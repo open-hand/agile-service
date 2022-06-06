@@ -18,7 +18,7 @@ import { WSItem } from './components/linked-item/LinkedItem';
 
 const IssueUI = (props: any) => {
   const [wsData, setWsData] = useState<WSItem[]>([]);
-  const { store, disabled } = useContext(EditIssueContext);
+  const { store, disabled, uiPreviewOutside = false } = useContext(EditIssueContext);
   const { issueId } = store.getIssue;
   const { outside } = store;
 
@@ -56,7 +56,9 @@ const IssueUI = (props: any) => {
 
   const handlePreview = useCallback((ui) => {
     if (ui.id) {
-      if (!outside) {
+      if (uiPreviewOutside) {
+        window.open(`/#/agile/outside/ui-preview/${ui.id}`);
+      } else if (!outside) {
         to(`/agile/ui-preview/${ui.id}`, {
           type: 'project',
           params: {

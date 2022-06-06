@@ -286,5 +286,12 @@ public interface BaseFeignClient {
                                                                   @RequestParam(required = false) String category,
                                                                   @RequestParam(required = false) Boolean enabled);
 
+    @PostMapping(value = "/choerodon/v1/organizations/{organization_id}/users/{user_id}/projects/paging_query")
+    ResponseEntity<Page<ProjectVO>> pagingQueryProjectsByUserId(@PathVariable("organization_id") Long organizationId,
+                                                                  @PathVariable("user_id") Long userId,
+                                                                  @RequestParam Integer page,
+                                                                  @RequestParam Integer size,
+                                                                  @RequestBody ProjectVO projectVO);
+
 }
 

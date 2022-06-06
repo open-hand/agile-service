@@ -1,18 +1,14 @@
 import React, {
-  ReactElement,
-  useCallback, useEffect, useMemo, useRef, useState,
+  ReactElement, useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { stores } from '@choerodon/boot';
 import {
-  DataSet, Row, Col, Spin, Form, TextField,
+  DataSet, Form, Spin, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { usePersistFn } from 'ahooks';
+import { usePersistFn, useUpdateEffect } from 'ahooks';
 import {
-  castArray,
-  every,
-  filter,
-  find, get, includes, map, merge, set, some, uniq,
+  castArray, every, filter, find, get, includes, map, merge, set, some, uniq,
 } from 'lodash';
 import { toJS } from 'mobx';
 import { UploadFile } from 'choerodon-ui/lib/upload/interface';
@@ -24,7 +20,7 @@ import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import {
-  IIssueType, IModalProps, IssueCreateFields, Priority, User, RiskInfluence,
+  IIssueType, IModalProps, IssueCreateFields, Priority, RiskInfluence, User,
 } from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
 import { fieldApi, issueApi } from '@/api';
@@ -32,14 +28,13 @@ import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
 import useDeepMemo from '@/hooks/useDeepMemo';
-import { DATETIME, MINUTE } from '@/constants/DATE_FORMAT';
+import { MINUTE } from '@/constants/DATE_FORMAT';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
 // import getFieldConfig from './fields';
 import getFieldConfig from '@/components/field-pro/layouts/create';
 import { insertField } from './utils';
-import useFormatMessage from '@/hooks/useFormatMessage';
 import { formatFieldDateValue } from '@/utils/formatDate';
 import { CreateIssueProps } from '.';
 import { SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
@@ -103,6 +98,7 @@ export interface CreateIssueBaseProps {
   applyType?: CreateIssueProps['applyType']
   hiddenIssueType?: boolean
   defaultPostData?: object,
+  footerEvents?: { handleSubmit: () => any },
 }
 const defaultDataSet = new DataSet({
   autoCreate: true,
@@ -327,6 +323,7 @@ const CreateIssueBase = observer(({
   applyType,
   hiddenIssueType = false,
   defaultPostData,
+  footerEvents,
 }: CreateIssueBaseProps) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const dataSetRef = useRef(defaultDataSet);
@@ -334,6 +331,9 @@ const CreateIssueBase = observer(({
   const currentTemplateDescription = useRef(defaultValues?.description || '');
   const otherLinkRef = useRef();
   const deliverableRef = useRef();
+  const formIsLoadingRef = useRef<boolean>();
+  const currentProjectIdRef = useRef<string>();
+  currentProjectIdRef.current = projectId;
   const [templateSummary] = useState(new Map());
   const [dataSet, setDataSet] = useState(defaultDataSet);
   const { isWaterfallAgile } = useIsWaterfall();
@@ -388,6 +388,7 @@ const CreateIssueBase = observer(({
   const [{ data: fields, isFetching: isFieldsLoading }, {
     data: templateData,
   }, { data: cascadeRuleList = [] }] = useIssueCreateFields({ issueTypeId: showSelectProject && isLoading ? undefined : issueTypeId, issueTypeCode, projectId });
+  formIsLoadingRef.current = isLoading || isFieldsLoading;
   const fieldValueArr = usePersistFn((field: IssueCreateFields) => {
     let value = castArray(getValue(dataSet, field.fieldCode));
     const preset = presets.get(field.fieldCode);
@@ -738,6 +739,13 @@ const CreateIssueBase = observer(({
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);
 
+  useEffect(() => {
+    if (footerEvents) {
+      // eslint-disable-next-line no-param-reassign
+      footerEvents.handleSubmit = handleSubmit;
+    }
+  }, [handleSubmit, footerEvents]);
+
   // hidden, 可见项
   const getFieldProps = usePersistFn((field?: Pick<IssueCreateFields, 'fieldType' | 'fieldCode' | 'defaultValueObj' | 'defaultValueObjs' | 'required'>): { [key: string]: any } => {
     if (!field) {
@@ -868,6 +876,13 @@ const CreateIssueBase = observer(({
           },
         };
       }
+      case 'programVersion': {
+        // @ts-ignore
+        const sameProject = field.currentProjectId === currentProjectIdRef.current;
+        return {
+          enabledQuery: sameProject && !formIsLoadingRef.current,
+        };
+      }
       default: break;
     }
     switch (field.fieldType) {
@@ -921,6 +936,9 @@ const CreateIssueBase = observer(({
           required: required || false,
           fieldCode: name,
           fieldType,
+          // 临时修复
+          // @ts-ignore
+          currentProjectId: field?.currentProjectId,
           defaultValueObj: field?.defaultValueObj,
           defaultValueObjs: field?.defaultValueObjs,
         });
@@ -985,6 +1003,10 @@ const CreateIssueBase = observer(({
     },
   }), []);
 
+  useUpdateEffect(() => {
+    issueLinkDataSet.reset();
+  }, [projectId]);
+
   return (
     <Spin spinning={isLoading || isFieldsLoading}>
       <Form
@@ -996,9 +1018,9 @@ const CreateIssueBase = observer(({
       </Form>
       {issueTypeCode === 'feature' ? <WSJF dataSet={dataSet} /> : null}
       {enableIssueLinks ? <IssueLink projectId={projectId} dataSet={issueLinkDataSet} /> : null}
-      {hasInject(DEPENDENCY) ? mount(DEPENDENCY, { issueTypeCode, forwardRef: otherLinkRef }) : null}
-      {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: deliverableRef }) : null}
-      {hasInject(RISK_SELECT_LINK) ? mount(RISK_SELECT_LINK, { issueTypeCode, dataSet }) : null}
+      {hasInject(DEPENDENCY) ? mount(DEPENDENCY, { issueTypeCode, forwardRef: otherLinkRef, projectId }) : null}
+      {hasInject(DELIVERABLE) ? mount(DELIVERABLE, { issueTypeCode, forwardRef: deliverableRef, projectId }) : null}
+      {hasInject(RISK_SELECT_LINK) ? mount(RISK_SELECT_LINK, { issueTypeCode, dataSet, projectId }) : null}
     </Spin>
   );
 });

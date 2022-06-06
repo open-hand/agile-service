@@ -113,7 +113,11 @@ class FeatureApi extends Api<FeatureApi> {
     teamProjectIds: number[],
     deleteTeamProjectIds: number[],
   }) {
-    return axios.post(`${this.prefix}/board_feature/feature_link_project`, data);
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/board_feature/feature_link_project`,
+      data,
+    });
   }
 
   /**

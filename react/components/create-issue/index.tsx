@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Form } from 'choerodon-ui/pro';
+import React, {
+  useEffect, useMemo, useRef, useState,
+} from 'react';
+import { Modal, Form, Select } from 'choerodon-ui/pro';
 import { C7NFormat } from '@choerodon/master';
 import { isEmpty, omit } from 'lodash';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { IModalProps, Issue } from '@/common/types';
+import { Issue } from '@/common/types';
 import { fieldApi, issueApi } from '@/api';
 import { uploadAttachment } from '@/utils/richText';
 import localCacheStore from '@/stores/common/LocalCacheStore';
@@ -11,32 +13,37 @@ import BaseComponent, { CreateIssueBaseProps } from './BaseComponent';
 import SelectProject from '@/components/select/select-project';
 import { AGILE_TYPE_CODES } from '@/constants/TYPE_CODE';
 
-export interface CreateIssueProps extends Omit<CreateIssueBaseProps, 'onSubmit'> {
+export interface CreateIssueSelectProjectProps {
+  showSelectProject?: boolean,
+  /** 限定查询层级为 `outside` */
+  queryLevelOutside?:boolean
+}
+export type CreateIssueBase0Props =CreateIssueBaseProps& CreateIssueSelectProjectProps;
+export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
   /** 创建来源 */
   originFrom?: 'scrumBoard' | 'Backlog'
   hiddenTypeCodes?: string[],
   applyType?: 'agile' | 'program' | 'waterfall' | 'risk',
   request?: (data: any, applyType?: 'agile' | 'program' | 'waterfall' | 'risk') => Promise<any>
-  showSelectProject?: boolean,
   onCancel?: () => void,
 }
 
-const CreateContent = (props: CreateIssueBaseProps) => {
+export const CreateContent = (props: CreateIssueBase0Props) => {
   const {
-    showSelectProject = false, projectId, modal,
+    showSelectProject = false, projectId, modal, queryLevelOutside,
   } = props;
-  const selectProjectRef = useRef();
+  const selectProjectRef = useRef<Select>();
   const [currentProjectId, setCurrentProjectId] = useState<string | never>();
   const handleProjectChange = (value: string) => {
     setCurrentProjectId(value);
   };
+
   useEffect(() => {
     if (showSelectProject) {
       // @ts-ignore
       modal?.handleOk(() => {
         if (!projectId) {
-          // @ts-ignore
           selectProjectRef?.current?.validate();
         }
         return false;
@@ -49,12 +56,12 @@ const CreateContent = (props: CreateIssueBaseProps) => {
       {showSelectProject && (
         <Form>
           <SelectProject
-            // @ts-ignore
             ref={selectProjectRef}
             onChange={handleProjectChange}
             label="所属项目"
             required
             clearButton={false}
+            level={queryLevelOutside ? 'outside' : undefined}
             category="N_AGILE"
           />
         </Form>

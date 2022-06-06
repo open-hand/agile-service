@@ -43,8 +43,8 @@ const { TabPane } = Tabs;
 function IssueBody(props) {
   const {
     prefixCls, disabled, store, applyType, refreshDeliverablesList, copingStrategyEditRef,
-    disabledIssueLinkActions, disabledTestActions, disabledDemandActions, disabledDevelopmentTab, disabledHeaderActionButtons,
-    disabledWSJFActions, disabledPIAimActions,
+    disabledIssueLinkActions, disabledTestActions, disabledDemandActions, disabledDevelopmentTab, disabledHeaderActionButtons, disabledTabDependLink,
+    disabledWSJFActions, disabledPIAimActions, disabledDeliverable,
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
   const { comments } = store;
@@ -146,8 +146,9 @@ function IssueBody(props) {
           ]) : null}
           {hasInject(DETAIL_DELIVERABLE) ? mount(DETAIL_DELIVERABLE, {
             issueTypeCode: issueTypeVO.typeCode,
-            disabled,
+            disabled: disabled || disabledDeliverable,
             issueId,
+            projectId: store.projectId,
             refreshDeliverablesList,
           }) : null}
           <IssueAttachment {...props} />
@@ -181,7 +182,13 @@ function IssueBody(props) {
             ? mount('backlog:issueLinkedBacklog', { ...props, disabled: disabled || disabledDemandActions }) : ''}
         </TabPane>
         {issueTypeVO.typeCode && WATERFALL_TYPE_CODES.includes(issueTypeVO.typeCode) && hasInject(DEPENDENCY_TAB)
-          ? <TabPane tab="依赖与关联" key="depend_link">{mount(DEPENDENCY_TAB, { ...props, issueTypeCode: issueTypeVO.typeCode })}</TabPane> : null}
+          ? (
+            <TabPane tab="依赖与关联" key="depend_link">
+              {mount(DEPENDENCY_TAB, {
+                ...props, disabled: disabled || disabledTabDependLink, projectId: store.projectId, issueTypeCode: issueTypeVO.typeCode,
+              })}
+            </TabPane>
+          ) : null}
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (

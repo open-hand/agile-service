@@ -10,7 +10,7 @@ import styles from './index.less';
 
 const PreviewIssueFile = () => {
   const {
-    filePreview, setFilePreview, hidden, setHidden,
+    filePreview, setFilePreview, hidden, setHidden, disabledPreviewIssueButton = false,
   } = useDetailContainerContext();
   const handleDownLoadFile = useCallback(() => {
     if (filePreview) {
@@ -32,21 +32,23 @@ const PreviewIssueFile = () => {
           {filePreview.name}
           <Icon type="get_app" style={{ marginLeft: 4 }} />
         </Button>
+        {!disabledPreviewIssueButton && (
+          <Button
+            style={{
+              marginLeft: 'auto',
+              borderRadius: '4px',
+            }}
+            onClick={() => {
+              setHidden(!hidden);
+            }}
+          >
+            查看工作项详情
+          </Button>
+        )}
         <Button
           style={{
-            marginLeft: 'auto',
             borderRadius: '4px',
-          }}
-          onClick={() => {
-            setHidden(!hidden);
-          }}
-        >
-          查看工作项详情
-        </Button>
-        <Button
-          style={{
-            borderRadius: '4px',
-            marginLeft: 16,
+            marginLeft: disabledPreviewIssueButton ? 'auto' : 16,
           }}
           icon="close"
           onClick={() => {

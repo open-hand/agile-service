@@ -2,22 +2,24 @@ import React from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
 import './index.less';
 import classNames from 'classnames';
+import { observer } from 'mobx-react';
 
 interface IIssueDetailHeaderFlagProps {
-  data?: any
+  data?: { instanceOpenRelVO?: { source: 'yqcloud' | string, openInstanceNum: string, openInstanceId: string } }
   hidden?: boolean
   className?: string
   style?: React.CSSProperties
 }
-const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = ({
+const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = observer(({
   data, hidden, className, style,
 }) => {
   const prefix = 'c7n-agile-third-components-detail-flag';
-  if (hidden) {
+  if (hidden || !data?.instanceOpenRelVO?.openInstanceId) {
     return <></>;
   }
+  const source = data.instanceOpenRelVO.source === 'yqcloud' ? '来自燕千云的单据：' : '来自三方应用平台：';
   return (
-    <Tooltip title="数据">
+    <Tooltip title={`${source}${data.instanceOpenRelVO.openInstanceNum}`}>
       <div className={classNames(prefix, className)} style={style}>
         <svg width="20px" height="28px" viewBox="0 0 54 38" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
           <g id="页面-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
@@ -30,7 +32,7 @@ const IssueDetailHeaderFlag: React.FC<IIssueDetailHeaderFlagProps> = ({
       </div>
     </Tooltip>
   );
-};
+});
 IssueDetailHeaderFlag.defaultProps = {
   data: undefined,
   hidden: false,
