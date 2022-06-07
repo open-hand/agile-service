@@ -568,7 +568,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             issueIds = queryRootOrNoEpicIssueIds(projectIds, searchVO, isTreeView, sortMap, currentId);
         } else if (GanttDimension.isFeature(instanceType) && Objects.equals(0L, instanceId)) {
             //未分配特性下拖动
-            issueIds = queryNoFeatureIssueIds(projectIds, searchVO, isTreeView, sortMap);
+            issueIds = queryNoFeatureIssueIds(projectIds, searchVO, isTreeView, sortMap, currentId);
         } else {
             addFilterConditionByInstanceType(searchVO, instanceType, instanceId);
             issueIds = issueService.listByTreeView(projectIds, searchVO, null, sortMap, isTreeView);
@@ -600,12 +600,16 @@ public class GanttChartServiceImpl implements GanttChartService {
     private List<Long> queryNoFeatureIssueIds(Set<Long> projectIds,
                                               SearchVO searchVO,
                                               boolean isTreeView,
-                                              Map<String, Object> sortMap) {
+                                              Map<String, Object> sortMap,
+                                              Long currentId) {
         setOtherArgsValueByKey(searchVO, "featureNull", "true");
         List<String> list = new ArrayList<>();
         list.add("0");
         setOtherArgsValueByKey(searchVO, "feature", list);
-        setOtherArgsValueByKey(searchVO, "epic", list);
+        IssueDTO issue = issueMapper.selectByPrimaryKey(currentId);
+        AssertUtilsForCommonException.notNull(issue, "error.gantt.move.currentId.not.existed");
+        String epicIdStr = Objects.isNull(issue.getEpicId()) ? "0" : issue.getEpicId().toString();
+        setOtherArgsValueByKey(searchVO, "epic", Arrays.asList(epicIdStr));
         boardAssembler.handleOtherArgs(searchVO);
         List<Long> issueIds = issueService.listByTreeView(projectIds, searchVO, null, sortMap, isTreeView);
         return issueIds;
