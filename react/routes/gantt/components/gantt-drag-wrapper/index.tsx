@@ -34,7 +34,7 @@ const isDisableDrag = (bar: Gantt.Bar) => {
  * 拖拽的元素是否能放置到目标位置
  */
 function isDragRowDrop(bar: Gantt.Bar, destinationBar?: Gantt.Bar) {
-  if (bar._depth === destinationBar?._depth && bar._parent?.key === destinationBar?._parent?.key) {
+  if (bar._depth === destinationBar?._depth && Object.is(bar._parent, destinationBar._parent)) {
     return true;
   }
   return false;
@@ -67,7 +67,7 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
   const [{ source: draggingBar, destination: draggingBarDestinationBar }, setDraggingBar] = useState<{ source?: Gantt.Bar, destination?: Gantt.Bar }>({} as any);
   const draggingBarDestinationBarRef = useRef<Gantt.Bar>();
   const draggingStyle = useRef<React.CSSProperties>();
-  const renderTableBody = useCallback((Component: React.ReactElement, ganttStore:GanttStore) => (
+  const renderTableBody = useCallback((Component: React.ReactElement, ganttStore: GanttStore) => (
     <Droppable
       droppableId="table"
       direction="vertical"
@@ -165,7 +165,7 @@ const GanttGroupDragWrapper: React.FC<IGanttGroupDragWrapperProps> = ({
       const destinationBar = store.ganttRef.current?.flattenData[initial.destination.index];
       // 移动是同层级进行移动，因此这里获取的目标节点应该是同层级的,当目标节点为高层级别的，则无效
       const newDestination = getDestinationBar(oldValue.source._depth, destinationBar);
-      if (newDestination?._parent?.key !== oldValue.source._parent?.key) {
+      if (!Object.is(newDestination?._parent, oldValue.source._parent)) {
         draggingBarDestinationBarRef.current = undefined;
         return { source: oldValue.source, destination: undefined };
       }
