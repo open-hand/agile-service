@@ -305,7 +305,7 @@ const groupBySprint = (data: any[], rankList: string[]) => {
   });
 };
 
-const groupByFeature = (epicChildrenData: any, data: any) => {
+const groupByFeature = (epicChildrenData: any, data: any, parentEpicIssueId: any) => {
   const map = new Map<string, { feature: any, rankIndex: number, disabledDrag?: boolean, children: any[] }>();
   const noFeatureData: any[] = [];
   epicChildrenData.forEach((issue: any) => {
@@ -333,7 +333,7 @@ const groupByFeature = (epicChildrenData: any, data: any) => {
   return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([featureId, { feature, disabledDrag, children }]) => ({
     ...feature,
     group: featureId === '0',
-    uniqueKey: `feature**${featureId}`,
+    uniqueKey: featureId === '0' ? `epic**${parentEpicIssueId}**feature**${featureId}` : `feature**${featureId}`,
     onlyShow: true,
     disabledCreate: !!disabledDrag,
     disabledDrag: !!disabledDrag,
@@ -371,7 +371,7 @@ const groupByEpic = (data: any, isInProgram: boolean, onlyShow?: boolean) => {
     });
   }
   return sortBy([...map.entries()], ([_, { rankIndex }]) => rankIndex).map(([epicIssueId, { epic, children, disabledDrag }]) => {
-    const groupIssues = isInProgram ? groupByFeature(children, data) : ganttList2Tree(children);
+    const groupIssues = isInProgram ? groupByFeature(children, data, epicIssueId) : ganttList2Tree(children);
     return ({
       ...epic,
       group: epicIssueId === '0',
