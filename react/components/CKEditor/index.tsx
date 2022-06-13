@@ -6,7 +6,7 @@ import { fileApi } from '@/api';
 async function handleImageUpload(file: File, outside?: boolean, projectId?: string, onUploadProgress?: (progressEvent: ProgressEvent) => void) {
   const formData = new FormData();
   formData.append('file', file);
-  const urls = await fileApi.uploadImage(formData, outside, projectId, onUploadProgress);
+  const urls = await fileApi.project(projectId).uploadImage(formData, outside, projectId, onUploadProgress);
   return urls[0];
 }
 type EditorProps = Omit<CKEditorProps, 'onImageUpload'> & {

@@ -73,6 +73,7 @@ const IssueDes = ({ reloadIssue, setIssueLoading }) => {
                 setEditDes(description);
               }}
               onOk={updateIssueDes}
+              projectId={store.projectId}
             />
           </div>
         )

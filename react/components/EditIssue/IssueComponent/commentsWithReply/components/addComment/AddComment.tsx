@@ -21,9 +21,10 @@ interface Props {
     setReplyValue: (v: string) => void
       } | null>
   commentsHeight: number | undefined
+  projectId?: string,
 }
 const Comments: React.FC<Props> = ({
-  onSubmit, addingRef, editingRef, replyingRef, commentsHeight,
+  onSubmit, addingRef, editingRef, replyingRef, commentsHeight, projectId,
 }) => {
   const [adding, setAdding] = useState(false);
   const [value, setValue] = useState<string>('');
@@ -82,6 +83,7 @@ const Comments: React.FC<Props> = ({
         value={value}
         onChange={handleChange}
         onOk={handleCreateCommit}
+        projectId={projectId}
       />
     </div>
   ) : (

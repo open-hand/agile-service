@@ -20,6 +20,7 @@ import SelectMultiServiceTag from '@/components/select/select-multi-service-tag'
 import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
 import SelectComponent from '../select/select-component';
+import SelectProduct from '../select/select-product';
 
 const multipleCodes = ['label', 'component', 'fixVersion', 'influenceVersion'];
 export default function renderField<T extends Partial<SelectProps>>({
@@ -72,6 +73,8 @@ export default function renderField<T extends Partial<SelectProps>>({
       case 'tag': {
         return <SelectMultiServiceTag name={fieldCode} multiple clearButton {...otherComponentProps} defaultValue={defaultValue} />;
       }
+      case 'product':
+        return <SelectProduct name={fieldCode} multiple clearButton {...otherComponentProps} />;
       case FORMAT_FIELDS[0]:
       case FORMAT_FIELDS[1]:
       case FORMAT_FIELDS[2]:
@@ -168,6 +171,7 @@ export default function renderField<T extends Partial<SelectProps>>({
           multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
           fieldId={fieldId as string}
           selected={defaultValue}
+          menuType="project"
           {...otherComponentProps}
         />
       );
