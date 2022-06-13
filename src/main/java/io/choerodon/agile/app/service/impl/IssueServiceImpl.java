@@ -331,7 +331,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private IssueProjectMoveService issueProjectMoveService;
     @Autowired(required = false)
-    private AgileWaterfallService agileWaterfallService;
+    protected AgileWaterfallService agileWaterfallService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
