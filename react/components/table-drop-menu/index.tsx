@@ -1,12 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { Tooltip } from 'choerodon-ui/pro';
-import { ButtonProps } from 'choerodon-ui/lib/button';
 import { Action, Permission } from '@choerodon/boot';
-
-import './index.less';
 import { pick } from 'lodash';
 import classNames from 'classnames';
-import { IBootActionDataItem, IBootPermissionProps } from '@/common/types';
+import type { ButtonProps } from 'choerodon-ui/lib/button';
+import type { IBootActionDataItem, IBootPermissionProps } from '../../common/types';
+import './index.less';
 
 export interface ITableDropMenuItem extends IBootActionDataItem {
   display?: boolean /** @default 'true' */
@@ -17,12 +16,15 @@ interface ITableDropMenuProps {
   style?: React.CSSProperties
   text?: React.ReactNode
   textClassName?: string
+  /**
+   *  文本点击事件 当配置时 则启动文本可点击
+   */
+  onTextClick?: React.MouseEventHandler<HTMLSpanElement>
   textStyle?: React.CSSProperties
   tooltip?: boolean | React.ReactNode /** 文字部分tooltip */
   // clickableText?: boolean
   /** @default 'true' */
   showText?: boolean
-  onTextClick?:(event:any)=>void
   /**
    * 是否展示菜单，当菜单列表为空时不会展示
    * 设置为 `true` 则会常展示
@@ -30,7 +32,7 @@ interface ITableDropMenuProps {
    *  */
   showMenu?: boolean
   defaultMenuIcon?: string /** @default 'more_vert' */
-  defaultButtonProps?: Partial<Pick<ButtonProps, 'className'|'style'|'shape'|'size'|'disabled'|'icon'>>
+  defaultButtonProps?: Partial<Pick<ButtonProps, 'className' | 'style' | 'shape' | 'size' | 'disabled' | 'icon'>>
   menuData?: ITableDropMenuItem[]
   /** 点击没有action菜单项会触发此事件 */
   onMenuClick?: (data: ITableDropMenuItem) => void

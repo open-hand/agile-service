@@ -15,6 +15,7 @@ const { API_HOST } = window._env_;
 
 class WebUploader {
   constructor() {
+    this.id = 1;
     this.inited = false;
     this.params = {};
     this.combine = {};
@@ -37,6 +38,7 @@ class WebUploader {
 
     webUploader.Uploader.register(
       {
+        name: this.id,
         'before-send-file': 'beforeSendFile',
         'before-send': 'beforeSend',
         'after-send-file': 'afterSendFile',
@@ -218,6 +220,10 @@ class WebUploader {
         });
       },
     });
+  }
+
+  unRegister () {
+    webUploader.Uploader.unRegister(this.id)
   }
 }
 
