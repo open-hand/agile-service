@@ -94,7 +94,7 @@ public interface AgileWaterfallService {
 
     Map<String, Set<Long>> queryPredecessorIssues(Long projectId, Long issueId, Set<String> predecessorTypes);
 
-    void setProgress(Long projectId, List<IssueListFieldKVVO> issueListFieldKVVOS);
+    Map<Long, Integer> getIssueProgressMap(List<Long> projectIds, List<Long> issueIds);
 
     void getWaterfallFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
