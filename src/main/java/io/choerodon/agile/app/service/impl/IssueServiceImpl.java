@@ -702,7 +702,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                 List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
                 if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
-                    agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId) ,issueListFieldKVVOS);
+                    boolean countSubIssue = Boolean.TRUE.equals(Optional.ofNullable(searchVO.getSearchArgs())
+                            .map(x -> x.get("countSubIssue"))
+                            .orElse(false));
+                    agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId), issueListFieldKVVOS, countSubIssue);
                 }
                 issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
             }

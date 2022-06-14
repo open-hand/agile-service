@@ -313,12 +313,13 @@ public interface AgilePluginService {
     SprintDetailVO setSprintPiAndType(Long projectId, Long sprintId, SprintDetailVO sprintDetailVO);
 
     /**
-     * do 转issueListFieldKVDTOList 设置特性的属性
+     * do 转issueListFieldKVDTOList 设置商业版属性
      *
      * @param projectIds
      * @param issueListFieldKVDTOList
+     * @param countSubIssue
      */
-    void doToIssueListFieldKVDTO(List<Long> projectIds, List<IssueListFieldKVVO> issueListFieldKVDTOList);
+    void doToIssueListFieldKVDTO(List<Long> projectIds, List<IssueListFieldKVVO> issueListFieldKVDTOList, boolean countSubIssue);
 
     /**
      * 项目群子项目下载issue 替换史诗列为特性
