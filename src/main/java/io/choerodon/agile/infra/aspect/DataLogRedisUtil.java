@@ -103,6 +103,8 @@ public class DataLogRedisUtil {
                 CUMULATIVE_FLOW_DIAGRAM + projectId + COLON + POINTER,
                 VELOCITY_CHART + projectId + COLON + POINTER,
                 PIE_CHART + projectId + COLON + POINTER,
+                VERSION_CHART + projectId + COLON + POINTER,
+                EPIC_CHART + projectId + COLON + POINTER,
                 BURN_DOWN_COORDINATE_BY_TYPE + projectId + COLON + POINTER
         });
     }
@@ -149,6 +151,7 @@ public class DataLogRedisUtil {
         deleteEpicChartCache(issueConvertDTO.getEpicId(), originIssueDTO.getProjectId(), issueConvertDTO.getIssueId(), STORY_POINT);
         deleteBurnDownCache(issueConvertDTO.getSprintId(), originIssueDTO.getProjectId(), issueConvertDTO.getIssueId(), STORY_POINTS_FIELD + POINTER);
         redisUtil.deleteRedisCache(new String[]{VELOCITY_CHART + originIssueDTO.getProjectId() + COLON + STORY_POINT,
+                PIE_CHART + issueConvertDTO.getProjectId() + COLON + STORY_POINT + POINTER,
                 BURN_DOWN_COORDINATE_BY_TYPE + originIssueDTO.getProjectId() + COLON + POINTER});
         deleteVersionCache(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), STORY_POINT);
     }
@@ -179,7 +182,8 @@ public class DataLogRedisUtil {
 
     @Async(REDIS_TASK_EXECUTOR)
     public void deleteByHandleIssueCreateDataLog(IssueConvertDTO issueConvertDTO, Boolean condition) {
-        redisUtil.deleteRedisCache(new String[]{PIE_CHART + issueConvertDTO.getProjectId() + COLON + POINTER});
+        redisUtil.deleteRedisCache(new String[]{PIE_CHART + issueConvertDTO.getProjectId() + COLON + POINTER,
+                CUMULATIVE_FLOW_DIAGRAM + issueConvertDTO.getProjectId() + COLON + POINTER});
         if (condition) {
             deleteBurnDownCache(issueConvertDTO.getSprintId(), issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), POINTER);
             deleteEpicChartCache(issueConvertDTO.getEpicId(), issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), POINTER);
@@ -237,8 +241,9 @@ public class DataLogRedisUtil {
 
     @Async(REDIS_TASK_EXECUTOR)
     public void deleteByDataLogCreateEpicId(Long projectId, Long issueId) {
-        redisUtil.deleteRedisCache(new String[]{EPIC_CHART + projectId + COLON + issueId + COLON + POINTER
-                , PIE_CHART + projectId + COLON + EPIC_FIELD + POINTER
+        redisUtil.deleteRedisCache(new String[]{EPIC_CHART + projectId + COLON + issueId + COLON + POINTER,
+                PIE_CHART + projectId + COLON + EPIC_FIELD + POINTER,
+                BURN_DOWN_COORDINATE_BY_TYPE + projectId + COLON + EPIC + POINTER
         });
     }
 
