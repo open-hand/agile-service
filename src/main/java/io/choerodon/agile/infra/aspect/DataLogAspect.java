@@ -146,6 +146,7 @@ public class DataLogAspect {
     private static final String FIELD_STATIC_FILE = "Static File";
     private static final String FIELD_STATIC_FILE_REL = "Static File Rel";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
+    private static final String LABEL = "label";
 
 
     @Autowired
@@ -885,6 +886,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> curLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(projectId, issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     getOriginLabelNames(curLabels), null, null);
+            redisUtil.deleteRedisCache(new String[]{PIECHART + projectId + ':' + LABEL + "*"});
         } catch (Throwable e) {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
@@ -918,6 +920,7 @@ public class DataLogAspect {
             List<IssueLabelDTO> originLabels = issueMapper.selectLabelNameByIssueId(issueId);
             createDataLog(issueDTO.getProjectId(), issueId, FIELD_LABELS, getOriginLabelNames(originLabels),
                     null, null, null);
+            redisUtil.deleteRedisCache(new String[]{PIECHART + issueDTO.getProjectId() + ':' + LABEL + "*"});
         }
     }
 
@@ -1366,6 +1369,7 @@ public class DataLogAspect {
             }
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_REPORTER, oldString, newString, oldValue, newValue);
+            redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_REPORTER + "*"});
         }
     }
 
