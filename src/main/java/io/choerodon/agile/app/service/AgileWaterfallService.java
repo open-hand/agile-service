@@ -97,4 +97,6 @@ public interface AgileWaterfallService {
     void setProgress(Long projectId, List<IssueListFieldKVVO> issueListFieldKVVOS);
 
     void getWaterfallFieldCodes(List<String> fieldCodes, Long issueTypeId);
+
+    void handleMilestoneProgressByStatusId(Long projectId, Long issueId, Long statusId, String typeCode);
 }
