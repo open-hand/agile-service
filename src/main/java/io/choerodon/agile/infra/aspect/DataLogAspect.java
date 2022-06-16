@@ -1314,11 +1314,19 @@ public class DataLogAspect {
                 }
                 workCalendarSubscribeService.handleWorkCalendarSubscribeChanged(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), false, new ArrayList<>());
                 dataLogRedisUtil.deleteByHandleIssueCreateDataLog(issueConvertDTO, condition);
+                handleMilestoneProgressByStatusId(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), issueConvertDTO.getStatusId(), issueConvertDTO.getTypeCode());
             }
         } catch (Throwable e) {
             throw new CommonException(ERROR_METHOD_EXECUTE, e);
         }
         return result;
+    }
+
+    private void handleMilestoneProgressByStatusId(Long projectId, Long issueId, Long statusId, String typeCode) {
+        if (agileWaterfallService != null && IssueTypeCode.isMilestone(typeCode)) {
+            // 状态联动更新里程碑进度
+            agileWaterfallService.handleMilestoneProgressByStatusId(projectId, issueId, statusId, typeCode);
+        }
     }
 
     private void handleSprintDataLog(Object[] args) {
@@ -1454,6 +1462,7 @@ public class DataLogAspect {
             }
             //删除缓存
             dataLogRedisUtil.deleteByHandleStatus(issueConvertDTO, originIssueDTO, condition);
+            handleMilestoneProgressByStatusId(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), issueConvertDTO.getStatusId(), originIssueDTO.getTypeCode());
         }
     }
 

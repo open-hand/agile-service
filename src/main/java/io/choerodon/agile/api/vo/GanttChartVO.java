@@ -163,6 +163,8 @@ public class GanttChartVO {
     private String applyType;
     @ApiModelProperty(value = "产品")
     private List<ProductVO> productVOList;
+    @ApiModelProperty(value = "描述")
+    private String description;
 
     public Set<Long> getParentSprintIds() {
         return parentSprintIds;
@@ -602,5 +604,13 @@ public class GanttChartVO {
 
     public void setProductVOList(List<ProductVO> productVOList) {
         this.productVOList = productVOList;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
