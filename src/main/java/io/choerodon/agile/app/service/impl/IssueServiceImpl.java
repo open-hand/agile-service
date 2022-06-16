@@ -2784,7 +2784,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    private List<String> handlerCopyRequirePredefinedField(Object object, JSONObject predefinedFields) {
+    @Override
+    public List<String> handlerCopyRequirePredefinedField(Object object, JSONObject predefinedFields) {
         if (ObjectUtils.isEmpty(predefinedFields)) {
             return new ArrayList<>();
         }
@@ -2882,7 +2883,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         buildTriggerCarrierVO(projectId, newIssueId, triggerCarrierVOS, customFieldIds);
     }
 
-    private void handleCopyPredefinedFields(Long origanizationId, IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
+    @Override
+    public void handleCopyPredefinedFields(Long origanizationId, IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
         //将不需要复制的预定义字段置空
         for (String fieldName : COPY_PREDEFINED_FIELDS_NAME) {
             if (!predefinedFieldNames.contains(fieldName)) {

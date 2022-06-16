@@ -11,6 +11,7 @@ import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.core.domain.Page;
@@ -193,6 +194,10 @@ public interface IssueService {
      * @return IssueVO
      */
     IssueVO cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType);
+
+    List<String> handlerCopyRequirePredefinedField(Object object, JSONObject predefinedFields);
+
+    void handleCopyPredefinedFields(Long origanizationId, IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames);
 
     /**
      * 根据issueId转换为子任务
