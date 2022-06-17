@@ -71,6 +71,9 @@ export const systemFields = new Map([
   ['participant', {
     id: 'participantIds',
   }],
+  ['product', {
+    id: 'productIds',
+  }],
 ]);
 
 export function transformValue(dataSet: DataSet, key: string, value: any, format: (v: any, lookup: any) => any) {
