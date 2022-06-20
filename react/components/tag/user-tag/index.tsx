@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { toJS } from 'mobx';
 import { Tooltip, Icon } from 'choerodon-ui/pro';
+import { usePersistFn } from 'ahooks';
 import { User } from '@/common/types';
 import HeadTag, { HeadTagProps } from '../head-tag';
 import { getFistStr } from './util';
@@ -8,7 +9,7 @@ import './index.less';
 /**
  * 数组内只有一个User 或者User是对象时,显示名字
  */
-export type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl' > & Partial<Pick<User, 'ldap' | 'email' | 'id' | 'textShow'>> & Pick<HeadTagProps, 'tooltip'>
+export type UserTagData = Pick<User, 'loginName' | 'realName' | 'imageUrl'> & Partial<Pick<User, 'ldap' | 'email' | 'id' | 'textShow'>> & Pick<HeadTagProps, 'tooltip'>
 interface Props extends HeadTagProps {
   data: UserTagData[] | UserTagData /**   */
   maxTagCount?: number /** @default 3 */
@@ -21,6 +22,10 @@ export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } &
     realName, email, loginName, textShow,
   } = data;
   const text = useMemo(() => textShow || realName || loginName, [loginName, realName, textShow]);
+  const tooltipText = data.tooltip ?? (data.ldap ? `${realName}${loginName ? `(${loginName})` : ''}` : `${realName}${email ? `(${email})` : ''}`);
+  const tooltipTextRef = useRef<any>();
+  tooltipTextRef.current = tooltipText;
+  const tooltip = <div id="c7n-agile-user-tag">{tooltipTextRef.current}</div>;
   return text ? (
     <HeadTag
       size={size}
@@ -29,7 +34,7 @@ export const UserUniqueTag: React.FC<{ data: UserTagData, prefixCls?: string } &
       text={text}
       showText={showText}
       textClassName={`${prefixCls}-text`}
-      tooltip={data.tooltip ?? (data.ldap ? `${realName}${loginName ? `(${loginName})` : ''}` : `${realName}${email ? `(${email})` : ''}`)}
+      tooltip={tooltip}
       style={{ maxWidth: 108, ...style }}
       avatarStyle={{
         color: '#6473c3',

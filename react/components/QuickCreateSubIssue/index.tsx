@@ -64,6 +64,29 @@ interface QuickCreateSubIssueProps extends Pick<IUserDropDownProps, 'assigneeSel
   saveFilterToCache?: ((issueType: IIssueType) => FilterCacheThumbnailKey) | FilterCacheThumbnailKey
 
 }
+/**
+ * 过滤一些dom 鼠标响应
+ * @param dom
+ * @returns
+ */
+function filterSelfDom(dom?: HTMLElement) {
+  if (!dom) {
+    return false;
+  }
+  // 点击自身
+  if (dom.classList?.contains('c7n-subTask-quickCreate')) {
+    return true;
+  }
+  // 过滤issueType下拉框
+  if (dom.id === 'quickCreateSubIssue-issueType-overlay' || dom.classList?.contains('c7n-agile-userDropdown-overlay-tooltip') || dom.classList?.contains('c7n-agile-type_tag_popup-tip')) {
+    return true;
+  }
+  // 过滤用户下拉框
+  if (dom.id === 'agile-userDropdown-overlay' || dom.id === 'c7n-agile-user-tag' || dom.classList?.contains('c7n-agile-userDropdown-overlay-tooltip')) {
+    return true;
+  }
+  return false;
+}
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
   typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache, createStatusTriggerAwayClick = 'success', onUserChange,
@@ -228,7 +251,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     setExpand(false);
   }, []);
   useClickAway((e) => {
-    if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.id === 'quickCreateSubIssue-issueType-overlay' || (dom as HTMLElement)?.classList?.contains('c7n-subTask-quickCreate') || (dom as HTMLElement)?.id === 'agile-userDropdown-overlay')) {
+    if (e && ((e as MouseEvent).composedPath() as HTMLElement[]).some(filterSelfDom)) {
+      e.stopPropagation();
+      e.preventDefault();
       return;
     }
     if (!isLoading && onAwayClick) {
