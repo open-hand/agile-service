@@ -39,6 +39,7 @@ interface QuickCreateSubIssueProps extends Pick<IUserDropDownProps, 'assigneeSel
   mountCreate?: boolean
   onCreate?: (issue: Issue) => void
   onUserChange?: IUserDropDownProps['onChange']
+  onIssueTypeChange?: (issueType?: IIssueType) => void,
   onAwayClick?: (createFn: () => Promise<any>, currentData: { createStatus: QuickCreateStatus, [key: string]: any }, event: MouseEvent | TouchEvent) => void
   /**
    *什么创建状态触发鼠标离开点击事件
@@ -66,7 +67,7 @@ interface QuickCreateSubIssueProps extends Pick<IUserDropDownProps, 'assigneeSel
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
   typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache, createStatusTriggerAwayClick = 'success', onUserChange,
-  assigneeSelected,
+  assigneeSelected, onIssueTypeChange,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({
     typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType,
@@ -85,6 +86,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   useEffect(() => {
     userDropDownRef.current?.changeSelect(assigneeSelected);
   }, [assigneeSelected]);
+  useEffect(() => {
+    onIssueTypeChange && onIssueTypeChange(currentType);
+  }, [currentType]);
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
       const typeCodes = castArray(typeCode || 'sub_task');
