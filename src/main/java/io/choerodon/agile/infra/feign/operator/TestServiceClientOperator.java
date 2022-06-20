@@ -48,4 +48,12 @@ public class TestServiceClientOperator {
             return new ArrayList<>();
         }
     }
+
+    public Boolean checkExistTestCaseLink(Long projectId, Long issueId) {
+        try {
+            return testFeignClient.checkTestCaseLinkExist(projectId, issueId).getBody();
+        } catch (ServiceUnavailableException e) {
+            return false;
+        }
+    }
 }

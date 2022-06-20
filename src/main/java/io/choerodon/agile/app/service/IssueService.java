@@ -506,4 +506,6 @@ public interface IssueService {
     void deleteIssueOnRequiresNew(Long projectId, Long issueId, BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
 
     void handleUpdateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
+
+    List<String> listLinkContents(Long projectId, Long issueId);
 }

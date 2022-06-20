@@ -59,6 +59,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -2702,6 +2703,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 objectVersionNumber = newIssue.getObjectVersionNumber();
             }
             //复制链接
+            copyLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId);
             batchCreateCopyIssueLink(copyConditionVO.getIssueLink(), issueId, newIssueId, projectId);
             // 复制项目群的特性和史诗都不会去创建关联关系
             if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals(ISSUE_EPIC) || issueDetailDTO.getTypeCode().equals("feature")))) {
@@ -2737,6 +2739,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");
         }
+    }
+
+    private void copyLinkContents(List<String> linkContents, Long issueId, Long newIssueId, Long projectId) {
+        // todo
     }
 
     @Override
@@ -3848,5 +3854,41 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, isBatch = true)
     public void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers) {
 
+    }
+
+    @Override
+    public List<String> listLinkContents(Long projectId, Long issueId) {
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        if (Objects.isNull(issueDTO)) {
+            return new ArrayList<>();
+        }
+        // 敏捷查询：知识、关联、评论、附件、前置依赖
+        IssueCopyLinkContents linkContents = issueMapper.queryIssueLinkContents(projectId, issueId);
+        // 关联测试用例
+        linkContents.setRelatedTestCases(testServiceClientOperator.checkExistTestCaseLink(projectId, issueId));
+        // 关联需求
+        if (backlogExpandService != null) {
+            linkContents.setRelatedBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId));
+        }
+        // 关联分支
+        linkContents.setRelatedBranches(false);
+        return getLinkContents(linkContents);
+    }
+
+    private List<String> getLinkContents(IssueCopyLinkContents linkContents) {
+        Class clazz = linkContents.getClass();
+        List<String> result = new ArrayList<>();
+        IssueCopyLinkContents.ISSUE_COPY_LINK_CONTENTS.forEach(content -> {
+            try {
+                Field field = clazz.getDeclaredField(content);
+                field.setAccessible(true);
+                if (Boolean.TRUE.equals(field.getBoolean(linkContents) )) {
+                    result.add(content);
+                }
+            } catch (Exception e) {
+                throw new CommonException("error.get.link.contents");
+            }
+        });
+        return result;
     }
 }

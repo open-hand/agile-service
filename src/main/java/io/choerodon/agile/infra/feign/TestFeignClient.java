@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.feign;
 
 import io.choerodon.agile.infra.feign.fallback.TestFeignClientFallback;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,4 +27,11 @@ public interface TestFeignClient {
                                 @RequestParam Long organizationId,
                                 @RequestParam Long issueTypeId,
                                 @RequestBody List<Long> statusIds);
+
+    @GetMapping("/v1/projects/{project_id}/case_link/check_exist")
+    ResponseEntity<Boolean> checkTestCaseLinkExist(@ApiParam(value = "项目id", required = true)
+                                                   @PathVariable(name = "project_id") Long projectId,
+                                                   @ApiParam(value = "issueId", required = true)
+                                                   @RequestParam(name = "issue_id")
+                                                   @Encrypt Long issueId);
 }

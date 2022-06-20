@@ -5764,4 +5764,23 @@
            </foreach>
        )
    </sql>
+
+    <select id="queryIssueLinkContents" resultType="io.choerodon.agile.api.vo.IssueCopyLinkContents">
+        SELECT
+            ai.issue_id,
+            IF(count(wiki.id)>0, true, false) knowledgeRelations,
+            IF(count(ail.link_id)>0 OR count(ail1.link_id)>0, true, false) issueLinks,
+            IF(count(aic.comment_id), true, false) comments,
+            IF(count(aia.attachment_id), true, false) attachments,
+            IF(count(aip.id), true, false) predecessors
+        FROM agile_issue ai
+        LEFT JOIN agile_wiki_relation wiki ON wiki.issue_id = ai.issue_id
+        LEFT JOIN agile_issue_link ail ON ail.issue_id = ai.issue_id
+        LEFT JOIN agile_issue_link ail1 ON ail1.linked_issue_id = ai.issue_id
+        LEFT JOIN agile_issue_comment aic ON aic.issue_id = ai.issue_id
+        LEFT JOIN agile_issue_attachment aia ON aia.issue_id = ai.issue_id
+        LEFT JOIN agile_issue_predecessor aip ON aip.issue_id = ai.issue_id
+        WHERE ai.issue_id = #{issueId}
+        AND ai.project_id = #{projectId}
+    </select>
 </mapper>
