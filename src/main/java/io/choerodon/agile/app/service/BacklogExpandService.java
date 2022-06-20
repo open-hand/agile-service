@@ -218,4 +218,6 @@ public interface BacklogExpandService {
     List<BacklogInfoVO> listBacklogByIdsWithOption(List<Long> backlogIds, String param);
 
     void startBacklog(Long projectId);
+
+    Boolean checkExistBacklogRel(Long projectId, Long issueId);
 }

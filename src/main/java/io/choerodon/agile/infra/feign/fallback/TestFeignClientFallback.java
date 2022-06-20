@@ -28,4 +28,9 @@ public class TestFeignClientFallback implements TestFeignClient {
     public ResponseEntity<String> list(Long projectId, Long organizationId, Long issueTypeId, List<Long> statusIds) {
         throw new CommonException("error.execution.case.status.change.setting.list");
     }
+
+    @Override
+    public ResponseEntity<Boolean> checkTestCaseLinkExist(Long projectId, Long issueId) {
+        throw new CommonException("error.check.test.case.link.exist");
+    }
 }
