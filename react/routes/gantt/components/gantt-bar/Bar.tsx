@@ -96,7 +96,7 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
     });
     return progress;
   }, [fillDateRange?.completedColor, progressCount?.completed, progressCount?.total]);
-
+  const isClingyDelay = !(deadline?.width === '100%' && fillStyle.marginLeft);
   const [, targetProps] = useFollowMouseTooltip({ tooltipTitle });
   return (
     <div
@@ -116,7 +116,7 @@ function GanttBaseBar(props: React.PropsWithChildren<IGanttBaseBarProps>) {
               <div style={progressStyle.completed} />
               <div style={progressStyle.unCompleted} />
             </div>
-            <div className={classNames(styles.delay, styles.fill_delay)} style={{ width: deadline?.width || 0 }} />
+            <div className={classNames(styles.delay, styles.fill_delay, { [styles.delay_clingy]: isClingyDelay })} style={{ width: deadline?.width || 0 }} />
           </div>
         </GanntMoveWrap>
       </div>
