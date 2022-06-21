@@ -77,6 +77,10 @@ public enum IssueTypeCode {
         return ACTIVITY.value.equals(value);
     }
 
+    public static boolean isRisk(String value) {
+        return RISK.value.equals(value);
+    }
+
     public static boolean contains(String typeCode) {
         for (IssueTypeCode issueTypeCode : IssueTypeCode.values()) {
             if(issueTypeCode.value().equals(typeCode)) {

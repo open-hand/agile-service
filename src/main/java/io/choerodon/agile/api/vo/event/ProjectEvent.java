@@ -14,6 +14,8 @@ public class ProjectEvent {
 
     private String projectName;
 
+    private Long organizationId;
+
     private String organizationCode;
 
     private String organizationName;
@@ -33,6 +35,9 @@ public class ProjectEvent {
     private List<ProjectEventCategory> newProjectCategoryVOS;
 
     private Boolean useTemplate;
+
+    private Long workGroupId;
+
 
     public List<ProjectEventCategory> getProjectCategoryVOS() {
         return projectCategoryVOS;
@@ -136,5 +141,21 @@ public class ProjectEvent {
 
     public void setNewProjectCategoryVOS(List<ProjectEventCategory> newProjectCategoryVOS) {
         this.newProjectCategoryVOS = newProjectCategoryVOS;
+    }
+
+    public Long getWorkGroupId() {
+        return workGroupId;
+    }
+
+    public void setWorkGroupId(Long workGroupId) {
+        this.workGroupId = workGroupId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

@@ -20,6 +20,11 @@ export interface SelectProgramVersionProps extends Partial<SelectProps> {
   filterSelected?: boolean
   projectId?: string
   selectedIds?: string[],
+  /**
+   * 是否启用查询
+   * @default true
+   */
+  enabledQuery?: boolean
 }
 interface OldProps extends Partial<OldSelectProps> {
   teamProjectIds?: string[],
@@ -38,9 +43,14 @@ interface VersionDataConfigProps {
   afterLoad?: (versions: any[]) => void | Array<any>
   projectId?: string
   selectedIds?: string[],
+  /**
+   * 是否启用查询
+   * @default true
+   */
+  enabled?: boolean
 }
 function useGetVersionData({
-  dataRef, afterLoad, teamProjectIds, projectId, selectedIds,
+  dataRef, afterLoad, teamProjectIds, projectId, selectedIds, enabled = true,
 }: VersionDataConfigProps): [StateProps, any] {
   const [versionData, dispatch] = useReducer<(state: StateProps, action: ActionProps) => StateProps>((state, action) => {
     const { type } = action;
@@ -84,19 +94,19 @@ function useGetVersionData({
   }, { data: [], option: new Map(), headOptions: [] });
 
   const loadData = useCallback(async () => {
-    versionApi.project(projectId).loadProgramVersion(false, teamProjectIds, selectedIds).then((res: any) => {
+    enabled && versionApi.project(projectId).loadProgramVersion(false, teamProjectIds, selectedIds).then((res: any) => {
       dispatch({ type: 'change', data: res });
     });
-  }, [projectId, teamProjectIds, selectedIds]);
+  }, [enabled, projectId, teamProjectIds, selectedIds]);
   useEffect(() => { loadData(); }, [loadData]);
   return [versionData, { loadData, dispatch }];
 }
 const SelectProgramVersion: React.FC<SelectProgramVersionProps> = forwardRef(({
-  teamProjectIds, dataRef, afterLoad, flat, optionFlat, projectId, selectedIds, ...otherProps
+  teamProjectIds, dataRef, afterLoad, flat, optionFlat, projectId, selectedIds, enabledQuery, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;
   const [versionData, method] = useGetVersionData({
-    teamProjectIds, dataRef, afterLoad, projectId, selectedIds,
+    teamProjectIds, dataRef, afterLoad, projectId, selectedIds, enabled: enabledQuery ?? true,
   });
   const OptionComponent = optionFlat ? versionData.data.map((option) => (
     <Component.Option value={option.id}>

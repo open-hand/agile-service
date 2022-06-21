@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import _ from 'lodash';
 import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
+import numToStringWithoutZero from '@/utils/numToString';
 /**
  * 精确加法
  */
@@ -11,19 +12,19 @@ function add(num1, num2) {
   const baseNum = Math.pow(10, Math.max(num1Digits, num2Digits));
   return (num1 * baseNum + num2 * baseNum) / baseNum;
 }
-/**
- *  数字不保留0 的字符串
- * @param {*} num
- * @returns
- */
-function numToStringWithoutZero(num, digits = 2) {
-  const strNum = String(num);
-  // 是数字并且不为0
-  if (/^(-?\d+)(\.\d+)?$/.test(strNum) && !!Number(strNum.replace(/\./g, ''))) {
-    return parseFloat(Number(num).toFixed(digits));
-  }
-  return '0';
-}
+// /**
+//  *  数字不保留0 的字符串
+//  * @param {*} num
+//  * @returns
+//  */
+// function numToStringWithoutZero(num, digits = 2) {
+//   const strNum = String(num);
+//   // 是数字并且不为0
+//   if (/^(-?\d+)(\.\d+)?$/.test(strNum) && !!Number(strNum.replace(/\./g, ''))) {
+//     return parseFloat(Number(num).toFixed(digits));
+//   }
+//   return '0';
+// }
 @observer class FieldTimeTrace extends Component {
   getWorkloads = () => {
     const { store } = this.props;

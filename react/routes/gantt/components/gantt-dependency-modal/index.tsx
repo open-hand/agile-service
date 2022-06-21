@@ -19,8 +19,8 @@ import type { IGanttUpdateIssueDependencyItem } from '@/api';
 import InlineIssueTag from '@/components/tag/inline-issue-tag';
 import { wrapRequestCallback } from '@/components/select/utils';
 
-const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading: React.Dispatch<React.SetStateAction<boolean>>, selectIds?: string[], isStopRequest: boolean, excludeIssueIds?: string[], otherArgs: object }> = ({
-  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, isStopRequest, otherArgs, ...otherProps
+const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading: React.Dispatch<React.SetStateAction<boolean>>, selectIds?: string[], isStopRequest: boolean, excludeIssueIds?: string[], projectId?: string, otherArgs: object }> = ({
+  issueId, selectIds: propsSelectIds, record, name, excludeIssueIds: propsExcludeIssueIds, setLoading, isStopRequest, projectId, otherArgs, ...otherProps
 }) => {
   const { multiple } = otherProps;
   const optionDataRef = useRef<any[]>([]);
@@ -49,7 +49,7 @@ const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading
     textField: 'summary',
     valueField: 'issueId',
     requestArgs: args,
-    request: wrapRequestCallback(({ page, filter, requestArgs }) => ganttApi.loadDependableIssues({ currentIssueId: issueId, page },
+    request: wrapRequestCallback(({ page, filter, requestArgs }) => ganttApi.project(projectId).loadDependableIssues({ currentIssueId: issueId, page },
       {
         contents: [filter].filter(Boolean) as string[],
         otherArgs: { issueIds: requestArgs?.selectIds, excludeIssueIds: requestArgs?.excludeIssueIds },
@@ -63,7 +63,7 @@ const SelectIssue: React.FC<Partial<SelectProps> & { issueId: string, setLoading
     optionRenderer: InlineIssueTag.createIssueTag({ multiple }),
     renderer: InlineIssueTag.createIssueTag({ multiple, rendererMode: true }),
     paging: true,
-  }), [args, issueId, multiple, setLoading]);
+  }), [args, issueId, multiple, setLoading, projectId]);
   const props = useSelect(config);
   return <Select name={name} record={record} {...props} {...otherProps} />;
 };
@@ -74,7 +74,7 @@ SelectIssue.defaultProps = {
 
 const GanttDependency: React.FC = observer(() => {
   const {
-    dataset, modal, onOk: propsOnOk, issueId, data: editData, btnText, forwardRef, disableAutoCreate, horizontal = false, otherArgs = {},
+    dataset, modal, onOk: propsOnOk, issueId, data: editData, btnText, forwardRef, disableAutoCreate, horizontal = false, projectId, otherArgs = {},
   } = useGanntDependencyModal();
   const [loading, setLoading] = useState(!disableAutoCreate);
   const [{ focusing, latestFocusRecord }, setFocusing] = useState({ focusing: false, latestFocusRecord: undefined as number | undefined });
@@ -141,6 +141,7 @@ const GanttDependency: React.FC = observer(() => {
               excludeIssueIds={excludeIssueIds}
               selectIds={editData[record.get('predecessorType')]}
               otherArgs={otherArgs}
+              projectId={projectId}
             />
             <Icon
               type="delete_sweep-o"

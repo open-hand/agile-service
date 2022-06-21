@@ -6,6 +6,9 @@ export interface IRoute {
   props?: Object
   events?: DetailEvents
 }
+export interface IDetailPushRouteOptions {
+  [path: string]: Omit<IRoute, 'path'>
+}
 export interface IRouteWithKey extends IRoute {
   key: React.Key
 }
@@ -27,6 +30,7 @@ interface DetailContainerContext {
   push: (nextRoute: IRoute) => void
   pop: () => void
   close: () => void
+  query: (routeIndex: number) => IRouteWithKey | undefined
   eventsMap: Map<string, DetailEvents>
   fullPage?: boolean
   resizeRef: React.MutableRefObject<any>
@@ -34,6 +38,16 @@ interface DetailContainerContext {
   setFilePreview: (filePreview?: IPreview) => void
   hidden: boolean
   setHidden: (hidden: boolean) => void
+  disableResizeWidth?: boolean
+  /**
+   * 没有边框
+   * @default  false 当 `disableResizeWidth` 设置为 `true`时，`noBorder=true`
+   */
+  noBorder?: boolean
+  /**
+   * 禁止附件预览中查看工作项详情按钮
+   */
+  disabledPreviewIssueButton?: boolean,
 }
 const DetailContainerContext = createContext({} as DetailContainerContext);
 

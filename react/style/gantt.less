@@ -46,6 +46,7 @@
         color: var(--text-color3) !important;
       }
     }
+
     /** 加载操作区域 **/
     .gantt-divider {
       padding: 0 .05rem;
@@ -85,6 +86,9 @@
     // 拖拽时样式
     .gantt-table-header-resize::after {
       background: var(--divider);
+    }
+    .gantt-table-header-resize:hover::after {
+      background: #5365ea;
     }
   }
 

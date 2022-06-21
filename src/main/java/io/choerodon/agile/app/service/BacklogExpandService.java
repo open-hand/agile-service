@@ -4,14 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.choerodon.agile.api.vo.business.*;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.AllDataLogVO;
-import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
-import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import io.choerodon.core.domain.Page;
@@ -217,4 +214,10 @@ public interface BacklogExpandService {
     List<BacklogInfoVO> listBacklogByProjectIds(List<Long> projectIds);
 
     List<BacklogDataVO> listBacklogStatus(List<Long> backlogIds);
+
+    List<BacklogInfoVO> listBacklogByIdsWithOption(List<Long> backlogIds, String param);
+
+    void startBacklog(Long projectId);
+
+    Boolean checkExistBacklogRel(Long projectId, Long issueId);
 }

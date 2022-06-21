@@ -10,11 +10,11 @@ function IssuePIHistory(props) {
   const [data, setData] = useState([]);
   useEffect(() => {
     const loadData = async () => {
-      const Data = await piApi.getFeatureLog(store.getIssue.issueId);
+      const Data = await piApi.project(store.projectId).getFeatureLog(store.getIssue.issueId);
       setData(Data.reverse());
     };
     loadData();
-  }, []);
+  }, [store.getIssue.issueId, store.projectId]);
   const { featureVO: { featureType } } = store.getIssue;
   return (
     <div id="data_log">

@@ -5,7 +5,7 @@ import './DocItem.less';
 import to from '@/utils/to';
 
 import LINK_URL from '@/constants/LINK_URL';
-import KnowledgeName from "../../knowledge-name";
+import KnowledgeName from '../../knowledge-name';
 
 class DocItem extends Component {
   paramConverter = (url) => {
@@ -22,13 +22,14 @@ class DocItem extends Component {
   };
 
   handleDocClick = ({ id, baseId }) => {
+    /**  需更改跳转  指定host */
     to(LINK_URL.knowledgeDoc(baseId), {
       type: 'project',
       id: this.props.projectId,
       params: {
         spaceId: id,
       },
-    });
+    }, { blank: true });
   };
 
   render() {

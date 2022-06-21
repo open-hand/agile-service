@@ -661,4 +661,15 @@ public class IssueController {
         issueService.executionUpdateStatus(projectId, issueId, executionUpdateIssueVO);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
+    @GetMapping(value = "/{issueId}/list_link_contents")
+    public ResponseEntity<List<String>> listLinkContents(@ApiParam(value = "项目id", required = true)
+                                                         @PathVariable(name = "project_id") Long projectId,
+                                                         @ApiParam(value = "issue id", required = true)
+                                                         @PathVariable @Encrypt Long issueId) {
+        return ResponseEntity.ok(issueService.listLinkContents(projectId, issueId));
+    }
+
 }

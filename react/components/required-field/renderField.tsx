@@ -171,6 +171,7 @@ export default function renderField<T extends Partial<SelectProps>>({
           multiple={fieldType === 'multiple' || fieldType === 'checkbox'}
           fieldId={fieldId as string}
           selected={defaultValue}
+          menuType="project"
           {...otherComponentProps}
         />
       );

@@ -45,15 +45,16 @@ const FragmentUpload = inject('AppState')(observer((props) => {
   const webUploaderRef = useRef(null);
   const fileMap = useRef(new Map());
 
-  useEffect(() => {
-    webUploaderRef.current = webUploader;
-    webUploaderRef.current.init({
-      prefixPatch, organizationId, projectId: id, combine,
-    });
-  }, [combine, id, organizationId, prefixPatch]);
+  // useEffect(() => {
+  //   webUploaderRef.current = webUploader;
+  //   webUploaderRef.current.init({
+  //     prefixPatch, organizationId, projectId: id, combine,
+  //   });
+  // }, [combine, id, organizationId, prefixPatch]);
 
   useEffect(() => {
-    webUploaderRef.current.setParams(paramsData);
+    // webUploaderRef.current.setParams(paramsData);
+    webUploader.setParams(paramsData);
   }, [paramsData]);
 
   useEffect(() => {
@@ -122,6 +123,10 @@ const FragmentUpload = inject('AppState')(observer((props) => {
         return item;
       }));
     }
+
+    if (file.status === 'error' || file.status === 'done') {
+      webUploaderRef.current.unRegister();
+    }
   };
 
   const webUploaderUpload = ({
@@ -176,16 +181,23 @@ const FragmentUpload = inject('AppState')(observer((props) => {
     onProgress, onError, onSuccess, file,
   }) => {
     // https://github.com/react-component/upload#customrequest
-    if (!webUploaderRef.current) {
-      onError(new Error('上传失败'));
-    } else {
-      fileMap.current.set(file.uid, file);
-      if (fileMap.current.size === 1) {
-        whileUpload({
-          onProgress, onError, onSuccess, file,
-        });
+    webUploaderRef.current = webUploader;
+    webUploaderRef.current.init({
+      prefixPatch, organizationId, projectId: id, combine,
+    });
+
+    setTimeout(() => {
+      if (!webUploaderRef.current) {
+        onError(new Error('上传失败'));
+      } else {
+        fileMap.current.set(file.uid, file);
+        if (fileMap.current.size === 1) {
+          whileUpload({
+            onProgress, onError, onSuccess, file,
+          });
+        }
       }
-    }
+    }, 0);
   };
 
   const uploadProps = {

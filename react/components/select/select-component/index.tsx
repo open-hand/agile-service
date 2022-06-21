@@ -13,8 +13,8 @@ import { useCreation } from 'ahooks';
 import { componentApi, fieldApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { IComponent } from '@/common/types';
-import { useNoticeSelectUpdateSelected } from '../useNoticeSelectUpdateSelected';
-import { refsBindRef, wrapRequestCallback } from '../utils';
+import { refsBindRef } from '../utils';
+import useSelectWithRuleConfig, { SelectConfigWithRule } from '../useSelectWithRuleConfig';
 
 export interface SelectComponentProps extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
@@ -38,40 +38,28 @@ function getSelectIds(options: any[], values: any, valueField?: string) {
   return values || [];
 }
 const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
-  dataRef, afterLoad, afterFirstRequest, valueField, flat, projectId, extraOptions, ruleIds, selected, fieldId, name, defaultSelectedIds: propsDefaultSelectedIds, ...otherProps
+  dataRef, afterLoad, afterFirstRequest, valueField, flat, projectId, extraOptions, ruleIds, selected: propsSelected, fieldId, name, defaultSelectedIds: propsDefaultSelectedIds, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectRef = useRef<Select>();
   const optionsRef = useRef<any[]>(extraOptions || []);
   const values = useComputed(() => ((castArray(otherProps.value ?? (selectRef.current?.getValues() || []))).flat(Infinity).map((item: any) => (typeof item === 'object' ? get(item, 'componentId') : item))), [otherProps.value, selectRef.current?.getValues()]);
-  const defaultSelectedIds = useCreation(() => (castArray(toJS(propsDefaultSelectedIds))), []);
-  const selectIdsRef = useRef<string[] | undefined>(defaultSelectedIds);
-  const [forceValue, setFilterWord] = useNoticeSelectUpdateSelected();
   const selectIds = useCreation(() => {
+    let newSelectIds: string[] = propsDefaultSelectedIds || [];
     if (optionsRef.current) {
-      const idValues = getSelectIds(optionsRef.current || [], values, valueField);
-      const hasNewUnExistValue = idValues.some((v: string) => !optionsRef.current?.find((item) => item.componentId === v));
-      if (hasNewUnExistValue || forceValue || !selectIdsRef.current) {
-        selectIdsRef.current = idValues;
-      }
+      newSelectIds = getSelectIds(optionsRef.current || [], values, valueField);
     }
-    return [...castArray(selectIdsRef.current || [])].filter(Boolean);
-  }, [forceValue, values, valueField]);
-  const ruleArgs = useMemo(() => ({ ruleIds, selected: castArray(selected).map((item:any) => (typeof item === 'object' ? item.componentId : item)) }), [ruleIds, selected]);
+    newSelectIds.push(...castArray(propsSelected).map((item: any) => (typeof item === 'object' ? item.componentId : item)));
+    return newSelectIds.filter(Boolean);
+  }, [values, valueField, propsSelected]);
 
-  const hasRule = ruleIds?.length && fieldId;
-  const args = useMemo(() => ({ ...ruleArgs, selectIds }), [ruleArgs, selectIds]);
-  const config = useMemo((): SelectConfig<IComponent> => ({
+  const configWithRule = useMemo((): SelectConfigWithRule<IComponent> => ({
     name: 'component',
     textField: 'name',
     valueField: valueField || 'componentId',
-    requestArgs: args,
-    request: wrapRequestCallback(hasRule && fieldId
-      ? ({ requestArgs, filter, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId, requestArgs?.selected, requestArgs?.ruleIds, filter ?? '', page ?? 0, 50)
-      : ({ page, filter, requestArgs }) => componentApi.loadAllComponents(filter, projectId, page, 50, requestArgs?.selectIds),
-    ({ filter }, res) => {
-      afterFirstRequest && afterFirstRequest(res);
-      setFilterWord('filter', filter);
-    }),
+    request: ({ requestArgs, filter, page }) => (requestArgs.hasRule ? fieldApi.project(projectId)
+      .getCascadeOptions(requestArgs.fieldId, requestArgs.selected, requestArgs.ruleIds, filter ?? '', page ?? 0, 50)
+      : componentApi.loadAllComponents(filter, projectId, page, 50, requestArgs.selected)),
+    afterLoad: afterFirstRequest,
     middleWare: (components) => {
       // @ts-ignore
       let data = components || [];
@@ -94,10 +82,10 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
     },
     paging: true,
     tooltip: true,
-  }), [valueField, args, hasRule, fieldId, projectId, setFilterWord, dataRef, extraOptions, afterLoad]);
+  }), [valueField, afterFirstRequest, projectId, dataRef, extraOptions, afterLoad]);
+  const config = useSelectWithRuleConfig(configWithRule, { ruleIds, selected: selectIds, fieldId });
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
-
   if (selectRef.current && name) {
     selectRef.current?.dataSet?.setState(`${name}-options`, props.options);
   }

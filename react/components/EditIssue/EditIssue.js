@@ -27,10 +27,6 @@ const JSONbigString = JSONbig({ storeAsString: true });
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
-const defaultProps = {
-  applyType: 'agile',
-};
-
 function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
   const {
@@ -56,13 +52,14 @@ function EditIssue() {
     showProjectInfo, // 顶部是否显示所属项目信息
     isShowFeature,
     isAgileProgram,
+    forceEnableCascadeRules,
   } = useContext(EditIssueContext);
   const otherProject = !sameProject(projectId);
   const container = useRef();
   const idRef = useRef();
   const messageRef = useRef();
   const {
-    push, close, eventsMap, pop, routes,
+    push, close, eventsMap, pop, routes, query: queryRoute,
   } = useDetailContainerContext();
   const issueEvents = eventsMap.get(applyType === 'program' ? 'program_issue' : 'issue');
   const onUpdate = useCallback((issue) => {
@@ -215,7 +212,8 @@ function EditIssue() {
       const fields = await fieldApi.project(programId ?? projectId).org(organizationId).outside(outside).getFieldAndValue(id, param, isProjectLevel ? undefined : projectId);
 
       // 根据工作项类型查询rules
-      if (!outside && !otherProject && String(issue?.projectId) === String(getProjectId())) {
+      const isForceEnableCascadeRules = forceEnableCascadeRules === 'always' || (forceEnableCascadeRules === 'currentOpenProject' && issue?.projectId && queryRoute(0)?.props?.projectId === issue?.projectId);
+      if (isForceEnableCascadeRules || (!outside && !otherProject && String(issue?.projectId) === String(getProjectId()))) {
         const rules = await pageConfigApi.project(programId ?? projectId).org(organizationId).getCascadeRuleList(issue.issueTypeId);
         store.setIssueTypeRules(rules);
       }
@@ -511,5 +509,4 @@ function EditIssue() {
     </div>
   );
 }
-EditIssue.defaultProps = defaultProps;
 export default observer(EditIssue);
