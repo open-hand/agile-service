@@ -1,21 +1,25 @@
 import React from 'react';
-import {
-  observable, action, computed, toJS,
-} from 'mobx';
-import {
-  sortBy, find, uniq, intersection, pick, isObject,
-} from 'lodash';
-import { C7NFormat } from '@choerodon/master';
-import { store } from '@choerodon/boot';
-import { Modal, DataSet } from 'choerodon-ui/pro';
+import {action, computed, observable, toJS,} from 'mobx';
+import {find, intersection, isObject, pick, sortBy, uniq,} from 'lodash';
+import {C7NFormat} from '@choerodon/master';
+import {store} from '@choerodon/boot';
+import {Modal} from 'choerodon-ui/pro';
 import Moment from 'moment';
-import { extendMoment } from 'moment-range';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import {extendMoment} from 'moment-range';
+import {localPageCacheStore} from '@/stores/common/LocalPageCacheStore';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, issueApiConfig,
+  commonApi,
+  epicApi,
+  featureApi,
+  issueTypeApi,
+  piApi,
+  priorityApi,
+  sprintApi,
+  storyMapApi,
+  versionApi,
 } from '@/api';
-import { getProjectId } from '@/utils/common';
-import { isInProgram } from '@/utils/program';
+import {getProjectId} from '@/utils/common';
+import {isInProgram} from '@/utils/program';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
 
 const moment = extendMoment(Moment);
@@ -1098,39 +1102,33 @@ class BacklogStore {
   /**
    * 加载版本数据
    */
-  loadVersion = () => {
-    versionApi.loadAll().then((data2) => {
-      const newVersion = [...data2];
-      for (let index = 0, len = newVersion.length; index < len; index += 1) {
-        newVersion[index].expand = false;
-      }
-      this.setVersionData(newVersion);
-    }).catch((error) => {
-    });
+  loadVersion = async () => {
+    const data2 = await versionApi.loadAll();
+    const newVersion = [...data2];
+    for (let index = 0, len = newVersion.length; index < len; index += 1) {
+      newVersion[index].expand = false;
+    }
+    this.setVersionData(newVersion);
   };
 
   /**
    * 加载史诗
    */
-  loadEpic = () => {
-    epicApi.loadEpics().then((data3) => {
-      const newEpic = [...data3];
-      for (let index = 0, len = newEpic.length; index < len; index += 1) {
-        newEpic[index].expand = false;
-      }
-      this.setEpicData(newEpic);
-    }).catch((error3) => {
-    });
+  loadEpic = async () => {
+    const data3 = await epicApi.loadEpics()
+    const newEpic = [...data3];
+    for (let index = 0, len = newEpic.length; index < len; index += 1) {
+      newEpic[index].expand = false;
+    }
+    this.setEpicData(newEpic);
   };
 
   /**
    * 加载特性
    */
-  loadFeature = () => {
-    featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId).then((data) => {
-      this.setFeatureData(data);
-    }).catch(() => {
-    });
+  loadFeature = async () => {
+    const data = await featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId)
+    this.setFeatureData(data);
   };
 
   /**

@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react';
-import { Table, DataSet, Modal } from 'choerodon-ui/pro';
-import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import React, {useMemo} from 'react';
+import {DataSet, Modal, Spin, Table} from 'choerodon-ui/pro';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
-const AssigneeModal = ({ data }) => {
+export const AssigneeModal = ({ data, loading }) => {
   const dataSet = useMemo(() => new DataSet({
     selection: false,
     paging: false,
@@ -122,25 +121,17 @@ const AssigneeModal = ({ data }) => {
     remainingTime: dealDecimal(total.totalRemainTime),
   }]);
   return data.assigneeIssues && (
-    <Table
-      dataSet={dataSet}
-      columns={columns}
-      queryBar="none"
-    />
+    <Spin spinning={loading}>
+      <Table
+        dataSet={dataSet}
+        columns={columns}
+        queryBar="none"
+      />
+    </Spin>
   );
 };
 
-export default function openAssigneeModal(props) {
+export function openAssigneeModal(openModalProps) {
   BacklogStore.setModalOpened(true);
-  Modal.open({
-    title: '经办人工作量',
-    style: {
-      width: MODAL_WIDTH.large,
-    },
-    drawer: true,
-    okText: '关闭',
-    footer: (ok) => ok,
-    children: <AssigneeModal {...props} />,
-    onOk: () => { BacklogStore.setModalOpened(false); return true; },
-  });
+  return Modal.open(openModalProps);
 }
