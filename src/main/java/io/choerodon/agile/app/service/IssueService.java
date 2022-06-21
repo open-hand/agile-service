@@ -508,4 +508,6 @@ public interface IssueService {
     void handleUpdateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
 
     List<String> listLinkContents(Long projectId, Long issueId);
+
+    List<IssueRequiredFields> listAllRequiredField(Long projectId, Long organizationId, Long issueId, Boolean subTask);
 }

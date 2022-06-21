@@ -3891,4 +3891,84 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         });
         return result;
     }
+
+    @Override
+    public List<IssueRequiredFields> listAllRequiredField(Long projectId, Long organizationId, Long issueId, Boolean subTask) {
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        if (Objects.isNull(issueDTO)) {
+            throw new CommonException("error.issue.not.exist");
+        }
+        Set<Long> issueIds = new HashSet<>();
+        issueIds.add(issueId);
+        if (subTask) {
+            if (Objects.equals(SchemeApplyType.AGILE, issueDTO.getApplyType())) {
+                // 敏捷工作项：查询子任务和自身
+                issueIds.addAll(issueMapper.selectSubTaskIds(projectId, issueId));
+            } else if (Objects.equals(SchemeApplyType.WATERFALL, issueDTO.getApplyType()) && agileWaterfallService != null) {
+                // 瀑布工作项：查询所有子级
+                issueIds.addAll(agileWaterfallService.selectDescendants(projectId, issueId));
+            }
+        }
+        return listRequiredFieldByIssueTypeIds(projectId, organizationId, new ArrayList<>(issueIds));
+    }
+
+    private List<IssueRequiredFields> listRequiredFieldByIssueTypeIds(Long projectId,
+                                                                      Long organizationId,
+                                                                      List<Long> issueIds) {
+        List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, null, true, false);
+        if (ObjectUtils.isEmpty(issueDTOList)) {
+            return new ArrayList<>();
+        }
+        Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), issueIds, false);
+        List<Long> issueTypeIds = issueDTOList.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
+        List<IssueVO> issueVOList = issueAssembler.issueDOToCopyIssueVOList(issueDTOList, organizationId, projectId, issueIds);
+        Map<Long, List<PageFieldViewVO>> issueTypeFieldMap = new HashMap<>();
+        boolean belongToProgram = belongToProgram(organizationId, projectId);
+        issueTypeIds.forEach(issueTypeId -> {
+            PageFieldViewParamVO param = new PageFieldViewParamVO();
+            param.setIssueTypeId(issueTypeId);
+            param.setSchemeCode(AGILE_SCHEME_CODE);
+            param.setPageCode(PageCode.AGILE_ISSUE_CREATE);
+            List<PageFieldViewVO> createPageFields =
+                    pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param);
+            Set<Long> fieldIds =
+                    createPageFields
+                            .stream()
+                            .map(PageFieldViewVO::getFieldId)
+                            .collect(Collectors.toSet());
+            param.setPageCode(PageCode.AGILE_ISSUE_EDIT);
+            pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param)
+                    .forEach(x -> {
+                        Long fieldId = x.getFieldId();
+                        if (!fieldIds.contains(fieldId)) {
+                            createPageFields.add(x);
+                            fieldIds.add(fieldId);
+                        }
+                    });
+            issueTypeFieldMap.put(issueTypeId, createPageFields);
+        });
+        List<IssueRequiredFields> result = new ArrayList<>();
+        issueVOList.forEach(issue -> {
+            List<PageFieldViewVO> createPageFields = issueTypeFieldMap.get(issue.getIssueTypeId());
+            Map<String, Object> customFieldMap = foundationCodeValue.get(issue.getIssueId());
+            if (ObjectUtils.isEmpty(createPageFields)) {
+                return;
+            }
+            List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
+            List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
+            createPageFields.forEach(x -> {
+                if (Boolean.TRUE.equals(x.getRequired())) {
+                    handlerSystemAndCustomRequiredField(customFieldMap, belongToProgram, x, requiredSystemFields, requiredCustomFields, issue);
+                }
+            });
+            requiredSystemFields.addAll(requiredCustomFields);
+            fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issue.getIssueTypeId(), requiredSystemFields);
+            IssueRequiredFields issueRequiredFields = new IssueRequiredFields();
+            issueRequiredFields.setIssueId(issue.getIssueId());
+            issueRequiredFields.setRequiredFields(requiredSystemFields);
+            result.add(issueRequiredFields);
+        });
+        return result;
+    }
+
 }

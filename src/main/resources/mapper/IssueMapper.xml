@@ -5783,4 +5783,13 @@
         WHERE ai.issue_id = #{issueId}
         AND ai.project_id = #{projectId}
     </select>
+
+    <select id="selectSubTaskIds" resultType="java.lang.Long">
+        SELECT
+            ai.issue_id
+        FROM agile_issue ai
+        WHERE ai.type_code IN ('sub_task')
+        AND ai.parent_issue_id = #{issueId}
+        AND ai.project_id = #{projectId}
+    </select>
 </mapper>

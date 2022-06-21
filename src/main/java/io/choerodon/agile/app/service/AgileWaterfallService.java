@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
@@ -99,4 +96,6 @@ public interface AgileWaterfallService {
     void getWaterfallFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
     void handleMilestoneProgressByStatusId(Long projectId, Long issueId, Long statusId, String typeCode);
+
+    List<Long> selectDescendants(Long projectId, Long issueId);
 }
