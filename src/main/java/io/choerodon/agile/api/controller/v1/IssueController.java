@@ -672,4 +672,16 @@ public class IssueController {
         return ResponseEntity.ok(issueService.listLinkContents(projectId, issueId));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
+    @GetMapping(value = "/{issueId}/all_required_field")
+    public ResponseEntity<List<IssueRequiredFields>> listAllRequiredField(@ApiParam(value = "项目id", required = true)
+                                                                          @PathVariable(name = "project_id") Long projectId,
+                                                                          @PathVariable @Encrypt Long issueId,
+                                                                          @ApiParam(value = "组织id", required = true)
+                                                                          @RequestParam Long organizationId,
+                                                                          @ApiParam(value = "是否复制子项", required = true)
+                                                                          @RequestParam Boolean subTask) {
+        return ResponseEntity.ok(issueService.listAllRequiredField(projectId, organizationId, issueId, subTask));
+    }
 }

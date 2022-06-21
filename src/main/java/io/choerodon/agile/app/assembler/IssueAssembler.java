@@ -3,10 +3,7 @@ package io.choerodon.agile.app.assembler;
 import com.google.common.collect.Lists;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
-import io.choerodon.agile.api.vo.business.IssueListVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.LookupValueService;
@@ -131,6 +128,36 @@ public class IssueAssembler extends AbstractAssembler {
             }
         }
         return issueVO;
+    }
+
+    public List<IssueVO> issueDOToCopyIssueVOList(List<IssueDTO> issueDTOList, Long organizationId, Long projectId, List<Long> issueIds) {
+        List<IssueVO> result = new ArrayList<>();
+        Map<Long, List<ProductVO>> issueProductMap = new HashMap<>();
+        if (agilePluginService != null) {
+            issueProductMap.putAll(agilePluginService.listProductMap(organizationId, Arrays.asList(projectId), issueIds));
+        }
+        issueDTOList.forEach(issueDO -> {
+            IssueVO issueVO = new IssueVO();
+            BeanUtils.copyProperties(issueDO, issueVO);
+            issueVO.setComponentIssueRelVOList(toTargetList(issueDO.getIssueComponentBriefDTOS(), ComponentIssueRelVO.class));
+            issueVO.setLabelIssueRelVOList(toTargetList(issueDO.getLabelIssueRelDTOS(), LabelIssueRelVO.class));
+            List<VersionIssueRelVO> versionList = toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class);
+            issueVO.setVersionIssueRelVOList(versionList);
+            issueVO.setCloseSprint(toTargetList(issueDO.getIssueSprintDTOS(), SprintNameVO.class));
+            issueVO.setProductVOList(issueProductMap.get(issueDO.getIssueId()));
+            issueVO.setTags(issueDO.getTags());
+            List<UserMessageDTO> participants = new ArrayList<>();
+            if (!ObjectUtils.isEmpty(issueDO.getParticipantIds())) {
+                issueDO.getParticipantIds().forEach(participantId -> {
+                    UserMessageDTO participant = new UserMessageDTO();
+                    participant.setId(participantId);
+                    participants.add(participant);
+                });
+            }
+            issueVO.setParticipants(participants);
+            result.add(issueVO);
+        });
+        return result;
     }
 
     private void handlerUser(IssueVO issueVO, Map<Long, UserMessageDTO> userMessageDOMap, IssueDetailDTO issueDetailDTO) {
@@ -554,6 +581,11 @@ public class IssueAssembler extends AbstractAssembler {
         }
         if (agilePluginService != null) {
             issueCreateVO.setProgramId(issueDetailDTO.getProjectId());
+            Map<Long, List<ProductVO>> productMap = agilePluginService.listProductMap(ConvertUtil.getOrganizationId(issueDetailDTO.getProjectId()), Arrays.asList(issueDetailDTO.getProjectId()), Arrays.asList(issueDetailDTO.getIssueId()));
+            List<ProductVO> productVOList = productMap.get(issueDetailDTO.getIssueId());
+            if (!ObjectUtils.isEmpty(productVOList)) {
+                issueCreateVO.setProductIds(productVOList.stream().map(ProductVO::getId).collect(Collectors.toList()));
+            }
         }
         return issueCreateVO;
     }
@@ -576,6 +608,13 @@ public class IssueAssembler extends AbstractAssembler {
         }
         if (predefinedFieldNames.contains("tag")) {
             issueSubCreateVO.setTags(issueDetailDTO.getTags());
+        }
+        if (agilePluginService != null) {
+            Map<Long, List<ProductVO>> productMap = agilePluginService.listProductMap(ConvertUtil.getOrganizationId(issueDetailDTO.getProjectId()), Arrays.asList(issueDetailDTO.getProjectId()), Arrays.asList(issueDetailDTO.getIssueId()));
+            List<ProductVO> productVOList = productMap.get(issueDetailDTO.getIssueId());
+            if (!ObjectUtils.isEmpty(productVOList)) {
+                issueSubCreateVO.setProductIds(productVOList.stream().map(ProductVO::getId).collect(Collectors.toList()));
+            }
         }
         return issueSubCreateVO;
     }

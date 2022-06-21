@@ -690,4 +690,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDTO> queryChildrenIssue(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     IssueCopyLinkContents queryIssueLinkContents(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
+
+    List<Long> selectSubTaskIds(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 }
