@@ -1,12 +1,12 @@
-import React, { Fragment } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Droppable } from 'react-beautiful-dnd';
+import React from 'react';
+import {observer} from 'mobx-react-lite';
+import {Droppable} from 'react-beautiful-dnd';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IssueList from './IssueList';
 import SprintHeader from './SprintHeader';
 import IssueItem from './IssueItem';
 
-function Sprint({ data, openCreateIssueModal, sprintIndex }) {
+function Sprint({ data, openCreateIssueModal, sprintIndex, refresh }) {
   const { sprintId, expand } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   return (
@@ -34,7 +34,7 @@ function Sprint({ data, openCreateIssueModal, sprintIndex }) {
                 border: !expand && snapshot.isDraggingOver ? '1px dashed green' : 'none',
               }}
             >
-              <SprintHeader data={data} sprintIndex={sprintIndex} />
+              <SprintHeader data={data} sprintIndex={sprintIndex} refresh={refresh} />
             </div>
             {expand && (
               <>

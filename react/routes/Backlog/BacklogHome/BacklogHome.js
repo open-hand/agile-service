@@ -1,30 +1,21 @@
-import React, { Component } from 'react';
-import { observer, inject, Observer } from 'mobx-react';
-import {
-  TabPage as Page,
-  Header,
-  Breadcrumb,
-  Content,
-  useTheme,
-  Permission,
-} from '@choerodon/boot';
-import { Button, Spin, Tooltip } from 'choerodon-ui';
-import { Modal, Button as ProButton, Tooltip as ProTooltip } from 'choerodon-ui/pro';
-import { C7NFormat, HeaderButtons } from '@choerodon/master';
-import { isEqual } from 'lodash';
+import React, {Component} from 'react';
+import {inject, observer, Observer} from 'mobx-react';
+import {Breadcrumb, Content, Header, Permission, TabPage as Page, useTheme,} from '@choerodon/boot';
+import {Button, Tooltip} from 'choerodon-ui';
+import {Button as ProButton, Modal, Tooltip as ProTooltip} from 'choerodon-ui/pro';
+import {C7NFormat, HeaderButtons} from '@choerodon/master';
+import {isEqual} from 'lodash';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import {localPageCacheStore} from '@/stores/common/LocalPageCacheStore';
 import SideNav from '@/components/side-nav';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import openCreateIssue from '@/components/create-issue';
-import { LoadingProvider } from '@/components/Loading';
+import {LoadingProvider} from '@/components/Loading';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
 import IssueDetail from '../components/issue-detail';
-import CreateSprint, {
-  CreateCurrentPiSprint,
-} from '../components/create-sprint';
+import CreateSprint, {CreateCurrentPiSprint,} from '../components/create-sprint';
 import SprintList from '../components/sprint-list';
 import ShowPlanSprint from '../components/show-plan-sprint';
 import './BacklogHome.less';
@@ -532,7 +523,10 @@ class BacklogHome extends Component {
 
             </Observer>
             <div className="c7n-backlog-content">
-              <SprintList openCreateIssueModal={this.openCreateIssueModal} />
+              <SprintList
+                  openCreateIssueModal={this.openCreateIssueModal}
+                  refresh={this.refresh}
+              />
             </div>
           </LoadingProvider>
 
