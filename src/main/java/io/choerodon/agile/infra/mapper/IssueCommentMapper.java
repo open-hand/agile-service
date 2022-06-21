@@ -65,4 +65,6 @@ public interface IssueCommentMapper extends BaseMapper<IssueCommentDTO> {
      * @return 评论下的回复
      */
     List<IssueCommentReplyVO> selectIssueCommentDesByParentIds(@Param("commentIds") Set<Long> commentIds, @Param("issueId") Long issueId, @Param("projectId") Long projectId);
+
+    List<IssueCommentDTO> queryAllIssueCommentList(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 }

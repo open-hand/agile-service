@@ -220,4 +220,6 @@ public interface BacklogExpandService {
     void startBacklog(Long projectId);
 
     Boolean checkExistBacklogRel(Long projectId, Long issueId);
+
+    void copyIssueBacklogRel(Long projectId, Long issueId, Long newIssueId);
 }
