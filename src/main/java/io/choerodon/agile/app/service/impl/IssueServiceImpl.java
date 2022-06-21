@@ -202,6 +202,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private FilePathService filePathService;
     @Autowired
     private WorkCalendarSubscribeService workCalendarSubscribeService;
+    @Autowired
+    private WikiRelationService wikiRelationService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -2703,8 +2705,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 objectVersionNumber = newIssue.getObjectVersionNumber();
             }
             //复制链接
-            copyLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId);
-            batchCreateCopyIssueLink(copyConditionVO.getIssueLink(), issueId, newIssueId, projectId);
+            copyIssueLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId);
             // 复制项目群的特性和史诗都不会去创建关联关系
             if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals(ISSUE_EPIC) || issueDetailDTO.getTypeCode().equals("feature")))) {
                 //生成一条复制的关联
@@ -2741,8 +2742,46 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    private void copyLinkContents(List<String> linkContents, Long issueId, Long newIssueId, Long projectId) {
-        // todo
+    @Override
+    public void copyIssueLinkContents(List<String> linkContents, Long issueId, Long newIssueId, Long projectId) {
+        if (!ObjectUtils.isEmpty(linkContents)) {
+            linkContents.forEach(linkContent -> {
+                copyIssueLinkContent(linkContent, issueId, newIssueId, projectId);
+            });
+        }
+    }
+
+    private void copyIssueLinkContent(String linkContent, Long issueId, Long newIssueId, Long projectId) {
+        switch(linkContent) {
+            case IssueCopyLinkContents.ISSUE_LINKS:
+                // 关联工作项
+                batchCreateCopyIssueLink(true, issueId, newIssueId, projectId);
+                break;
+            case IssueCopyLinkContents.ATTACHMENTS:
+                // 附件
+                issueAttachmentService.copyIssueAttachments(projectId, issueId, newIssueId);
+                break;
+            case IssueCopyLinkContents.KNOWLEDGE_RELATIONS:
+                // 关联知识
+                wikiRelationService.copyIssueKnowledgeRelations(projectId, issueId, newIssueId);
+                break;
+            case IssueCopyLinkContents.PREDECESSORS:
+                // 前置依赖项
+                issuePredecessorService.copyIssuePredecessors(projectId, issueId, newIssueId);
+                break;
+            case IssueCopyLinkContents.RELATED_BACKLOGS:
+                // 关联需求
+                if (backlogExpandService != null) {
+                    backlogExpandService.copyIssueBacklogRel(projectId, issueId, newIssueId);
+                }
+                break;
+            case IssueCopyLinkContents.COMMENTS:
+                // 评论
+                issueCommentService.copyIssueComments(projectId, issueId, newIssueId);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

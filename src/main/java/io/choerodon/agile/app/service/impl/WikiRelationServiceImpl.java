@@ -109,4 +109,31 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         iWikiRelationService.deleteBase(wikiRelationDTO);
         BaseFieldUtil.updateIssueLastUpdateInfo(wikiRelationDTO.getIssueId(), projectId);
     }
+
+    @Override
+    public void copyIssueKnowledgeRelations(Long projectId, Long issueId, Long newIssueId) {
+        WikiRelationDTO wikiRelation = new WikiRelationDTO();
+        wikiRelation.setProjectId(projectId);
+        wikiRelation.setIssueId(issueId);
+        List<WikiRelationDTO> list = wikiRelationMapper.select(wikiRelation);
+        if (ObjectUtils.isEmpty(list)) {
+            return;
+        }
+        wikiRelation.setIssueId(newIssueId);
+        List<WikiRelationDTO> existList = wikiRelationMapper.select(wikiRelation);
+        if (!ObjectUtils.isEmpty(existList)) {
+            return;
+        }
+        List<WikiRelationVO> createList = new ArrayList<>();
+        list.forEach(v -> {
+            WikiRelationVO create = new WikiRelationVO();
+            create.setIssueId(newIssueId);
+            create.setProjectId(newIssueId);
+            create.setSpaceId(v.getSpaceId());
+            create.setWikiName(v.getWikiName());
+            create.setWikiUrl(v.getWikiUrl());
+            createList.add(create);
+        });
+        create(projectId, createList);
+    }
 }

@@ -11,14 +11,14 @@ import java.util.List;
  */
 public class IssueCopyLinkContents {
 
-    private static final String ISSUE_LINKS = "issueLinks";
-    private static final String ATTACHMENTS = "attachments";
-    private static final String KNOWLEDGE_RELATIONS = "knowledgeRelations";
-    private static final String PREDECESSORS = "predecessors";
-    private static final String RELATED_BACKLOGS = "relatedBacklogs";
-    private static final String RELATED_TEST_CASES = "relatedTestCases";
-    private static final String RELATED_BRANCHES = "relatedBranches";
-    private static final String COMMENTS = "comments";
+    public static final String ISSUE_LINKS = "issueLinks";
+    public static final String ATTACHMENTS = "attachments";
+    public static final String KNOWLEDGE_RELATIONS = "knowledgeRelations";
+    public static final String PREDECESSORS = "predecessors";
+    public static final String RELATED_BACKLOGS = "relatedBacklogs";
+    public static final String RELATED_TEST_CASES = "relatedTestCases";
+    public static final String RELATED_BRANCHES = "relatedBranches";
+    public static final String COMMENTS = "comments";
     public static final List<String> ISSUE_COPY_LINK_CONTENTS = Arrays.asList(
         ISSUE_LINKS,
         ATTACHMENTS,

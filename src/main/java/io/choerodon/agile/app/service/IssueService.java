@@ -510,4 +510,6 @@ public interface IssueService {
     List<String> listLinkContents(Long projectId, Long issueId);
 
     List<IssueRequiredFields> listAllRequiredField(Long projectId, Long organizationId, Long issueId, Boolean subTask);
+
+    void copyIssueLinkContents(List<String> linkContents, Long issueId, Long newIssueId, Long projectId);
 }
