@@ -1138,13 +1138,20 @@ public class GanttChartServiceImpl implements GanttChartService {
         gantt.setPredecessors(ganttPredecessors);
         predecessors.forEach(predecessor -> {
             Long predecessorId = predecessor.getPredecessorId();
-            GanttChartVO predecessorGantt = ganttMap.get(predecessorId);
-            if (predecessorGantt == null) {
-                return;
+            GanttChartVO ganttChartVO = ganttMap.get(predecessorId);
+            if (ganttChartVO != null) {
+                ganttPredecessors.add(buildPredecessor(ganttChartVO, predecessor));
             }
-            predecessorGantt.setPredecessorType(predecessor.getPredecessorType());
-            ganttPredecessors.add(predecessorGantt);
         });
+    }
+
+    private GanttChartVO buildPredecessor(GanttChartVO ganttChartVO, IssuePredecessorDTO predecessor) {
+        GanttChartVO predecessorGantt = new GanttChartVO();
+        predecessorGantt.setIssueId(ganttChartVO.getIssueId());
+        predecessorGantt.setIssueNum(ganttChartVO.getIssueNum());
+        predecessorGantt.setSummary(ganttChartVO.getSummary());
+        predecessorGantt.setPredecessorType(predecessor.getPredecessorType());
+        return predecessorGantt;
     }
 
     private void calcWorkTimePercentage(Map<Long, Set<Long>> parentSonMap,

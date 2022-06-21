@@ -94,7 +94,7 @@ const Overlay: React.FC<OverlayProps> = ({
             const user: User & { tooltip?: string } = record.toData();
             return (
               <Menu.Item key={user.id}>
-                <Tooltip title={user.tooltip || `${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
+                <Tooltip popupClassName="c7n-agile-userDropdown-overlay-tooltip" title={user.tooltip || `${user.ldap ? `${user.realName}(${user.loginName})` : `${user.realName}(${user.email})`}`}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <UserTag
                       data={user}
