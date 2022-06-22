@@ -33,4 +33,9 @@ public class TestFeignClientFallback implements TestFeignClient {
     public ResponseEntity<Boolean> checkTestCaseLinkExist(Long projectId, Long issueId) {
         throw new CommonException("error.check.test.case.link.exist");
     }
+
+    @Override
+    public ResponseEntity<Void> copyIssueRelatedTestCases(Long projectId, Long issueId, Long newIssueId) {
+        throw new CommonException("error.copy.issue.test.case.link");
+    }
 }

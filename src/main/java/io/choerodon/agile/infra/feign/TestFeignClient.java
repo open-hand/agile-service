@@ -34,4 +34,12 @@ public interface TestFeignClient {
                                                    @ApiParam(value = "issueId", required = true)
                                                    @RequestParam(name = "issue_id")
                                                    @Encrypt Long issueId);
+
+    @GetMapping("/v1/projects/{project_id}/case_link/copy_by_issue_id")
+    ResponseEntity<Void> copyIssueRelatedTestCases(@ApiParam(value = "项目id", required = true)
+                                                   @PathVariable(name = "project_id") Long projectId,
+                                                   @ApiParam(value = "issueId", required = true)
+                                                   @RequestParam @Encrypt Long issueId,
+                                                   @ApiParam(value = "newIssueId", required = true)
+                                                   @RequestParam @Encrypt Long newIssueId);
 }
