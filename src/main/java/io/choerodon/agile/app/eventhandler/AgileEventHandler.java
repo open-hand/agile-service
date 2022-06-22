@@ -5,10 +5,12 @@ import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CRE
 import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import io.choerodon.agile.api.vo.event.*;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.slf4j.Logger;
@@ -18,10 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import io.choerodon.agile.api.vo.event.DevopsMergeRequestPayload;
-import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
-import io.choerodon.agile.api.vo.event.ProjectEvent;
-import io.choerodon.agile.api.vo.event.ProjectEventCategory;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
@@ -78,6 +76,8 @@ public class AgileEventHandler {
     private AgileWaterfallService agileWaterfallService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private IssueService issueService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -215,6 +215,27 @@ public class AgileEventHandler {
         EncryptContext.setEncryptType(EncryptType.TO_STRING.name());
         if (!ObjectUtils.isEmpty(issueIds)) {
             issueIds.forEach(x -> statusBranchMergeSettingService.handleBranchMergeEvent(projectId, x));
+        }
+        return message;
+    }
+
+    @SagaTask(code = TASK_CLONE_ISSUE,
+            sagaCode = CLONE_ISSUE,
+            seq = 1,
+            maxRetryCount = 3,
+            description = "复制工作项关联内容")
+    public String handleCloneIssueEvent(String message) {
+        CloneIssueEvent cloneIssueEvent = JSON.parseObject(message, CloneIssueEvent.class);
+        LOGGER.info("工作项复制关联内容，{}", message);
+        Long projectId = cloneIssueEvent.getProjectId();
+        List<String> linkContents = cloneIssueEvent.getLinkContents();
+        Map<Long, Long> newIssueIdMap = cloneIssueEvent.getNewIssueIdMap();
+        EncryptContext.setEncryptType(EncryptType.TO_STRING.name());
+        if (!ObjectUtils.isEmpty(newIssueIdMap) && !ObjectUtils.isEmpty(linkContents)) {
+            newIssueIdMap.keySet().forEach(newIssueId -> {
+                Long oldIssueId = newIssueIdMap.get(newIssueId);
+                issueService.copyIssueLinkContents(linkContents, oldIssueId, newIssueId, projectId);
+            });
         }
         return message;
     }

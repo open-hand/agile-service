@@ -35,6 +35,16 @@ public final class SagaTopic {
 
         public static final String TASK_BRANCH_MERGE_REQUEST_PASS = "agile-branch-merge-request-pass";
 
+        /**
+         * 复制工作项SagaCode
+         */
+        public static final String CLONE_ISSUE = "agile-clone-issue";
+
+        /**
+         * 复制工作项SagaTaskCode
+         */
+        public static final String TASK_CLONE_ISSUE = "agile-clone-issue";
+
     }
 
     public static class Organization {
