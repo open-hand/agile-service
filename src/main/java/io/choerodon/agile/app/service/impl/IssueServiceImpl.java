@@ -3989,7 +3989,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<IssueRequiredFields> result = new ArrayList<>();
         issueVOList.forEach(issue -> {
             List<PageFieldViewVO> createPageFields = issueTypeFieldMap.get(issue.getIssueTypeId());
-            Map<String, Object> customFieldMap = foundationCodeValue.get(issue.getIssueId());
+            Map<String, Object> customFieldMap = Optional.ofNullable(foundationCodeValue.get(issue.getIssueId())).orElse(new HashMap<>());
             if (ObjectUtils.isEmpty(createPageFields)) {
                 return;
             }
