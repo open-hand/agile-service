@@ -2,9 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.agile.api.vo.event.CloneIssueEvent;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
@@ -13,9 +11,6 @@ import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
-import io.choerodon.asgard.saga.annotation.Saga;
-import io.choerodon.asgard.saga.producer.StartSagaBuilder;
-import io.choerodon.asgard.saga.producer.TransactionalProducer;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -71,8 +66,6 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static io.choerodon.agile.infra.utils.SagaTopic.Project.CLONE_ISSUE;
 
 /**
  * 敏捷开发Issue
@@ -342,10 +335,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private IssueProjectMoveService issueProjectMoveService;
     @Autowired(required = false)
     protected AgileWaterfallService agileWaterfallService;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    protected TransactionalProducer transactionalProducer;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -2675,8 +2664,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return typeCodes;
     }
 
-    @Transactional(rollbackFor = CommonException.class)
-    @Saga(code = CLONE_ISSUE, description = "复制工作项", inputSchemaClass = CloneIssueEvent.class)
     @Override
     public IssueVO cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
@@ -2717,6 +2704,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
             }
+            // 复制关联内容
+            copyIssueLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId);
             // 复制项目群的特性和史诗都不会去创建关联关系
             if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals(ISSUE_EPIC) || issueDetailDTO.getTypeCode().equals("feature")))) {
                 //生成一条复制的关联
@@ -2747,33 +2736,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (agileWaterfallService != null) {
                 agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
             }
-            buildCloneIssueEvent(projectId, result, issueId, copyConditionVO.getLinkContents());
             return result;
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");
-        }
-    }
-
-    private void buildCloneIssueEvent(Long projectId, IssueVO result, Long issueId, List<String> linkContents) {
-        CloneIssueEvent cloneIssueEvent = new CloneIssueEvent();
-        Map<Long, Long> newIssueIdMap = new HashMap<>();
-        newIssueIdMap.put(result.getIssueId(), issueId);
-        cloneIssueEvent.setProjectId(projectId);
-        cloneIssueEvent.setNewIssueIdMap(newIssueIdMap);
-        cloneIssueEvent.setLinkContents(linkContents);
-        try {
-            String input = objectMapper.writeValueAsString(cloneIssueEvent);
-            transactionalProducer.apply(StartSagaBuilder.newBuilder()
-                            .withRefId(String.valueOf(projectId))
-                            .withLevel(ResourceLevel.PROJECT)
-                            .withRefType(ResourceLevel.PROJECT.value())
-                            .withSagaCode(CLONE_ISSUE)
-                            .withSourceId(projectId)
-                            .withJson(input),
-                    builder -> {
-                    });
-        } catch (Exception e) {
-            throw new CommonException("error.clone.issue.event", e);
         }
     }
 
