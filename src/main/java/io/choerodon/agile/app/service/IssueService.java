@@ -511,5 +511,5 @@ public interface IssueService {
 
     List<IssueRequiredFields> listAllRequiredField(Long projectId, Long organizationId, Long issueId, Boolean subTask);
 
-    void copyIssueLinkContents(List<String> linkContents, Long issueId, Long newIssueId, Long projectId);
+    void copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId);
 }

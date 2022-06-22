@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo.event;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +16,9 @@ public class CloneIssueEvent {
 
     @ApiModelProperty("key:newIssueId, value:oldIssueId")
     private Map<Long, Long> newIssueIdMap;
+
+    @ApiModelProperty("关联内容")
+    private List<String> linkContents;
 
     public Long getProjectId() {
         return projectId;
@@ -30,5 +34,13 @@ public class CloneIssueEvent {
 
     public void setNewIssueIdMap(Map<Long, Long> newIssueIdMap) {
         this.newIssueIdMap = newIssueIdMap;
+    }
+
+    public List<String> getLinkContents() {
+        return linkContents;
+    }
+
+    public void setLinkContents(List<String> linkContents) {
+        this.linkContents = linkContents;
     }
 }
