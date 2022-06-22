@@ -56,4 +56,12 @@ public class TestServiceClientOperator {
             return false;
         }
     }
+
+    public void copyIssueRelatedTestCases(Long projectId, Long issueId, Long newIssueId) {
+        try{
+            testFeignClient.copyIssueRelatedTestCases(projectId, issueId, newIssueId).getBody();
+        } catch (ServiceUnavailableException e) {
+            return;
+        }
+    }
 }

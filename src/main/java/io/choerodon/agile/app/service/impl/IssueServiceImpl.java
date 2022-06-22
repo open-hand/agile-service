@@ -2779,6 +2779,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 // 评论
                 issueCommentService.copyIssueComments(projectId, issueId, newIssueId);
                 break;
+            case IssueCopyLinkContents.RELATED_TEST_CASES:
+                // 关联测试用例
+                testServiceClientOperator.copyIssueRelatedTestCases(projectId, issueId, newIssueId);
+                break;
             default:
                 break;
         }
