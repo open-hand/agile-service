@@ -2,6 +2,8 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -11,6 +13,7 @@ import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
+import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -271,6 +274,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String FIX_VERSION = "fixVersion";
     private static final String INFLUENCE_VERSION = "influenceVersion";
     private static final String ORDER_STR = "orderStr";
+    private static final String WEBSOCKET_COPY_ISSUE_CODE = "agile-clone-issue";
+    private static final String DOING_STATUS = "doing";
+    private static final String FAILED_STATUS = "failed";
+    private static final String SUCCEED_STATUS = "succeed";
 
 //    @Value("${services.attachment.url}")
 //    private String attachmentUrl;
@@ -335,6 +342,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private IssueProjectMoveService issueProjectMoveService;
     @Autowired(required = false)
     protected AgileWaterfallService agileWaterfallService;
+    @Autowired
+    private MessageClientC7n messageClientC7n;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -2665,10 +2676,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public IssueVO cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType) {
+    public void cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
         }
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + EncryptionUtils.encrypt(issueId);
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("projectId", projectId);
+        paramsMap.put("userId", userId);
+        sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 0);
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
         //处理需要复制的预定义字段
         List<String> predefinedFieldNames = copyConditionVO.getPredefinedFieldNames();
@@ -2682,6 +2699,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             copyIssueRequiredFieldVOMap.putAll(copyIssueRequiredFieldVOS.stream().collect(Collectors.toMap(CopyIssueRequiredFieldVO::getIssueId, Function.identity())));
         }
         CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueId, new CopyIssueRequiredFieldVO());
+        sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 10);
         if (issueDetailDTO != null) {
             Long newIssueId;
             Long objectVersionNumber;
@@ -2704,8 +2722,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
             }
+            sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 30);
             // 复制关联内容
             copyIssueLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId);
+            sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 50);
             // 复制项目群的特性和史诗都不会去创建关联关系
             if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals(ISSUE_EPIC) || issueDetailDTO.getTypeCode().equals("feature")))) {
                 //生成一条复制的关联
@@ -2717,29 +2737,34 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
             // 处理冲刺、子任务、自定义字段的值
             List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
+            sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 80);
             handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO, copyIssueRequiredFieldVOMap, triggerCarrierVOS);
-            IssueVO result = queryIssue(projectId, newIssueId, organizationId);
-            setCompletedAndActualCompletedDate(result);
-            List<IssueSubListVO> subTasks = result.getSubIssueVOList();
-            if (!ObjectUtils.isEmpty(subTasks)) {
-                subTasks.forEach(x -> {
-                    setCompletedAndActualCompletedDate(x);
-                });
-            }
-            List<IssueSubListVO> subBugs = result.getSubBugVOList();
-            if (!ObjectUtils.isEmpty(subBugs)) {
-                subBugs.forEach(x -> {
-                    setCompletedAndActualCompletedDate(x);
-                });
-            }
             this.self().batchCreateIssueInvokeTrigger(triggerCarrierVOS);
             if (agileWaterfallService != null) {
                 agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
             }
-            return result;
+            sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
         } else {
+            sendCloneProcess(userId, websocketKey, paramsMap, FAILED_STATUS, 100);
             throw new CommonException("error.issue.copyIssueByIssueId");
         }
+    }
+
+    private void sendCloneProcess(Long userId,
+                                  String websocketKey,
+                                  Map<String, Object> paramsMap,
+                                  String status,
+                                  int process) {
+        paramsMap.put("status", status);
+        paramsMap.put("process", process);
+        String message = null;
+        try {
+            message = objectMapper.writeValueAsString(paramsMap);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("object to json error: {0}", e);
+        }
+        System.out.println("websocketKey:" + message);
+        messageClientC7n.sendByUserId(userId, websocketKey, message);
     }
 
     @Override

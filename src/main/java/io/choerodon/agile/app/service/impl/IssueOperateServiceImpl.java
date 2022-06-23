@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
+import io.choerodon.agile.api.vo.CopyConditionVO;
 import io.choerodon.agile.api.vo.LinkIssueLinkageMessageVO;
 import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.IssueOperateService;
@@ -22,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.*;
 
@@ -127,5 +129,17 @@ public class IssueOperateServiceImpl implements IssueOperateService {
         } finally {
             messageClientC7n.sendByUserId(userId, websocketKey, JSON.toJSONString(linkIssueLinkageMessageVO));
         }
+    }
+
+    @Async
+    @Override
+    public void cloneIssueByIssueId(Long projectId,
+                                    Long issueId,
+                                    CopyConditionVO copyConditionVO,
+                                    Long organizationId,
+                                    String applyType,
+                                    ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
+        issueService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType);
     }
 }

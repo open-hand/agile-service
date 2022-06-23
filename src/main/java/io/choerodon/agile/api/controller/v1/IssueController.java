@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import springfox.documentation.annotations.ApiIgnore;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueValidator;
@@ -409,7 +411,7 @@ public class IssueController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("复制一个issue")
     @PostMapping("/{issueId}/clone_issue")
-    public ResponseEntity<IssueVO> cloneIssueByIssueId(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> cloneIssueByIssueId(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "issueId", required = true)
                                                         @PathVariable(name = "issueId") @Encrypt Long issueId,
@@ -420,9 +422,8 @@ public class IssueController {
                                                        @ApiParam(value = "复制条件", required = true)
                                                         @RequestBody CopyConditionVO copyConditionVO) {
         issueValidator.checkPredefinedFields(copyConditionVO.getPredefinedFieldNames());
-        return Optional.ofNullable(issueService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.issue.cloneIssueByIssueId"));
+        issueOperateService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
