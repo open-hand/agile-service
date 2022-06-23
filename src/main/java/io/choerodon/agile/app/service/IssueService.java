@@ -191,9 +191,8 @@ public interface IssueService {
      * @param projectId        projectId
      * @param issueId          issueId
      * @param copyConditionVO copyConditionVO
-     * @return IssueVO
      */
-    IssueVO cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType);
+    void cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType);
 
     List<String> handlerCopyRequirePredefinedField(Object object, JSONObject predefinedFields);
 
