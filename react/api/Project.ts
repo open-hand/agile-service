@@ -35,14 +35,11 @@ class ProjectApi extends Api<ProjectApi> {
     userId, filter, page, size, category,
   }: any) {
     return this.request({
-      method: 'get',
-      url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging`,
-      params: {
-        page,
-        size,
-        onlySucceed: true,
+      method: 'post',
+      url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging?onlySucceed=true&page=1&size=0`,
+      data: {
         name: filter || '',
-        category,
+        categoryCodes: category,
       },
     });
   }
