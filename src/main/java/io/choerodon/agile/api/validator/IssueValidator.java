@@ -118,7 +118,7 @@ public class IssueValidator {
         if (ObjectUtils.isEmpty(issueCreateVO.getSummary())) {
             throw new CommonException("error.IssueRule.Summary");
         }
-        if (issueCreateVO.getSummary().length() > 100) {
+        if (issueCreateVO.getSummary().length() > IssueConstant.SUMMARY_LENGTH) {
             throw new CommonException("error.summary.too.long");
         }
         if (issueCreateVO.getPriorityCode() == null) {
@@ -218,7 +218,7 @@ public class IssueValidator {
         if (issueUpdate.containsKey(FieldCode.SUMMARY) && ObjectUtils.isEmpty(issueUpdate.get(FieldCode.SUMMARY).toString())) {
             throw new CommonException("error.IssueRule.Summary");
         }
-        if (issueUpdate.get(FieldCode.SUMMARY).toString().length() > 100 ) {
+        if (issueUpdate.get(FieldCode.SUMMARY).toString().length() > IssueConstant.SUMMARY_LENGTH) {
             throw new CommonException("error.summary.too.long");
         }
     }
@@ -229,7 +229,7 @@ public class IssueValidator {
             throw new CommonException("error.IssueRule.Summary");
         }
         // 校验概要长度
-        if (issueSubCreateVO.getSummary().length() > 100) {
+        if (issueSubCreateVO.getSummary().length() > IssueConstant.SUMMARY_LENGTH) {
             throw new CommonException("error.summary.too.long");
         }
         if (issueSubCreateVO.getPriorityCode() == null) {

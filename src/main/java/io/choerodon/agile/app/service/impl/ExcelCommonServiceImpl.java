@@ -1678,7 +1678,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
             value = cell.toString();
-            if (value.length() > 100) {
+            if (value.length() > IssueConstant.SUMMARY_LENGTH) {
                 cell.setCellValue(buildWithErrorMsg(value, "概要过长"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {

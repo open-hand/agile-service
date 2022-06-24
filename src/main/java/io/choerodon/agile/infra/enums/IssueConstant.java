@@ -8,4 +8,7 @@ public class IssueConstant {
 
     public static final String ISSUE_TYPE_CN = "工作项类型";
     public static final String ISSUE_CN = "工作项";
+
+    // 概要长度
+    public static final int SUMMARY_LENGTH = 100;
 }
