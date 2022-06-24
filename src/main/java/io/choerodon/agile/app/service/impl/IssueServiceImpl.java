@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.core.client.MessageClientC7n;
@@ -346,6 +347,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private MessageClientC7n messageClientC7n;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private DevopsClientOperator devopsClientOperator;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -2808,6 +2811,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 // 关联测试用例
                 testServiceClientOperator.copyIssueRelatedTestCases(projectId, issueId, newIssueId);
                 break;
+            case IssueCopyLinkContents.RELATED_BRANCHES:
+                // 关联测试分支
+                devopsClientOperator.copyIssueRelatedBranches(projectId, issueId, newIssueId);
+                break;
             default:
                 break;
         }
@@ -3939,7 +3946,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             linkContents.setRelatedBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId));
         }
         // 关联分支
-        linkContents.setRelatedBranches(false);
+        linkContents.setRelatedBranches(devopsClientOperator.checkExistIssueBranchRel(projectId, issueId));
         return getLinkContents(linkContents);
     }
 
