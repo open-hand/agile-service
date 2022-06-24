@@ -15,7 +15,9 @@ export interface IGanttProps extends TableCacheRenderProps {
   myDefaultFilter: IPersonalFilter | undefined
   projectId?: string
   projects?: any[]
-  setCurrentProject?: any
+  setCurrentProject?: any,
+  setCurrentItem?:(val:any)=>void,
+  newItem:any,
 }
 interface GanttContext extends IGanttProps {
   store: GanttStore
@@ -24,7 +26,7 @@ interface GanttContext extends IGanttProps {
   disable: boolean
   // processType: 'task' | 'workTime'
   issueSearchStore: IssueSearchStore
-  projectId?: string
+  projectId?: string,
   // dimensionType: IGanttDimensionTypeValue
   // sortedList: IGanttSortLabelSortItem[]
 }

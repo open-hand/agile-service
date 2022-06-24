@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   HeaderButtons,
 } from '@choerodon/boot';
 import { LoadingProvider } from '@choerodon/components';
 import { useMount } from 'ahooks';
 import classNames from 'classnames';
+import { has as hasInject, get as getInject, mount as injectMount } from '@choerodon/inject';
 import SelectProject from '@/components/select/select-project';
 import StatusLinkageWSHandle from '@/components/StatusLinkageWSHandle';
 import styles from './Gantt.less';
@@ -18,7 +19,7 @@ import GanttBody from '@/routes/gantt/GanttBody';
 
 const WorkbenchGantt: React.FC = () => {
   const {
-    menuType, projectId, projects, setCurrentProject, store, issueSearchStore,
+    menuType, projectId, projects, setCurrentProject, store, issueSearchStore, setCurrentItem, newItem,
   } = useGanttContext();
   const [ganttHeaderData, {
     typeComponentProps, sprintComponentsProps, processTypeComponentProps, headerComponentProps,
@@ -48,20 +49,27 @@ const WorkbenchGantt: React.FC = () => {
                   return String(oldValue);
                 }
                 store.setSprintIds(null);
+                const selectItem = projects?.find((item) => item.id === val);
+                setCurrentItem && setCurrentItem(selectItem);
                 localPageCacheStore.setItem('org.gantt.projectId', val);
+                localPageCacheStore.setItem('org.gantt.projectItem', selectItem);
                 return val;
               });
             }}
           />
-          <SelectSprint {...sprintComponentsProps} />
-          <SelectType {...typeComponentProps} />
-          <SelectProcessType {...processTypeComponentProps} />
+          {newItem.categoryCodes.includes('N_AGILE') && (
+          <>
+            <SelectSprint {...sprintComponentsProps} />
+            <SelectType {...typeComponentProps} />
+            <SelectProcessType {...processTypeComponentProps} />
+          </>
+          )}
         </div>
         <HeaderButtons {...headerComponentProps} />
-
       </div>
       <div className={classNames(styles.content, 'c7n-gantt-content')}>
-        <GanttBody {...ganttHeaderData} key={projectId} />
+        {newItem.categoryCodes.includes('N_WATERFALL') && injectMount('waterfall:workbechGantt', { projectId })}
+        {newItem.categoryCodes.includes('N_AGILE') && <GanttBody {...ganttHeaderData} key={projectId} />}
       </div>
       <StatusLinkageWSHandle />
     </LoadingProvider>
