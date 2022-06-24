@@ -11,13 +11,9 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.IssueFieldMapping;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -119,8 +115,11 @@ public class IssueValidator {
         if (issueCreateVO.getTypeCode() == null) {
             throw new CommonException(ERROR_ISSUE_RULE_TYPE_CODE);
         }
-        if (issueCreateVO.getSummary() == null) {
+        if (ObjectUtils.isEmpty(issueCreateVO.getSummary())) {
             throw new CommonException("error.IssueRule.Summary");
+        }
+        if (issueCreateVO.getSummary().length() > 100) {
+            throw new CommonException("error.summary.too.long");
         }
         if (issueCreateVO.getPriorityCode() == null) {
             throw new CommonException("error.IssueRule.PriorityCode");
@@ -214,12 +213,24 @@ public class IssueValidator {
             }
             judgeEpicCanUpdateAndExist(projectId, decrypt(issueUpdate.get(EPIC_ID).toString()));
         }
+
+        // 概要校验
+        if (issueUpdate.containsKey(FieldCode.SUMMARY) && ObjectUtils.isEmpty(issueUpdate.get(FieldCode.SUMMARY).toString())) {
+            throw new CommonException("error.IssueRule.Summary");
+        }
+        if (issueUpdate.get(FieldCode.SUMMARY).toString().length() > 100 ) {
+            throw new CommonException("error.summary.too.long");
+        }
     }
 
     public void verifySubCreateData(IssueSubCreateVO issueSubCreateVO, Long projectId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        if (issueSubCreateVO.getSummary() == null) {
+        if (ObjectUtils.isEmpty(issueSubCreateVO.getSummary())) {
             throw new CommonException("error.IssueRule.Summary");
+        }
+        // 校验概要长度
+        if (issueSubCreateVO.getSummary().length() > 100) {
+            throw new CommonException("error.summary.too.long");
         }
         if (issueSubCreateVO.getPriorityCode() == null) {
             throw new CommonException("error.IssueRule.PriorityCode");
