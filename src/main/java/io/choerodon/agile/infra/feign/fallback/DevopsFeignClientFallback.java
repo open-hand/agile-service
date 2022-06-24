@@ -33,4 +33,14 @@ public class DevopsFeignClientFallback implements DevopsFeignClient {
     public ResponseEntity<String> listByProjectIdAndCode(Long organizationId, List<AppServiceSimpleVO> appServiceList) {
         throw new CommonException("error.devops.listByProjectIdAndCode");
     }
+
+    @Override
+    public ResponseEntity<Boolean> checkIssueBranchRelExist(Long projectId, Long issueId) {
+        throw new CommonException("error.check.exist.issueBranchRel");
+    }
+
+    @Override
+    public ResponseEntity<Void> copyIssueBranchRel(Long projectId, Long oldIssueId, Long newIssueId) {
+        throw new CommonException("error.copy.issue.relatedBranches");
+    }
 }

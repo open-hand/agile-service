@@ -40,4 +40,12 @@ public interface DevopsFeignClient {
     ResponseEntity<String> listByProjectIdAndCode(@PathVariable(value = "organization_id") Long organizationId,
                                                   @RequestBody List<AppServiceSimpleVO> appServiceList);
 
+    @GetMapping({"/v1/projects/{project_id}/branch/issue/check_rel_exist"})
+    ResponseEntity<Boolean> checkIssueBranchRelExist(@PathVariable(value = "project_id") Long projectId,
+                                                     @RequestParam("issue_id") Long issueId);
+
+    @PostMapping({"/v1/projects/{project_id}/branch/issue/copy_rel"})
+    ResponseEntity<Void> copyIssueBranchRel(@PathVariable(value = "project_id") Long projectId,
+                                            @RequestParam("old_issue_id") Long oldIssueId,
+                                            @RequestParam("new_issue_id") Long newIssueId);
 }
