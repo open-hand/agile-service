@@ -318,7 +318,9 @@
             ai.priority_id,
             CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
             ais.is_completed as completed,
-            ai.created_by
+            ai.created_by,
+            ai.estimated_start_time,
+            ai.estimated_end_time
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
@@ -337,7 +339,9 @@
             ai.priority_id,
             ai.object_version_number,
             CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
-            ai.created_by
+            ai.created_by,
+            ai.estimated_start_time,
+            ai.estimated_end_time
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         WHERE ai.relate_issue_id = #{issueId}
