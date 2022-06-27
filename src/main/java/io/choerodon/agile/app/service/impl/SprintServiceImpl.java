@@ -23,6 +23,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -96,6 +97,8 @@ public class SprintServiceImpl implements SprintService {
     private ProjectConfigService projectConfigService;
     @Autowired
     private StatusService statusService;
+    @Autowired
+    private IssueSprintRelMapper issueSprintRelMapper;
 
     public static final String ADVANCED_SEARCH_ARGS = "advancedSearchArgs";
     private static final String SPRINT_DATA = "sprintData";
@@ -886,5 +889,43 @@ public class SprintServiceImpl implements SprintService {
     @Override
     public SprintStartMessageVO selectSprintStartMessage(Long projectId, Long sprintId) {
         return sprintMapper.selectSprintStartMessage(projectId, sprintId);
+    }
+
+    @Override
+    public Map<Long, List<IssueSprintDTO>> queryIssueSprintMap(Set<Long> projectIds, Set<Long> issueIds) {
+        List<IssueSprintDTO> issueSprintList = issueSprintRelMapper.selectIssueSprintByIds(projectIds, new HashSet<>(issueIds));
+        if (issueSprintList.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Set<Long> sprintIds = new HashSet<>();
+        Map<Long, List<IssueSprintDTO>> issueSprintMap = new HashMap<>();
+        issueSprintList.forEach(x -> {
+            Long issueId = x.getIssueId();
+            Long sprintId = x.getSprintId();
+            sprintIds.add(sprintId);
+            List<IssueSprintDTO> issueSprints = issueSprintMap.computeIfAbsent(issueId, y -> new ArrayList<>());
+            issueSprints.add(x);
+        });
+        if (!sprintIds.isEmpty()) {
+            Map<Long, SprintDTO> sprintMap =
+                    sprintMapper.selectByIds(StringUtils.join(sprintIds, ","))
+                            .stream()
+                            .collect(Collectors.toMap(SprintDTO::getSprintId, Function.identity()));
+            issueSprintMap.forEach((issueId, list) -> {
+                list.forEach(x -> {
+                    Long sprintId = x.getSprintId();
+                    SprintDTO dto = sprintMap.get(sprintId);
+                    if (ObjectUtils.isEmpty(dto)) {
+                        return;
+                    }
+                    x.setSprintName(dto.getSprintName());
+                    x.setStartDate(dto.getStartDate());
+                    x.setEndDate(dto.getEndDate());
+                    x.setActualEndDate(dto.getActualEndDate());
+                    x.setStatusCode(dto.getStatusCode());
+                });
+            });
+        }
+        return issueSprintMap;
     }
 }
