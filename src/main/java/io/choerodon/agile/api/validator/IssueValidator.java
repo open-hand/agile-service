@@ -218,7 +218,7 @@ public class IssueValidator {
         if (issueUpdate.containsKey(FieldCode.SUMMARY) && ObjectUtils.isEmpty(issueUpdate.get(FieldCode.SUMMARY).toString())) {
             throw new CommonException("error.IssueRule.Summary");
         }
-        if (issueUpdate.get(FieldCode.SUMMARY).toString().length() > IssueConstant.SUMMARY_LENGTH) {
+        if (issueUpdate.containsKey(FieldCode.SUMMARY) && issueUpdate.get(FieldCode.SUMMARY).toString().length() > IssueConstant.SUMMARY_LENGTH) {
             throw new CommonException("error.summary.too.long");
         }
     }
