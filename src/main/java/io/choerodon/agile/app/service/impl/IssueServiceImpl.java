@@ -2812,7 +2812,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 testServiceClientOperator.copyIssueRelatedTestCases(projectId, issueId, newIssueId);
                 break;
             case IssueCopyLinkContents.RELATED_BRANCHES:
-                // 关联测试分支
+                // 关联分支
                 devopsClientOperator.copyIssueRelatedBranches(projectId, issueId, newIssueId);
                 break;
             default:
