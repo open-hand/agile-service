@@ -613,6 +613,8 @@ public interface AgilePluginService {
 
     List<String> getOpenUserIdsByUserIds(List<Long> userIds, String openAppCode);
 
+    List<IssueProductRelVO> queryIssueProductRel(List<Long> issueIds);
+
     void createInstanceOpenRel(Long projectId, Long instanceId, String instanceType, InstanceOpenRelVO instanceOpenRelVO);
 
     InstanceOpenRelVO queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
