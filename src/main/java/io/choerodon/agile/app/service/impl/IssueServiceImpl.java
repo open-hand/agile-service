@@ -3649,17 +3649,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType, workBenchIssueSearchVO.getSearchVO()));
-        List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
-        if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
+        Page<IssueDTO> parentPage =
+                queryIssuesByTypeAndUserId(projectIds, userId, searchType, workBenchIssueSearchVO.getSearchVO(), pageRequest);
+        List<IssueDTO> allIssue = parentPage.getContent();
+        if (CollectionUtils.isEmpty(allIssue)) {
             return new Page<>();
-        }
-        List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> allIssue;
-        if (Objects.equals(searchType, MY_START_BEACON)) {
-            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, parentIssues, userId, workBenchIssueSearchVO.getSearchVO());
-        } else {
-            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType, workBenchIssueSearchVO.getSearchVO());
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
@@ -3700,6 +3694,49 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private Page<IssueDTO> queryIssuesByTypeAndUserId(List<Long> projectIds,
+                                                      Long userId,
+                                                      String searchType,
+                                                      SearchVO searchVO,
+                                                      PageRequest pageRequest) {
+
+        if (ObjectUtils.isEmpty(searchType)) {
+            searchType = WorkBenchSearchType.MY_TODO;
+        }
+        Set<Long> projectIdSet = new HashSet<>(projectIds);
+        //查活跃冲刺
+        Set<Long> activeSprintIds =
+                sprintMapper.selectActiveSprintsByProjectIds(projectIdSet)
+                        .stream()
+                        .map(SprintDTO::getSprintId)
+                        .collect(Collectors.toSet());
+        Page<IssueDTO> parentPage;
+        switch (searchType) {
+            case WorkBenchSearchType.MY_TODO:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyTodoIssues(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_BUG:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyBugs(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_STAR_BEACON:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyStarBeacon(projectIds, userId, searchVO));
+                break;
+            case WorkBenchSearchType.MY_REPORTED:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyReported(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_ASSIGNED:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyAssigned(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_REPORTED_BUG:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectReportedBug(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            default:
+                parentPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+                break;
+        }
+        return parentPage;
     }
 
     private Long setParentId(Long issueId){
