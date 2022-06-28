@@ -1,12 +1,10 @@
 /* eslint-disable no-nested-ternary */
-import React, {
-  Fragment, useContext, useRef, useState, useEffect,
-} from 'react';
-import { Tabs } from 'choerodon-ui';
-import { observer } from 'mobx-react-lite';
-import { has as hasInject, mount } from '@choerodon/inject';
+import React, {useContext, useEffect, useRef, useState,} from 'react';
+import {Tabs} from 'choerodon-ui';
+import {observer} from 'mobx-react-lite';
+import {has as hasInject, mount} from '@choerodon/inject';
 import map from 'lodash/map';
-import { useDetailContainerContext } from '@/components/detail-container/context';
+import {useDetailContainerContext} from '@/components/detail-container/context';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
 import useHasBacklog from '@/hooks/useHasBacklog';
@@ -25,18 +23,17 @@ import IssueLink from './IssueLink';
 import IssueBranch from './IssueBranch';
 import IssueDropDown from '../IssueDropDown';
 import IssuePIHistory from './IssuePIHistory';
-import { FieldStoryPoint, FieldSummary } from './Field';
+import {FieldStoryPoint, FieldSummary} from './Field';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
-import { InjectedComponent } from '../../injectComponent';
+import {InjectedComponent} from '../../injectComponent';
 import './IssueBody.less';
 import IssueUI from './Issue-UI';
 
-import { featureApi } from '@/api';
-import { getProjectId } from '@/utils/common';
-import { DEPENDENCY_TAB, DETAIL_DELIVERABLE } from '../../../../constants/WATERFALL_INJECT';
-import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
-import { COPINGSTRATEGY, RISK_ISSUE_LINK } from '../../../../constants/AGILEPRO_INJECT';
+import {featureApi} from '@/api';
+import {DEPENDENCY_TAB, DETAIL_DELIVERABLE} from '../../../../constants/WATERFALL_INJECT';
+import {WATERFALL_TYPE_CODES} from '../../../../constants/TYPE_CODE';
+import {COPINGSTRATEGY, RISK_ISSUE_LINK} from '../../../../constants/AGILEPRO_INJECT';
 
 const { TabPane } = Tabs;
 
@@ -48,6 +45,7 @@ function IssueBody(props) {
   } = useContext(EditIssueContext);
   const { match } = useDetailContainerContext();
   const { comments } = store;
+  const workLogs = store.getWorkLogs;
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {}, projectId, projectVO,
@@ -200,7 +198,7 @@ function IssueBody(props) {
         <TabPane tab={`评论${comments ? `(${(comments?.totalElements || 0) > 99 ? '99+' : (comments?.totalElements || 0)})` : ''}`} key="comment">
           <Comments {...props} />
         </TabPane>
-        <TabPane tab="记录" key="record">
+        <TabPane tab={`记录${workLogs ? `(${(workLogs.length || 0) > 99 ? '99+' : (workLogs.length || 0)})` : ''}`} key="record">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature', 'issue_epic', 'risk'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''}

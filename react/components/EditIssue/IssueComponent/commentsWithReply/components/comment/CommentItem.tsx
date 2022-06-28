@@ -1,14 +1,12 @@
-import React, {
-  useCallback, useEffect, useState, useImperativeHandle,
-} from 'react';
-import { Icon } from 'choerodon-ui/pro';
-import { stores } from '@choerodon/boot';
-import { observer } from 'mobx-react-lite';
+import React, {useCallback, useEffect, useImperativeHandle, useState,} from 'react';
+import {Icon} from 'choerodon-ui/pro';
+import {stores} from '@choerodon/boot';
+import {observer} from 'mobx-react-lite';
 import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import './Comment.less';
-import { IComment } from '@/common/types';
-import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
+import {IComment} from '@/common/types';
+import {IReplyCreate, issueCommentApi, UComment} from '@/api/IssueComment';
 import UserTag from '@/components/tag/user-tag';
 import openDeleteModal from '../deleteComment';
 
@@ -256,6 +254,7 @@ const CommentItem: React.FC<Props> = ({
                 }}
                 onOk={handleUpdate}
                 projectId={projectId}
+                placeholder="请输入评论"
               />
             </div>
           ) : (
@@ -281,6 +280,7 @@ const CommentItem: React.FC<Props> = ({
               onOk={handleReply}
               okText="回复"
               projectId={projectId}
+              placeholder={`回复 ${comment.userRealName}:`}
             />
           </div>
         )
