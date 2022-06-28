@@ -1790,6 +1790,413 @@
         and reporter_id is not null
     </select>
 
+    <select id="selectMyTodoIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select *
+        from (
+        select
+        ai.issue_id,
+        ai.summary,
+        ai.project_id,
+        ai.type_code,
+        CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id
+        from agile_issue ai
+        join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
+        left join agile_project_info api ON ai.project_id = api.project_id
+        where 1=1
+        and ai.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'waterfall'
+        and ai.assignee_id = #{userId}
+        and ais.is_completed != 1
+        and ai.type_code in ('stage','milestone','activity')
+        <include refid="workbenchFilterSql"/>
+        <if test="activeSprintIds != null and activeSprintIds.size() > 0">
+            union
+            select
+            ai.issue_id,
+            ai.summary,
+            ai.project_id,
+            ai.type_code,
+            CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+            ai.reporter_id,
+            ai.last_update_date,
+            ai.priority_id,
+            ai.assignee_id,
+            ai.issue_type_id,
+            ai.status_id,
+            ai.parent_issue_id,
+            ai.relate_issue_id
+            from agile_issue ai
+            join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
+            join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
+            left join agile_project_info api ON ai.project_id = api.project_id
+            where 1=1
+            and ai.project_id in
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            and ai.apply_type = 'agile'
+            and ai.assignee_id = #{userId}
+            and aisr.sprint_id in
+            <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
+                #{activeSprintId}
+            </foreach>
+            and ais.is_completed != 1
+            and ai.type_code in ('story','bug','task', 'sub_task')
+            <include refid="workbenchFilterSql"/>
+        </if>
+        ) ai
+        order by
+        ai.project_id ASC,
+        ai.last_update_date DESC
+    </select>
+
+    <select id="selectMyBugs" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.summary,
+        ai.project_id,
+        ai.type_code,
+        CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id
+        from agile_issue ai
+        join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
+        join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
+        left join agile_project_info api ON ai.project_id = api.project_id
+        where 1=1
+        and ai.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        and ai.assignee_id = #{userId}
+        and aisr.sprint_id in
+        <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
+            #{activeSprintId}
+        </foreach>
+        and ais.is_completed != 1
+        and ai.type_code = 'bug'
+        <include refid="workbenchFilterSql"/>
+        order by
+        ai.project_id ASC,
+        ai.last_update_date DESC
+    </select>
+
+    <select id="selectMyStarBeacon" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.summary,
+        ai.project_id,
+        ai.type_code,
+        CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id
+        from agile_issue ai
+        left join agile_project_info api ON ai.project_id = api.project_id
+        where 1=1
+        and ai.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        AND ai.type_code in ('story','bug','task','sub_task','feature', 'stage','milestone','activity')
+        AND ai.issue_id in
+        (
+            select fsb.instance_id
+            from fd_star_beacon fsb
+            where fsb.type = 'issue'
+            and fsb.project_id in
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            and fsb.user_id = #{userId}
+        )
+        <include refid="workbenchFilterSql"/>
+        order by
+        ai.project_id ASC,
+        ai.last_update_date DESC
+    </select>
+
+    <select id="selectMyReported" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select *
+        from (
+        select
+        ai.issue_id,
+        ai.summary,
+        ai.project_id,
+        ai.type_code,
+        CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id
+        from agile_issue ai
+        left join agile_project_info api ON ai.project_id = api.project_id
+        where 1=1
+        and ai.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'waterfall'
+        and ai.reporter_id = #{userId}
+        and ai.type_code in ('stage','milestone','activity')
+        <include refid="workbenchFilterSql"/>
+        <if test="activeSprintIds != null and activeSprintIds.size() > 0">
+            union
+            select
+            ai.issue_id,
+            ai.summary,
+            ai.project_id,
+            ai.type_code,
+            CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+            ai.reporter_id,
+            ai.last_update_date,
+            ai.priority_id,
+            ai.assignee_id,
+            ai.issue_type_id,
+            ai.status_id,
+            ai.parent_issue_id,
+            ai.relate_issue_id
+            from agile_issue ai
+            join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
+            left join agile_project_info api ON ai.project_id = api.project_id
+            where 1=1
+            and ai.project_id in
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            and ai.apply_type = 'agile'
+            and aisr.sprint_id in
+            <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
+                #{activeSprintId}
+            </foreach>
+            and ai.reporter_id = #{userId}
+            and ai.type_code in ('story','bug','task', 'sub_task')
+            <include refid="workbenchFilterSql"/>
+        </if>
+        ) ai
+        order by
+        ai.project_id ASC,
+        ai.last_update_date DESC
+    </select>
+
+    <select id="selectMyAssigned" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select *
+        from (
+        select
+        ai.issue_id,
+        ai.summary,
+        ai.project_id,
+        ai.type_code,
+        CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id
+        from agile_issue ai
+        left join agile_project_info api ON ai.project_id = api.project_id
+        where 1=1
+        and ai.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'waterfall'
+        and ai.type_code in ('stage','milestone','activity')
+        AND
+        (
+        ai.assignee_id = #{userId}
+        or
+        ai.issue_id in
+        (
+        SELECT
+        adl.issue_id
+        FROM
+        agile_data_log adl
+        WHERE
+        adl.project_id IN
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        AND adl.field = 'assignee'
+        AND adl.old_value = concat('',#{userId},'')
+        )
+        )
+        <include refid="workbenchFilterSql"/>
+        <if test="activeSprintIds != null and activeSprintIds.size() > 0">
+            union
+            select
+            ai.issue_id,
+            ai.summary,
+            ai.project_id,
+            ai.type_code,
+            CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+            ai.reporter_id,
+            ai.last_update_date,
+            ai.priority_id,
+            ai.assignee_id,
+            ai.issue_type_id,
+            ai.status_id,
+            ai.parent_issue_id,
+            ai.relate_issue_id
+            from agile_issue ai
+            join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
+            left join agile_project_info api ON ai.project_id = api.project_id
+            where 1=1
+            and ai.project_id in
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            and ai.apply_type = 'agile'
+            and ai.assignee_id = #{userId}
+            and aisr.sprint_id in
+            <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
+                #{activeSprintId}
+            </foreach>
+            and ai.type_code in ('story','bug','task', 'sub_task')
+            AND
+            (
+            ai.assignee_id = #{userId}
+            or
+            ai.issue_id in
+            (
+            SELECT
+            adl.issue_id
+            FROM
+            agile_data_log adl
+            WHERE
+            adl.project_id IN
+            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                #{projectId}
+            </foreach>
+            AND adl.field = 'assignee'
+            AND adl.old_value = concat('',#{userId},'')
+            )
+            )
+            <include refid="workbenchFilterSql"/>
+        </if>
+        ) ai
+        order by
+        ai.project_id ASC,
+        ai.last_update_date DESC
+    </select>
+
+    <select id="selectReportedBug" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.summary,
+        ai.project_id,
+        ai.type_code,
+        CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id
+        from agile_issue ai
+        join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
+        join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
+        left join agile_project_info api ON ai.project_id = api.project_id
+        where 1=1
+        and ai.project_id in
+        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        and ai.reporter_id = #{userId}
+        and aisr.sprint_id in
+        <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
+            #{activeSprintId}
+        </foreach>
+        and ais.is_completed != 1
+        and ai.type_code = 'bug'
+        <include refid="workbenchFilterSql"/>
+        order by
+        ai.project_id ASC,
+        ai.last_update_date DESC
+    </select>
+
+
+    <sql id = "workbenchFilterSql">
+        <if test="searchVO != null">
+            <if test='searchVO.advancedSearchArgs != null'>
+                <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+                    AND ai.type_code IN
+                    <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
+                             close=")">
+                        #{typeCode}
+                    </foreach>
+                </if>
+                <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
+                    AND ai.priority_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
+                             close=")">
+                        #{priorityId}
+                    </foreach>
+                </if>
+                <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
+                    and ai.status_id in
+                    <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
+                             close=")">
+                        #{statusId}
+                    </foreach>
+                </if>
+            </if>
+            <if test='searchVO.otherArgs != null'>
+                <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
+                    AND (
+                    <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
+                        (ai.assignee_id = 0 or ai.assignee_id is null) OR
+                    </if>
+                    ai.assignee_id in
+                    <foreach collection="searchVO.otherArgs.assigneeId" item="aId" open="(" separator=","
+                             close=")">
+                        #{aId}
+                    </foreach>
+                    )
+                </if>
+            </if>
+            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <foreach collection="searchVO.contents" item="content" index="index">
+                    (issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                    OR summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
+                </foreach>
+            </if>
+        </if>
+    </sql>
+
     <select id="queryParentIssueByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select DISTINCT ai.*
         from (
@@ -1946,319 +2353,10 @@
                     </if>
                 </if>
             </where>
-        <if test="searchType == null or searchType == 'myStarBeacon' or searchType == 'myReported' or searchType == 'myAssigned'">
-        UNION ALL
-            (
-                select
-                    ai.issue_id,
-                    ai.project_id,
-                    ai.last_update_date
-                from agile_issue ai
-                where
-                ai.project_id in
-                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                    #{projectId}
-                </foreach>
-                AND ai.issue_id in (
-                    select issue_id
-                    from (
-                        select
-                            IF(ai.type_code = 'bug',ai.relate_issue_id,ai.parent_issue_id) as issue_id,
-                            ai.summary,
-                            CONCAT(api.project_code,'-', ai.issue_num) as issue_num
-                        from
-                            <if test="searchType != 'myStarBeacon'">
-                                agile_issue_sprint_rel aisr,
-                            </if>
-                            <if test="searchType != 'myReported' and searchType != 'myAssigned' and searchType != 'myStarBeacon'">
-                                agile_issue_status ais,
-                            </if>
-                            agile_issue ai
-                            LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
-                        where 1=1
-                        <if test="searchType != 'myStarBeacon'">
-                            AND ai.issue_id = aisr.issue_id
-                            AND aisr.project_id in
-                            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                #{projectId}
-                            </foreach>
-                            AND aisr.sprint_id in (
-                                select sprint_id
-                                from agile_sprint asp
-                                where asp.project_id in
-                                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                    #{projectId}
-                                </foreach>
-                                AND asp.status_code = 'started'
-                            )
-                            <if test="searchType != 'myReported' and searchType != 'myAssigned'">
-                                AND ais.status_id = ai.status_id
-                                AND ais.is_completed != 1
-                                AND ais.project_id = ai.project_id
-                            </if>
-                        </if>
-                        <choose>
-                            <when test="searchType == null">
-                                AND ai.assignee_id = #{userId}
-                            </when>
-                            <when test="searchType == 'myReported'">
-                                AND ai.reporter_id = #{userId}
-                            </when>
-                            <when test="searchType == 'myAssigned'">
-                                AND
-                                (
-                                    ai.assignee_id = #{userId}
-                                    or
-                                    ai.issue_id in
-                                    (
-                                        SELECT
-                                        adl.issue_id
-                                        FROM
-                                        agile_data_log adl
-                                        WHERE
-                                        adl.project_id IN
-                                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                            #{projectId}
-                                        </foreach>
-                                        AND adl.field = 'assignee'
-                                        AND adl.old_value = concat('',#{userId},'')
-                                    )
-                                )
-                            </when>
-                            <when test=" searchType == 'myStarBeacon'">
-                                AND ai.issue_id IN (
-                                    select fsb.instance_id
-                                    from fd_star_beacon fsb
-                                    where fsb.type = 'issue'
-                                    and fsb.project_id in
-                                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                        #{projectId}
-                                    </foreach>
-                                    and fsb.user_id = #{userId}
-                                )
-                            </when>
-                        </choose>
-                        AND ai.type_code in ('sub_task','bug')
-                        <if test="searchVO != null">
-                            <if test='searchVO.advancedSearchArgs != null'>
-                                <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
-                                    AND ai.type_code IN
-                                    <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
-                                             close=")">
-                                        #{typeCode}
-                                    </foreach>
-                                </if>
-                                <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
-                                    AND ai.priority_id IN
-                                    <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
-                                             close=")">
-                                        #{priorityId}
-                                    </foreach>
-                                </if>
-                                <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
-                                    and ai.status_id in
-                                    <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
-                                             close=")">
-                                        #{statusId}
-                                    </foreach>
-                                </if>
-                            </if>
-                            <if test='searchVO.otherArgs != null'>
-                                <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
-                                    AND (
-                                    <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
-                                        (ai.assignee_id = 0 or ai.assignee_id is null) OR
-                                    </if>
-                                    ai.assignee_id in
-                                    <foreach collection="searchVO.otherArgs.assigneeId" item="aId" open="(" separator=","
-                                             close=")">
-                                        #{aId}
-                                    </foreach>
-                                    )
-                                </if>
-                            </if>
-                        </if>
-                    ) search
-                    <where>
-                        <if test="searchVO != null">
-                            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-                                <foreach collection="searchVO.contents" item="content" index="index">
-                                    (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
-                                </foreach>
-                            </if>
-                        </if>
-                    </where>
-                )
-            )
-        </if>
         ) ai
         order by
         ai.project_id ASC,
         ai.last_update_date DESC
-    </select>
-
-    <select id="listIssuesByParentIssueIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
-          SELECT
-            ai.issue_id, ai.summary,
-            ai.project_id, ai.type_code,
-            CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
-            ai.reporter_id,
-            ai.last_update_date,
-            ai.priority_id,
-            ai.assignee_id,
-            ai.issue_type_id,
-            ai.status_id,
-            ai.parent_issue_id,
-            ai.relate_issue_id
-            FROM agile_issue ai
-            LEFT JOIN agile_project_info api ON ai.project_id = api.project_id,
-            <if test="searchType != 'myReported' and searchType != 'myAssigned'">
-                agile_issue_status ais,
-            </if>
-             agile_issue_sprint_rel aisr
-            WHERE 1=1
-            AND aisr.project_id IN
-            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                #{projectId}
-            </foreach>
-            AND aisr.sprint_id IN (
-                SELECT sprint_id
-                FROM agile_sprint asp
-                where asp.project_id IN
-                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                    #{projectId}
-                </foreach>
-                AND asp.status_code = 'started'
-            )
-            AND ai.issue_id = aisr.issue_id
-            <if test="searchType != 'myReported' and searchType != 'myAssigned'">
-                AND ais.status_id = ai.status_id
-                AND ais.project_id = ai.project_id
-            </if>
-            AND ai.project_id IN
-            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                #{projectId}
-            </foreach>
-            AND
-            (
-                (
-                    ai.issue_id in
-                    <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                        #{parentIssue}
-                    </foreach>
-                )
-                OR
-                (
-                    <choose>
-                        <when test="searchType == null or searchType == 'myReported' or searchType == 'myAssigned'">
-                            ai.project_id in
-                            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                #{projectId}
-                            </foreach>
-                            and ((
-                                ai.type_code = 'sub_task'
-                                and ai.parent_issue_id is not null
-                                and ai.parent_issue_id != 0
-                                and ai.parent_issue_id in
-                                <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                                    #{parentIssue}
-                                </foreach>
-                            )
-                            or (
-                                ai.type_code = 'bug'
-                                and ai.relate_issue_id is not null
-                                and ai.relate_issue_id != 0
-                                and ai.relate_issue_id in
-                                <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                                    #{parentIssue}
-                                </foreach>
-                            ))
-                            <if test="searchType == null">
-                                AND ai.assignee_id = #{userId}
-                                AND ais.is_completed != 1
-                            </if>
-                            <if test="searchType == 'myReported'">
-                                AND ai.reporter_id = #{userId}
-                            </if>
-                            <if test="searchType == 'myAssigned'">
-                                AND
-                                (
-                                    ai.assignee_id = #{userId}
-                                    or ai.issue_id IN
-                                    (
-                                        select adl.issue_id
-                                        from agile_data_log adl
-                                        where adl.project_id in
-                                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                            #{projectId}
-                                        </foreach>
-                                        and field = 'assignee'
-                                        and old_value = concat('',#{userId},'')
-                                    )
-                                )
-                            </if>
-                        </when>
-                        <when test="searchType == 'myBug' or searchType == 'reportedBug'">
-                            ai.type_code = 'bug'
-                            and ai.relate_issue_id is not null
-                            and ai.relate_issue_id != 0
-                            AND ais.is_completed != 1
-                            and ai.relate_issue_id in
-                            <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                                #{parentIssue}
-                            </foreach>
-                        </when>
-                    </choose>
-                    <if test="searchVO != null">
-                        <if test='searchVO.advancedSearchArgs != null'>
-                            <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
-                                AND ai.type_code IN
-                                <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
-                                         close=")">
-                                    #{typeCode}
-                                </foreach>
-                            </if>
-                            <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
-                                AND ai.priority_id IN
-                                <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
-                                         close=")">
-                                    #{priorityId}
-                                </foreach>
-                            </if>
-                            <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
-                                and ai.status_id in
-                                <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
-                                         close=")">
-                                    #{statusId}
-                                </foreach>
-                            </if>
-                        </if>
-                        <if test='searchVO.otherArgs != null'>
-                            <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
-                                AND (
-                                <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
-                                    (ai.assignee_id = 0 or ai.assignee_id is null) OR
-                                </if>
-                                ai.assignee_id in
-                                <foreach collection="searchVO.otherArgs.assigneeId" item="aId" open="(" separator=","
-                                         close=")">
-                                    #{aId}
-                                </foreach>
-                                )
-                            </if>
-                        </if>
-                        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-                            and (
-                            <foreach collection="searchVO.contents" item="content" index="index">
-                                (CONCAT_WS('-', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%', #{content}), '%')
-                                OR ai.summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
-                            </foreach>
-                            )
-                        </if>
-                    </if>
-                )
-            )
-            order by ai.project_id ASC,ai.last_update_date desc
     </select>
 
     <select id="queryIssueByOption" resultType="io.choerodon.agile.infra.dto.IssueNumDTO">
@@ -4264,120 +4362,6 @@
             )
         </if>
         order by issue_num_convert desc
-    </select>
-
-    <select id="listMyStarIssuesByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
-        SELECT *
-        FROM (
-            SELECT
-                ai.issue_id, ai.summary,
-                ai.project_id, ai.type_code,
-                CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
-                ai.reporter_id,
-                ai.last_update_date,
-                ai.priority_id,
-                ai.assignee_id,
-                ai.issue_type_id,
-                ai.status_id,
-                ai.parent_issue_id,
-                ai.relate_issue_id
-            FROM
-                agile_issue ai,
-                agile_project_info api,
-                agile_issue_status ais
-            WHERE
-                ai.project_id = api.project_id
-                AND ais.project_id = ai.project_id
-                AND ai.status_id = ais.status_id
-                AND ai.project_id IN
-                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                    #{projectId}
-                </foreach>
-                AND
-                (
-                    (
-                        ai.issue_id IN
-                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                            #{parentIssue}
-                        </foreach>
-                    )
-                    OR
-                    (
-                        ai.type_code IN ('sub_task','bug')
-                        AND (
-                            ai.parent_issue_id IN
-                            <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                                #{parentIssue}
-                            </foreach>
-                            OR
-                            ai.relate_issue_id IN
-                            <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                                #{parentIssue}
-                            </foreach>
-                        )
-                        AND ai.issue_id IN (
-                            SELECT fsb.instance_id
-                            FROM fd_star_beacon fsb
-                            WHERE fsb.type = 'issue'
-                            AND fsb.project_id IN
-                            <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                                #{projectId}
-                            </foreach>
-                            AND fsb.user_id = #{userId}
-                        )
-                        <if test="searchVO != null">
-                            <if test='searchVO.advancedSearchArgs != null'>
-                                <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
-                                    AND ai.type_code IN
-                                    <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
-                                             close=")">
-                                        #{typeCode}
-                                    </foreach>
-                                </if>
-                                <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
-                                    AND ai.priority_id IN
-                                    <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
-                                             close=")">
-                                        #{priorityId}
-                                    </foreach>
-                                </if>
-                                <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
-                                    and ai.status_id in
-                                    <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
-                                             close=")">
-                                        #{statusId}
-                                    </foreach>
-                                </if>
-                            </if>
-                            <if test='searchVO.otherArgs != null'>
-                                <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
-                                    AND (
-                                    <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
-                                        (ai.assignee_id = 0 or ai.assignee_id is null) OR
-                                    </if>
-                                    ai.assignee_id in
-                                    <foreach collection="searchVO.otherArgs.assigneeId" item="aId" open="(" separator=","
-                                             close=")">
-                                        #{aId}
-                                    </foreach>
-                                    )
-                                </if>
-                            </if>
-                            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-                                and (
-                                <foreach collection="searchVO.contents" item="content" index="index">
-                                    (CONCAT_WS('-', api.project_code, ai.issue_num) LIKE CONCAT(CONCAT('%', #{content}), '%')
-                                    OR ai.summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
-                                </foreach>
-                                )
-                            </if>
-                        </if>
-                    )
-                )
-        ) search
-        ORDER BY
-        search.project_id ASC,
-        search.last_update_date DESC
     </select>
 
     <select id="listUndoneAvailableParents" resultType="io.choerodon.agile.api.vo.business.IssueVO">
