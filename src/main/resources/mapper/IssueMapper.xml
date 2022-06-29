@@ -1806,7 +1806,10 @@
         ai.issue_type_id,
         ai.status_id,
         ai.parent_issue_id,
-        ai.relate_issue_id
+        ai.relate_issue_id,
+        ai.creation_date,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         from agile_issue ai
         join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
         left join agile_project_info api ON ai.project_id = api.project_id
@@ -1835,7 +1838,10 @@
             ai.issue_type_id,
             ai.status_id,
             ai.parent_issue_id,
-            ai.relate_issue_id
+            ai.relate_issue_id,
+            ai.creation_date,
+            ai.estimated_start_time,
+            ai.estimated_end_time
             from agile_issue ai
             join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
             join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
@@ -1856,9 +1862,6 @@
             <include refid="workbenchFilterSql"/>
         </if>
         ) ai
-        order by
-        ai.project_id ASC,
-        ai.last_update_date DESC
     </select>
 
     <select id="selectMyBugs" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -1875,7 +1878,10 @@
         ai.issue_type_id,
         ai.status_id,
         ai.parent_issue_id,
-        ai.relate_issue_id
+        ai.relate_issue_id,
+        ai.creation_date,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         from agile_issue ai
         join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
         join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
@@ -1894,9 +1900,6 @@
         and ais.is_completed != 1
         and ai.type_code = 'bug'
         <include refid="workbenchFilterSql"/>
-        order by
-        ai.project_id ASC,
-        ai.last_update_date DESC
     </select>
 
     <select id="selectMyStarBeacon" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -1913,7 +1916,10 @@
         ai.issue_type_id,
         ai.status_id,
         ai.parent_issue_id,
-        ai.relate_issue_id
+        ai.relate_issue_id,
+        ai.creation_date,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         from agile_issue ai
         left join agile_project_info api ON ai.project_id = api.project_id
         where 1=1
@@ -1934,9 +1940,6 @@
             and fsb.user_id = #{userId}
         )
         <include refid="workbenchFilterSql"/>
-        order by
-        ai.project_id ASC,
-        ai.last_update_date DESC
     </select>
 
     <select id="selectMyReported" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -1955,7 +1958,10 @@
         ai.issue_type_id,
         ai.status_id,
         ai.parent_issue_id,
-        ai.relate_issue_id
+        ai.relate_issue_id,
+        ai.creation_date,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         from agile_issue ai
         left join agile_project_info api ON ai.project_id = api.project_id
         where 1=1
@@ -1982,7 +1988,10 @@
             ai.issue_type_id,
             ai.status_id,
             ai.parent_issue_id,
-            ai.relate_issue_id
+            ai.relate_issue_id,
+            ai.creation_date,
+            ai.estimated_start_time,
+            ai.estimated_end_time
             from agile_issue ai
             join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
             left join agile_project_info api ON ai.project_id = api.project_id
@@ -2001,9 +2010,6 @@
             <include refid="workbenchFilterSql"/>
         </if>
         ) ai
-        order by
-        ai.project_id ASC,
-        ai.last_update_date DESC
     </select>
 
     <select id="selectMyAssigned" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -2022,7 +2028,10 @@
         ai.issue_type_id,
         ai.status_id,
         ai.parent_issue_id,
-        ai.relate_issue_id
+        ai.relate_issue_id,
+        ai.creation_date,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         from agile_issue ai
         left join agile_project_info api ON ai.project_id = api.project_id
         where 1=1
@@ -2067,7 +2076,10 @@
             ai.issue_type_id,
             ai.status_id,
             ai.parent_issue_id,
-            ai.relate_issue_id
+            ai.relate_issue_id,
+            ai.creation_date,
+            ai.estimated_start_time,
+            ai.estimated_end_time
             from agile_issue ai
             join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
             left join agile_project_info api ON ai.project_id = api.project_id
@@ -2105,9 +2117,6 @@
             <include refid="workbenchFilterSql"/>
         </if>
         ) ai
-        order by
-        ai.project_id ASC,
-        ai.last_update_date DESC
     </select>
 
     <select id="selectReportedBug" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -2124,7 +2133,10 @@
         ai.issue_type_id,
         ai.status_id,
         ai.parent_issue_id,
-        ai.relate_issue_id
+        ai.relate_issue_id,
+        ai.creation_date,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         from agile_issue ai
         join agile_issue_sprint_rel aisr on ai.issue_id = aisr.issue_id
         join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id
@@ -2143,9 +2155,6 @@
         and ais.is_completed != 1
         and ai.type_code = 'bug'
         <include refid="workbenchFilterSql"/>
-        order by
-        ai.project_id ASC,
-        ai.last_update_date DESC
     </select>
 
 
