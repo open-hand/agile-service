@@ -5775,4 +5775,31 @@
         AND ai.parent_issue_id = #{issueId}
         AND ai.project_id = #{projectId}
     </select>
+
+    <select id="queryChildrenWithCompleted" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        case
+        when ai.parent_issue_id is not null and ai.parent_issue_id != 0
+        then ai.parent_issue_id
+        else ai.relate_issue_id
+        end as parent_issue_id,
+        ifnull(ais.is_completed, 0) as completed
+        from agile_issue ai
+        left join agile_issue_status ais on (ais.project_id = ai.project_id and ai.status_id = ais.status_id )
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
+        and (
+        ai.parent_issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+        or ai.relate_issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+        )
+    </select>
 </mapper>

@@ -756,6 +756,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<Long> selectSubTaskIds(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
-
-
+    List<IssueDTO> queryChildrenWithCompleted(@Param("projectIds") Set<Long> projectIds,
+                                              @Param("issueIds") Set<Long> issueIds);
 }

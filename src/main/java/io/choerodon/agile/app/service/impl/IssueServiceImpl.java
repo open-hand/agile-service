@@ -3677,9 +3677,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();
         Set<Long> userIds = new HashSet<>();
+        List<IssueListFieldKVVO> waterfallIssues = new ArrayList<>();
+        List<IssueListFieldKVVO> agileIssues = new ArrayList<>();
+        List<String> waterfallIssueTypeCodes = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
         allIssue.forEach(v -> {
             IssueListFieldKVVO issueListFieldKVVO = new IssueListFieldKVVO();
             modelMapper.map(v,issueListFieldKVVO);
+            String typeCode = issueListFieldKVVO.getTypeCode();
+            if (waterfallIssueTypeCodes.contains(typeCode)) {
+                waterfallIssues.add(issueListFieldKVVO);
+            } else {
+                agileIssues.add(issueListFieldKVVO);
+            }
             setIssueTypeVO(issueListFieldKVVO, issueTypeDTOMap.get(v.getIssueTypeId()));
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(v.getStatusId()));
             issueListFieldKVVO.setPriorityVO(priorityMap.get(v.getPriorityId()));
@@ -3699,6 +3708,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 userIds.add(assigneeId);
             }
         });
+        setProgress(waterfallIssues, agileIssues, new HashSet<>(projectIds));
         if (agilePluginService != null) {
             agilePluginService.setFeatureTypeAndFeatureTeams(list, organizationId);
         }
@@ -3710,6 +3720,37 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    @Override
+    public void setProgress(List<IssueListFieldKVVO> waterfallIssues,
+                            List<IssueListFieldKVVO> agileIssues,
+                            Set<Long> projectIds) {
+        if (!ObjectUtils.isEmpty(agileWaterfallService) && !ObjectUtils.isEmpty(waterfallIssues)) {
+            List<Long> waterfallIssueIds =
+                    waterfallIssues.stream().map(IssueListFieldKVVO::getIssueId).collect(Collectors.toList());
+            Map<Long, Integer> issueProgressMap = agileWaterfallService.getIssueProgressMap(new ArrayList<>(projectIds), waterfallIssueIds);
+            waterfallIssues.forEach(issue -> issue.setProgress(issueProgressMap.get(issue.getIssueId())));
+        }
+        if (!ObjectUtils.isEmpty(agileIssues)) {
+            Set<Long> issueIds =
+                    agileIssues.stream().map(IssueListFieldKVVO::getIssueId).collect(Collectors.toSet());
+            List<IssueDTO> issues = issueMapper.queryChildrenWithCompleted(projectIds, issueIds);
+            Map<Long, List<IssueDTO>> issueMap =
+                    issues.stream().collect(Collectors.groupingBy(IssueDTO::getParentIssueId));
+            agileIssues.forEach(issue -> {
+                Long issueId = issue.getIssueId();
+                List<IssueDTO> subIssues = issueMap.get(issueId);
+                int total = 0;
+                int completed = 0;
+                if (!ObjectUtils.isEmpty(subIssues)) {
+                    total = subIssues.size();
+                    completed = subIssues.stream().filter(x -> x.getCompleted()).collect(Collectors.toList()).size();
+                }
+                issue.setTotalSubIssues(total);
+                issue.setCompletedSubIssues(completed);
+            });
+        }
     }
 
     private Page<IssueDTO> queryIssuesByTypeAndUserId(List<Long> projectIds,
