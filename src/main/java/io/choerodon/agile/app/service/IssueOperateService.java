@@ -21,5 +21,13 @@ public interface IssueOperateService {
                              CopyConditionVO copyConditionVO,
                              Long organizationId,
                              String applyType,
+                             String asyncTraceId,
                              ServletRequestAttributes requestAttributes);
+
+    void asyncCloneIssueByIssueId(Long projectId,
+                                  Long issueId,
+                                  CopyConditionVO copyConditionVO,
+                                  Long organizationId,
+                                  String applyType,
+                                  String asyncTraceId);
 }

@@ -68,6 +68,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -276,6 +277,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String INFLUENCE_VERSION = "influenceVersion";
     private static final String ORDER_STR = "orderStr";
     private static final String WEBSOCKET_COPY_ISSUE_CODE = "agile-clone-issue";
+    private static final String CLONE_ISSUE_KEY = "cloneIssue:";
     private static final String DOING_STATUS = "doing";
     private static final String FAILED_STATUS = "failed";
     private static final String SUCCEED_STATUS = "succeed";
@@ -2679,16 +2681,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType) {
+    public void cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType, String asyncTraceId) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
         }
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + EncryptionUtils.encrypt(issueId);
+        String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + asyncTraceId;
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("projectId", projectId);
         paramsMap.put("userId", userId);
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 0);
+        redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
         //处理需要复制的预定义字段
         List<String> predefinedFieldNames = copyConditionVO.getPredefinedFieldNames();
@@ -2747,8 +2750,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
             }
             sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
+            redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , SUCCEED_STATUS, 24L, TimeUnit.HOURS);
         } else {
             sendCloneProcess(userId, websocketKey, paramsMap, FAILED_STATUS, 100);
+            redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , FAILED_STATUS, 24L, TimeUnit.HOURS);
             throw new CommonException("error.issue.copyIssueByIssueId");
         }
     }
@@ -2777,6 +2782,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 copyIssueLinkContent(linkContent, oldIssueId, newIssueId, projectId);
             });
         }
+    }
+
+    @Override
+    public String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId) {
+        String key = CLONE_ISSUE_KEY + issueId + ":" + asyncTraceId;
+        Object object = redisUtil.get(key);
+        String status = "";
+        if (!Objects.isNull(object)) {
+            status = object.toString();
+        }
+        return ObjectUtils.isEmpty(status) ? "failed" : status;
     }
 
     private void copyIssueLinkContent(String linkContent, Long issueId, Long newIssueId, Long projectId) {
