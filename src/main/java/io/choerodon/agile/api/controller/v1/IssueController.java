@@ -412,18 +412,32 @@ public class IssueController {
     @ApiOperation("复制一个issue")
     @PostMapping("/{issueId}/clone_issue")
     public ResponseEntity<Void> cloneIssueByIssueId(@ApiParam(value = "项目id", required = true)
-                                                        @PathVariable(name = "project_id") Long projectId,
-                                                       @ApiParam(value = "issueId", required = true)
-                                                        @PathVariable(name = "issueId") @Encrypt Long issueId,
-                                                       @ApiParam(value = "组织id", required = true)
-                                                        @RequestParam Long organizationId,
-                                                       @ApiParam(value = "应用类型", required = true)
-                                                        @RequestParam(value = "applyType") String applyType,
-                                                       @ApiParam(value = "复制条件", required = true)
-                                                        @RequestBody CopyConditionVO copyConditionVO) {
+                                                    @PathVariable(name = "project_id") Long projectId,
+                                                    @ApiParam(value = "issueId", required = true)
+                                                    @PathVariable(name = "issueId") @Encrypt Long issueId,
+                                                    @ApiParam(value = "组织id", required = true)
+                                                    @RequestParam Long organizationId,
+                                                    @ApiParam(value = "应用类型", required = true)
+                                                    @RequestParam(value = "applyType") String applyType,
+                                                    @ApiParam(value = "异步任务id", required = true)
+                                                    @RequestParam(value = "asyncTraceId") String asyncTraceId,
+                                                    @ApiParam(value = "复制条件", required = true)
+                                                    @RequestBody CopyConditionVO copyConditionVO) {
         issueValidator.checkPredefinedFields(copyConditionVO.getPredefinedFieldNames());
-        issueOperateService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
+        issueOperateService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询工作项复制异步任务执行状态")
+    @GetMapping(value = "/{issueId}/query_async_clone_status")
+    public ResponseEntity<String> queryAsyncCloneStatus(@ApiParam(value = "项目id", required = true)
+                                                        @PathVariable("project_id") Long projectId,
+                                                        @ApiParam(value = "issueId", required = true)
+                                                        @PathVariable(name = "issueId") @Encrypt Long issueId,
+                                                        @ApiParam(value = "异步任务id", required = true)
+                                                        @RequestParam(value = "asyncTraceId") String asyncTraceId) {
+        return ResponseEntity.ok(issueService.queryAsyncCloneStatus(projectId, issueId, asyncTraceId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
