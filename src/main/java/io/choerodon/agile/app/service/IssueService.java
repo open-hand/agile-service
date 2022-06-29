@@ -513,4 +513,8 @@ public interface IssueService {
     void copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId);
 
     String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId);
+
+    void setProgress(List<IssueListFieldKVVO> waterfallIssues,
+                     List<IssueListFieldKVVO> agileIssues,
+                     Set<Long> projectIds);
 }
