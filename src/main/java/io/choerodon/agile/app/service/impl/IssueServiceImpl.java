@@ -3712,6 +3712,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         .stream()
                         .map(SprintDTO::getSprintId)
                         .collect(Collectors.toSet());
+        addProjectOrderIfNotExisted(pageRequest);
         Page<IssueDTO> parentPage;
         switch (searchType) {
             case WorkBenchSearchType.MY_TODO:
@@ -3737,6 +3738,32 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 break;
         }
         return parentPage;
+    }
+
+    private void addProjectOrderIfNotExisted(PageRequest pageRequest) {
+        List<Sort.Order> orders = new ArrayList<>();
+        Sort sort = pageRequest.getSort();
+        String projectIdKey = "projectId";
+        Sort.Order projectOrder = sort.getOrderFor(projectIdKey);
+        if (ObjectUtils.isEmpty(projectOrder)) {
+            Sort.Order order = new Sort.Order(Sort.Direction.ASC, projectIdKey);
+            orders.add(order);
+        } else {
+            orders.add(projectOrder);
+        }
+        if (!ObjectUtils.isEmpty(sort)) {
+            Iterator<Sort.Order> iterator = sort.iterator();
+            while (iterator.hasNext()) {
+                Sort.Order thisOrder = iterator.next();
+                String property = thisOrder.getProperty();
+                if (!Objects.equals(projectIdKey, property)) {
+                    orders.add(thisOrder);
+                }
+            }
+        }
+        Sort newSort = new Sort(orders);
+        pageRequest.setSort(newSort);
+        pageRequest.resetOrder("ai", Collections.emptyMap());
     }
 
     private Long setParentId(Long issueId){
