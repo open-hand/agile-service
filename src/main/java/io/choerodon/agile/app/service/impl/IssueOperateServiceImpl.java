@@ -151,7 +151,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                                     ServletRequestAttributes requestAttributes) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
         redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
-        issueOperateService.asyncCloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId);
+        issueOperateService.asyncCloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId, requestAttributes);
     }
 
     @Async
@@ -161,7 +161,9 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                                          CopyConditionVO copyConditionVO,
                                          Long organizationId,
                                          String applyType,
-                                         String asyncTraceId) {
+                                         String asyncTraceId,
+                                         ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
         issueService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId);
     }
 }
