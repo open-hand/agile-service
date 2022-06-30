@@ -33,7 +33,7 @@ const WorkbenchGantt: React.FC = () => {
   });
   return (
     <LoadingProvider className={classNames(styles.page, { [styles.full]: ganttHeaderData.isFullScreen })}>
-      <div className={styles.header}>
+      <div className={newItem.categoryCodes.includes('N_WATERFALL') ? styles.headerWaterfall : styles.header}>
         <div className={styles.header_left}>
           <SelectProject
             value={projectId}
@@ -65,7 +65,8 @@ const WorkbenchGantt: React.FC = () => {
           </>
           )}
         </div>
-        <HeaderButtons {...headerComponentProps} />
+        {newItem.categoryCodes.includes('N_AGILE') && <HeaderButtons {...headerComponentProps} />}
+
       </div>
       <div className={classNames(styles.content, 'c7n-gantt-content')}>
         {newItem.categoryCodes.includes('N_WATERFALL') && injectMount('waterfall:workbechGantt', { projectId })}
