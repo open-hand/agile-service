@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
-import { observer } from 'mobx-react';
-import { Modal, Select } from 'choerodon-ui/pro';
+import React, {Component} from 'react';
+import {observer} from 'mobx-react';
+import {Modal, Select} from 'choerodon-ui/pro';
 
-import { stores } from '@choerodon/boot';
-import { sprintApi } from '@/api';
+import {stores} from '@choerodon/boot';
+import {sprintApi} from '@/api';
 import _ from 'lodash';
 
 const { AppState } = stores;
@@ -40,7 +40,6 @@ class CloseSprint extends Component {
     };
     sprintApi.complete(data).then((res) => {
       modal.close();
-      // console.log('completed');
       if (afterClose) {
         afterClose();
       }

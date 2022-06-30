@@ -410,7 +410,6 @@ class BacklogStore {
   @action
   toggle(issueId) {
     const isExpand = this.isExpand(issueId);
-    // console.log(isExpand);
     this.expandedIssueMap.set(issueId, !isExpand);
   }
 
@@ -569,7 +568,6 @@ class BacklogStore {
   }
 
   @action dealWithCtrl(data, currentIndex, item) {
-    // console.log(data, currentIndex, item);
     // if (this.whichVisible === 'feature' && item.issueTypeVO.typeCode !== 'story') {
     //   return;
     // }
@@ -1247,7 +1245,6 @@ class BacklogStore {
   }
 
   onDragStart = (result) => {
-    // console.log('onDragStart', result);
     const { source, draggableId } = result;
     const { droppableId: sourceId, index: sourceIndex } = source;
     const item = this.getIssueMap.get(sourceId)[sourceIndex];

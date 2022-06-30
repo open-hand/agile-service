@@ -1,14 +1,14 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { DataSet } from 'choerodon-ui/pro';
-import { IField, IIssueType } from '@/common/types';
+import {observer} from 'mobx-react-lite';
+import {DataSet} from 'choerodon-ui/pro';
+import {IField, IIssueType} from '@/common/types';
 import RequiredField from '@/components/required-field';
-import { TypeTag } from '@/components';
-import { RequiredFieldDs } from '@/components/required-field/useRequiredFieldDataSet';
+import {TypeTag} from '@/components';
+import {RequiredFieldDs} from '@/components/required-field/useRequiredFieldDataSet';
 import styles from './SubTaskRequired.less';
 
 export interface ISubTaskRequiredItem {
-  issueId: string, issueTypeVO: IIssueType, issueNum: string, summary: string, requiredFields: IField[],
+  issueId: string, issueTypeId?: string, issueTypeVO: IIssueType, issueNum: string, summary: string, requiredFields: IField[],
 }
 
 interface Props {

@@ -1,11 +1,9 @@
 /* eslint-disable no-nested-ternary */
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { Icon } from 'choerodon-ui/pro';
-import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
-import { DropTarget } from 'react-dnd';
-import { IsInProgram } from '@/hooks/useIsInProgram';
+import React, {Component} from 'react';
+import {Icon} from 'choerodon-ui/pro';
+import {observer} from 'mobx-react';
+import {DropTarget} from 'react-dnd';
+import {IsInProgram} from '@/hooks/useIsInProgram';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import Column from './Column';
 import EpicCard from './EpicCard';
@@ -13,7 +11,7 @@ import Cell from './Cell';
 import AddCard from './AddCard';
 import CreateEpic from './CreateEpic';
 import ListenEpicCellInViewport from './ListenEpicCellInViewport';
-import { ColumnWidth, CellPadding } from '../../Constants';
+import {CellPadding, ColumnWidth} from '../../Constants';
 import AutoScroll from '../../../../../common/AutoScroll';
 import EpicDragCollapse from './EpicDragCollapse';
 
@@ -106,7 +104,6 @@ class EpicCell extends Component {
     if (Math.abs(posX) > (ColumnWidth / 2)) {
       // 变化的倍数 当达到宽度1/2的倍数的时候触发变化
       const multiple = Math.round(Math.abs(posX) / (ColumnWidth / 2));
-      // console.log(multiple);
       // 奇数和偶数的不同处理 5=>2  4=>2
       if (multiple % 2 === 0) {
         this.handleItemResize('right', multiple * (posX > 0 ? 1 : -1) / 2);

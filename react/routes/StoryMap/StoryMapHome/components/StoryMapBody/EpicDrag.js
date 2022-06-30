@@ -1,4 +1,4 @@
-import { DragSource } from 'react-dnd';
+import {DragSource} from 'react-dnd';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 const EpicDrag = Component => DragSource(
@@ -22,10 +22,6 @@ const EpicDrag = Component => DragSource(
       }
       const { epic, index } = item;
       const { epic: targetEpic, index: targetIndex } = dropResult;
-      // console.log({
-      //   source: epic,
-      //   destination: targetEpic,
-      // });
       if (index === targetIndex || index === targetIndex - 1) {
         return; 
       }
