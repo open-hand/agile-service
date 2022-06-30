@@ -1,15 +1,8 @@
-import {
-  observable, action, computed, set, toJS,
-} from 'mobx';
-import {
-  cloneDeep,
-  find, findIndex, remove, sortBy, pick,
-} from 'lodash';
-import { getProjectId } from '@/utils/common';
-import {
-  storyMapApi, versionApi, issueTypeApi, priorityApi, sprintApi,
-} from '@/api';
-import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
+import {action, computed, observable, set, toJS,} from 'mobx';
+import {cloneDeep, find, findIndex, remove, sortBy,} from 'lodash';
+import {getProjectId} from '@/utils/common';
+import {issueTypeApi, priorityApi, sprintApi, storyMapApi, versionApi,} from '@/api';
+import {localPageCacheStore} from '@/stores/common/LocalPageCacheStore';
 import openDescriptionConfirm from '@/components/detail-container/openDescriptionConfirm';
 
 class StoryMapStore {
@@ -516,7 +509,6 @@ class StoryMapStore {
     // 删掉之前正在创建的
     this.removeAddingEpic();
     const currentIndex = findIndex(this.storyMapData.epicWithFeature, { issueId: epicData.issueId });
-    // console.log(currentIndex);
     this.storyMapData.epicWithFeature.splice(currentIndex + 1, 0, epic);
   }
 
@@ -588,8 +580,6 @@ class StoryMapStore {
     };
 
     const currentIndex = findIndex(this.storyMapData.epicWithFeature, { issueId: epic.issueId });
-    // console.log(currentIndex);
-    // console.log(epic, currentIndex);
     this.storyMapData.epicWithFeature[currentIndex].featureCommonDTOList.push(feature);
   }
 

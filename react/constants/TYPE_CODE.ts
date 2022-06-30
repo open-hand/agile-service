@@ -1,4 +1,14 @@
-export const AGILE_TYPE_CODES = ['story', 'task', 'bug', 'sub_task', 'issue_epic'];
-export const ALL_TYPE_CODES = ['story', 'task', 'bug', 'sub_task', 'feature', 'issue_epic'];
-export const SHOW_ISSUE_LINK_TYPE_CODES = ['story', 'task', 'bug'];
-export const WATERFALL_TYPE_CODES = ['stage', 'milestone', 'activity'];
+export const STORY_TYPE_CODE = 'story';
+export const TASK_TYPE_CODE = 'task';
+export const BUG_TYPE_CODE = 'bug';
+export const SUB_TASK_TYPE_CODE = 'sub_task';
+export const FEATURE_TASK_TYPE_CODE = 'feature';
+export const ISSUE_EPIC_TYPE_CODE = 'issue_epic';
+export const STAGE_TYPE_CODE = 'stage';
+export const MILESTONE_TYPE_CODE = 'milestone';
+export const ACTIVITY_TYPE_CODE = 'activity';
+
+export const AGILE_TYPE_CODES = [STORY_TYPE_CODE, TASK_TYPE_CODE, BUG_TYPE_CODE, SUB_TASK_TYPE_CODE, ISSUE_EPIC_TYPE_CODE];
+export const ALL_TYPE_CODES = [STORY_TYPE_CODE, TASK_TYPE_CODE, BUG_TYPE_CODE, SUB_TASK_TYPE_CODE, FEATURE_TASK_TYPE_CODE, ISSUE_EPIC_TYPE_CODE];
+export const SHOW_ISSUE_LINK_TYPE_CODES = [STORY_TYPE_CODE, TASK_TYPE_CODE, BUG_TYPE_CODE];
+export const WATERFALL_TYPE_CODES = [STAGE_TYPE_CODE, MILESTONE_TYPE_CODE, ACTIVITY_TYPE_CODE];

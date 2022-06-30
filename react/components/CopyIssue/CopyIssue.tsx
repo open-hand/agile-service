@@ -1,23 +1,20 @@
-import React, {
-  useMemo, useCallback, useEffect, useState, useRef,
-} from 'react';
-import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
-import {
-  Form, DataSet, Select, TextField, CheckBox,
-  Spin,
-} from 'choerodon-ui/pro';
+import React, {useCallback, useEffect, useMemo, useRef, useState,} from 'react';
+import {observer} from 'mobx-react-lite';
+import {toJS} from 'mobx';
+import {CheckBox, DataSet, Form, Select, Spin, TextField,} from 'choerodon-ui/pro';
 
-import { difference, find, map } from 'lodash';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { epicApi, issueApi } from '@/api';
-import {
-  IFieldWidthValue, IModalProps, Issue,
-} from '@/common/types';
+import {difference, find, map} from 'lodash';
+import {FieldType} from 'choerodon-ui/pro/lib/data-set/enum';
+import {epicApi, issueApi} from '@/api';
+import {IFieldWidthValue, IModalProps, Issue, IssueApplyType, ISubIssue,} from '@/common/types';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import CopyRequired from './copy-required';
 import styles from './CopyIssue.less';
-import { RequiredFieldDs } from '../required-field/useRequiredFieldDataSet';
+import {RequiredFieldDs} from '../required-field/useRequiredFieldDataSet';
+import {ISSUE_EPIC_TYPE_CODE, WATERFALL_TYPE_CODES} from "@/constants/TYPE_CODE";
+import EditIssueStore from "@/components/EditIssue/stores/EditIssueStore";
+import openCreateNotification from '@choerodon/master/lib/components/notification';
+import {v4 as uuidV4} from 'uuid';
 
 const { Option } = Select;
 const systemFieldsMap = new Map([
@@ -46,27 +43,49 @@ const predefinedFieldsMap = new Map([
   ['participant', 'participantIds'],
 ]);
 
+const allLinkContentCodes = new Map<string, LinkContent>([
+  ['issueLinks', {contentCode: 'issueLinks', contentName: '关联任务'}],
+  ['attachments', {contentCode: 'attachments', contentName: '附件'}],
+  ['knowledgeRelations', {contentCode: 'knowledgeRelations', contentName: '关联知识'}],
+  ['predecessors', {contentCode: 'predecessors', contentName: '依赖关系'}],
+  ['relatedBacklogs', {contentCode: 'relatedBacklogs', contentName: '关联需求'}],
+  ['relatedTestCases', {contentCode: 'relatedTestCases', contentName: '关联测试用例'}],
+  ['relatedBranches', {contentCode: 'relatedBranches', contentName: '关联分支'}],
+  ['comments', {contentCode: 'comments', contentName: '评论'}],
+])
+
 interface Props {
-  issue: Issue
-  projectId?:string
-  issueLink: any[]
-  modal: IModalProps
-  applyType: 'agile' | 'program'
-  onOk: (issue: Issue) => void,
-  closeSprint: any[]
-  copyFields: IFieldWidthValue[]
-  setCopyHasEpic: (hasEpic: boolean) => void
+  store: EditIssueStore;
+  issue: Issue;
+  projectId?:string;
+  issueLink: any[];
+  modal: IModalProps;
+  applyType: IssueApplyType;
+  onOk: (issue: Issue) => void;
+  closeSprint: any[];
+  copyFields: IFieldWidthValue[];
+  setCopyHasEpic: (hasEpic: boolean) => void;
 }
+
+/**
+ * 复制关联内容
+ */
+interface LinkContent {
+  contentCode: string;
+  contentName: string;
+}
+
 const CopyIssue: React.FC<Props> = ({
-  issue, issueLink, applyType, projectId, modal, onOk, closeSprint, copyFields, setCopyHasEpic,
+  store, issue, issueLink, applyType, projectId, modal, onOk, closeSprint, copyFields, setCopyHasEpic,
 }) => {
   const [finalFields, setFinalFields] = useState<IFieldWidthValue[]>([]);
+  const [linkContents, setLinkContents] = useState<LinkContent[]>([]);
   const { isInProgram } = useIsInProgram();
   const [loading, setLoading] = useState<boolean>(false);
   const requiredFieldsVOArrRef = useRef<RequiredFieldDs[] | null>(null);
   const [selfExtraRequiredFields, setSelfExtraRequiredFields] = useState([]);
   const checkEpicName = useCallback(async (value: string) => {
-    if (issue.typeCode === 'issue_epic') {
+    if (issue.typeCode === ISSUE_EPIC_TYPE_CODE) {
       if (value && value.trim()) {
         return epicApi.project(projectId).checkName(value)
           .then((res: boolean) => {
@@ -79,33 +98,49 @@ const CopyIssue: React.FC<Props> = ({
     }
     return true;
   }, [issue.typeCode, projectId]);
+  const isWaterfall = WATERFALL_TYPE_CODES.includes(issue.typeCode || '');
+  // @ts-ignore
+  const { waterfallIssueVO } = store.getIssue;
+  const showCopySubIssue = (!isWaterfall && !!issue.subIssueVOList?.length) || (isWaterfall && !!waterfallIssueVO?.childIssueList?.length);
+  const subIssues = (isWaterfall ? waterfallIssueVO?.childIssueList as ISubIssue[] : issue.subIssueVOList) || [];
 
   const handleUpdate = useCallback(async ({
     name, oldValue, value,
   }) => {
-    if (name === 'fields') {
-      const unCopyFieldCodes = difference(finalFields.map((item) => item.fieldCode), value) || [];
-      if (unCopyFieldCodes?.length) {
-        const res = await issueApi.project(projectId).checkRequiredFields(issue.issueTypeId, unCopyFieldCodes as string[]);
-        setSelfExtraRequiredFields(res);
-      } else {
-        setSelfExtraRequiredFields([]);
-      }
-      setCopyHasEpic(value.find((code: string) => code === 'epic'));
+    if (name !== 'fields') {
+      return;
     }
+    const unCopyFieldCodes = difference(finalFields.map((item) => item.fieldCode), value) || [];
+    if (unCopyFieldCodes?.length) {
+      const res = await issueApi.project(projectId).checkRequiredFields(issue.issueTypeId, unCopyFieldCodes as string[]);
+      setSelfExtraRequiredFields(res);
+    } else {
+      setSelfExtraRequiredFields([]);
+    }
+    setCopyHasEpic(value.find((code: string) => code === 'epic'));
   }, [finalFields, issue.issueTypeId, projectId, setCopyHasEpic]);
+
+  useEffect(() => {
+    setLoading(true);
+    issueApi.getNotEmptyLinkContentCodes(issue.issueId)
+      .then(res => {
+        setLinkContents(res.map(code => allLinkContentCodes.get(code) as LinkContent));
+      })
+      .finally(() => setLoading(false))
+  }, [issue?.issueId])
+
   const copyIssueDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
       name: 'summary',
       label: '概要',
-      type: 'string' as FieldType,
+      type: FieldType.string,
       required: true,
       maxLength: 44,
     }, {
       name: 'epicName',
       label: '史诗名称',
-      type: 'string' as FieldType,
+      type: FieldType.string,
       validator: checkEpicName,
       required: issue.typeCode === 'issue_epic',
       maxLength: 20,
@@ -116,75 +151,117 @@ const CopyIssue: React.FC<Props> = ({
       textField: 'fieldName',
       valueField: 'fieldCode',
     }, {
-      name: 'copySubIssue',
-      label: '是否复制子任务',
-      type: 'boolean' as FieldType,
+      name: 'linkContents',
+      label: '复制关联内容',
+      multiple: true,
+      type: FieldType.string,
+      textField: 'contentName',
+      valueField: 'contentCode',
     }, {
-      name: 'copyLinkIssue',
-      label: '是否复制关联任务',
+      name: 'copySubIssue',
+      label: isWaterfall ? '是否复制子级工作项' : '是否复制子任务',
       type: 'boolean' as FieldType,
     }],
     data: [{
       summary: issue.summary,
       epicName: issue.typeCode === 'issue_epic' && issue.epicName,
       fields: map(finalFields, 'fieldCode'),
+      linkContents: linkContents.map((linkContent) => linkContent.contentCode),
     }],
     events: {
       update: handleUpdate,
     },
-  }), [checkEpicName, finalFields, handleUpdate, issue.epicName, issue.summary, issue.typeCode]);
+  }), [checkEpicName, finalFields, handleUpdate, issue.epicName, issue.summary, issue.typeCode, linkContents, isWaterfall]);
 
+  const openNotificationAfterSubmit = useCallback((asyncTraceId: string) => {
+    openCreateNotification({
+      notificationKey: `agile-clone-issue-${asyncTraceId}`,
+      type: 'ws',
+      loadStatus: async () => issueApi.project(projectId).queryAsyncCloneStatus(issue.issueId, asyncTraceId),
+      messageKey: `agile-clone-issue-${asyncTraceId}`,
+      textObject: {
+        failed: {
+          title: '复制工作项失败',
+          description: <span>复制工作项“{issue.summary}”失败，请重新复制。</span>,
+          // icon?: string;
+        },
+        success: {
+          title: '复制工作项成功',
+          description: <span>复制工作项成功，您可以刷新{isWaterfall ? '项目计划' : '所有工作项'}页面即可看到新复制的工作项。</span>,
+          // icon?: string;
+        },
+        doing: {
+          title: '正在复制工作项',
+          description: <span>您正在复制工作项“{issue.summary}”，该过程可能要持续一段时间，您可以进行其他操作，不会影响复制的进程。</span>,
+          // icon?: string;
+        },
+      },
+    });
+    return true;
+  }, [issue, issue.issueId]);
   const handleSubmit = useCallback(async () => {
     const validate = await copyIssueDataSet.validate();
     let epicNameValidate = true;
-    if (issue.typeCode === 'issue_epic') {
+    if (issue.typeCode === ISSUE_EPIC_TYPE_CODE) {
       // @ts-ignore
       epicNameValidate = await copyIssueDataSet.current?.getField('epicName')?.checkValidity();
     }
-    if (validate && epicNameValidate) {
-      return Promise.all((requiredFieldsVOArrRef.current || []).map((item) => item.dataSet.current?.validate())).then(async (validateRes) => {
-        if (validateRes.every((item) => !!item)) {
-          const fields = copyIssueDataSet.current?.get('fields') || [];
-          const copyfs: {
-            customFieldIds: string[],
-            predefinedFieldNames: string[],
-          } = { customFieldIds: [], predefinedFieldNames: [] };
-          fields.forEach((item: string) => {
-            const field = finalFields.find((f: IFieldWidthValue) => f.fieldCode === item);
-            if (field) {
-              const { fieldCode, fieldId, system } = field;
-              if (!system) {
-                copyfs.customFieldIds.push(fieldId);
-              } else {
-                copyfs.predefinedFieldNames.push(predefinedFieldsMap.get(fieldCode as string) || fieldCode as string);
-              }
-            }
-          });
-          if (isInProgram && find(copyfs.predefinedFieldNames, (code) => code === 'epicId')) {
-            copyfs.predefinedFieldNames.push('featureId');
-          }
-          const copyIssueRequiredFieldVOS = (requiredFieldsVOArrRef.current || []).map((item) => item.getData()).map((item) => ({
-            customFields: item.customFields,
-            predefinedFields: item.predefinedFields,
-            issueId: item.issueIds[0],
-          }));
-          const copyConditionVO = {
-            issueLink: copyIssueDataSet.current?.get('copyLinkIssue') || false,
-            subTask: copyIssueDataSet.current?.get('copySubIssue') || false,
-            summary: copyIssueDataSet.current?.get('summary') || false,
-            epicName: issue.typeCode === 'issue_epic' && copyIssueDataSet.current?.get('epicName'),
-            copyIssueRequiredFieldVOS,
-            ...copyfs,
-          };
-
-          const res = await issueApi.project(projectId).clone(issue.issueId, applyType, copyConditionVO);
-          onOk(res);
-          return true;
-        }
-        return false;
-      });
+    if (!validate || !epicNameValidate) {
+      return false;
     }
-    return false;
+    return Promise.all((requiredFieldsVOArrRef.current || []).map((item) => item.dataSet.current?.validate())).then(async (validateRes) => {
+      if (!validateRes.every((item) => !!item)) {
+        return false;
+      }
+      const copyFieldCodes = copyIssueDataSet.current?.get('fields') || [];
+      const copyFields: {
+        customFieldIds: string[],
+        predefinedFieldNames: string[],
+      } = { customFieldIds: [], predefinedFieldNames: [] };
+      copyFieldCodes.forEach((copyFieldCode: string) => {
+        const field = finalFields.find((f: IFieldWidthValue) => f.fieldCode === copyFieldCode);
+        if (field) {
+          const { fieldCode, fieldId, system } = field;
+          if (!system) {
+            copyFields.customFieldIds.push(fieldId);
+          } else {
+            copyFields.predefinedFieldNames.push(predefinedFieldsMap.get(fieldCode as string) || fieldCode as string);
+          }
+        }
+      });
+      if (isInProgram && find(copyFields.predefinedFieldNames, (code) => code === 'epicId')) {
+        copyFields.predefinedFieldNames.push('featureId');
+      }
+      const copyIssueRequiredFieldVOS = (requiredFieldsVOArrRef.current || []).map((item) => item.getData()).map((item) => {
+        // 如果包含parentId字段或progress字段, 则单独包装成一个vo
+        const finalPredefinedFields = (!!item?.predefinedFields?.parentId || !! item?.predefinedFields?.progress) ?
+          {
+            ...item?.predefinedFields,
+            waterfallIssueVO: {
+              parentId: item?.predefinedFields?.parentId,
+              progress: item?.predefinedFields?.progress
+            },
+          } : item?.predefinedFields;
+        return {
+          customFields: item.customFields,
+          predefinedFields: finalPredefinedFields,
+          issueId: item.issueIds[0],
+        }
+      });
+      const copyConditionVO = {
+        subTask: copyIssueDataSet.current?.get('copySubIssue') || false,
+        summary: copyIssueDataSet.current?.get('summary') || false,
+        epicName: issue.typeCode === 'issue_epic' && copyIssueDataSet.current?.get('epicName'),
+        linkContents: copyIssueDataSet.current?.get('linkContents'),
+        copyIssueRequiredFieldVOS,
+        ...copyFields,
+      };
+      const asyncTraceId = uuidV4();
+      const res = await issueApi.project(projectId).clone(issue.issueId, applyType, asyncTraceId, copyConditionVO);
+      openNotificationAfterSubmit(asyncTraceId);
+      onOk(res);
+      return true;
+    });
   }, [applyType, copyIssueDataSet, finalFields, isInProgram, issue.issueId, issue.typeCode, onOk, projectId]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
@@ -240,41 +317,40 @@ const CopyIssue: React.FC<Props> = ({
       <Form style={styles.copyIssue} dataSet={copyIssueDataSet}>
         <TextField name="summary" />
         {
-        issue.typeCode === 'issue_epic' && (
-          <TextField name="epicName" />
-        )
-      }
-        <Select name="fields" style={{ marginBottom: !(!!issue.subIssueVOList.length || !!issueLink.length) ? 10 : 0 }}>
+          issue.typeCode === 'issue_epic' && (
+            <TextField name="epicName" />
+          )
+        }
+        <Select name="fields" style={{ marginBottom: 0 }}>
           {
             finalFields.map((item) => (
               <Option value={item.fieldCode} key={item.fieldCode}>{item.fieldName}</Option>
             ))
           }
         </Select>
+        <Select name="linkContents" style={{ marginBottom: !showCopySubIssue ? 10 : 0 }}>
+          {
+            linkContents.map((item) => (
+              <Option value={item.contentCode} key={item.contentCode}>{item.contentName}</Option>
+            ))
+          }
+        </Select>
         {
-          (!!issue.subIssueVOList.length || !!issueLink.length) && (
-          <div style={{
-            position: 'relative',
-            top: -6,
-            marginBottom: 4,
-          }}
-          >
-            {
-              !!issue.subIssueVOList.length && (
-                <CheckBox name="copySubIssue" style={{ marginRight: 10 }} />
-              )
-            }
-            {
-              !!issueLink.length && (
-                <CheckBox name="copyLinkIssue" />
-              )
-            }
-          </div>
+          (showCopySubIssue) && (
+            <div style={{
+              position: 'relative',
+              top: -6,
+              marginBottom: 4,
+            }}
+            >
+              <CheckBox name="copySubIssue" style={{ marginRight: 10 }} />
+            </div>
           )
         }
       </Form>
       <CopyRequired
         issue={issue}
+        subIssues={subIssues}
         projectId={projectId}
         copySubIssueChecked={copyIssueDataSet.current?.get('copySubIssue') || false}
         selfExtraRequiredFields={selfExtraRequiredFields}

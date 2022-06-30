@@ -51,7 +51,6 @@ function getElementStyles(el) {
   const css = window.getComputedStyle(el);
   let style = '';
   for (const key of css) {
-    // console.log(key,isNaN(key))
     style += `${hump(key)}:${css[key]};`;
   }
   return style;
