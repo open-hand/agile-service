@@ -744,7 +744,7 @@
     </select>
 
     <select id="queryIssueIdsList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
-        SELECT
+        select
         ai.issue_id,
         ai.project_id,
         <if test="searchVO.ganttDefaultOrder">
@@ -753,66 +753,75 @@
             agir.instance_type,
         </if>
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert
-        FROM agile_issue ai
+        from agile_issue ai
         <if test="searchVO.ganttDefaultOrder">
             left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{searchVO.searchArgs.dimension}
         </if>
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
             (
-                SELECT
-                instance_id,
-                date_value,
-                option_id,
-                string_value,
-                text_value,
-                number_value
-                FROM fd_field_value ffv
-                JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
-                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                    #{projectId}
-                </foreach>
-                WHERE ffv.field_id = #{sortMap.sortFieldId}
-                AND ffv.project_id in
-                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                    #{projectId}
-                </foreach>
-                AND ai.issue_type_id IN
-                <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
-                    #{issueTypeId}
-                </foreach>
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
             ) fv ON ai.issue_id = fv.instance_id
         </if>
-        WHERE ai.project_id in
-        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-            #{projectId}
-        </foreach>
-        <choose>
-            <when test="searchVO.applyTypes != null and searchVO.applyTypes.size > 0">
-                AND ai.apply_type IN
-                <foreach collection="searchVO.applyTypes" item="applyType" open="(" separator="," close=")">
-                    #{applyType}
-                </foreach>
-            </when>
-            <otherwise>
-                AND ai.apply_type = 'agile'
-            </otherwise>
-        </choose>
-        <include refid="explainSearchVO"/>
-        <include refid="filterSqlAndAssigneeIds"/>
-        <if test='searchVO.searchArgs != null'>
-            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+        where ai.issue_id in
+        (
+            SELECT
+            ai.issue_id
+            FROM agile_issue ai
+            <if test="searchVO.onlyInCompleted != null and searchVO.onlyInCompleted">
+                join agile_issue_status ais on ai.project_id = ais.project_id and ai.status_id = ais.status_id and ais.is_completed = 0
             </if>
-        </if>
-        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-            <foreach collection="searchVO.contents" item="content" index="index">
-                AND (
+            WHERE ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            <choose>
+                <when test="searchVO.applyTypes != null and searchVO.applyTypes.size > 0">
+                    AND ai.apply_type IN
+                    <foreach collection="searchVO.applyTypes" item="applyType" open="(" separator="," close=")">
+                        #{applyType}
+                    </foreach>
+                </when>
+                <otherwise>
+                    AND ai.apply_type = 'agile'
+                </otherwise>
+            </choose>
+            <include refid="explainSearchVO"/>
+            <include refid="filterSqlAndAssigneeIds"/>
+            <if test='searchVO.searchArgs != null'>
+                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                    AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                </if>
+            </if>
+            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <foreach collection="searchVO.contents" item="content" index="index">
+                    AND (
                     ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
                     OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
-                )
-            </foreach>
-        </if>
+                    )
+                </foreach>
+            </if>
+        )
         <if test="sortMap != null and sortMap.orderStr != null">
             ORDER BY ${sortMap.orderStr}
         </if>
@@ -1820,7 +1829,7 @@
         </foreach>
         and ai.apply_type = 'waterfall'
         and ai.assignee_id = #{userId}
-        and ais.is_completed != 1
+        and ais.is_completed = 0
         and ai.type_code in ('stage','milestone','activity')
         <include refid="workbenchFilterSql"/>
         <if test="activeSprintIds != null and activeSprintIds.size() > 0">
@@ -1857,7 +1866,7 @@
             <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
                 #{activeSprintId}
             </foreach>
-            and ais.is_completed != 1
+            and ais.is_completed = 0
             and ai.type_code in ('story','bug','task', 'sub_task')
             <include refid="workbenchFilterSql"/>
         </if>
@@ -1897,7 +1906,7 @@
         <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
             #{activeSprintId}
         </foreach>
-        and ais.is_completed != 1
+        and ais.is_completed = 0
         and ai.type_code = 'bug'
         <include refid="workbenchFilterSql"/>
     </select>
@@ -2152,7 +2161,7 @@
         <foreach collection="activeSprintIds" item="activeSprintId" separator="," open="(" close=")">
             #{activeSprintId}
         </foreach>
-        and ais.is_completed != 1
+        and ais.is_completed = 0
         and ai.type_code = 'bug'
         <include refid="workbenchFilterSql"/>
     </select>
