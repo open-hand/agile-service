@@ -49,6 +49,16 @@ public class SearchVO {
     private List<String> applyTypes;
     @ApiModelProperty(value = "展示的字段")
     private List<ObjectSchemeFieldVO> displayFields;
+    @ApiModelProperty(value = "仅未完成的")
+    private Boolean onlyInCompleted;
+
+    public Boolean getOnlyInCompleted() {
+        return onlyInCompleted;
+    }
+
+    public void setOnlyInCompleted(Boolean onlyInCompleted) {
+        this.onlyInCompleted = onlyInCompleted;
+    }
 
     public List<ObjectSchemeFieldVO> getDisplayFields() {
         return displayFields;
