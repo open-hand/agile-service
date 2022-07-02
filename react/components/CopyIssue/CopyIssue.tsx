@@ -1,23 +1,17 @@
-import React, {
-  useMemo, useCallback, useEffect, useState, useRef,
-} from 'react';
-import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
-import {
-  Form, DataSet, Select, TextField, CheckBox,
-  Spin,
-} from 'choerodon-ui/pro';
+import React, {useCallback, useEffect, useMemo, useRef, useState,} from 'react';
+import {observer} from 'mobx-react-lite';
+import {toJS} from 'mobx';
+import {CheckBox, DataSet, Form, Select, Spin, TextField,} from 'choerodon-ui/pro';
 
-import { difference, find, map } from 'lodash';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { epicApi, issueApi } from '@/api';
-import {
-  IFieldWidthValue, IModalProps, Issue,
-} from '@/common/types';
+import {difference, find, map} from 'lodash';
+import {FieldType} from 'choerodon-ui/pro/lib/data-set/enum';
+import {epicApi, issueApi} from '@/api';
+import {IFieldWidthValue, IModalProps, Issue,} from '@/common/types';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import CopyRequired from './copy-required';
 import styles from './CopyIssue.less';
-import { RequiredFieldDs } from '../required-field/useRequiredFieldDataSet';
+import {RequiredFieldDs} from '../required-field/useRequiredFieldDataSet';
+import {MAX_LENGTH_EPIC_NAME, MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
 
 const { Option } = Select;
 const systemFieldsMap = new Map([
@@ -101,14 +95,14 @@ const CopyIssue: React.FC<Props> = ({
       label: '概要',
       type: 'string' as FieldType,
       required: true,
-      maxLength: 44,
+      maxLength: MAX_LENGTH_SUMMARY,
     }, {
       name: 'epicName',
       label: '史诗名称',
       type: 'string' as FieldType,
       validator: checkEpicName,
       required: issue.typeCode === 'issue_epic',
-      maxLength: 20,
+      maxLength: MAX_LENGTH_EPIC_NAME,
     }, {
       name: 'fields',
       label: '复制字段',
@@ -238,7 +232,7 @@ const CopyIssue: React.FC<Props> = ({
     <Spin spinning={loading}>
 
       <Form style={styles.copyIssue} dataSet={copyIssueDataSet}>
-        <TextField name="summary" />
+        <TextField name="summary" showLengthInfo={true} />
         {
         issue.typeCode === 'issue_epic' && (
           <TextField name="epicName" />

@@ -1,6 +1,7 @@
-import { axios } from '@choerodon/boot';
-import { getOrganizationId, getProjectId } from '@/utils/common';
+import {axios} from '@choerodon/boot';
+import {getOrganizationId, getProjectId} from '@/utils/common';
 import Api from './Api';
+import {isArray} from "lodash";
 
 export interface IProjectInfo {
   infoId: string,
@@ -32,14 +33,20 @@ class ProjectApi extends Api<ProjectApi> {
    * @param { userId, filter, page, size, category } category表示筛选的项目类型
    */
   loadProjectByUser({
-    userId, filter, page, size, category,
-  }: any) {
+                      userId, filter, page, size, category,
+                    }: {
+    userId: number | string;
+    filter?: string;
+    page?: number;
+    size?: number;
+    category?: string | string[]
+  }) {
     return this.request({
       method: 'post',
       url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging?onlySucceed=true&page=1&size=0`,
       data: {
         name: filter || '',
-        categoryCodes: category,
+        categoryCodes: isArray(category)? category : [category],
       },
     });
   }

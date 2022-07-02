@@ -1,30 +1,23 @@
 /* eslint-disable react/require-default-props */
 
-import React, {
-  useCallback, useEffect, useRef, useState,
-} from 'react';
-import { Choerodon } from '@choerodon/boot';
-import {
-  Input, Icon, Dropdown, Menu,
-} from 'choerodon-ui';
-import { Button, Spin } from 'choerodon-ui/pro';
-import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import {
-  useClickAway, useLockFn, useUpdateEffect,
-} from 'ahooks';
-import {
-  castArray, find, isBoolean, isString, pick,
-} from 'lodash';
-import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
-import { IIssueType, Issue, User } from '@/common/types';
-import { checkCanQuickCreate, getQuickCreateDefaultObj, IQuickCreateDefaultValueParams } from '@/utils/quickCreate';
-import { fieldApi, issueApi } from '@/api';
-import { fields2Map } from '@/utils/defaultValue';
+import React, {useCallback, useEffect, useRef, useState,} from 'react';
+import {Choerodon} from '@choerodon/boot';
+import {Dropdown, Icon, Menu,} from 'choerodon-ui';
+import {Button, Spin, TextField} from 'choerodon-ui/pro';
+import {ButtonColor, FuncType} from 'choerodon-ui/pro/lib/button/interface';
+import {useClickAway, useLockFn, useUpdateEffect,} from 'ahooks';
+import {castArray, find, isBoolean, isString, pick,} from 'lodash';
+import useProjectIssueTypes, {ProjectIssueTypesConfig} from '@/hooks/data/useProjectIssueTypes';
+import {IIssueType, Issue, User} from '@/common/types';
+import {checkCanQuickCreate, getQuickCreateDefaultObj, IQuickCreateDefaultValueParams} from '@/utils/quickCreate';
+import {fieldApi, issueApi} from '@/api';
+import {fields2Map} from '@/utils/defaultValue';
 import localCacheStore from '@/stores/common/LocalCacheStore';
 import TypeTag from '../TypeTag';
-import UserDropdown, { IUserDropDownProps } from '../UserDropdown';
+import UserDropdown, {IUserDropDownProps} from '../UserDropdown';
 import useDefaultPriority from '@/hooks/data/useDefaultPriority';
-import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
+import {WATERFALL_TYPE_CODES} from '@/constants/TYPE_CODE';
+import {MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
 
 type QuickCreateStatus = 'init' | 'success' | 'failed'
 type FilterCacheThumbnailKey = 'agile.issue.type.sub.selected' | 'agile.issue.type.common.selected';
@@ -324,18 +317,22 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                 )}
                 <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} projectId={projectId} onChange={onUserChange} />
 
-                <Input
+                <TextField
                   className="hidden-label"
                   autoFocus
                   autoComplete="on"
-                  onPressEnter={handleCreate}
-                  onChange={(e) => {
-                    setSummary(e.target.value);
+                  onEnterDown={handleCreate}
+                  onInput={(e) =>{
+                    if(e && e.target) {
+                      setSummary((e.target as any).value);
+                    }
                   }}
                   disabled={loading}
                   value={summary}
-                  maxLength={44}
+                  maxLength={MAX_LENGTH_SUMMARY}
+                  showLengthInfo={true}
                   placeholder="请输入工作项概要"
+                  style={{width: '100%'}}
                 />
                 <Button
                   color={'primary' as ButtonColor}

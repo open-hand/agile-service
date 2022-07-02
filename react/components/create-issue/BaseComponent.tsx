@@ -1,46 +1,39 @@
-import React, {
-  ReactElement, useCallback, useEffect, useMemo, useRef, useState,
-} from 'react';
-import { stores } from '@choerodon/boot';
-import {
-  DataSet, Form, Spin, TextField,
-} from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
-import { usePersistFn, useUpdateEffect } from 'ahooks';
-import {
-  castArray, every, filter, find, get, includes, map, merge, set, some, uniq,
-} from 'lodash';
-import { toJS } from 'mobx';
-import { UploadFile } from 'choerodon-ui/lib/upload/interface';
+import React, {ReactElement, useCallback, useEffect, useMemo, useRef, useState,} from 'react';
+import {stores} from '@choerodon/boot';
+import {DataSet, Form, Spin, TextField,} from 'choerodon-ui/pro';
+import {observer} from 'mobx-react-lite';
+import {usePersistFn, useUpdateEffect} from 'ahooks';
+import {castArray, every, filter, find, get, includes, map, merge, set, some, uniq,} from 'lodash';
+import {toJS} from 'mobx';
+import {UploadFile} from 'choerodon-ui/lib/upload/interface';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import moment from 'moment';
-import { has as hasInject, mount } from '@choerodon/inject';
+import {has as hasInject, mount} from '@choerodon/inject';
 import UploadButton from '@/components/CommonComponent/UploadButton';
 import validateFile from '@/utils/File';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
-import {
-  IIssueType, IModalProps, IssueCreateFields, Priority, RiskInfluence, User,
-} from '@/common/types';
+import {IIssueType, IModalProps, IssueCreateFields, Priority, RiskInfluence, User,} from '@/common/types';
 import useIssueCreateFields from '@/hooks/data/useIssueCreateFields';
-import { fieldApi, issueApi } from '@/api';
-import { getProjectId } from '@/utils/common';
+import {fieldApi, issueApi} from '@/api';
+import {getProjectId} from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { ICascadeLinkage } from '@/routes/page-config/components/setting-linkage/Linkage';
+import {ICascadeLinkage} from '@/routes/page-config/components/setting-linkage/Linkage';
 import useDeepMemo from '@/hooks/useDeepMemo';
-import { MINUTE } from '@/constants/DATE_FORMAT';
+import {MINUTE} from '@/constants/DATE_FORMAT';
 import WSJF from './components/wsjf';
 import IssueLink from './components/issue-link';
 import hooks from './hooks';
 // import getFieldConfig from './fields';
 import getFieldConfig from '@/components/field-pro/layouts/create';
-import { insertField } from './utils';
-import { formatFieldDateValue } from '@/utils/formatDate';
-import { CreateIssueProps } from '.';
-import { SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
-import { DELIVERABLE, DEPENDENCY } from '@/constants/WATERFALL_INJECT';
+import {insertField} from './utils';
+import {formatFieldDateValue} from '@/utils/formatDate';
+import {CreateIssueProps} from '.';
+import {SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES} from '@/constants/TYPE_CODE';
+import {DELIVERABLE, DEPENDENCY} from '@/constants/WATERFALL_INJECT';
 import useIsWaterfall from '@/hooks/useIsWaterfall';
-import { RISK_SELECT_LINK } from '@/constants/AGILEPRO_INJECT';
+import {RISK_SELECT_LINK} from '@/constants/AGILEPRO_INJECT';
+import {MAX_LENGTH_EPIC_NAME, MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -860,7 +853,14 @@ const CreateIssueBase = observer(({
       }
       case 'summary': {
         return {
-          maxLength: 44,
+          maxLength: MAX_LENGTH_SUMMARY,
+          showLengthInfo: true,
+        };
+      }
+      case 'epicName': {
+        return {
+          maxLength: MAX_LENGTH_EPIC_NAME,
+          showLengthInfo: true,
         };
       }
       case 'riskInfluence':

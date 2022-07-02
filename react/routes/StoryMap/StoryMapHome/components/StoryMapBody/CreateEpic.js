@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Input } from 'choerodon-ui';
-import { Choerodon } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
-import { issueApi, fieldApi } from '@/api';
-import { checkCanQuickCreate } from '@/utils/quickCreate';
+import React, {Component} from 'react';
+import {TextArea} from 'choerodon-ui/pro';
+import {Choerodon} from '@choerodon/boot';
+import {getProjectId} from '@/utils/common';
+import {fieldApi, issueApi} from '@/api';
+import {checkCanQuickCreate} from '@/utils/quickCreate';
 import openCreateIssue from '@/components/create-issue';
 import Card from './Card';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
+import {MAX_LENGTH_EPIC_NAME} from "@/constants/MAX_LENGTH";
 
 class CreateEpic extends Component {
   // 防止重复创建
@@ -125,7 +125,9 @@ class CreateEpic extends Component {
         justifyContent: 'center',
       }}
       >
-        <Input autoFocus onPressEnter={this.handleCreateIssue} placeholder="史诗是开发或需求的核心内容，例如：用户管理" maxLength="22" value={value} onChange={this.handleChange} />
+        <TextArea autoFocus onEnterDown={this.handleCreateIssue} placeholder="史诗是开发或需求的核心内容，例如：用户管理" rows={1}
+                  resize={'vertical'} maxLength={MAX_LENGTH_EPIC_NAME} showLengthInfo={true} value={value}
+                  onInput={this.handleChange}/>
       </Card>
     );
   }
