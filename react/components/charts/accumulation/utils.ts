@@ -79,7 +79,7 @@ export function transformAccumulationData(
     return {
       name,
       type: 'line',
-      stack: true,
+      stack: name,
       areaStyle: {
         normal: {
           color,
