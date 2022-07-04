@@ -1,12 +1,14 @@
-import React, {useCallback, useEffect, useImperativeHandle, useState,} from 'react';
-import {Icon} from 'choerodon-ui/pro';
-import {stores} from '@choerodon/boot';
-import {observer} from 'mobx-react-lite';
+import React, {
+  useCallback, useEffect, useImperativeHandle, useState,
+} from 'react';
+import { Icon } from 'choerodon-ui/pro';
+import { stores } from '@choerodon/boot';
+import { observer } from 'mobx-react-lite';
 import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import './Comment.less';
-import {IComment} from '@/common/types';
-import {IReplyCreate, issueCommentApi, UComment} from '@/api/IssueComment';
+import { IComment } from '@/common/types';
+import { IReplyCreate, issueCommentApi, UComment } from '@/api/IssueComment';
 import UserTag from '@/components/tag/user-tag';
 import openDeleteModal from '../deleteComment';
 
@@ -108,12 +110,14 @@ const CommentItem: React.FC<Props> = ({
   }, [isSelf, onUpdate, projectId]);
 
   const handleUpdate = useCallback(async (delta: string) => {
-    const commentText = value;
-    updateComment({
-      commentId: comment.commentId,
-      objectVersionNumber: comment.objectVersionNumber,
-      commentText,
-    });
+    if (replyValue && verifyComment(replyValue)) {
+      const commentText = value;
+      updateComment({
+        commentId: comment.commentId,
+        objectVersionNumber: comment.objectVersionNumber,
+        commentText,
+      });
+    }
     setEditing(false);
   }, [comment.commentId, comment.objectVersionNumber, updateComment, value]);
 
