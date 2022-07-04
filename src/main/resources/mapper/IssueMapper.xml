@@ -2207,6 +2207,7 @@
                 </if>
             </if>
             <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            and
                 <foreach collection="searchVO.contents" item="content" index="index">
                     (issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
                     OR summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
