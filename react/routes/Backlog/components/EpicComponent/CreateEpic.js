@@ -1,11 +1,11 @@
-import React, {useEffect, useMemo} from 'react';
-import {DataSet, Form, Modal, TextArea, TextField,} from 'choerodon-ui/pro';
-import {C7NFormat} from '@choerodon/master';
-import {Choerodon, stores} from '@choerodon/boot';
-import {epicApi, fieldApi, issueApi} from '@/api';
-import {checkCanQuickCreate} from '@/utils/quickCreate';
+import React, { useEffect, useMemo } from 'react';
+import { DataSet, Form, Modal, TextArea, TextField, } from 'choerodon-ui/pro';
+import { C7NFormat } from '@choerodon/master';
+import { Choerodon, stores } from '@choerodon/boot';
+import { epicApi, fieldApi, issueApi } from '@/api';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
-import {MAX_LENGTH_EPIC_NAME, MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
+import { MAX_LENGTH_EPIC_NAME, MAX_LENGTH_SUMMARY } from '@/constants/MAX_LENGTH';
 
 const { AppState } = stores;
 
