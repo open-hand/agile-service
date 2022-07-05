@@ -1,20 +1,21 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState,} from 'react';
-import {observer} from 'mobx-react-lite';
-import {toJS} from 'mobx';
-import {CheckBox, DataSet, Form, Select, Spin, TextField,} from 'choerodon-ui/pro';
+import React, { useCallback, useEffect, useMemo, useRef, useState, } from 'react';
+import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
+import { CheckBox, DataSet, Form, Select, Spin, TextField, } from 'choerodon-ui/pro';
 
-import {difference, find, map} from 'lodash';
-import {FieldType} from 'choerodon-ui/pro/lib/data-set/enum';
-import {epicApi, issueApi} from '@/api';
-import {IFieldWidthValue, IModalProps, Issue, IssueApplyType, ISubIssue,} from '@/common/types';
+import { difference, find, map } from 'lodash';
+import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import openCreateNotification from '@choerodon/master/lib/components/notification';
+import { v4 as uuidV4 } from 'uuid';
+import { epicApi, issueApi } from '@/api';
+import { IFieldWidthValue, IModalProps, Issue, IssueApplyType, ISubIssue, } from '@/common/types';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import CopyRequired from './copy-required';
 import styles from './CopyIssue.less';
-import {RequiredFieldDs} from '../required-field/useRequiredFieldDataSet';
-import {ISSUE_EPIC_TYPE_CODE, WATERFALL_TYPE_CODES} from "@/constants/TYPE_CODE";
-import EditIssueStore from "@/components/EditIssue/stores/EditIssueStore";
-import openCreateNotification from '@choerodon/master/lib/components/notification';
-import {v4 as uuidV4} from 'uuid';
+import { RequiredFieldDs } from '../required-field/useRequiredFieldDataSet';
+import { MAX_LENGTH_EPIC_NAME, MAX_LENGTH_SUMMARY } from '@/constants/MAX_LENGTH';
+import { ISSUE_EPIC_TYPE_CODE, WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
+import EditIssueStore from '@/components/EditIssue/stores/EditIssueStore';
 
 const { Option } = Select;
 const systemFieldsMap = new Map([
@@ -44,15 +45,15 @@ const predefinedFieldsMap = new Map([
 ]);
 
 const allLinkContentCodes = new Map<string, LinkContent>([
-  ['issueLinks', {contentCode: 'issueLinks', contentName: '关联任务'}],
-  ['attachments', {contentCode: 'attachments', contentName: '附件'}],
-  ['knowledgeRelations', {contentCode: 'knowledgeRelations', contentName: '关联知识'}],
-  ['predecessors', {contentCode: 'predecessors', contentName: '依赖关系'}],
-  ['relatedBacklogs', {contentCode: 'relatedBacklogs', contentName: '关联需求'}],
-  ['relatedTestCases', {contentCode: 'relatedTestCases', contentName: '关联测试用例'}],
-  ['relatedBranches', {contentCode: 'relatedBranches', contentName: '关联分支'}],
-  ['comments', {contentCode: 'comments', contentName: '评论'}],
-])
+  ['issueLinks', { contentCode: 'issueLinks', contentName: '关联任务' }],
+  ['attachments', { contentCode: 'attachments', contentName: '附件' }],
+  ['knowledgeRelations', { contentCode: 'knowledgeRelations', contentName: '关联知识' }],
+  ['predecessors', { contentCode: 'predecessors', contentName: '依赖关系' }],
+  ['relatedBacklogs', { contentCode: 'relatedBacklogs', contentName: '关联需求' }],
+  ['relatedTestCases', { contentCode: 'relatedTestCases', contentName: '关联测试用例' }],
+  ['relatedBranches', { contentCode: 'relatedBranches', contentName: '关联分支' }],
+  ['comments', { contentCode: 'comments', contentName: '评论' }],
+]);
 
 interface Props {
   store: EditIssueStore;
@@ -123,11 +124,11 @@ const CopyIssue: React.FC<Props> = ({
   useEffect(() => {
     setLoading(true);
     issueApi.getNotEmptyLinkContentCodes(issue.issueId)
-      .then(res => {
-        setLinkContents(res.map(code => allLinkContentCodes.get(code) as LinkContent));
+      .then((res) => {
+        setLinkContents(res.map((code) => allLinkContentCodes.get(code) as LinkContent));
       })
-      .finally(() => setLoading(false))
-  }, [issue?.issueId])
+      .finally(() => setLoading(false));
+  }, [issue?.issueId]);
 
   const copyIssueDataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -136,14 +137,14 @@ const CopyIssue: React.FC<Props> = ({
       label: '概要',
       type: FieldType.string,
       required: true,
-      maxLength: 44,
+      maxLength: MAX_LENGTH_SUMMARY,
     }, {
       name: 'epicName',
       label: '史诗名称',
       type: FieldType.string,
       validator: checkEpicName,
       required: issue.typeCode === 'issue_epic',
-      maxLength: 20,
+      maxLength: MAX_LENGTH_EPIC_NAME,
     }, {
       name: 'fields',
       label: '复制字段',
@@ -182,17 +183,29 @@ const CopyIssue: React.FC<Props> = ({
       textObject: {
         failed: {
           title: '复制工作项失败',
-          description: <span>复制工作项“{issue.summary}”失败，请重新复制。</span>,
+          description: <span>
+            复制工作项“
+            {issue.summary}
+            ”失败，请重新复制。
+          </span>,
           // icon?: string;
         },
         success: {
           title: '复制工作项成功',
-          description: <span>复制工作项成功，您可以刷新{isWaterfall ? '项目计划' : '所有工作项'}页面即可看到新复制的工作项。</span>,
+          description: <span>
+            复制工作项成功，您可以刷新
+            {isWaterfall ? '项目计划' : '所有工作项'}
+            页面即可看到新复制的工作项。
+          </span>,
           // icon?: string;
         },
         doing: {
           title: '正在复制工作项',
-          description: <span>您正在复制工作项“{issue.summary}”，该过程可能要持续一段时间，您可以进行其他操作，不会影响复制的进程。</span>,
+          description: <span>
+            您正在复制工作项“
+            {issue.summary}
+            ”，该过程可能要持续一段时间，您可以进行其他操作，不会影响复制的进程。
+          </span>,
           // icon?: string;
         },
       },
@@ -234,19 +247,19 @@ const CopyIssue: React.FC<Props> = ({
       }
       const copyIssueRequiredFieldVOS = (requiredFieldsVOArrRef.current || []).map((item) => item.getData()).map((item) => {
         // 如果包含parentId字段或progress字段, 则单独包装成一个vo
-        const finalPredefinedFields = (!!item?.predefinedFields?.parentId || !! item?.predefinedFields?.progress) ?
-          {
+        const finalPredefinedFields = (!!item?.predefinedFields?.parentId || !!item?.predefinedFields?.progress)
+          ? {
             ...item?.predefinedFields,
             waterfallIssueVO: {
               parentId: item?.predefinedFields?.parentId,
-              progress: item?.predefinedFields?.progress
+              progress: item?.predefinedFields?.progress,
             },
           } : item?.predefinedFields;
         return {
           customFields: item.customFields,
           predefinedFields: finalPredefinedFields,
           issueId: item.issueIds[0],
-        }
+        };
       });
       const copyConditionVO = {
         subTask: copyIssueDataSet.current?.get('copySubIssue') || false,
@@ -315,7 +328,7 @@ const CopyIssue: React.FC<Props> = ({
     <Spin spinning={loading}>
 
       <Form style={styles.copyIssue} dataSet={copyIssueDataSet}>
-        <TextField name="summary" />
+        <TextField name="summary" showLengthInfo />
         {
           issue.typeCode === 'issue_epic' && (
             <TextField name="epicName" />
