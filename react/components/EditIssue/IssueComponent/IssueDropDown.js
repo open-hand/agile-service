@@ -1,16 +1,13 @@
-import React, { useContext, useState, useRef } from 'react';
-import {
-  Button,
-  Modal as ModalPro, Dropdown, Menu,
-} from 'choerodon-ui/pro';
-import { Permission } from '@choerodon/boot';
+import React, {useContext, useRef, useState} from 'react';
+import {Button, Dropdown, Menu, Modal as ModalPro,} from 'choerodon-ui/pro';
+import {Permission} from '@choerodon/boot';
 
-import { includes } from 'lodash';
-import { has as hasInject, get as getInject } from '@choerodon/inject';
-import { issueApi } from '@/api';
+import {includes} from 'lodash';
+import {get as getInject, has as hasInject} from '@choerodon/inject';
+import {issueApi} from '@/api';
 import useHasDevops from '@/hooks/useHasDevops';
 import useHasTest from '@/hooks/useHasTest';
-import { openEditIssueCopyIssue } from '@/components/CopyIssue';
+import {openEditIssueCopyIssue} from '@/components/CopyIssue';
 import openRecordWorkLogModal from '@/components/DailyLog/DailyLogPro';
 import openCreateBranchModal from '@/components/CreateBranch/CreateBranchPro';
 import EditIssueContext from '../stores';
@@ -20,8 +17,13 @@ import openChangeParentModal from './ChangeParent';
 import openRelateIssueModal from './RelateIssue/RelateIssue';
 import openTransformSubIssue from './TransformSubIssue/TransformSubIssue';
 import openTransformFromSubIssue from './IssueBody/TransformFromSubIssue';
-import { WATERFALL_TYPE_CODES } from '../../../constants/TYPE_CODE';
-import { DELETE_ISSUE } from '../../../constants/WATERFALL_INJECT';
+import {
+  BUG_TYPE_CODE,
+  FEATURE_TASK_TYPE_CODE,
+  SUB_TASK_TYPE_CODE,
+  WATERFALL_TYPE_CODES
+} from '../../../constants/TYPE_CODE';
+import {DELETE_ISSUE} from '../../../constants/WATERFALL_INJECT';
 import useIsWaterfall from '../../../hooks/useIsWaterfall';
 
 const IssueDropDown = ({
@@ -48,7 +50,7 @@ const IssueDropDown = ({
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi, issueTypeVO, parentRelateSummary, parentIssueId, relateIssueId,
   } = issue;
-  const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
+  const disableFeatureDeleteWhilePiDoing = typeCode === FEATURE_TASK_TYPE_CODE && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
     if (WATERFALL_TYPE_CODES.includes(typeCode) && hasInject(DELETE_ISSUE)) {
       getInject(DELETE_ISSUE)({ issue, store, onDeleteIssue });
@@ -104,11 +106,12 @@ const IssueDropDown = ({
     } else if (e.key === '3') {
       openEditIssueCopyIssue({
         projectId: store.projectId,
+        store,
         issue,
         issueLink: store.getLinkIssues,
         issueSummary: issue.summary,
         // onCancel: () => store.setCopyIssueShow(false),
-        onOk: handleCopyIssue.bind(this, parentIssueId || relateIssueId || issueId, typeCode === 'sub_task' || (typeCode === 'bug' && parentRelateSummary), dontCopyEpic),
+        onOk: handleCopyIssue.bind(this, parentIssueId || relateIssueId || issueId, typeCode === SUB_TASK_TYPE_CODE || (typeCode === BUG_TYPE_CODE && parentRelateSummary), dontCopyEpic),
         applyType,
         copyFields: store.copyFields,
         setCopyHasEpic,
@@ -231,7 +234,7 @@ const IssueDropDown = ({
           </Menu.Item>
         )
       }
-      {['feature', ...(isShowFeature ? ['issue_epic'] : []), 'risk', ...WATERFALL_TYPE_CODES].indexOf(typeCode) === -1 && (
+      {['feature', ...(isShowFeature ? ['issue_epic'] : []), 'risk', /**...WATERFALL_TYPE_CODES*/].indexOf(typeCode) === -1 && (
         <Menu.Item key="3">
           复制工作项
         </Menu.Item>

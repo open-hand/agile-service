@@ -1,10 +1,10 @@
-import { axios, stores, Choerodon } from '@choerodon/boot';
-import {
-  getProjectId, getOrganizationId, getApplyType, getMenuType,
-} from '@/utils/common';
-import { sameProject } from '@/utils/detail';
+import {axios, Choerodon, stores} from '@choerodon/boot';
+import {getApplyType, getMenuType, getOrganizationId, getProjectId,} from '@/utils/common';
+import {sameProject} from '@/utils/detail';
 import Api from './Api';
-import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
+import {WATERFALL_TYPE_CODES} from '@/constants/TYPE_CODE';
+import {IField, IIssueType} from "@/common/types";
+import {ISubTaskRequiredItem} from "@/components/CopyIssue/copy-required/SubTaskRequired";
 
 const { AppState } = stores;
 interface IIssue {
@@ -66,7 +66,6 @@ interface SearchVO {
   advancedSearchArgs: object,
 }
 interface CopyCondition {
-  issueLink: boolean,
   subTask: boolean,
   summary: string,
   epicName?: string,
@@ -148,6 +147,17 @@ interface IImportOrExportRecord {
   status: null | string
   successCount: null | number
   userId: null | string
+}
+export const defaultIssueType: IIssueType = {
+  colour: '#4d90fe',
+  description: '任务',
+  icon: 'agile_task',
+  id: '',
+  name: '任务',
+  stateMachineId: '',
+  typeCode: 'task',
+  enabled: true,
+  initialize: true,
 }
 export { IExportSearch, ICustomFieldData, IImportOrExportRecord };
 class IssueApi extends Api<IssueApi> {
@@ -235,7 +245,13 @@ class IssueApi extends Api<IssueApi> {
     });
   }
 
-  getRequiredField(issueId: string, issueTypeId: string) {
+  /**
+   * 根据工作项ID和工作项类型ID查询当前工作项的必输字段
+   * @deprecated 已废弃, 请使用batchGetRequiredField替代
+   * @param issueId 工作项ID
+   * @param issueTypeId 作项类型ID
+   */
+  getRequiredField(issueId: number|string, issueTypeId: string): Promise<IField[]> {
     const organizationId = getOrganizationId();
     return this.request({
       method: 'get',
@@ -243,6 +259,23 @@ class IssueApi extends Api<IssueApi> {
       params: {
         organizationId,
         issueTypeId,
+      },
+    });
+  }
+
+  /**
+   * 根据工作项ID和批量查询当前工作项以及子工作项的必输字段
+   * @param issueId 工作项ID
+   * @param withSubIssue 是否查询子工作项, 默认false
+   */
+  batchGetRequiredField(issueId: number|string, withSubIssue: boolean = false): Promise<ISubTaskRequiredItem[]> {
+    const organizationId = getOrganizationId();
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issues/${issueId}/all_required_field`,
+      params: {
+        organizationId,
+        subTask: withSubIssue,
       },
     });
   }
@@ -268,20 +301,24 @@ class IssueApi extends Api<IssueApi> {
   }
 
   /**
-    * 克隆工作项
+    * 克隆工作项(敏捷/瀑布)
     * @param issueId
     * @param applyType
+    * @param asyncTraceId 异步任务ID(UUID)
     * @param copyCondition
     */
-  clone(issueId: string, applyType: string = 'agile', copyCondition: CopyCondition) {
+  clone(issueId: string, applyType: string = 'agile', asyncTraceId: string, copyCondition: CopyCondition) {
     const organizationId = getOrganizationId();
+    const realUrl = this.prefix +
+      (applyType === 'agile' ? `/issues/${issueId}/clone_issue` : `/waterfall/wbs/${issueId}/clone_issue`);
     return axios({
       method: 'post',
-      url: `${this.prefix}/issues/${issueId}/clone_issue`,
+      url: realUrl,
       data: copyCondition,
       params: {
         organizationId,
         applyType,
+        asyncTraceId
       },
     });
   }
@@ -703,6 +740,33 @@ class IssueApi extends Api<IssueApi> {
       data,
     });
   }
+
+  /**
+   * 根据issueId获取非空内容code(For issue复制界面)
+   * @param issueId issueId
+   */
+  getNotEmptyLinkContentCodes(issueId: number | string): Promise<string[]> {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issues/${issueId}/list_link_contents`,
+    });
+  }
+
+  /**
+   * 复制异步任务执行状态查询(For issue复制界面)
+   * @param issueId issueId
+   * @param asyncTraceId 异步任务ID(UUID)
+   */
+  queryAsyncCloneStatus(issueId: number| string, asyncTraceId: string): Promise<string> {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issues/${issueId}/query_async_clone_status`,
+      params: {
+        asyncTraceId
+      }
+    });
+  }
+
 }
 const issueApi = new IssueApi();
 const issueApiConfig = new IssueApi(true);

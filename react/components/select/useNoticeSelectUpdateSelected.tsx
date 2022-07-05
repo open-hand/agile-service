@@ -1,4 +1,7 @@
-import { useCounter, useCreation, usePersistFn } from 'ahooks';
+import {
+  useCounter, useCreation, usePersistFn, useUpdate,
+} from 'ahooks';
+import { isEqual } from 'lodash';
 
 function transformVal(v: any) {
   return v === '' || !v || (Array.isArray(v) && v.length === 0) ? undefined : v;
@@ -10,19 +13,19 @@ function transformVal(v: any) {
  */
 
 export function useNoticeSelectUpdateSelected() {
-  const [forceUpdateValue, { inc: notice, set }] = useCounter(0);
+  // const [forceUpdateValue, { inc: notice, set }] = useCounter(0);
+  const forceUpdate = useUpdate();
   const values = useCreation(() => new Map<string, { old?: any; }>(), []);
   const setValue = usePersistFn((key: string, val?: any, callback?: (isUpdate: boolean) => void) => {
     const { old } = values.get(key) || {};
     const newVal = transformVal(val);
-    if (old !== newVal) {
+    if (!isEqual(old, newVal)) {
       values.set(key, { old: newVal });
       callback && callback(true);
-      notice();
+      forceUpdate();
       return;
     }
-    set(0);
     callback && callback(false);
   });
-  return [forceUpdateValue, setValue] as const;
+  return [forceUpdate, setValue] as const;
 }

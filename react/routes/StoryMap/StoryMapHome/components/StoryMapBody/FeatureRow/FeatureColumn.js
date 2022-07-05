@@ -1,9 +1,8 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { observer } from 'mobx-react';
+import React, {Component} from 'react';
+import {observer} from 'mobx-react';
 import Column from '../Column';
 import FeatureCard from './FeatureCard';
-import { ColumnWidth } from '../../../Constants';
+import {ColumnWidth} from '../../../Constants';
 import AutoScroll from '../../../../../../common/AutoScroll';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import './FeatureColumn.less';
@@ -72,7 +71,6 @@ class FeatureColumn extends Component {
     if (Math.abs(posX) > (ColumnWidth / 2)) {
       // 变化的倍数 当达到宽度1/2的倍数的时候触发变化
       const multiple = Math.round(Math.abs(posX) / (ColumnWidth / 2));
-      // console.log(multiple);
       // 奇数和偶数的不同处理 5=>2  4=>2
       if (multiple % 2 === 0) {
         this.handleItemResize('right', multiple * (posX > 0 ? 1 : -1) / 2);

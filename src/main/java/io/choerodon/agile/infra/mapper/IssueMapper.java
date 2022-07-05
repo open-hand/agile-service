@@ -494,31 +494,99 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     /**
      * 查询个人未完成故事，任务和bug
-     *
      * @param projectIds
      * @param userId
      * @param searchType
      * @return
      */
+    @Deprecated
     List<IssueDTO> queryParentIssueByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds,
                                                          @Param("userId") Long userId,
                                                          @Param("searchType") String searchType,
                                                          @Param("searchVO") SearchVO searchVO);
 
+
     /**
-     * 查询个人在所有子项目中未完成的问题
+     * 工作台查我的待办
      *
      * @param projectIds
-     * @param parentIssues
      * @param userId
-     * @param searchType
+     * @param searchVO
      * @return
      */
-    List<IssueDTO> listIssuesByParentIssueIdsAndUserId(@Param("projectIds") List<Long> projectIds,
-                                                       @Param("parentIssues") List<Long> parentIssues,
-                                                       @Param("userId") Long userId,
-                                                       @Param("searchType") String searchType,
-                                                       @Param("searchVO") SearchVO searchVO);
+    List<IssueDTO> selectMyTodoIssues(@Param("projectIds") List<Long> projectIds,
+                                      @Param("userId") Long userId,
+                                      @Param("searchVO") SearchVO searchVO,
+                                      @Param("activeSprintIds") Set<Long> activeSprintIds);
+
+    /**
+     * 工作台查我的缺陷
+     *
+     * @param projectIds
+     * @param userId
+     * @param searchVO
+     * @param activeSprintIds
+     * @return
+     */
+    List<IssueDTO> selectMyBugs(@Param("projectIds") List<Long> projectIds,
+                                @Param("userId") Long userId,
+                                @Param("searchVO") SearchVO searchVO,
+                                @Param("activeSprintIds") Set<Long> activeSprintIds);
+
+    /**
+     * 工作台查我的星标工作项
+     *
+     * @param projectIds
+     * @param userId
+     * @param searchVO
+     * @return
+     */
+    List<IssueDTO> selectMyStarBeacon(@Param("projectIds") List<Long> projectIds,
+                                      @Param("userId") Long userId,
+                                      @Param("searchVO") SearchVO searchVO);
+
+    /**
+     * 工作台查我报告的
+     *
+     * @param projectIds
+     * @param userId
+     * @param searchVO
+     * @param activeSprintIds
+     * @return
+     */
+    List<IssueDTO> selectMyReported(@Param("projectIds") List<Long> projectIds,
+                                    @Param("userId") Long userId,
+                                    @Param("searchVO") SearchVO searchVO,
+                                    @Param("activeSprintIds") Set<Long> activeSprintIds);
+
+
+    /**
+     * 工作台查我分配的
+     *
+     * @param projectIds
+     * @param userId
+     * @param searchVO
+     * @param activeSprintIds
+     * @return
+     */
+    List<IssueDTO> selectMyAssigned(@Param("projectIds") List<Long> projectIds,
+                                    @Param("userId") Long userId,
+                                    @Param("searchVO") SearchVO searchVO,
+                                    @Param("activeSprintIds") Set<Long> activeSprintIds);
+
+    /**
+     * 工作台查我报告的bug
+     *
+     * @param projectIds
+     * @param userId
+     * @param searchVO
+     * @param activeSprintIds
+     * @return
+     */
+    List<IssueDTO> selectReportedBug(@Param("projectIds") List<Long> projectIds,
+                                     @Param("userId") Long userId,
+                                     @Param("searchVO") SearchVO searchVO,
+                                     @Param("activeSprintIds") Set<Long> activeSprintIds);
 
     List<IssueOverviewVO> selectIssueBysprint(@Param("projectId") Long projectId,
                                               @Param("sprintId") Long sprintId,
@@ -549,11 +617,6 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueVO> listAvailableParents(@Param("projectId") Long projectId,
                                        @Param("issueType") String issueType,
                                        @Param("param") String param);
-
-    List<IssueDTO> listMyStarIssuesByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds,
-                                                         @Param("parentIssues") List<Long> parentIssues,
-                                                         @Param("userId") Long userId,
-                                                         @Param("searchVO") SearchVO searchVO);
 
     /**
      * 查询项目下未完成的issue，包含story, task和bug(不包含子缺陷)
@@ -692,4 +755,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     IssueCopyLinkContents queryIssueLinkContents(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
     List<Long> selectSubTaskIds(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
+
+    List<IssueDTO> queryChildrenWithCompleted(@Param("projectIds") Set<Long> projectIds,
+                                              @Param("issueIds") Set<Long> issueIds);
 }

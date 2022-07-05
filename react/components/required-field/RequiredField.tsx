@@ -1,19 +1,17 @@
-import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import {
-  Form, DataSet,
-} from 'choerodon-ui/pro';
+import React, {useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
+import {DataSet, Form,} from 'choerodon-ui/pro';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { IField } from '@/common/types';
+import {IField} from '@/common/types';
 import renderField from './renderField';
 
 export interface IFieldsValueVo {
-  issueIds: string[],
-  predefinedFields: object
+  issueIds: string[];
+  predefinedFields: any;
   customFields: {
-    fieldId: string,
-    fieldType: string,
-    value: any,
+    fieldId: string;
+    fieldType: string;
+    value: any;
   }[]
 }
 

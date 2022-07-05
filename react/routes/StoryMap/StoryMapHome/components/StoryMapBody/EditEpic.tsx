@@ -1,6 +1,10 @@
 import React, {useCallback, useImperativeHandle, useState} from 'react';
 import {Choerodon} from '@choerodon/boot';
 import {epicApi, issueApi} from '@/api';
+import React, {useCallback, useImperativeHandle, useState} from 'react';
+import {Input} from 'choerodon-ui';
+import {Choerodon} from '@choerodon/boot';
+import {epicApi, issueApi} from '@/api';
 import Card from './Card';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
@@ -32,8 +36,6 @@ const EditEpic: React.FC<Props> = ({
   }, []);
 
   const handleEditEpic = useCallback(async (newValue) => {
-    console.log('pressEnter');
-
     if (!canEdit) {
       return;
     }

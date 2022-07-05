@@ -24,10 +24,10 @@ function valueTypeSync(targetValueType: 'string' | 'array', value?: any[]): stri
 }
 
 function getSelectIds(value: string[], options: any[], dataValueKey: string, preValue?: string[]) {
-  if (!value.length || !options.length) {
+  const differenceValues = preValue?.length ? difference(value, preValue) : value;
+  if (differenceValues.length && (!value.length || !options.length)) {
     return value;
   }
-  const differenceValues = preValue?.length ? difference(value, preValue) : value;
   if (differenceValues?.length) {
     const dataOptionValues = options.map((option) => get(option, dataValueKey));
     return differenceValues.some((v) => !dataOptionValues.includes(v)) ? value : preValue || value;

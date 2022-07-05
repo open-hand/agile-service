@@ -68,6 +68,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -276,6 +277,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String INFLUENCE_VERSION = "influenceVersion";
     private static final String ORDER_STR = "orderStr";
     private static final String WEBSOCKET_COPY_ISSUE_CODE = "agile-clone-issue";
+    private static final String CLONE_ISSUE_KEY = "cloneIssue:";
     private static final String DOING_STATUS = "doing";
     private static final String FAILED_STATUS = "failed";
     private static final String SUCCEED_STATUS = "succeed";
@@ -2679,16 +2681,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType) {
+    public void cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType, String asyncTraceId) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
         }
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + EncryptionUtils.encrypt(issueId);
+        String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + asyncTraceId;
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("projectId", projectId);
         paramsMap.put("userId", userId);
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 0);
+        redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
         //处理需要复制的预定义字段
         List<String> predefinedFieldNames = copyConditionVO.getPredefinedFieldNames();
@@ -2747,8 +2750,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
             }
             sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
+            redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , SUCCEED_STATUS, 24L, TimeUnit.HOURS);
         } else {
             sendCloneProcess(userId, websocketKey, paramsMap, FAILED_STATUS, 100);
+            redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , FAILED_STATUS, 24L, TimeUnit.HOURS);
             throw new CommonException("error.issue.copyIssueByIssueId");
         }
     }
@@ -2777,6 +2782,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 copyIssueLinkContent(linkContent, oldIssueId, newIssueId, projectId);
             });
         }
+    }
+
+    @Override
+    public String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId) {
+        String key = CLONE_ISSUE_KEY + issueId + ":" + asyncTraceId;
+        Object object = redisUtil.get(key);
+        String status = "";
+        if (!Objects.isNull(object)) {
+            status = object.toString();
+        }
+        return ObjectUtils.isEmpty(status) ? "failed" : status;
     }
 
     private void copyIssueLinkContent(String linkContent, Long issueId, Long newIssueId, Long projectId) {
@@ -3649,17 +3665,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType, workBenchIssueSearchVO.getSearchVO()));
-        List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
-        if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
+        Page<IssueDTO> parentPage =
+                queryIssuesByTypeAndUserId(projectIds, userId, searchType, workBenchIssueSearchVO.getSearchVO(), pageRequest);
+        List<IssueDTO> allIssue = parentPage.getContent();
+        if (CollectionUtils.isEmpty(allIssue)) {
             return new Page<>();
-        }
-        List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> allIssue;
-        if (Objects.equals(searchType, MY_START_BEACON)) {
-            allIssue = issueMapper.listMyStarIssuesByProjectIdsAndUserId(projectIds, parentIssues, userId, workBenchIssueSearchVO.getSearchVO());
-        } else {
-            allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType, workBenchIssueSearchVO.getSearchVO());
         }
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, List<IssueTypeVO>> issueTypeDTOMap = issueTypeService.listIssueTypeMapByProjectIds(organizationId, projectIds);
@@ -3667,28 +3677,38 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();
         Set<Long> userIds = new HashSet<>();
+        List<IssueListFieldKVVO> waterfallIssues = new ArrayList<>();
+        List<IssueListFieldKVVO> agileIssues = new ArrayList<>();
+        List<String> waterfallIssueTypeCodes = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
         allIssue.forEach(v -> {
             IssueListFieldKVVO issueListFieldKVVO = new IssueListFieldKVVO();
             modelMapper.map(v,issueListFieldKVVO);
+            String typeCode = issueListFieldKVVO.getTypeCode();
+            if (waterfallIssueTypeCodes.contains(typeCode)) {
+                waterfallIssues.add(issueListFieldKVVO);
+            } else {
+                agileIssues.add(issueListFieldKVVO);
+            }
             setIssueTypeVO(issueListFieldKVVO, issueTypeDTOMap.get(v.getIssueTypeId()));
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(v.getStatusId()));
             issueListFieldKVVO.setPriorityVO(priorityMap.get(v.getPriorityId()));
             issueListFieldKVVO.setProjectVO(projectVOMap.get(v.getProjectId()));
             // 设置父级issueId
-            Long parentId = null;
-            Long parentIssueId = v.getParentIssueId();
-            Long relateIssueId = v.getRelateIssueId();
-            parentId = setParentId(parentIssueId);
-            if (parentId == null) {
-                parentId = setParentId(relateIssueId);
-            }
-            issueListFieldKVVO.setParentId(parentId);
+//            Long parentId = null;
+//            Long parentIssueId = v.getParentIssueId();
+//            Long relateIssueId = v.getRelateIssueId();
+//            parentId = setParentId(parentIssueId);
+//            if (parentId == null) {
+//                parentId = setParentId(relateIssueId);
+//            }
+//            issueListFieldKVVO.setParentId(parentId);
             list.add(issueListFieldKVVO);
             Long assigneeId = v.getAssigneeId();
             if (!ObjectUtils.isEmpty(assigneeId)) {
                 userIds.add(assigneeId);
             }
         });
+        setProgress(waterfallIssues, agileIssues, new HashSet<>(projectIds));
         if (agilePluginService != null) {
             agilePluginService.setFeatureTypeAndFeatureTeams(list, organizationId);
         }
@@ -3700,6 +3720,107 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    @Override
+    public void setProgress(List<IssueListFieldKVVO> waterfallIssues,
+                            List<IssueListFieldKVVO> agileIssues,
+                            Set<Long> projectIds) {
+        if (!ObjectUtils.isEmpty(agileWaterfallService) && !ObjectUtils.isEmpty(waterfallIssues)) {
+            List<Long> waterfallIssueIds =
+                    waterfallIssues.stream().map(IssueListFieldKVVO::getIssueId).collect(Collectors.toList());
+            Map<Long, Integer> issueProgressMap = agileWaterfallService.getIssueProgressMap(new ArrayList<>(projectIds), waterfallIssueIds);
+            waterfallIssues.forEach(issue -> issue.setProgress(issueProgressMap.get(issue.getIssueId())));
+        }
+        if (!ObjectUtils.isEmpty(agileIssues)) {
+            Set<Long> issueIds =
+                    agileIssues.stream().map(IssueListFieldKVVO::getIssueId).collect(Collectors.toSet());
+            List<IssueDTO> issues = issueMapper.queryChildrenWithCompleted(projectIds, issueIds);
+            Map<Long, List<IssueDTO>> issueMap =
+                    issues.stream().collect(Collectors.groupingBy(IssueDTO::getParentIssueId));
+            agileIssues.forEach(issue -> {
+                Long issueId = issue.getIssueId();
+                List<IssueDTO> subIssues = issueMap.get(issueId);
+                int total = 0;
+                int completed = 0;
+                if (!ObjectUtils.isEmpty(subIssues)) {
+                    total = subIssues.size();
+                    completed = subIssues.stream().filter(x -> x.getCompleted()).collect(Collectors.toList()).size();
+                }
+                issue.setTotalSubIssues(total);
+                issue.setCompletedSubIssues(completed);
+            });
+        }
+    }
+
+    private Page<IssueDTO> queryIssuesByTypeAndUserId(List<Long> projectIds,
+                                                      Long userId,
+                                                      String searchType,
+                                                      SearchVO searchVO,
+                                                      PageRequest pageRequest) {
+
+        if (ObjectUtils.isEmpty(searchType)) {
+            searchType = WorkBenchSearchType.MY_TODO;
+        }
+        Set<Long> projectIdSet = new HashSet<>(projectIds);
+        //查活跃冲刺
+        Set<Long> activeSprintIds =
+                sprintMapper.selectActiveSprintsByProjectIds(projectIdSet)
+                        .stream()
+                        .map(SprintDTO::getSprintId)
+                        .collect(Collectors.toSet());
+        addProjectOrderIfNotExisted(pageRequest);
+        Page<IssueDTO> parentPage;
+        switch (searchType) {
+            case WorkBenchSearchType.MY_TODO:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyTodoIssues(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_BUG:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyBugs(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_STAR_BEACON:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyStarBeacon(projectIds, userId, searchVO));
+                break;
+            case WorkBenchSearchType.MY_REPORTED:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyReported(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_ASSIGNED:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyAssigned(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            case WorkBenchSearchType.MY_REPORTED_BUG:
+                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectReportedBug(projectIds, userId, searchVO, activeSprintIds));
+                break;
+            default:
+                parentPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+                break;
+        }
+        return parentPage;
+    }
+
+    private void addProjectOrderIfNotExisted(PageRequest pageRequest) {
+        List<Sort.Order> orders = new ArrayList<>();
+        Sort sort = pageRequest.getSort();
+        String projectIdKey = "projectId";
+        Sort.Order projectOrder = sort.getOrderFor(projectIdKey);
+        if (ObjectUtils.isEmpty(projectOrder)) {
+            Sort.Order order = new Sort.Order(Sort.Direction.ASC, projectIdKey);
+            orders.add(order);
+        } else {
+            orders.add(projectOrder);
+        }
+        if (!ObjectUtils.isEmpty(sort)) {
+            Iterator<Sort.Order> iterator = sort.iterator();
+            while (iterator.hasNext()) {
+                Sort.Order thisOrder = iterator.next();
+                String property = thisOrder.getProperty();
+                if (!Objects.equals(projectIdKey, property)) {
+                    orders.add(thisOrder);
+                }
+            }
+        }
+        Sort newSort = new Sort(orders);
+        pageRequest.setSort(newSort);
+        pageRequest.resetOrder("ai", Collections.emptyMap());
     }
 
     private Long setParentId(Long issueId){
