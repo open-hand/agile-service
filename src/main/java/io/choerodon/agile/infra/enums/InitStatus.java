@@ -42,6 +42,8 @@ public enum InitStatus {
         List<InitStatus> result = new ArrayList<>();
         switch (applyType) {
             case SchemeApplyType.AGILE:
+            case SchemeApplyType.WATERFALL:
+            case SchemeApplyType.RISK:
                 result.add(InitStatus.CREATE);
                 result.add(InitStatus.PROCESSING);
                 result.add(InitStatus.COMPLETE);
