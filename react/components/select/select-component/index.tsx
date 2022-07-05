@@ -83,6 +83,7 @@ const SelectComponent: React.FC<SelectComponentProps> = forwardRef(({
     paging: true,
     tooltip: true,
   }), [valueField, afterFirstRequest, projectId, dataRef, extraOptions, afterLoad]);
+  console.log('ruleIds', ruleIds);
   const config = useSelectWithRuleConfig(configWithRule, { ruleIds, selected: selectIds, fieldId });
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
