@@ -619,7 +619,7 @@ const CreateIssueBase = observer(({
     });
     // TODO: 将各种默认值的获取和设置逻辑合并
     // 设置描述默认值  和上一个模板相同 或默认值
-    if (currentTemplateDescription.current === newValue.description) {
+    if (currentTemplateDescription.current === newValue.description && !defaultValues?.description) {
       newValue.description = templateData?.template;
     }
     currentTemplateDescription.current = templateData?.template;
