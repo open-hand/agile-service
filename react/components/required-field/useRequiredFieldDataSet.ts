@@ -1,25 +1,21 @@
-import {useCallback, useMemo, useRef,} from 'react';
-import {DataSet} from 'choerodon-ui/pro';
-import {toJS} from 'mobx';
-import {assign,} from 'lodash';
+import { useCallback, useMemo, useRef } from 'react';
+import { DataSet } from 'choerodon-ui/pro';
+import { toJS } from 'mobx';
+import { assign } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import {getProjectId} from '@/utils/common';
+import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import {IField} from '@/common/types';
-import {formatFields, systemFields} from './util';
-import {IFieldsValueVo} from './RequiredField';
-import {epicConfigApi} from '@/api';
+import { IField } from '@/common/types';
+import { formatFields, systemFields } from './util';
+import { IFieldsValueVo } from './RequiredField';
+import { epicConfigApi } from '@/api';
+import { ISubTaskRequiredItem } from '@/components/CopyIssue/copy-required/SubTaskRequired';
 
 interface Props {
   issueId: string
   issueTypeId: string
   requiredFields: IField[]
 }
-import {IField} from '@/common/types';
-import {formatFields, systemFields} from './util';
-import {IFieldsValueVo} from './RequiredField';
-import {epicConfigApi} from '@/api';
-import {ISubTaskRequiredItem} from "@/components/CopyIssue/copy-required/SubTaskRequired";
 
 export interface RequiredFieldDs {
   issueId: string

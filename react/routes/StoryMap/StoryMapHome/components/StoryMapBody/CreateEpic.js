@@ -1,20 +1,14 @@
-import React, {Component} from 'react';
-import {TextArea} from 'choerodon-ui/pro';
-import {Choerodon} from '@choerodon/boot';
-import {getProjectId} from '@/utils/common';
-import {fieldApi, issueApi} from '@/api';
-import {checkCanQuickCreate} from '@/utils/quickCreate';
-import React, {Component} from 'react';
-import {Input} from 'choerodon-ui';
-import {Choerodon} from '@choerodon/boot';
-import {getProjectId} from '@/utils/common';
-import {fieldApi, issueApi} from '@/api';
-import {checkCanQuickCreate} from '@/utils/quickCreate';
+import React, { Component } from 'react';
+import { TextArea } from 'choerodon-ui/pro';
+import { Choerodon } from '@choerodon/boot';
+import { getProjectId } from '@/utils/common';
+import { fieldApi, issueApi } from '@/api';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import openCreateIssue from '@/components/create-issue';
 import Card from './Card';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
-import {MAX_LENGTH_EPIC_NAME} from "@/constants/MAX_LENGTH";
+import { MAX_LENGTH_EPIC_NAME } from '@/constants/MAX_LENGTH';
 
 class CreateEpic extends Component {
   // 防止重复创建

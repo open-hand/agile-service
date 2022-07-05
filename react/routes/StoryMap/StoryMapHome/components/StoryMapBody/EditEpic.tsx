@@ -1,16 +1,12 @@
-import React, {useCallback, useImperativeHandle, useState} from 'react';
-import {Choerodon} from '@choerodon/boot';
-import {epicApi, issueApi} from '@/api';
-import React, {useCallback, useImperativeHandle, useState} from 'react';
-import {Input} from 'choerodon-ui';
-import {Choerodon} from '@choerodon/boot';
-import {epicApi, issueApi} from '@/api';
+import React, { useCallback, useImperativeHandle, useState } from 'react';
+import { Choerodon } from '@choerodon/boot';
+import { ResizeType } from 'choerodon-ui/pro/lib/text-area/enum';
+import { TextArea } from 'choerodon-ui/pro';
+import { epicApi, issueApi } from '@/api';
 import Card from './Card';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
-import {TextArea} from 'choerodon-ui/pro';
-import {ResizeType} from 'choerodon-ui/pro/lib/text-area/enum'
-import {MAX_LENGTH_EPIC_NAME} from "@/constants/MAX_LENGTH";
+import { MAX_LENGTH_EPIC_NAME } from '@/constants/MAX_LENGTH';
 
 interface Props {
   epic: {
