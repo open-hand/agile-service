@@ -15,7 +15,7 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
       objectVersionNumber,
       projectId: getProjectId(),
       sprintId,
-      sprintGoal: value,
+      sprintGoal: value || '',
     };
     sprintApi.updateSprint(req).then((res) => {
       BacklogStore.updateSprint(sprintId, {
