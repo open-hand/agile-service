@@ -64,7 +64,7 @@ export interface CreateIssueBaseProps {
   menuType?: 'project' | 'org',
   /**
    * 默认选中的问题类型code
-   * @default 'story'
+   * @default false
    *
    * 当为 `false` 时则默认选择第一个问题类型
    */
@@ -308,7 +308,7 @@ const CreateIssueBase = observer(({
   projectId,
   onSubmit,
   onAfterSubmitError,
-  defaultTypeCode = 'story',
+  defaultTypeCode = false,
   defaultTypeId,
   defaultAssignee,
   defaultFeature,
