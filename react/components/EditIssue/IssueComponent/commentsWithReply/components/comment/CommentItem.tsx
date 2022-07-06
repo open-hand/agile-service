@@ -110,7 +110,7 @@ const CommentItem: React.FC<Props> = ({
   }, [isSelf, onUpdate, projectId]);
 
   const handleUpdate = useCallback(async (delta: string) => {
-    if (replyValue && verifyComment(replyValue)) {
+    if (value && verifyComment(value)) {
       const commentText = value;
       updateComment({
         commentId: comment.commentId,
