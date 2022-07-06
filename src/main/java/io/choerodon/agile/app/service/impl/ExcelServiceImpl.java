@@ -1010,15 +1010,15 @@ public class ExcelServiceImpl implements ExcelService {
             Integer col = entry.getKey();
             ExcelColumnVO excelColumn = entry.getValue();
             boolean isCustomField = excelColumn.isCustomField();
-            excelCommonService.handlerRequireFiled(excelColumn, requireFieldMap, issueCreateVO, projectId);
-            Boolean checkRequireField = excelCommonService.checkRequireField(requireFieldMap, excelColumn, issueCreateVO, row, col, errorRowColMap);
-            if (!checkRequireField) {
-                break;
-            }
             if (isCustomField) {
                 excelCommonService.validateCustomFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO);
             } else {
                 excelCommonService.validateCommonSystemFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO, parentIssue, projectId, headerMap);
+            }
+            excelCommonService.handlerRequireFiled(excelColumn, requireFieldMap, issueCreateVO, projectId);
+            Boolean checkRequireField = excelCommonService.checkRequireField(requireFieldMap, excelColumn, issueCreateVO, row, col, errorRowColMap);
+            if (!checkRequireField) {
+                break;
             }
         }
     }
