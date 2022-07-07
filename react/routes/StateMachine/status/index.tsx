@@ -99,7 +99,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
           className={styles.table}
           autoHeight={{
             type: 'maxHeight' as TableAutoHeightType,
-            diff: 100,
+            diff: 35,
           }}
           filterBarFieldName="param"
         >
