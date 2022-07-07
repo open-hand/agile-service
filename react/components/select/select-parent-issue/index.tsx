@@ -7,13 +7,13 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { Issue } from '@/common/types';
 import InlineIssueTag from '@/components/tag/inline-issue-tag';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectParentIssueProps extends Partial<SelectProps> {
   issueType: 'sub_task' | 'bug'
   flat?: boolean
   projectId?: string
 }
 
-const SelectParentIssue: React.FC<Props> = forwardRef(({
+const SelectParentIssue: React.FC<SelectParentIssueProps> = forwardRef(({
   flat, projectId, issueType, ...otherProps
 }, ref: React.Ref<Select>) => {
   const { multiple } = otherProps;
