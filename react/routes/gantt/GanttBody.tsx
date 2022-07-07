@@ -485,7 +485,8 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
         onDelete={handleIssueDelete}
         onDeleteSubIssue={handleDeleteSubIssue}
         onCreateSubIssue={handleCreateSubIssue}
-        onCopyIssue={handleCopyIssue}
+        // 复制改为异步，无法最小局部更新
+        onCopyIssue={run}
         onTransformType={handleTransformType}
         onChangeParent={handleChangeParent}
         onLinkIssue={handleLinkIssue}
