@@ -31,8 +31,15 @@ const IssueHeader = (props) => {
               <span>{projectVO.name}</span>
             </div>
           )}
-          {
-            parentIssueSummary || parentRelateSummary || waterfallIssueVO?.issueParentVO?.summary ? (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginRight: !relateIssueId && !parentIssueId ? 15 : 0,
+            paddingLeft: 12,
+          }}
+          >
+            <IssueType {...props} />
+            {parentIssueSummary || parentRelateSummary || waterfallIssueVO?.issueParentVO?.summary ? (
               <Popover
                 overlayClassName={`${prefixCls}-IssueHeader-top-popover`}
                 placement="leftTop"
@@ -46,14 +53,7 @@ const IssueHeader = (props) => {
                 )}
                 trigger="hover"
               >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginRight: !relateIssueId && !parentIssueId ? 15 : 0,
-                  paddingLeft: 9,
-                }}
-                >
-                  <IssueType {...props} />
+                <div>
                   <IssueParentSummary
                     parentIssueId={relateIssueId || parentIssueId || waterfallIssueVO?.issueParentVO?.issueId}
                     resetIssue={resetIssue}
@@ -64,26 +64,8 @@ const IssueHeader = (props) => {
                   />
                 </div>
               </Popover>
-            ) : (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginRight: !relateIssueId && !parentIssueId ? 15 : 0,
-                paddingLeft: 12,
-              }}
-              >
-                <IssueType {...props} />
-                <IssueParentSummary
-                  parentIssueId={relateIssueId || parentIssueId || waterfallIssueVO?.issueParentVO?.issueId}
-                  resetIssue={resetIssue}
-                  reloadIssue={reloadIssue}
-                  parentSummary={parentIssueSummary || parentRelateSummary || waterfallIssueVO?.issueParentVO?.summary}
-                  issue={issue}
-                  disabled={disabled}
-                />
-              </div>
-            )
-          }
+            ) : null}
+          </div>
           {/* 工作项编号 */}
           <span className={`${prefixCls}-IssueHeader-top-number`}>
             <IssueNumber
