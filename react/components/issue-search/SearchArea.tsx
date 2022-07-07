@@ -1,14 +1,14 @@
-import React, {useCallback, useContext, useMemo} from 'react';
-import {Button, Icon, Tooltip,} from 'choerodon-ui/pro';
-import {stores} from '@choerodon/boot';
-import {find, includes} from 'lodash';
-import {toJS} from 'mobx';
-import {observer} from 'mobx-react-lite';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { Button, Icon, Tooltip } from 'choerodon-ui/pro';
+import { stores } from '@choerodon/boot';
+import { find, includes } from 'lodash';
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react-lite';
 
-import {ButtonColor, FuncType} from 'choerodon-ui/pro/lib/button/enum';
-import {FlatSelect} from '@choerodon/components';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { FlatSelect } from '@choerodon/components';
 import classNames from 'classnames';
-import {flattenObject, isFilterSame} from './utils';
+import { flattenObject, isFilterSame } from './utils';
 import IssueSearchContext from './context';
 import SummaryField from './custom-fields/field/SummaryField';
 import CustomFields from './custom-fields';
@@ -16,7 +16,7 @@ import useQuickFilters from './useQuickFilters';
 import ListenSearchSize from './ListenSearchSize';
 import useFormatMessage from '@/hooks/useFormatMessage';
 import isEqualNonNullable from '@/utils/isEqualNonNullable';
-import {IIssueSearchCommonFilterOption} from '.';
+import { IIssueSearchCommonFilterOption } from '.';
 
 const { AppState } = stores;
 const { Option, OptGroup } = FlatSelect;
@@ -57,7 +57,7 @@ const SearchArea: React.FC = () => {
       const filterObject = flattenObject(JSON.parse(targetMyFilter?.filterJson || '{}'));
       // 先清除筛选
       store.clearAllFilter();
-      store.updateFilter(filterObject);
+      store.updateFilter(store.transformFlattenFilter(filterObject));
       if (folded) {
         store.setFolded(false);
       }
