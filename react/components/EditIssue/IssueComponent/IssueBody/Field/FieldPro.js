@@ -1,34 +1,23 @@
-import {
-  DatePicker, DateTimePicker, NumberField, TextArea, TextField, TimePicker,
-} from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import moment from 'moment';
 import classnames from 'classnames';
-import React, { Component } from 'react';
+import React, { Component, forwardRef } from 'react';
 import { fieldApi } from '@/api';
-import SelectUser from '@/components/select/select-user';
 import UserTag from '@/components/tag/user-tag';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { MAX_NUMBER_VALUE, MAX_NUMBER_STEP } from '@/constants/MAX_VALUE';
-import SelectCustomField from '@/components/select/select-custom-field';
-import SelectCustomFieldBox from '@/components/select/select-custom-field-box';
+import { getEditFields } from '@/components/field-pro/layouts';
 
-const EditorMap = new Map([
-  ['text', TextArea],
-  ['input', TextField],
-  ['member', SelectUser],
-  ['single', SelectCustomField],
-  ['multiple', SelectCustomField],
-  ['radio', SelectCustomFieldBox],
-  ['checkbox', SelectCustomFieldBox],
-  ['number', NumberField],
-  ['time', TimePicker],
-  ['date', DatePicker],
-  ['datetime', DateTimePicker],
-  ['multiMember', SelectUser],
-
-]);
+/**
+ * 兼容性自定义编辑
+ * @param {*} props
+ */
+const CompatibilityEditor = forwardRef(({ fieldType, ...otherProps }, ref) => {
+  const editor = getEditFields([], [], { fieldType, outputs: ['element'] })[0][0];
+  return React.cloneElement(editor, { ref, ...otherProps, showLengthInfo: fieldType === 'input' });
+});
+CompatibilityEditor.displayName = 'CompatibilityEditor';
 @observer class FieldPro extends Component {
   updateIssueField = (value) => {
     const {
@@ -87,7 +76,7 @@ const EditorMap = new Map([
     } = field;
     const { value } = this;
     const required = field?.required || store.getRuleRequired(field);
-    const Editor = EditorMap.get(fieldType);
+    const Editor = CompatibilityEditor;
     if (Editor) {
       switch (fieldType) {
         case 'single':
@@ -97,6 +86,7 @@ const EditorMap = new Map([
         {
           return (
             <Editor
+              fieldType={fieldType}
               searchable
               selected={value}
               required={required}
@@ -112,18 +102,18 @@ const EditorMap = new Map([
           );
         }
         case 'text': {
-          return <Editor required={required} autoSize />;
+          return <Editor fieldType={fieldType} required={required} autoSize />;
         }
         case 'multiMember': {
-          return <Editor required={required} projectId={store.projectId} multiple selectedUser={valueStr} />;
+          return <Editor fieldType={fieldType} required={required} projectId={store.projectId} multiple selectedUser={valueStr} />;
         }
         case 'member': {
-          return <Editor required={required} projectId={store.projectId} selectedUser={valueStr} />;
+          return <Editor fieldType={fieldType} required={required} projectId={store.projectId} selectedUser={valueStr} />;
         }
         case 'number': {
-          return <Editor required={required} max={MAX_NUMBER_VALUE} step={extraConfig ? MAX_NUMBER_STEP : 1} />;
+          return <Editor fieldType={fieldType} required={required} max={MAX_NUMBER_VALUE} step={extraConfig ? MAX_NUMBER_STEP : 1} />;
         }
-        default: return <Editor required={required} />;
+        default: return <Editor fieldType={fieldType} required={required} />;
       }
     }
     return null;
