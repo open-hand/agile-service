@@ -124,8 +124,38 @@ class Doc extends Component {
     const { data, filter } = this.state;
     return produce(data, (draft) => {
       draft.forEach((base) => {
-        // eslint-disable-next-line no-param-reassign
-        base.children = base.children.filter((doc) => doc.name.indexOf(filter) + 1);
+        const getData = (parent, topChildren) => {
+          const childrenData = [];
+          parent.children.forEach((doc) => {
+            if (doc.children) {
+              getData(doc, childrenData);
+            }
+            if (doc.name.indexOf(filter) + 1) {
+              childrenData.push(doc);
+            }
+          });
+          // eslint-disable-next-line no-param-reassign
+          parent.children = childrenData?.length ? childrenData : undefined;
+          if (childrenData.length) {
+            topChildren.push(parent);
+          }
+        };
+        if (filter) {
+          const childrenData = [];
+          base.children.forEach((doc) => {
+            if (doc.children) {
+              getData(doc, childrenData);
+            }
+            if (doc.name.indexOf(filter) + 1) {
+              childrenData.push(doc);
+            }
+          });
+          // eslint-disable-next-line no-param-reassign
+          base.children = childrenData?.length ? childrenData : undefined;
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          base.children = base.children.filter((doc) => doc.name.indexOf(filter) + 1);
+        }
       });
     }).filter((base) => base.children.length);
   }
