@@ -20,7 +20,7 @@ const SelectIssuesDailyLog: React.FC<Props> = forwardRef(({
   const config = useMemo((): SelectConfig<Issue> => ({
     textField: 'summary',
     valueField: 'issueId',
-    request: ({ filter, page }) => workingHoursApi.project(projectId).loadIssuesDailyLog(page, 20, issueId, filter), // 故事、任务、缺陷（不能是子缺陷
+    request: ({ filter, page }) => workingHoursApi.project(projectId).loadIssuesDailyLog(page, 20, filter ? undefined : issueId, filter), // 故事、任务、缺陷（不能是子缺陷
     paging: true,
     optionRenderer: InlineIssueTag.createIssueTag({ multiple }),
     renderer: InlineIssueTag.createIssueTag({ multiple, rendererMode: true }),
