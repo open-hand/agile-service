@@ -1,10 +1,10 @@
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {DataSet} from 'choerodon-ui/pro';
-import {IField, IIssueType} from '@/common/types';
+import { observer } from 'mobx-react-lite';
+import { DataSet } from 'choerodon-ui/pro';
+import { IField, IIssueType } from '@/common/types';
 import RequiredField from '@/components/required-field';
-import {TypeTag} from '@/components';
-import {RequiredFieldDs} from '@/components/required-field/useRequiredFieldDataSet';
+import { TypeTag } from '@/components';
+import { RequiredFieldDs } from '@/components/required-field/useRequiredFieldDataSet';
 import styles from './SubTaskRequired.less';
 
 export interface ISubTaskRequiredItem {
@@ -26,7 +26,7 @@ const SubTaskRequired: React.FC<Props> = ({ item, requiredFieldDsArr }) => {
         <TypeTag
           data={issueTypeVO}
         />
-        <span style={{ margin: '0 8px' }}>{issueNum}</span>
+        <span style={{ marginLeft: '2px', marginRight: '8px' }}>{issueNum}</span>
         <span>{summary}</span>
       </div>
       <div>
