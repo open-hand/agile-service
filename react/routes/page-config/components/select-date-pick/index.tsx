@@ -108,7 +108,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
   }, [optionValue]);
   return (
     <Select
-      ref={refsBindRef(innerRef, ref)}
+      ref={refsBindRef(ref, innerRef)}
       value={optionValue === 'custom' ? value?.format(format) : optionValue}
       primitiveValue={false}
       // @ts-ignore
