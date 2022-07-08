@@ -16,6 +16,9 @@ public class IssueRequiredFields {
     @ApiModelProperty(value = "issue id")
     private Long issueId;
 
+    @ApiModelProperty(value = "问题编号")
+    private String issueNum;
+
     @ApiModelProperty(value = "问题概要")
     private String summary;
 
@@ -31,6 +34,18 @@ public class IssueRequiredFields {
 
     public IssueRequiredFields setIssueId(Long issueId) {
         this.issueId = issueId;
+        return this;
+    }
+
+    /**
+     * @return 问题编号
+     */
+    public String getIssueNum() {
+        return this.issueNum;
+    }
+
+    public IssueRequiredFields setIssueNum(String issueNum) {
+        this.issueNum = issueNum;
         return this;
     }
 

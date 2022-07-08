@@ -4164,6 +4164,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             IssueRequiredFields issueRequiredFields = new IssueRequiredFields()
                     .setIssueId(issue.getIssueId())
                     .setSummary(issue.getSummary())
+                    .setIssueNum(issue.getIssueNum())
                     .setRequiredFields(requiredSystemFields);
             result.add(issueRequiredFields);
         }
