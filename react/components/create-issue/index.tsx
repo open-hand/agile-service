@@ -28,10 +28,6 @@ export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'
   request?: (data: any, applyType?: 'agile' | 'program' | 'waterfall' | 'risk') => Promise<any>
   onCancel?: () => void,
 }
-export const A: React.FC<{ name?: string }> = () => {
-  console.log('a');
-  return <div>2</div>;
-};
 export const CreateContent = (props: CreateIssueBase0Props) => {
   const {
     showSelectProject = false, projectId, modal, queryLevelOutside,

@@ -480,13 +480,11 @@ const CreateIssueBase = observer(({
         break;
       }
       case 'assignee': {
-        console.log('changeAssignee', value);
         // 标识经办人是否手动选择过，以便判断是否赋值为模块负责人
         record.setState('changeAssignee', !!value);
         break;
       }
       case 'component': {
-        console.log('update component', record.getState('changeAssignee'), value);
         // 若经办人未手动选择，按照选中的模块顺序，经办人默认赋值为第一个模块负责人
         if (!record.getState('changeAssignee')) {
           if (value && value.length) {
