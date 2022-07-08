@@ -364,6 +364,12 @@ const GanttBody: React.FC<IGanttGanttBodyProps> = (props) => {
     if (issue) {
       setData(produce(data, (draft) => {
         remove(draft, (item) => item.issueId === issue.issueId || some(issue.subIssueVOList || [], { issueId: item.issueId }));
+        issue.subBugVOList.forEach((item) => {
+          const bugIssue = find(draft, (i) => i.issueId === item.issueId);
+          if (bugIssue) {
+            bugIssue.parentId = null;
+          }
+        });
       }));
     }
   });
