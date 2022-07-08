@@ -91,7 +91,7 @@ const CopyRequired: React.FC<Props> = ({
       const subTask = idToSubIssueMap.get(item.issueId);
       const itemTemp: ISubTaskRequiredItem = {
         ...item,
-        summary: subTask?.summary || '',
+        summary: item.summary,
         issueTypeId: subTask?.issueTypeId,
         issueTypeVO: subTask?.issueTypeVO || defaultIssueType,
       };
