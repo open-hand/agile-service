@@ -7,7 +7,6 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.enums.OpenAppCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.enums.MessageAdditionalType;
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,6 +46,7 @@ public class SiteMsgUtil {
     private static final String COMMENT_TYPE = "commentType";
     private static final String ISSUE_TYPE = "issueType";
     private static final String LOGIN_NAME = "loginName";
+    private static final String NO_SEND_WEBHOOK = "NoSendWebHook";
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -80,14 +80,10 @@ public class SiteMsgUtil {
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"ISSUECREATE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
-        //问题创建通知自定义字段人员时仅发送邮件和站内信，避免重复发送webhook
         if (customFieldUsers) {
-            messageClient.async().sendWebMessage("ISSUE_CREATE.WEB", messageSender.getReceiverAddressList(), messageSender.getArgs());
-            messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_CREATE.EMAIL", messageSender.getReceiverAddressList(), messageSender.getArgs());
-            if (agilePluginService != null) {
-                List<String> openUserIds = agilePluginService.getOpenUserIdsByUserIds(userIds, OpenAppCode.DING_TALK);
-                messageClient.async().sendDingTalkMessage(projectVO.getOrganizationId(), "DING_TALK", "ISSUE_CREATE.DT", messageSender.getArgs(), null, openUserIds);
-            }
+            // 自定义人员通知不再发送webhook，避免重复发送webhook
+            objectMap.put(NO_SEND_WEBHOOK, true);
+            messageClient.async().sendMessage(messageSender);
         } else {
             messageClient.async().sendMessage(messageSender);
         }
@@ -397,16 +393,12 @@ public class SiteMsgUtil {
         });
         senderList.forEach(sender -> {
             if (!Objects.isNull(sender.getReceiverAddressList())) {
-                //向接收人发送邮件和站内信消息
-                messageClient.async().sendWebMessage("ISSUE_COMMENT_NOTICE.WEB", sender.getReceiverAddressList(), sender.getArgs());
-                messageClient.async().sendEmail("CHOERODON-EMAIL", "ISSUE_COMMENT_NOTICE.EMAIL", sender.getReceiverAddressList(), sender.getArgs());
-                if (agilePluginService != null) {
-                    List<Long> userIds = sender.getReceiverAddressList().stream().map(Receiver::getUserId).collect(Collectors.toList());
-                    List<String> openUserIds = agilePluginService.getOpenUserIdsByUserIds(userIds, OpenAppCode.DING_TALK);
-                    messageClient.async().sendDingTalkMessage(projectVO.getOrganizationId(), "DING_TALK", "ISSUE_COMMENT_NOTICE.DT", sender.getArgs(), null, openUserIds);
-                }
+                //向接收人发送邮件和站内信消息，不发送webhook通知，避免重复发送
+                Map<String, Object> additionalInformation = sender.getAdditionalInformation();
+                additionalInformation.put(NO_SEND_WEBHOOK, true);
+                messageClient.async().sendMessage(sender);
             } else {
-                //发送无接收人的消息(webhook等)
+                //单独发送无接收人的消息(webhook等)
                 messageClient.async().sendMessage(sender);
             }
         });
