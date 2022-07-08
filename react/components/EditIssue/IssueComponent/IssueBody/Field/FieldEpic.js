@@ -1,14 +1,15 @@
-import React, {Component} from 'react';
-import {Choerodon} from '@choerodon/boot';
-import {inject, observer} from 'mobx-react';
-import {withRouter} from 'react-router-dom';
-import {injectIntl} from 'react-intl';
-import {some} from 'lodash';
-import {featureApi} from '@/api';
+import React, { Component } from 'react';
+import { Choerodon } from '@choerodon/boot';
+import { inject, observer } from 'mobx-react';
+import { withRouter } from 'react-router-dom';
+import { injectIntl } from 'react-intl';
+import { some } from 'lodash';
+import { featureApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectFeature from '@/components/select/select-feature';
-import {IsInProgram} from '@/hooks/useIsInProgram';
-import {SHOW_FEATURE_TYPE_CODES} from '@/constants/SHOW_FEATURE_TYPE_CODE';
+import SelectEpic from '@/components/select/select-epic';
+import { IsInProgram } from '@/hooks/useIsInProgram';
+import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import styles from './FieldEpic.less';
 
 @inject('AppState')
@@ -158,18 +159,7 @@ import styles from './FieldEpic.less';
                     disabled={(isShowFeature && (!isAgileProgram || applyType === 'agile')) || disabled}
                     onSubmit={this.updateIssueEpic}
                     initValue={issueEpicName && (applyType === 'program' || some(this.dataRef.current || [], { issueId: epicId })) ? epicId || null : null}
-                    // editor={({ submit }) => <SelectEpic projectId={store.projectId} required={required} onChange={submit} selectIds={epicId} dataRef={this.dataRef} />}
-                    editor={(
-                      <SelectFeature
-                        featureId={featureId}
-                        projectId={store.projectId}
-                        featureName={featureName}
-                        style={{
-                          width: 200,
-                        }}
-                      />
-
-                    )}
+                    editor={({ submit }) => <SelectEpic projectId={store.projectId} required={required} onChange={submit} selectIds={epicId} dataRef={this.dataRef} />}
                   >
                     {
                       issueEpicName ? (
