@@ -7,6 +7,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 import { useClickAway } from 'ahooks';
 import { sprintApi } from '@/api';
+import { refsBindRef } from '../utils';
 
 const { OptGroup, Option } = Select;
 export interface SelectTeamSprintProps extends Partial<SelectProps> {
@@ -16,6 +17,10 @@ export interface SelectTeamSprintProps extends Partial<SelectProps> {
   afterLoad?: (data: any[]) => void
   flat?: boolean
   dataRef?: React.MutableRefObject<any>
+  /**
+   * 当选项改变时清除无效值
+   */
+  clearInvalidValueWhenOptionsChange?: boolean
 }
 interface Sprint {
   sprintId: number,
@@ -49,14 +54,23 @@ const SelectSprintDisabled = forwardRef<any, { tooltipTitle: string } & Partial<
   );
 });
 const SelectTeamSprint = forwardRef<Select, SelectTeamSprintProps>(({
-  teamIds, piId, hasUnassign, afterLoad, flat, dataRef,
+  teamIds, piId, hasUnassign, afterLoad, flat, dataRef, clearInvalidValueWhenOptionsChange,
   ...otherProps
 }, ref: React.Ref<Select>) => {
+  const selectRef = useRef<Select>();
   const [teams, setTeams] = useState<Team[]>([]);
   const sprints = useMemo(() => teams.reduce((result, team) => [
     ...result,
     ...(team.sprints || []),
   ], []), [teams]);
+  const sprintIdSet = useMemo(() => new Set(sprints.map((sprint) => sprint.sprintId)), [sprints]);
+  useEffect(() => {
+    if (clearInvalidValueWhenOptionsChange) {
+      const values = selectRef.current?.getValues();
+      const validValues = values?.filter((v) => sprintIdSet.has(v));
+      selectRef.current?.setValue(validValues);
+    }
+  }, [clearInvalidValueWhenOptionsChange, sprintIdSet]);
   if (dataRef) {
     Object.assign(dataRef, {
       current: sprints,
@@ -91,10 +105,11 @@ const SelectTeamSprint = forwardRef<Select, SelectTeamSprintProps>(({
 
   return (
     <Component
-      ref={ref}
+      ref={refsBindRef(ref, selectRef)}
       multiple
       // @ts-ignore
       renderer={({ value }) => find(sprints, { sprintId: value })?.sprintName}
+      checkValueOnOptionsChange
       {...otherProps}
     >
       {

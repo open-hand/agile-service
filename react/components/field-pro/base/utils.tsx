@@ -14,7 +14,7 @@ const filterModeSelectCommonProps = {
   clearButton: true,
 };
 const filterModeProps = {
-  input: {},
+  input: { maxLength: null },
   time: {},
   datetime: {},
   date: {},

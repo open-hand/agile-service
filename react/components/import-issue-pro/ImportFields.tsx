@@ -226,7 +226,7 @@ const ImportFields = forwardRef<IIortIssueFieldsRef, IImportIssueFieldsProps>(({
     }
   }, [applyType, events, fieldsOptionDataSet, fs, isWaterfall, systemFields]);
   const setValue = useCallback((codes: string[]) => {
-    chooseDataSet.current?.init('fields', codes);
+    chooseDataSet.current?.set('fields', codes);
   }, [chooseDataSet]);
   useImperativeHandle(ref, () => ({ setValue }));
 

@@ -110,13 +110,15 @@ const CommentItem: React.FC<Props> = ({
   }, [isSelf, onUpdate, projectId]);
 
   const handleUpdate = useCallback(async (delta: string) => {
-    if (replyValue && verifyComment(replyValue)) {
+    if (value && verifyComment(value)) {
       const commentText = value;
       updateComment({
         commentId: comment.commentId,
         objectVersionNumber: comment.objectVersionNumber,
         commentText,
       });
+    } else {
+      setValue(comment.commentText);
     }
     setEditing(false);
   }, [comment.commentId, comment.objectVersionNumber, updateComment, value]);
@@ -255,6 +257,7 @@ const CommentItem: React.FC<Props> = ({
                 style={{ minHeight: 300, width: '100%' }}
                 onCancel={() => {
                   setEditing(false);
+                  setValue(comment.commentText);
                 }}
                 onOk={handleUpdate}
                 projectId={projectId}

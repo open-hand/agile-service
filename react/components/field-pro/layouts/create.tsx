@@ -229,7 +229,7 @@ const fieldMap = {
 };
 
 /** 创建工作项字段实例 */
-const getCreateFields = getFieldsInstance<IFieldBaseConfig, typeof AgileComponentMapWithPro>({ SystemComponents: AgileComponentMapWithPro, CustomComponents: CreateCustomFieldMap });
+export const getCreateFields = getFieldsInstance<IFieldBaseConfig, typeof AgileComponentMapWithPro>({ SystemComponents: AgileComponentMapWithPro, CustomComponents: CreateCustomFieldMap });
 
 // export { fieldMap };
 /**

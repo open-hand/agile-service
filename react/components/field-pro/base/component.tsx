@@ -1,5 +1,7 @@
 import React from 'react';
-import { DatePicker, DateTimePicker, NumberField, TextArea, TextField, TimePicker, } from 'choerodon-ui/pro';
+import {
+  DatePicker, DateTimePicker, NumberField, TextArea, TextField, TimePicker,
+} from 'choerodon-ui/pro';
 import type { TextFieldProps } from 'choerodon-ui/pro/lib/text-field/TextField';
 import type { NumberFieldProps } from 'choerodon-ui/pro/lib/number-field/NumberField';
 import type { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';

@@ -1,8 +1,8 @@
-import React, {useEffect} from 'react';
-import {observer} from 'mobx-react-lite';
-import {DataSet, Form,} from 'choerodon-ui/pro';
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { DataSet, Form } from 'choerodon-ui/pro';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import {IField} from '@/common/types';
+import { IField } from '@/common/types';
 import renderField from './renderField';
 
 export interface IFieldsValueVo {
@@ -24,7 +24,7 @@ export type IRequiredFieldRef = React.MutableRefObject<IRequiredField | null>
 interface Props {
   requiredFields: IField[]
   requiredFieldDataSet: DataSet
-  projectId?:string
+  projectId?: string
 }
 
 const RequiredField: React.FC<Props> = ({

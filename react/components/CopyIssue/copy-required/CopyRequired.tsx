@@ -1,14 +1,15 @@
-import React, {memo, ReactElement, useEffect, useImperativeHandle, useMemo, useState,} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { memo, ReactElement, useEffect, useImperativeHandle, useMemo, useState, } from 'react';
+import { observer } from 'mobx-react-lite';
 import classnames from 'classnames';
-import {DataSet} from 'choerodon-ui/pro';
-import {unstable_batchedUpdates as batchedUpdates} from 'react-dom';
-import {IFieldWidthValue, Issue, ISubIssue} from '@/common/types';
-import {defaultIssueType, issueApi} from '@/api';
+import { DataSet } from 'choerodon-ui/pro';
+import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import { isEmpty } from 'lodash';
+import { IFieldWidthValue, Issue, ISubIssue } from '@/common/types';
+import { defaultIssueType, issueApi } from '@/api';
 import RequiredField from '@/components/required-field';
-import useRequiredFieldDataSet, {RequiredFieldDs} from '@/components/required-field/useRequiredFieldDataSet';
+import useRequiredFieldDataSet, { RequiredFieldDs } from '@/components/required-field/useRequiredFieldDataSet';
 import styles from './CopyRequired.less';
-import SubTaskRequired, {ISubTaskRequiredItem} from './SubTaskRequired';
+import SubTaskRequired, { ISubTaskRequiredItem } from './SubTaskRequired';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -43,7 +44,7 @@ interface Props {
   requiredFieldsVOArrRef: React.MutableRefObject<RequiredFieldDs[] | null>;
   setLoading: (loading: boolean) => void;
   selfExtraRequiredFields: IFieldWidthValue[];
-  projectId?:string;
+  projectId?: string;
 }
 
 const CopyRequired: React.FC<Props> = ({
@@ -57,7 +58,7 @@ const CopyRequired: React.FC<Props> = ({
     setLoading(true);
     issueApi.project(projectId).batchGetRequiredField(issue.issueId).then((res) => {
       batchedUpdates(() => {
-        if(res && res.length > 0){
+        if (res && res.length > 0) {
           setSelfTaskRequiredItem(res[0]);
         }
       });
@@ -73,24 +74,27 @@ const CopyRequired: React.FC<Props> = ({
         batchedUpdates(() => {
           setHasGotSubTaskRequiredItems(true);
           const { issueId } = issue;
-          setSubTaskRequiredItems(res?.filter(item => item.issueId !== issueId) || []);
+          setSubTaskRequiredItems(res?.filter((item) => item.issueId !== issueId && !isEmpty(item.requiredFields)) || []);
         });
       }).finally(() => {
         setLoading(false);
       });
     }
-  }, [copySubIssueChecked, projectId, setLoading]);
+  }, [copySubIssueChecked, hasGotSubTaskRequiredItems, issue, projectId, setLoading]);
 
   const issueIdToSubTaskRequiredItemMap = useMemo<Map<number|string, ISubTaskRequiredItem>>(() => {
     if (!copySubIssueChecked) {
       return new Map<number|string, ISubTaskRequiredItem>();
     }
-    const idToSubIssueMap = subIssues.reduce((pre, cur) => { pre.set(cur.issueId, cur); return pre}, new Map<string, Issue>());
+    const idToSubIssueMap = subIssues.reduce((pre, cur) => { pre.set(cur.issueId, cur); return pre; }, new Map<string, Issue>());
     return subTaskRequiredItems.reduce((map, item) => {
       const subTask = idToSubIssueMap.get(item.issueId);
-      item.issueTypeId = subTask?.issueTypeId;
-      item.issueTypeVO = subTask?.issueTypeVO || defaultIssueType;
-      map.set(item.issueId, item);
+      const itemTemp: ISubTaskRequiredItem = {
+        ...item,
+        issueTypeId: subTask?.issueTypeId,
+        issueTypeVO: subTask?.issueTypeVO || defaultIssueType,
+      };
+      map.set(itemTemp.issueId, itemTemp);
       return map;
     }, new Map<number|string, ISubTaskRequiredItem>());
   }, [copySubIssueChecked, subIssues, subTaskRequiredItems]);
@@ -122,15 +126,16 @@ const CopyRequired: React.FC<Props> = ({
       }
       {
         copySubIssueChecked && !!issueIdToSubTaskRequiredItemMap.size && (
-          <FormPart title={"补全" + (issue.applyType === 'waterfall' ? '子工作项' : '子任务') + "必填字段"}>
+          <FormPart title={`补全${issue.applyType === 'waterfall' ? '子工作项' : '子任务'}必填字段`}>
             {
-              [...issueIdToSubTaskRequiredItemMap.values()].map((item: ISubTaskRequiredItem, i: number) => (
-                <SubTaskRequired
-                  key={item.issueId}
-                  item={item}
-                  requiredFieldDsArr={requiredFieldDsArr}
-                />
-              ))
+              [...issueIdToSubTaskRequiredItemMap.values()]
+                .map((item: ISubTaskRequiredItem, i: number) => (
+                  <SubTaskRequired
+                    key={item.issueId}
+                    item={item}
+                    requiredFieldDsArr={requiredFieldDsArr}
+                  />
+                ))
             }
           </FormPart>
         )
