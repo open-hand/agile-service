@@ -117,6 +117,8 @@ const CommentItem: React.FC<Props> = ({
         objectVersionNumber: comment.objectVersionNumber,
         commentText,
       });
+    } else {
+      setValue(comment.commentText);
     }
     setEditing(false);
   }, [comment.commentId, comment.objectVersionNumber, updateComment, value]);
@@ -255,6 +257,7 @@ const CommentItem: React.FC<Props> = ({
                 style={{ minHeight: 300, width: '100%' }}
                 onCancel={() => {
                   setEditing(false);
+                  setValue(comment.commentText);
                 }}
                 onOk={handleUpdate}
                 projectId={projectId}
