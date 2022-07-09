@@ -162,9 +162,14 @@ export function ganttLocalMove({
 }
 
 const ganttList2Tree = (data: any[]) => list2tree(data, { valueField: 'issueId', parentField: 'parentId' });
-
+/**
+ * 构建史诗模式下的issue
+ * @todo 需要精简
+ * @param data
+ * @returns
+ */
 const formatData = (data: any[]) => data.map((item, i, arr) => {
-  let newItem = Object.assign(item, {});
+  let newItem = { ...item };
   if (item.parentId && item.parentId !== '0' && !arr.find((issue) => issue.issueId === item.parentId)) {
     Object.assign(newItem, { parentId: '0' });
   }
@@ -176,6 +181,10 @@ const formatData = (data: any[]) => data.map((item, i, arr) => {
   }
   if (!item.create && item.issueTypeVO && (item.issueTypeVO.typeCode === 'sub_task' || item.issueTypeVO.typeCode === 'bug') && item.parentId) {
     const parent = arr.find((issue) => issue.issueId === item.parentId);
+    // 不存在则直接返回
+    if (!parent) {
+      return newItem;
+    }
     const newParent = Object.assign(parent, {});
     if (parent.epicId && parent.epicId !== '0' && !arr.find((issue) => issue.issueId === parent.epicId)) {
       Object.assign(newParent, { epicId: '0' });

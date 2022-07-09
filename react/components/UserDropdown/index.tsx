@@ -148,6 +148,7 @@ const UserDropDown: React.FC<IUserDropDownProps> = ({
   const prefixCls = getProPrefixCls('dropdown');
   const inputRef = useRef<TextField>();
   const timeoutIdRef = useRef<number>();
+  const mountDefaultValueRef = useRef<any>();
   const [visible, setVisible] = useState<boolean>(false);
   const triggerRef = useRef<any>();
   const defaultAssignee = useCreation(() => props.defaultAssignee, []);
@@ -175,15 +176,17 @@ const UserDropDown: React.FC<IUserDropDownProps> = ({
         load: ({ dataSet }: any) => {
           if (init && defaultAssignee) {
             changeDatasetSelect(dataSet, defaultAssignee);
+            mountDefaultValueRef.current = true;
           }
           init = false;
         },
         select: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
           if (!dataSet.getState('init')) {
             dataSet.created.length && dataSet.delete(dataSet.created[0], false);
-            events.onChange && events.onChange(record.toData());
           }
+          events.onChange && !mountDefaultValueRef.current && events.onChange(record.toData());
           dataSet.setState('init', false);
+          mountDefaultValueRef.current = false;
         },
         unSelect: ({ dataSet, record }: { dataSet: DataSet, record: any }) => {
           dataSet.created.length && dataSet.delete(dataSet.created[0], false);
