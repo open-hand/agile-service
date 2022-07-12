@@ -20,7 +20,7 @@ public class AgileDataFixTask {
     private FixDataService fixDataService;
 
     @JobTask(maxRetryCount = 3,
-            code = "fixAgileAndProgram",
+            code = "fixStatusTransferRoleData",
             description = "升级到2.2.0,修复状态联动角色数据")
     @TimedTask(name = "fixStatusTransferRoleData",
             description = "升级到2.2.0,修复状态联动角色数据",
