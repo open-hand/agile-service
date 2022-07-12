@@ -8,6 +8,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.StatusTransferType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StatusMapper;
@@ -36,9 +37,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class StatusTransferSettingServiceImpl implements StatusTransferSettingService {
-    private static final String SPECIFIER = "specifier";
-    private static final String PROJECT_OWNER = "projectOwner";
-    private static final String  OTHER = "other";
     @Autowired
     private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired
@@ -71,7 +69,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
         if (!CollectionUtils.isEmpty(list)) {
             for (StatusTransferSettingCreateVO settingCreateVO : list) {
-                if (SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
+                if (StatusTransferType.SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
                     for (Long userId : settingCreateVO.getUserIds()) {
                         StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, projectId, settingCreateVO.getType());
                         statusTransferSettingDTO.setUserId(userId);
@@ -156,14 +154,14 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         Set<Long> userIds = new HashSet<>();
         Boolean verifySubIssueCompleted = false;
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
-            if (PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
+            if (StatusTransferType.PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
                 List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
                 if (!CollectionUtils.isEmpty(body)) {
                     userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
                 }
-            } else if (SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
+            } else if (StatusTransferType.SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
                 userIds.add(statusTransferSettingDTO.getUserId());
-            } else if (OTHER.equals(statusTransferSettingDTO.getUserType())) {
+            } else if (StatusTransferType.OTHER.equals(statusTransferSettingDTO.getUserType())) {
                 verifySubIssueCompleted = statusTransferSettingDTO.getVerifySubissueCompleted();
             }
         }
@@ -215,7 +213,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
         if (!CollectionUtils.isEmpty(list)) {
             for (StatusTransferSettingCreateVO settingCreateVO : list) {
-                if (SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
+                if (StatusTransferType.SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
                     for (Long userId : settingCreateVO.getUserIds()) {
                         StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, 0L, settingCreateVO.getType());
                         statusTransferSettingDTO.setOrganizationId(organizationId);
@@ -303,12 +301,12 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
 
     private void getUserIds(Long projectId, Set<Long> userIds, List<StatusTransferSettingDTO> query){
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
-            if (PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
+            if (StatusTransferType.PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
                 List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
                 if (!CollectionUtils.isEmpty(body)) {
                     userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
                 }
-            } else if (SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
+            } else if (StatusTransferType.SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
                 userIds.add(statusTransferSettingDTO.getUserId());
             }
         }

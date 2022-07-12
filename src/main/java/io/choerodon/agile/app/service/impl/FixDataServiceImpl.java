@@ -2,10 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.agile.api.vo.IssueTypeSearchVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.StatusMachineNodeVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -21,6 +18,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.slf4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -99,6 +97,8 @@ public class FixDataServiceImpl implements FixDataService {
     private AgileTriggerService agileTriggerService;
     @Autowired
     private FixDataMapper fixDataMapper;
+    @Autowired
+    private StatusTransferSettingMapper statusTransferSettingMapper;
 
     @Override
     public void fixCreateProject() {
@@ -307,6 +307,89 @@ public class FixDataServiceImpl implements FixDataService {
         fixAboardType();
         LOGGER.info("完成修复看板数据");
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 1.2.0 <<<<<<<<=================================");
+    }
+
+    @Override
+    public void fixStatusMachineCustomTransferRoleData() {
+        fixStatusTransferSetting();
+        fixStatusNoticeSetting();
+    }
+
+    private void fixStatusNoticeSetting() {
+    }
+
+    private void fixStatusTransferSetting() {
+        LOGGER.info("开始修复fd_status_transfer_setting数据");
+        StatusTransferSettingDTO statusTransferSetting = new StatusTransferSettingDTO();
+        statusTransferSetting.setUserType(StatusTransferType.PROJECT_OWNER);
+        List<StatusTransferSettingDTO> statusTransferSettingList = statusTransferSettingMapper.select(statusTransferSetting);
+        if (statusTransferSettingList.isEmpty()) {
+            return;
+        }
+        Map<Long, Set<Long>> projectRoleMap = new HashMap<>();
+        Map<Long, Set<Long>> organizationRoleMap = new HashMap<>();
+        String projectAdminCode = "project-admin";
+        statusTransferSettingList.forEach(setting -> {
+            Long projectId = setting.getProjectId();
+            Long organizationId = setting.getOrganizationId();
+            Set<Long> roleIds;
+            boolean isOrganizationLevel = Objects.equals(0L, projectId);
+            if (isOrganizationLevel) {
+                //组织层
+                roleIds = organizationRoleMap.get(organizationId);
+                if (ObjectUtils.isEmpty(roleIds)) {
+                    List<RoleVO> roles =
+                            baseFeignClient.listOrganizationRoles(0, 0, null, projectAdminCode, null, organizationId, null, null, null).getBody().getContent();
+                    if (!ObjectUtils.isEmpty(roles)) {
+                        roleIds = new HashSet<>();
+                        roleIds.addAll(roles.stream().map(RoleVO::getId).collect(Collectors.toList()));
+                        organizationRoleMap.put(organizationId, roleIds);
+                    }
+                }
+            } else {
+                roleIds = projectRoleMap.get(projectId);
+                if (ObjectUtils.isEmpty(roleIds)) {
+                    List<RoleVO> roles =
+                            baseFeignClient.listProjectRoles(projectId, null, null)
+                                    .getBody()
+                                    .stream()
+                                    .filter(x -> projectAdminCode.equalsIgnoreCase(x.getCode()))
+                                    .collect(Collectors.toList());
+                    if (!ObjectUtils.isEmpty(roles)) {
+                        roleIds = new HashSet<>();
+                        roleIds.addAll(roles.stream().map(RoleVO::getId).collect(Collectors.toList()));
+                        projectRoleMap.put(projectId, roleIds);
+                    }
+                }
+            }
+            insertOrUpdateStatusTransferSetting(setting, roleIds);
+            LOGGER.info("修复fd_status_transfer_setting数据结束，总计{}条数据", statusTransferSettingList.size());
+        });
+    }
+
+    private void insertOrUpdateStatusTransferSetting(StatusTransferSettingDTO setting, Set<Long> roleIds) {
+        if (ObjectUtils.isEmpty(roleIds)) {
+            return;
+        }
+        List<Long> roleIdList = new ArrayList<>(roleIds);
+        Long updateId = roleIdList.get(0);
+        List<Long> insertRoleIds = new ArrayList<>();
+        if (roleIdList.size() > 1) {
+            for (int i = 1; i < roleIdList.size(); i++) {
+                insertRoleIds.add(roleIdList.get(i));
+            }
+        }
+        setting.setUserType(StatusTransferType.ROLE);
+        setting.setUserId(updateId);
+        statusTransferSettingMapper.updateByPrimaryKeySelective(setting);
+        insertRoleIds.forEach(insertRoleId -> {
+            StatusTransferSettingDTO dto = new StatusTransferSettingDTO();
+            BeanUtils.copyProperties(setting, dto);
+            dto.setId(null);
+            dto.setUserType(StatusTransferType.ROLE);
+            dto.setUserId(insertRoleId);
+            statusTransferSettingMapper.insert(dto);
+        });
     }
 
     private void fixAboardType() {
