@@ -201,6 +201,17 @@ public interface BaseFeignClient {
                                                   @RequestParam(name = "only_select_enable") Boolean onlySelectEnable,
                                                   @RequestParam(name = "role_name") String roleName);
 
+    @GetMapping(value = "/choerodon/v1/roles/search")
+    ResponseEntity<Page<RoleVO>> listOrganizationRoles(@RequestParam Integer page,
+                                                       @RequestParam Integer size,
+                                                       @RequestParam String name,
+                                                       @RequestParam String code,
+                                                       @RequestParam String roleLevel,
+                                                       @RequestParam Long tenantId,
+                                                       @RequestParam Boolean builtIn,
+                                                       @RequestParam Boolean enabled,
+                                                       @RequestParam String params);
+
     @GetMapping(value = "/choerodon/v1/projects/{project_id}/users")
     ResponseEntity<Page<UserVO>> queryUsersByProject(@PathVariable("project_id") Long projectId,
                                                      @RequestParam("param") String param,
