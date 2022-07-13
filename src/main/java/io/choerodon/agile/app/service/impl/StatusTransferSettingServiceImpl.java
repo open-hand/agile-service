@@ -18,6 +18,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
@@ -69,9 +70,12 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
         if (!CollectionUtils.isEmpty(list)) {
             for (StatusTransferSettingCreateVO settingCreateVO : list) {
-                if (StatusTransferType.SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
+                String type = settingCreateVO.getType();
+                boolean containsUserIds = (StatusTransferType.isSpecifier(type) || StatusTransferType.isRole(type));
+                if (containsUserIds
+                        && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
                     for (Long userId : settingCreateVO.getUserIds()) {
-                        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, projectId, settingCreateVO.getType());
+                        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, projectId, type);
                         statusTransferSettingDTO.setUserId(userId);
                         baseInsert(statusTransferSettingDTO);
                     }
@@ -80,7 +84,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                     statusTransferSettingDTO.setIssueTypeId(issueTypeId);
                     statusTransferSettingDTO.setStatusId(statusId);
                     statusTransferSettingDTO.setProjectId(projectId);
-                    statusTransferSettingDTO.setUserType(settingCreateVO.getType());
+                    statusTransferSettingDTO.setUserType(type);
                     baseInsert(statusTransferSettingDTO);
                 }
             }
@@ -153,18 +157,18 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         Long userId = DetailsHelper.getUserDetails().getUserId();
         Set<Long> userIds = new HashSet<>();
         Boolean verifySubIssueCompleted = false;
+        Set<Long> roleIds = new HashSet<>();
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
-            if (StatusTransferType.PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
-                List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
-                if (!CollectionUtils.isEmpty(body)) {
-                    userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
-                }
+            if (StatusTransferType.ROLE.equals(statusTransferSettingDTO.getUserType())) {
+                Long roleId = statusTransferSettingDTO.getUserId();
+                roleIds.add(roleId);
             } else if (StatusTransferType.SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
                 userIds.add(statusTransferSettingDTO.getUserId());
             } else if (StatusTransferType.OTHER.equals(statusTransferSettingDTO.getUserType())) {
                 verifySubIssueCompleted = statusTransferSettingDTO.getVerifySubissueCompleted();
             }
         }
+        queryUserIdsByRoleIds(projectId, userIds, roleIds);
         if (!CollectionUtils.isEmpty(userIds) && !userIds.contains(userId)) {
             return Boolean.TRUE;
         }
@@ -179,6 +183,17 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             }
         }
         return Boolean.FALSE;
+    }
+
+    private void queryUserIdsByRoleIds(Long projectId, Set<Long> userIds, Set<Long> roleIds) {
+        if (!roleIds.isEmpty()) {
+            //查角色下的用户
+            String idString = StringUtils.join(roleIds, ",");
+            List<UserVO> users = baseFeignClient.listUsersUnderRoleByIds(projectId, idString).getBody();
+            if (!ObjectUtils.isEmpty(users)) {
+                userIds.addAll(users.stream().map(UserVO::getId).collect(Collectors.toList()));
+            }
+        }
     }
 
     @Override
@@ -300,16 +315,16 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     }
 
     private void getUserIds(Long projectId, Set<Long> userIds, List<StatusTransferSettingDTO> query){
+        Set<Long> roleIds = new HashSet<>();
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
-            if (StatusTransferType.PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
-                List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
-                if (!CollectionUtils.isEmpty(body)) {
-                    userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
-                }
+            if (StatusTransferType.ROLE.equals(statusTransferSettingDTO.getUserType())) {
+                Long roleId = statusTransferSettingDTO.getUserId();
+                roleIds.add(roleId);
             } else if (StatusTransferType.SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
                 userIds.add(statusTransferSettingDTO.getUserId());
             }
         }
+        queryUserIdsByRoleIds(projectId, userIds, roleIds);
     }
     private void baseInsert(StatusTransferSettingDTO statusTransferSettingDTO) {
         if (statusTransferSettingMapper.insertSelective(statusTransferSettingDTO) != 1) {
