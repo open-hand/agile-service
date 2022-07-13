@@ -134,6 +134,11 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
+    public ResponseEntity<List<UserVO>> listUsersUnderRoleByIds(Long projectId, String roleIdString) {
+        throw new CommonException("error.query.user.under.role.by.ids");
+    }
+
+    @Override
     public ResponseEntity<Boolean> checkIsProjectOwner(Long id, Long projectId) {
         throw new CommonException("error.check.project.admin");
     }
