@@ -1581,7 +1581,7 @@ public class ExcelServiceImpl implements ExcelService {
         setLabelName(labelNames, issueId, exportIssuesVO);
         setComponentName(componentMap, issueId, exportIssuesVO);
         exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
-        exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
+        exportIssuesVO.setDescription(RichTextUtil.getDes(exportIssuesVO.getDescription()));
         setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
         issueMap.put(issueId, exportIssuesVO);
         processParentSonRelation(parentSonMap, issue);
@@ -2052,73 +2052,6 @@ public class ExcelServiceImpl implements ExcelService {
                 fieldMap.put(FIELD_NAMES, fieldsName);
             }
         }
-    }
-
-    public String getDes(String str) {
-        if (str == null) {
-            return "";
-        }
-        StringBuilder result = new StringBuilder();
-        try {
-            JSONArray root = JSON.parseArray(str);
-            for (Object o : root) {
-                JSONObject object = (JSONObject) o;
-                if (!(object.get(INSERT) instanceof JSONObject)) {
-                    result.append(StringEscapeUtils.unescapeJava(object.getString(INSERT)));
-                }
-            }
-        } catch (Exception e){
-            Document doc = Jsoup.parse(str);
-            doc.body().children().forEach(element -> {
-                String tagName = element.tag().getName();
-                if(tagName == null){
-                    result.append(element.text()).append("\n");
-                    return;
-                }
-                switch (tagName){
-                    case "figure":
-                        break;
-                    case "ol":
-                    case "ul":
-                        setListElementStr(result, element);
-                        break;
-                    default:
-                        result.append(element.text()).append("\n");
-                        break;
-                }
-            });
-        }
-        return result.toString().trim();
-    }
-
-    private String setListElementStr(StringBuilder result, Element element) {
-        element.children().forEach(childElement -> result.append(getLiText(childElement)).append("\n"));
-        return element.text();
-    }
-
-    private String getLiText(Element element) {
-        StringBuilder result = new StringBuilder();
-        String liAllText = element.text();
-        StringBuilder childListText = new StringBuilder();
-        StringBuilder childRelText = new StringBuilder();
-        element.children().forEach(childElement -> {
-            String tagName = childElement.tag().getName();
-            if("ol".equals(tagName) || "ul".equals(tagName)){
-                childListText.append(" ").append(setListElementStr(childRelText, childElement));
-            }
-        });
-        if (childListText.length() > 0) {
-            int childTextStart = liAllText.indexOf(childListText.toString());
-            if (childTextStart > -1) {
-                result.append(liAllText, 0, childTextStart);
-            } else {
-                result.append(liAllText);
-            }
-            result.append("\n").append(childRelText.toString());
-        } else {
-            result.append(liAllText);
-        }
-        return result.toString().trim();
     }
 
     protected String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
