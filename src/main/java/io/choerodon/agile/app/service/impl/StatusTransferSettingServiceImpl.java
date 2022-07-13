@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
@@ -129,13 +130,38 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if(CollectionUtils.isEmpty(dtos)){
            return new ArrayList<>();
         }
-        Set<Long> userIds = dtos.stream().filter(v -> !ObjectUtils.isEmpty(v.getUserId())).map(StatusTransferSettingDTO::getUserId).collect(Collectors.toSet());
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long,UserDTO> userDTOMap = new HashMap<>();
+        Map<Long,RoleVO> roleMap = new HashMap<>();
+        processUserAndRoleMap(dtos, organizationId, userDTOMap, roleMap);
+        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap, roleMap);
+    }
+
+    private void processUserAndRoleMap(List<StatusTransferSettingDTO> statusTransferSettingList,
+                                       Long organizationId,
+                                       Map<Long, UserDTO> userMap,
+                                       Map<Long, RoleVO> roleMap) {
+        Set<Long> userIds = new HashSet<>();
+        Set<Long> roleIds = new HashSet<>();
+        statusTransferSettingList.forEach(x -> {
+            String userType = x.getUserType();
+            Long userId = x.getUserId();
+            if (StatusTransferType.isSpecifier(userType)) {
+                userIds.add(userId);
+            } else if (StatusTransferType.isRole(userType)) {
+                roleIds.add(userId);
+            }
+        });
         if(!CollectionUtils.isEmpty(userIds)){
             List<UserDTO> userDTOS = userService.listUsersByIds(userIds.toArray(new Long[userIds.size()]));
-            userDTOMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
+            userMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
         }
-        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap);
+        if (!ObjectUtils.isEmpty(roleIds)) {
+
+            List<RoleVO> roles =
+                    baseFeignClient.listRolesByIds(organizationId, new ArrayList<>(roleIds)).getBody();
+            roleMap.putAll(roles.stream().collect(Collectors.toMap(RoleVO::getId, Function.identity())));
+        }
     }
 
     @Override
@@ -268,13 +294,10 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if(CollectionUtils.isEmpty(dtos)){
             return new ArrayList<>();
         }
-        Set<Long> userIds = dtos.stream().filter(v -> !ObjectUtils.isEmpty(v.getUserId())).map(StatusTransferSettingDTO::getUserId).collect(Collectors.toSet());
-        Map<Long,UserDTO> userDTOMap = new HashMap<>();
-        if(!CollectionUtils.isEmpty(userIds)){
-            List<UserDTO> userDTOS = userService.listUsersByIds(userIds.toArray(new Long[userIds.size()]));
-            userDTOMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
-        }
-        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap);
+        Map<Long, UserDTO> userDTOMap = new HashMap<>();
+        Map<Long, RoleVO> roleMap = new HashMap<>();
+        processUserAndRoleMap(dtos, organizationId, userDTOMap, roleMap);
+        return statusTransferSettingAssembler.listDTOToVO(dtos, userDTOMap, roleMap);
     }
 
     @Override
