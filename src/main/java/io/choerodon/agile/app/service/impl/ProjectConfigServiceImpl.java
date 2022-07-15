@@ -334,7 +334,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Map<Long, StatusVO> statusMap = statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, x -> x));
             // 查询哪些状态能够流转
             List<Long> statusIds = transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toList());
-            List<Long> canTransformStatus = statusTransferSettingService.checkStatusTransform(projectId,issueTypeId, statusIds);
+            List<Long> canTransformStatus = statusTransferSettingService.checkStatusTransform(projectId, statusIds, issueId, issueTypeId);
             List<TransformVO> collect = transformVOS.stream().filter(v -> canTransformStatus.contains(v.getEndStatusId())).collect(Collectors.toList());
             collect.forEach(transformVO -> {
                 StatusVO statusVO = statusMap.get(transformVO.getEndStatusId());
@@ -407,7 +407,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 Set<Long> allStatus = new HashSet<>();
                 allStatus.addAll(!ObjectUtils.isEmpty(boardId) ? boardStatus : statusTransferMap.keySet());
                 // 查询能转换的状态
-                List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
+                List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, new ArrayList<>(allStatus), null, issueType.getId());
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
                 statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && boardStatus.contains(entry.getKey())).forEach(entry ->

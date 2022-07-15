@@ -11,15 +11,14 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.StatusTransferType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.StatusMapper;
-import io.choerodon.agile.infra.mapper.StatusTransferSettingMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.util.Pair;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
@@ -59,7 +58,12 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
-
+    @Autowired
+    private IssueParticipantRelMapper issueParticipantRelMapper;
+    @Autowired
+    private IssueUserRelMapper issueUserRelMapper;
+    @Autowired
+    private FieldValueMapper fieldValueMapper;
     private static final List<String> WATERFALL_ISSUE_TYPES = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
 
 
@@ -175,26 +179,15 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
 
     @Override
     public Boolean verifyStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId){
-        List<StatusTransferSettingDTO> query = query(projectId, issueDTO.getIssueTypeId(), endStatusId);
-        if (CollectionUtils.isEmpty(query)) {
+        List<StatusTransferSettingDTO> statusTransferSettingList = query(projectId, issueDTO.getIssueTypeId(), endStatusId);
+        if (CollectionUtils.isEmpty(statusTransferSettingList)) {
             return Boolean.FALSE;
         }
         // 获取当前的用户
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        Set<Long> userIds = new HashSet<>();
-        Boolean verifySubIssueCompleted = false;
-        Set<Long> roleIds = new HashSet<>();
-        for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
-            if (StatusTransferType.ROLE.equals(statusTransferSettingDTO.getUserType())) {
-                Long roleId = statusTransferSettingDTO.getUserId();
-                roleIds.add(roleId);
-            } else if (StatusTransferType.SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
-                userIds.add(statusTransferSettingDTO.getUserId());
-            } else if (StatusTransferType.OTHER.equals(statusTransferSettingDTO.getUserType())) {
-                verifySubIssueCompleted = statusTransferSettingDTO.getVerifySubissueCompleted();
-            }
-        }
-        queryUserIdsByRoleIds(projectId, userIds, roleIds);
+        Pair<Set<Long>, Boolean> pair = queryUserIdsAndVerify(projectId, statusTransferSettingList, issueDTO);
+        Set<Long> userIds = pair.getFirst();
+        Boolean verifySubIssueCompleted = pair.getSecond();
         if (!CollectionUtils.isEmpty(userIds) && !userIds.contains(userId)) {
             return Boolean.TRUE;
         }
@@ -223,7 +216,14 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     }
 
     @Override
-    public List<Long> checkStatusTransform(Long projectId, Long issueTypeId, List<Long> statusIds) {
+    public List<Long> checkStatusTransform(Long projectId,
+                                           List<Long> statusIds,
+                                           Long issueId,
+                                           Long issueTypeId) {
+        IssueDTO issue = null;
+        if (!ObjectUtils.isEmpty(issueId)) {
+            issue = issueMapper.selectByPrimaryKey(issueId);
+        }
         List<StatusTransferSettingDTO> dtos = statusTransferSettingMapper.listByStatusId(projectId, issueTypeId, statusIds);
         if (CollectionUtils.isEmpty(dtos)) {
             return statusIds;
@@ -235,8 +235,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             if (CollectionUtils.isEmpty(statusTransfer)) {
                 list.add(statusId);
             } else {
-                Set<Long> userIds = new HashSet<>();
-                getUserIds(projectId, userIds, statusTransfer);
+                Set<Long> userIds = queryUserIdsAndVerify(projectId, statusTransfer, issue).getFirst();
                 Long userId = DetailsHelper.getUserDetails().getUserId();
                 if (CollectionUtils.isEmpty(userIds) || userIds.contains(userId)) {
                     list.add(statusId);
@@ -337,18 +336,79 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         return statusList;
     }
 
-    private void getUserIds(Long projectId, Set<Long> userIds, List<StatusTransferSettingDTO> query){
+    /**
+     *
+     * @param projectId
+     * @param StatusTransferSettingList
+     * @param issue
+     * @return 用户集合， 是否校验子任务已完成
+     */
+    private Pair<Set<Long>, Boolean> queryUserIdsAndVerify(Long projectId,
+                                                           List<StatusTransferSettingDTO> StatusTransferSettingList,
+                                                           IssueDTO issue) {
+        Long issueId = null;
+        Long assigneeId = null;
+        Long reporterId = null;
+        Long mainResponsibleId = null;
+        if (!ObjectUtils.isEmpty(issue)) {
+            issueId = issue.getIssueId();
+            assigneeId = issue.getAssigneeId();
+            reporterId = issue.getReporterId();
+            mainResponsibleId = issue.getMainResponsibleId();
+        }
         Set<Long> roleIds = new HashSet<>();
-        for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
-            if (StatusTransferType.ROLE.equals(statusTransferSettingDTO.getUserType())) {
-                Long roleId = statusTransferSettingDTO.getUserId();
-                roleIds.add(roleId);
-            } else if (StatusTransferType.SPECIFIER.equals(statusTransferSettingDTO.getUserType())) {
-                userIds.add(statusTransferSettingDTO.getUserId());
+        boolean verifySubIssueCompleted = false;
+        Set<Long> userIds = new HashSet<>();
+        for (StatusTransferSettingDTO statusTransferSetting : StatusTransferSettingList) {
+            String userType = statusTransferSetting.getUserType();
+            Long userId = statusTransferSetting.getUserId();
+            switch (userType) {
+                case StatusTransferType.SPECIFIER:
+                    userIds.add(userId);
+                    break;
+                case StatusTransferType.ROLE:
+                    roleIds.add(userId);
+                    break;
+                case StatusTransferType.OTHER:
+                    verifySubIssueCompleted = statusTransferSetting.getVerifySubissueCompleted();
+                    break;
+                case StatusTransferType.ASSIGNEE:
+                    if (!ObjectUtils.isEmpty(assigneeId)) {
+                        userIds.add(assigneeId);
+                    }
+                    break;
+                case StatusTransferType.REPORTER:
+                    if (!ObjectUtils.isEmpty(reporterId)) {
+                        userIds.add(reporterId);
+                    }
+                    break;
+                case StatusTransferType.PARTICIPANT:
+                    if (!ObjectUtils.isEmpty(issueId)) {
+                        userIds.addAll(issueParticipantRelMapper.listByIssueId(projectId, issueId));
+                    }
+                    break;
+                case StatusTransferType.MAIN_RESPONSIBLE:
+                    if (!ObjectUtils.isEmpty(mainResponsibleId)) {
+                        userIds.add(mainResponsibleId);
+                    }
+                    break;
+                case StatusTransferType.RELATED_PARTIES:
+                    if (!ObjectUtils.isEmpty(issueId)) {
+                        userIds.addAll(issueUserRelMapper.listUserIdsByIssueId(projectId, issueId, "relatedParties"));
+                    }
+                    break;
+                default:
+                    // 不在默认配置里，则检索自定义字段，有则加入，没有则忽略
+                    if (!ObjectUtils.isEmpty(issueId)) {
+                        userIds.addAll(fieldValueMapper.selectUserIdByField(projectId, Collections.singletonList(userType), issueId));
+                    }
+                    break;
             }
         }
         queryUserIdsByRoleIds(projectId, userIds, roleIds);
+        return Pair.of(userIds, verifySubIssueCompleted);
     }
+
     private void baseInsert(StatusTransferSettingDTO statusTransferSettingDTO) {
         if (statusTransferSettingMapper.insertSelective(statusTransferSettingDTO) != 1) {
             throw new CommonException("error.insert.status.transfer.setting");
