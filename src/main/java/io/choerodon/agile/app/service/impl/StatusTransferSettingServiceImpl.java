@@ -18,6 +18,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.util.Pair;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
@@ -184,8 +185,9 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
         // 获取当前的用户
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        Set<Long> userIds = new HashSet<>();
-        Boolean verifySubIssueCompleted = getUserIds(projectId, userIds, statusTransferSettingList, issueDTO);
+        Pair<Set<Long>, Boolean> pair = queryUserIdsAndVerify(projectId, statusTransferSettingList, issueDTO);
+        Set<Long> userIds = pair.getFirst();
+        Boolean verifySubIssueCompleted = pair.getSecond();
         if (!CollectionUtils.isEmpty(userIds) && !userIds.contains(userId)) {
             return Boolean.TRUE;
         }
@@ -233,8 +235,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             if (CollectionUtils.isEmpty(statusTransfer)) {
                 list.add(statusId);
             } else {
-                Set<Long> userIds = new HashSet<>();
-                getUserIds(projectId, userIds, statusTransfer, issue);
+                Set<Long> userIds = queryUserIdsAndVerify(projectId, statusTransfer, issue).getFirst();
                 Long userId = DetailsHelper.getUserDetails().getUserId();
                 if (CollectionUtils.isEmpty(userIds) || userIds.contains(userId)) {
                     list.add(statusId);
@@ -335,10 +336,16 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         return statusList;
     }
 
-    private boolean getUserIds(Long projectId,
-                               Set<Long> userIds,
-                               List<StatusTransferSettingDTO> StatusTransferSettingList,
-                               IssueDTO issue) {
+    /**
+     *
+     * @param projectId
+     * @param StatusTransferSettingList
+     * @param issue
+     * @return 用户集合， 是否校验子任务已完成
+     */
+    private Pair<Set<Long>, Boolean> queryUserIdsAndVerify(Long projectId,
+                                                           List<StatusTransferSettingDTO> StatusTransferSettingList,
+                                                           IssueDTO issue) {
         Long issueId = null;
         Long assigneeId = null;
         Long reporterId = null;
@@ -351,6 +358,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
         Set<Long> roleIds = new HashSet<>();
         boolean verifySubIssueCompleted = false;
+        Set<Long> userIds = new HashSet<>();
         for (StatusTransferSettingDTO statusTransferSetting : StatusTransferSettingList) {
             String userType = statusTransferSetting.getUserType();
             Long userId = statusTransferSetting.getUserId();
@@ -398,7 +406,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             }
         }
         queryUserIdsByRoleIds(projectId, userIds, roleIds);
-        return verifySubIssueCompleted;
+        return Pair.of(userIds, verifySubIssueCompleted);
     }
 
     private void baseInsert(StatusTransferSettingDTO statusTransferSettingDTO) {
