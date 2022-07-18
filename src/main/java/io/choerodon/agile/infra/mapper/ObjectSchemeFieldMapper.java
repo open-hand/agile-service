@@ -112,7 +112,8 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
      * @param fieldCodes
      * @return
      */
-    List<ObjectSchemeFieldDTO> selectFieldsByFieldCodes(@Param("fieldCodes") List<String> fieldCodes);
+    List<ObjectSchemeFieldDTO> selectFieldsByFieldCodes(@Param("organizationId") Long organizationId,
+                                                        @Param("fieldCodes") List<String> fieldCodes);
 
     List<ObjectSchemeFieldDTO> selectNotSyncField(@Param("systemFieldIds") List<Long> systemFieldIds, @Param("includeBacklogSystemField") boolean includeBacklogSystemField);
 

@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author superlee
  * @since 2022-07-11
@@ -15,6 +18,18 @@ public class StatusTransferType {
     public static final String PARTICIPANT = "participant";
     public static final String MAIN_RESPONSIBLE = "mainResponsible";
     public static final String RELATED_PARTIES = "relatedParties";
+
+    public static final List<String> ALL_TYPES =
+            Arrays.asList(
+                    SPECIFIER,
+                    PROJECT_OWNER,
+                    OTHER,
+                    ROLE,
+                    ASSIGNEE,
+                    REPORTER,
+                    PARTICIPANT,
+                    MAIN_RESPONSIBLE,
+                    RELATED_PARTIES);
 
 
     public static boolean isSpecifier(String value) {
