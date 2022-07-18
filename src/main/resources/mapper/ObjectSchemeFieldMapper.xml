@@ -527,6 +527,8 @@
             t1.is_system,
             t1.extra_config,
             t1.is_required,
+            t1.organization_id,
+            t1.project_id,
             flv.name as field_type_name,
             t1.is_required as required,
             ffo.id as ffo_id,
