@@ -138,7 +138,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         Map<Long,UserDTO> userDTOMap = new HashMap<>();
         Map<Long,RoleVO> roleMap = new HashMap<>();
         processUserAndRoleMap(dtos, organizationId, userDTOMap, roleMap);
-        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap, roleMap);
+        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap, roleMap, ConvertUtil.getOrganizationId(projectId));
     }
 
     private void processUserAndRoleMap(List<StatusTransferSettingDTO> statusTransferSettingList,
@@ -253,9 +253,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
         if (!CollectionUtils.isEmpty(list)) {
             for (StatusTransferSettingCreateVO settingCreateVO : list) {
-                if (StatusTransferType.SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
+                String type = settingCreateVO.getType();
+                boolean containsUserIds = (StatusTransferType.isSpecifier(type) || StatusTransferType.isRole(type));
+                if (containsUserIds && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
                     for (Long userId : settingCreateVO.getUserIds()) {
-                        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, 0L, settingCreateVO.getType());
+                        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, 0L, type);
                         statusTransferSettingDTO.setOrganizationId(organizationId);
                         statusTransferSettingDTO.setUserId(userId);
                         baseInsert(statusTransferSettingDTO);
@@ -265,7 +267,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                     statusTransferSettingDTO.setIssueTypeId(issueTypeId);
                     statusTransferSettingDTO.setStatusId(statusId);
                     statusTransferSettingDTO.setProjectId(0L);
-                    statusTransferSettingDTO.setUserType(settingCreateVO.getType());
+                    statusTransferSettingDTO.setUserType(type);
                     statusTransferSettingDTO.setOrganizationId(organizationId);
                     baseInsert(statusTransferSettingDTO);
                 }
@@ -296,7 +298,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         Map<Long, UserDTO> userDTOMap = new HashMap<>();
         Map<Long, RoleVO> roleMap = new HashMap<>();
         processUserAndRoleMap(dtos, organizationId, userDTOMap, roleMap);
-        return statusTransferSettingAssembler.listDTOToVO(dtos, userDTOMap, roleMap);
+        return statusTransferSettingAssembler.listDTOToVO(dtos, userDTOMap, roleMap, organizationId);
     }
 
     @Override

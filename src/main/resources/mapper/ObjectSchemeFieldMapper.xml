@@ -537,7 +537,8 @@
         from fd_object_scheme_field t1
         left join lookup_value flv on flv.value_code = t1.field_type and flv.type_code = 'field_type'
         left join fd_field_option ffo on t1.id = ffo.field_id
-        where t1.code in
+        where t1.organization_id = #{organizationId}
+        and t1.code in
         <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
            #{fieldCode}
         </foreach>
