@@ -38,7 +38,7 @@ public interface DevopsFeignClient {
                                                   @RequestBody List<AppServiceSimpleVO> appServiceList);
 
     @GetMapping({"/v1/projects/{project_id}/branch/issue/check_rel_exist"})
-    ResponseEntity<Boolean> checkIssueBranchRelExist(@PathVariable(value = "project_id") Long projectId,
+    ResponseEntity<String> checkIssueBranchRelExist(@PathVariable(value = "project_id") Long projectId,
                                                      @RequestParam("issue_id") Long issueId);
 
     @PostMapping({"/v1/projects/{project_id}/branch/issue/copy_rel"})

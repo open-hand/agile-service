@@ -1,10 +1,14 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 import io.choerodon.agile.api.vo.WorkCalendarHolidayRefVO;
 import io.choerodon.agile.app.assembler.WorkCalendarHolidayRefAssembler;
 import io.choerodon.agile.app.service.WorkCalendarHolidayRefService;
 import io.choerodon.agile.infra.dto.WorkCalendarHolidayRefDTO;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.utils.DateUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -13,10 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
 
 /**
  * @author dinghuang123@gmail.com
@@ -29,7 +29,7 @@ public class WorkCalendarHolidayRefServiceImpl implements WorkCalendarHolidayRef
     @Autowired
     private WorkCalendarHolidayRefAssembler workCalendarHolidayRefAssembler;
     @Autowired
-    private RemoteIamFeignClient remoteIamFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -40,7 +40,7 @@ public class WorkCalendarHolidayRefServiceImpl implements WorkCalendarHolidayRef
 
     @Override
     public List<WorkCalendarHolidayRefVO> queryByYearIncludeLastAndNext(Integer year) {
-        return formatAndSortToDTO(modelMapper.map(remoteIamFeignClient.queryByYearIncludeLastAndNext(0L, year).getBody(),
+        return formatAndSortToDTO(modelMapper.map(remoteIamOperator.queryByYearIncludeLastAndNext(0L, year),
                 new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
                 }.getType()));
     }

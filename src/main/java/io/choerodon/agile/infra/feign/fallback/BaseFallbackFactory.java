@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.feign.fallback;
 
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
+import io.choerodon.agile.infra.feign.IamFeignClient;
 import io.choerodon.agile.infra.utils.FeignFallbackUtil;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
  * @since 2022/7/13
  */
 @Component
-public class BaseFallbackFactory implements FallbackFactory<RemoteIamFeignClient> {
+public class BaseFallbackFactory implements FallbackFactory<IamFeignClient> {
 
     @Override
-    public RemoteIamFeignClient create(Throwable cause) {
-        return FeignFallbackUtil.get(cause, RemoteIamFeignClient.class);
+    public IamFeignClient create(Throwable cause) {
+        return FeignFallbackUtil.get(cause, IamFeignClient.class);
     }
 }

@@ -1,23 +1,26 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
-import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
 import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -27,10 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -56,13 +55,9 @@ public class StatusServiceImpl implements StatusService {
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private IssueMapper issueMapper;
-    @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
     private IssueStatusService issueStatusService;
-    @Autowired
-    private RemoteIamFeignClient remoteIamFeignClient;
     @Autowired
     private IssueStatusMapper issueStatusMapper;
     @Autowired

@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 public interface TestFeignClient {
 
     @DeleteMapping(value = "/v1/projects/{project_id}/defect/delete_relation/{defectId}")
-    ResponseEntity deleteTestRel(@PathVariable(value = "project_id") Long projectId,
-                                 @PathVariable(name = "defectId") Long defectId);
+    ResponseEntity<Void> deleteTestRel(@PathVariable(value = "project_id") Long projectId,
+                                       @PathVariable(name = "defectId") Long defectId);
 
     @DeleteMapping(value = "/v1/projects/{project_id}/project_info")
     ResponseEntity<String> queryProjectInfo(@ApiParam(value = "项目id", required = true)
@@ -29,7 +29,7 @@ public interface TestFeignClient {
                                 @RequestBody List<Long> statusIds);
 
     @GetMapping("/v1/projects/{project_id}/case_link/check_exist")
-    ResponseEntity<Boolean> checkTestCaseLinkExist(@ApiParam(value = "项目id", required = true)
+    ResponseEntity<String> checkTestCaseLinkExist(@ApiParam(value = "项目id", required = true)
                                                    @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "issueId", required = true)
                                                    @RequestParam(name = "issue_id")

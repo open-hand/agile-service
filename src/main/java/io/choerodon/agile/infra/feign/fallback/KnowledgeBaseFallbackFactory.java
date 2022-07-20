@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.feign.fallback;
 
-import io.choerodon.agile.infra.feign.KnowledgebaseClient;
+import io.choerodon.agile.infra.feign.KnowledgebaseFeignClient;
 import io.choerodon.agile.infra.utils.FeignFallbackUtil;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
  * @since 2022/7/13
  */
 @Component
-public class KnowledgeBaseFallbackFactory implements FallbackFactory<KnowledgebaseClient> {
+public class KnowledgeBaseFallbackFactory implements FallbackFactory<KnowledgebaseFeignClient> {
 
     @Override
-    public KnowledgebaseClient create(Throwable cause) {
-        return FeignFallbackUtil.get(cause, KnowledgebaseClient.class);
+    public KnowledgebaseFeignClient create(Throwable cause) {
+        return FeignFallbackUtil.get(cause, KnowledgebaseFeignClient.class);
     }
 }

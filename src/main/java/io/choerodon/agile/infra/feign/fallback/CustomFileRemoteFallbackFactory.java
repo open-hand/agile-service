@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.feign.fallback;
 
-import io.choerodon.agile.infra.feign.CustomFileRemoteService;
+import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import io.choerodon.agile.infra.utils.FeignFallbackUtil;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
  * @since 2022/7/13
  */
 @Component
-public class CustomFileRemoteFallbackFactory implements FallbackFactory<CustomFileRemoteService> {
+public class CustomFileRemoteFallbackFactory implements FallbackFactory<CustomFileFeignClient> {
 
     @Override
-    public CustomFileRemoteService create(Throwable cause) {
-        return FeignFallbackUtil.get(cause, CustomFileRemoteService.class);
+    public CustomFileFeignClient create(Throwable cause) {
+        return FeignFallbackUtil.get(cause, CustomFileFeignClient.class);
     }
 }

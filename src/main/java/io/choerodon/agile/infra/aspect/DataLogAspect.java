@@ -15,7 +15,6 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -202,11 +201,7 @@ public class DataLogAspect {
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
     @Autowired
-    private RemoteIamFeignClient remoteIamFeignClient;
-    @Autowired
     private RemoteIamOperator remoteIamOperator;
-    @Autowired
-    private StaticFileHeaderMapper staticFileHeaderMapper;
     @Autowired
     private StaticFileIssueRelMapper staticFileIssueRelMapper;
     @Autowired

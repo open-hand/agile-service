@@ -1,11 +1,12 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.StatusParamVO;
+import java.util.List;
+import java.util.Optional;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -24,9 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * @author zhaotianxin

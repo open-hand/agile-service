@@ -1,5 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.google.common.reflect.TypeToken;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -7,7 +10,6 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.*;
@@ -28,9 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin

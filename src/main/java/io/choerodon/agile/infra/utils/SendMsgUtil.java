@@ -1,11 +1,30 @@
 package io.choerodon.agile.infra.utils;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.IssueCommentVO;
+import io.choerodon.agile.api.vo.IssueMoveVO;
+import io.choerodon.agile.api.vo.IssueSubVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.NoticeService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.IssueConstant;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.mapper.StarBeaconMapper;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
@@ -18,27 +37,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import io.choerodon.agile.api.vo.IssueCommentVO;
-import io.choerodon.agile.api.vo.IssueMoveVO;
-import io.choerodon.agile.api.vo.IssueSubVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.app.service.NoticeService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.mapper.IssueStatusMapper;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.
@@ -81,9 +79,6 @@ public class SendMsgUtil {
 
     @Autowired
     private IssueStatusMapper issueStatusMapper;
-
-    @Autowired
-    private RemoteIamFeignClient remoteIamFeignClient;
 
     @Autowired
     private ProjectInfoMapper projectInfoMapper;

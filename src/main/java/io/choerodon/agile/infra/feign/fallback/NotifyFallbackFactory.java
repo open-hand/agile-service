@@ -1,6 +1,5 @@
 package io.choerodon.agile.infra.feign.fallback;
 
-import io.choerodon.agile.infra.feign.KnowledgebaseClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.utils.FeignFallbackUtil;
 import org.springframework.cloud.openfeign.FallbackFactory;

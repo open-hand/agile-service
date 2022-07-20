@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Component
 @FeignClient(value = "choerodon-iam", fallbackFactory = BaseFallbackFactory.class)
-public interface RemoteIamFeignClient {
+public interface IamFeignClient {
 
     /**
      * 查询用户信息

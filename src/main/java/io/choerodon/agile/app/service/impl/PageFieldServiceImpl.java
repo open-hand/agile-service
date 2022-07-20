@@ -1,12 +1,15 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.CopyPageField;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
@@ -21,10 +24,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -77,8 +76,6 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
-    @Autowired
-    private RemoteIamFeignClient remoteIamFeignClient;
 
     @Autowired
     private FieldCascadeRuleService fieldCascadeRuleService;

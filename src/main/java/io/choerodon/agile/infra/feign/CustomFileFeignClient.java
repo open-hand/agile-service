@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 2020-05-22
  */
 @FeignClient(value = "choerodon-file", fallbackFactory = CustomFileRemoteFallbackFactory.class)
-public interface CustomFileRemoteService {
+public interface CustomFileFeignClient {
 
     @PostMapping({"/choerodon/v1/{organizationId}/delete-by-url"})
     ResponseEntity<String> deleteFileByUrl(@PathVariable("organizationId") Long organizationId,

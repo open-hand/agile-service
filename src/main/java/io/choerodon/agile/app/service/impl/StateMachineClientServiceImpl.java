@@ -4,16 +4,6 @@ import java.util.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.infra.enums.InstanceType;
-import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.IssueSubCreateVO;
 import io.choerodon.agile.api.vo.IssueSubVO;
@@ -31,6 +21,7 @@ import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.dto.RankDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -53,6 +44,13 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author shinan.chen
@@ -89,8 +87,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private StateMachineClient stateMachineClient;
-    @Autowired
-    private RemoteIamFeignClient remoteIamFeignClient;
     @Autowired
     private RankMapper rankMapper;
     @Autowired

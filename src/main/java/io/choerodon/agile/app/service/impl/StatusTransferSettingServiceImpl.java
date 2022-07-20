@@ -1,12 +1,19 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.IssueCountDTO;
+import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.StatusTransferType;
@@ -26,10 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -163,7 +166,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (!ObjectUtils.isEmpty(roleIds)) {
 
             List<RoleVO> roles =
-                    baseFeignClient.listRolesByIds(organizationId, new ArrayList<>(roleIds)).getBody();
+                    remoteIamOperator.listRolesByIds(organizationId, new ArrayList<>(roleIds));
             roleMap.putAll(roles.stream().collect(Collectors.toMap(RoleVO::getId, Function.identity())));
         }
     }
