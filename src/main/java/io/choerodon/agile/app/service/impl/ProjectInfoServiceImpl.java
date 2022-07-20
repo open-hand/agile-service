@@ -5,7 +5,7 @@ import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.ProjectInfoService;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
@@ -30,7 +30,7 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamFeignClient remoteIamFeignClient;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired(required = false)

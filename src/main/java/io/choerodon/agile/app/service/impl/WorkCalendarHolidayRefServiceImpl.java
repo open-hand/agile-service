@@ -4,7 +4,7 @@ import io.choerodon.agile.api.vo.WorkCalendarHolidayRefVO;
 import io.choerodon.agile.app.assembler.WorkCalendarHolidayRefAssembler;
 import io.choerodon.agile.app.service.WorkCalendarHolidayRefService;
 import io.choerodon.agile.infra.dto.WorkCalendarHolidayRefDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.utils.DateUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -29,7 +29,7 @@ public class WorkCalendarHolidayRefServiceImpl implements WorkCalendarHolidayRef
     @Autowired
     private WorkCalendarHolidayRefAssembler workCalendarHolidayRefAssembler;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamFeignClient remoteIamFeignClient;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -40,7 +40,7 @@ public class WorkCalendarHolidayRefServiceImpl implements WorkCalendarHolidayRef
 
     @Override
     public List<WorkCalendarHolidayRefVO> queryByYearIncludeLastAndNext(Integer year) {
-        return formatAndSortToDTO(modelMapper.map(baseFeignClient.queryByYearIncludeLastAndNext(0L, year).getBody(),
+        return formatAndSortToDTO(modelMapper.map(remoteIamFeignClient.queryByYearIncludeLastAndNext(0L, year).getBody(),
                 new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
                 }.getType()));
     }

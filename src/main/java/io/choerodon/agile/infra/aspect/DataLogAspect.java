@@ -1,5 +1,13 @@
 package io.choerodon.agile.infra.aspect;
 
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.DataLog;
@@ -7,7 +15,8 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
@@ -25,14 +34,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 日志切面
@@ -201,7 +202,9 @@ public class DataLogAspect {
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamFeignClient remoteIamFeignClient;
+    @Autowired
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private StaticFileHeaderMapper staticFileHeaderMapper;
     @Autowired
@@ -591,7 +594,7 @@ public class DataLogAspect {
             Set<Long> projectIds = new HashSet<>();
             projectIds.add(projectId);
             projectIds.add(targetProjectId);
-            List<ProjectVO> projectVOS = baseFeignClient.queryByIds(projectIds).getBody();
+            List<ProjectVO> projectVOS = remoteIamOperator.queryProjectByIds(projectIds);
             if (CollectionUtils.isEmpty(projectVOS) || !Objects.equals(projectVOS.size(),projectIds.size())) {
                 throw new CommonException("error.project.not.found");
             }

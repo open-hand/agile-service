@@ -1,24 +1,25 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
+import io.choerodon.agile.api.vo.RoleVO;
+import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -28,11 +29,11 @@ import java.util.stream.Collectors;
 @Component
 public class UserServiceImpl implements UserService {
 
-    private final BaseFeignClient baseFeignClient;
+    private final RemoteIamOperator remoteIamOperator;
 
     @Autowired
-    public UserServiceImpl(BaseFeignClient baseFeignClient) {
-        this.baseFeignClient = baseFeignClient;
+    public UserServiceImpl(RemoteIamOperator remoteIamOperator) {
+        this.remoteIamOperator = remoteIamOperator;
     }
 
     @Override
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
         if (userId == null || userId == 0) {
             return new UserDTO();
         } else {
-            UserDTO userDTO = baseFeignClient.query(customUserDetails.getOrganizationId(), userId).getBody();
+            UserDTO userDTO = remoteIamOperator.query(customUserDetails.getOrganizationId(), userId);
             if (withId) {
                 userDTO.setRealName(userDTO.getLoginName() + userDTO.getRealName());
                 return userDTO;
@@ -60,7 +61,7 @@ public class UserServiceImpl implements UserService {
         if (!assigneeIdList.isEmpty()) {
             Long[] assigneeIds = new Long[assigneeIdList.size()];
             assigneeIdList.toArray(assigneeIds);
-            List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(assigneeIds, false).getBody();
+            List<UserDTO> userDTOS = remoteIamOperator.listUsersByIds(assigneeIds, false);
             if (withLoginName) {
                 userDTOS.forEach(userDO -> {
                     String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
@@ -90,7 +91,7 @@ public class UserServiceImpl implements UserService {
         if (!assigneeIdList.isEmpty()) {
             Long[] assigneeIds = new Long[assigneeIdList.size()];
             assigneeIdList.toArray(assigneeIds);
-            List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(assigneeIds, false).getBody();
+            List<UserDTO> userDTOS = remoteIamOperator.listUsersByIds(assigneeIds, false);
             if (withLoginName) {
                 userDTOS.forEach(userDO -> {
                     String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
@@ -118,7 +119,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserMessageDTO> queryUserByProjectId(Long projectId, int page, int size, Boolean withLoginName) {
-        Page<UserVO> pages = baseFeignClient.queryUsersByProject(projectId, null, page, size).getBody();
+        Page<UserVO> pages = remoteIamOperator.queryUsersByProject(projectId, null, page, size);
         if (CollectionUtils.isEmpty(pages.getContent())) {
             return new Page<>();
         }
@@ -137,7 +138,7 @@ public class UserServiceImpl implements UserService {
                                 userDO.getLdap(),
                                 userDO.getId());
                         userMessageDTO.setCreationDate(userDO.getCreationDate());
-                        return  userMessageDTO;
+                        return userMessageDTO;
                     }).collect(Collectors.toList());
         } else {
             content = pages.getContent().stream()
@@ -153,7 +154,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserMessageDTO> queryUserByOrganizationId(Long organizationId, int page, int size, Boolean withLoginName) {
-        Page<UserVO> pages = baseFeignClient.queryUsersByOrganization(organizationId, null, page, size).getBody();
+        Page<UserVO> pages = remoteIamOperator.queryUsersByOrganization(organizationId, null, page, size);
         if (CollectionUtils.isEmpty(pages.getContent())) {
             return new Page<>();
         }
@@ -164,7 +165,7 @@ public class UserServiceImpl implements UserService {
                     .map(userDO -> {
                         String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
                         String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
-                        return   new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                        return new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
                                 userDO.getLoginName(),
                                 userDO.getRealName(),
                                 userDO.getImageUrl(),
@@ -182,12 +183,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserVO> queryUsersByNameAndProjectId(Long projectId, String name) {
-        ResponseEntity<Page<UserVO>> userList = baseFeignClient.list(projectId, name);
-        if (userList != null) {
-            return userList.getBody().getContent();
-        } else {
-            return new ArrayList<>();
-        }
+        return remoteIamOperator.list(projectId, name);
     }
 
     @Override
@@ -195,55 +191,49 @@ public class UserServiceImpl implements UserService {
         if (ObjectUtils.isEmpty(realNames)) {
             return new ArrayList<>();
         } else {
-            return baseFeignClient.listUsersByRealNames(onlyEnabled, new HashSet<>(realNames)).getBody();
+            return remoteIamOperator.listUsersByRealNames(onlyEnabled, new HashSet<>(realNames));
         }
     }
 
     @Override
     public List<UserVO> listProjectAdminUsersByProjectId(Long projectId) {
-        List<UserVO> users = baseFeignClient.listProjectOwnerById(projectId).getBody();
+        List<UserVO> users = remoteIamOperator.listProjectOwnerById(projectId);
         return !CollectionUtils.isEmpty(users) ? users : new ArrayList<>();
     }
 
     @Override
     public List<UserVO> listAllUsersByProject(Long projectId) {
-        ResponseEntity<Page<UserVO>> users = baseFeignClient.queryUsersByProject(projectId, null, 0, 0);
-        return users != null ? users.getBody() : new ArrayList<>();
+        return remoteIamOperator.queryUsersByProject(projectId, null, 0, 0);
     }
 
     @Override
     public List<UserVO> listAllUsersByOrganization(Long organizationId) {
-        ResponseEntity<Page<UserVO>> users = baseFeignClient.queryUsersByOrganization(organizationId, null, 0, 0);
-        return users != null ? users.getBody() : new ArrayList<>();
+        return remoteIamOperator.queryUsersByOrganization(organizationId, null, 0, 0);
     }
 
     @Override
     public ProjectVO queryProject(Long projectId) {
-        return baseFeignClient.queryProject(projectId).getBody();
+        return remoteIamOperator.queryProject(projectId);
     }
 
     @Override
     public List<RoleVO> listRolesWithUserCountOnProjectLevel(Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
-        ResponseEntity<List<RoleVO>> roles = baseFeignClient.listRolesWithUserCountOnProjectLevel(sourceId, roleAssignmentSearchVO);
-        return roles != null ? roles.getBody() : new ArrayList<>();
+        return remoteIamOperator.listRolesWithUserCountOnProjectLevel(sourceId, roleAssignmentSearchVO);
     }
 
     @Override
     public Page<UserVO> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
-        ResponseEntity<Page<UserVO>> users = baseFeignClient.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, true, sourceId, roleAssignmentSearchVO);
-        return users != null ? users.getBody() : new Page<>();
+        return remoteIamOperator.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, true, sourceId, roleAssignmentSearchVO);
     }
 
     @Override
     public List<UserDTO> listUsersByIds(Long[] ids) {
-        ResponseEntity<List<UserDTO>> users = baseFeignClient.listUsersByIds(ids, false);
-        return users != null ? users.getBody() : new ArrayList<>();
+        return remoteIamOperator.listUsersByIds(ids, false);
     }
 
     @Override
     public ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId) {
-        ResponseEntity<ProjectVO> projectDTOResponseEntity = baseFeignClient.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
-        return projectDTOResponseEntity != null ? projectDTOResponseEntity.getBody() : null;
+        return remoteIamOperator.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
     }
 
     @Override
@@ -253,7 +243,7 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        boolean  isProjectOwner = baseFeignClient.checkIsProjectOwner(userId, projectId).getBody();
+        boolean isProjectOwner = remoteIamOperator.checkIsProjectOwner(userId, projectId);
         if (ObjectUtils.isEmpty(isProjectOwner)) {
             return false;
         } else {

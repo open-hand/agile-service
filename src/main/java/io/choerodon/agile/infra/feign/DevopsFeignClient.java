@@ -1,22 +1,19 @@
 package io.choerodon.agile.infra.feign;
 
+import java.util.List;
+
 import io.choerodon.agile.api.vo.AppServiceSimpleVO;
-import io.choerodon.agile.infra.feign.fallback.DevopsFeignClientFallback;
+import io.choerodon.agile.infra.feign.fallback.DevopsFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 /**
  * @author superlee
  * @since 2021-03-12
  */
-@FeignClient(
-        value = "devops-service",
-        fallback = DevopsFeignClientFallback.class
-)
+@FeignClient(value = "devops-service", fallbackFactory = DevopsFallbackFactory.class)
 public interface DevopsFeignClient {
 
     @PostMapping({"/v1/projects/{project_id}/app_service/page_by_options"})

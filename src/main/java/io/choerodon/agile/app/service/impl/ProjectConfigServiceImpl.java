@@ -10,7 +10,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -119,7 +119,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamFeignClient remoteIamFeignClient;
     @Autowired
     private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired

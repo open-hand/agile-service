@@ -6,8 +6,7 @@ import io.choerodon.agile.infra.annotation.CopyPageField;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
@@ -79,7 +78,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamFeignClient remoteIamFeignClient;
 
     @Autowired
     private FieldCascadeRuleService fieldCascadeRuleService;

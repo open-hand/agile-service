@@ -10,7 +10,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -75,7 +75,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     @Autowired
     private ProductVersionMapper productVersionMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private PriorityMapper priorityMapper;
     @Autowired
@@ -197,7 +197,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 if ("member".equals(statusFieldSettingVO.getFieldType())) {
                     // 查询用户信息
                     List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
-                    List<UserDTO> body = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
+                    List<UserDTO> body = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false);
                     if (CollectionUtils.isEmpty(body)) {
                         statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                         return;
@@ -392,7 +392,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 if ("member".equals(statusFieldSettingVO.getFieldType())) {
                     // 查询用户信息
                     List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
-                    List<UserDTO> body = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody();
+                    List<UserDTO> body = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false);
                     if (CollectionUtils.isEmpty(body)) {
                         statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                         return;
@@ -875,7 +875,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         List<Long> userIds = statusFieldValueSetting.stream().filter(v -> (FieldType.MEMBER.equals(v.getFieldType()) || FieldType.MULTI_MEMBER.equals(v.getFieldType())) && !ObjectUtils.isEmpty(v.getUserId())).map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
         Map<Long, String> userMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(userIds)) {
-            List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true).getBody();
+            List<UserDTO> userDTOS = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true);
             userMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getRealName)));
         }
         Set<Long> customFieldIds = statusFieldValueSetting.stream().

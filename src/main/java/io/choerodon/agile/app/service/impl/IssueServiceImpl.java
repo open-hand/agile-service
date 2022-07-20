@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -48,7 +49,6 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
@@ -178,7 +178,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private TestServiceClientOperator testServiceClientOperator;
     @Autowired
-    protected BaseFeignClient baseFeignClient;
+    protected RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectUtil projectUtil;
     @Autowired
@@ -1222,7 +1222,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService == null) {
             belongToProgram = false;
         } else {
-            belongToProgram = baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
+            belongToProgram = remoteIamOperator.getGroupInfoByEnableProject(organizationId, projectId) != null;
         }
         return belongToProgram;
     }
@@ -3618,14 +3618,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectUserIdsByProjectIds(Arrays.asList(projectId));
         AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        return remoteIamOperator.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
     }
 
     @Override
     public Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectReporterIdsByProjectId(projectId);
         AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        return remoteIamOperator.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
     }
 
     @Override
@@ -3883,13 +3883,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
-            List<ProjectVO> projectVOS = baseFeignClient.listProjectsByUserIdForSimple(organizationId,userId, null, true).getBody();
+            List<ProjectVO> projectVOS = remoteIamOperator.listProjectsByUserIdForSimple(organizationId,userId, null, true);
             if (!CollectionUtils.isEmpty(projectVOS)) {
                 projectIds.addAll(projectVOS.stream().map(ProjectVO::getId).collect(Collectors.toList()));
                 projects.addAll(projectVOS);
             }
         } else {
-            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
             if (!organizationId.equals(projectVO.getOrganizationId())) {
                 throw new CommonException("error.organization.illegal");
             }
@@ -3909,11 +3909,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         agileUserVO.setProjectIds(new HashSet<>(projectIds));
         agileUserVO.setOrganizationId(organizationId);
-        Page<UserDTO> page = baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        Page<UserDTO> page = remoteIamOperator.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
         Set<Long> ignoredUserIds = agileUserVO.getIgnoredUserIds();
         List<UserDTO> result = new ArrayList<>();
         if (!CollectionUtils.isEmpty(ignoredUserIds)) {
-            result.addAll(baseFeignClient.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false).getBody());
+            result.addAll(remoteIamOperator.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false));
         }
         if (!CollectionUtils.isEmpty(page.getContent())) {
             result.addAll(page.getContent());

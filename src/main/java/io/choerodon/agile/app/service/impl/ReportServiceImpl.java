@@ -12,7 +12,8 @@ import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
@@ -96,7 +97,9 @@ public class ReportServiceImpl implements ReportService {
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamFeignClient remoteIamFeignClient;
+    @Autowired
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private IssueService issueService;
     @Autowired
@@ -1719,7 +1722,7 @@ public class ReportServiceImpl implements ReportService {
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(userIds, true);
         UserMessageDTO nullUser = new UserMessageDTO("无", null, null);
         userMap.put(0L, nullUser);
-        List<ProjectVO> projectList = baseFeignClient.queryByIds(projectIds).getBody();
+        List<ProjectVO> projectList = remoteIamOperator.queryProjectByIds(projectIds);
         if (!CollectionUtils.isEmpty(projectList)) {
             projectList.forEach(projectVO -> {
                 projectMap.put(projectVO.getId(), projectVO);

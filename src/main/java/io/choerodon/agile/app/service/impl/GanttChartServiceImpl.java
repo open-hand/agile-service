@@ -15,7 +15,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -102,7 +102,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
@@ -581,9 +581,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, String> rankMap = new HashMap<>();
         if (agilePluginService != null) {
-            ResponseEntity<ProjectVO> response =
-                    baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
-            ProjectVO program = response.getBody();
+            ProjectVO program = remoteIamOperator.getGroupInfoByEnableProject(organizationId, projectId);
             if (program != null) {
                 projectIds.add(program.getId());
             }
@@ -1563,9 +1561,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     private List<ProjectVO> queryProgramIds(Set<Long> projectIds) {
         Long projectId = new ArrayList<>(projectIds).get(0);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        ResponseEntity<List<ProjectVO>> response =
-                baseFeignClient.getGroupInfoByEnableProjects(organizationId, projectIds);
-        List<ProjectVO> projects = response.getBody();
+        List<ProjectVO> projects = remoteIamOperator.getGroupInfoByEnableProjects(organizationId, projectIds);
         if (ObjectUtils.isEmpty(projects)) {
             return Collections.emptyList();
         }

@@ -5,8 +5,8 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -23,13 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -59,7 +55,7 @@ public class WorkBenchController {
 
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
 
     @Autowired
     private ExcelService excelService;
@@ -239,7 +235,7 @@ public class WorkBenchController {
                                                                                            @PathVariable(name = "organization_id") Long organizationId,
                                                                                            @ApiParam(value = "年份", required = true)
                                                                                            @RequestParam(name = "year") Integer year) {
-        return baseFeignClient.queryTimeZoneWorkCalendarDetail(organizationId, year);
+        return Results.success(remoteIamOperator.queryTimeZoneWorkCalendarDetail(organizationId, year));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
@@ -257,7 +253,7 @@ public class WorkBenchController {
                                                                              @RequestParam(required = false) String param,
                                                                              @ApiParam(value = "忽略的用户id")
                                                                              @RequestBody @Encrypt List<Long> notSelectUserIds) {
-        return baseFeignClient.pagingQueryUsersOnOrganizationAgile(organizationId, pageRequest.getPage(), pageRequest.getSize(), userId, email, param, notSelectUserIds);
+        return Results.success(remoteIamOperator.pagingQueryUsersOnOrganizationAgile(organizationId, pageRequest.getPage(), pageRequest.getSize(), userId, email, param, notSelectUserIds));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)

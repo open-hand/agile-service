@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.StatusBranchMergeSettingVO;
 import io.choerodon.agile.api.vo.TransformVO;
 import io.choerodon.agile.app.service.IssueService;
@@ -8,8 +7,7 @@ import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusBranchMergeSettingService;
 import io.choerodon.agile.infra.dto.StatusBranchMergeSettingDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.RemoteIamFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StatusBranchMergeSettingMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -39,7 +37,7 @@ public class StatusBranchMergeSettingServiceImpl implements StatusBranchMergeSet
     @Autowired
     private IssueMapper issueMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamFeignClient remoteIamFeignClient;
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired

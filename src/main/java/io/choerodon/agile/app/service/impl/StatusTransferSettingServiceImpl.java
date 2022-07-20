@@ -10,7 +10,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.StatusTransferType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -47,7 +47,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     @Autowired
     private StatusMapper statusMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
@@ -208,7 +208,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (!roleIds.isEmpty()) {
             //查角色下的用户
             String idString = StringUtils.join(roleIds, ",");
-            List<UserVO> users = baseFeignClient.listUsersUnderRoleByIds(projectId, idString).getBody();
+            List<UserVO> users = remoteIamOperator.listUsersUnderRoleByIds(projectId, idString);
             if (!ObjectUtils.isEmpty(users)) {
                 userIds.addAll(users.stream().map(UserVO::getId).collect(Collectors.toList()));
             }

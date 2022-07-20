@@ -7,7 +7,7 @@ import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StarBeaconMapper;
@@ -127,7 +127,7 @@ public class IssueDelaySendMessageTask {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private DelayTaskService delayTaskService;
     @Autowired
@@ -190,8 +190,7 @@ public class IssueDelaySendMessageTask {
             processProjectOwner(projectMap, multiKeyMap, issueGroupByProject, userIds, projectIdForProjectOwner, localDateTime);
             if (!userIds.isEmpty()) {
                 userMap.putAll(
-                        baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true)
-                                .getBody()
+                        remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true)
                                 .stream()
                                 .collect(Collectors.toMap(UserDTO::getId, Function.identity()))
                 );
@@ -347,8 +346,7 @@ public class IssueDelaySendMessageTask {
 
     private void processProjectOwner(Map<Long, ProjectMessageVO> projectMap, MultiKeyMap multiKeyMap, Map<Long, List<IssueDTO>> issueGroupByProject, Set<Long> userIds, Set<Long> projectIdForProjectOwner, LocalDateTime localDateTime) {
         if (!projectIdForProjectOwner.isEmpty()) {
-            List<ProjectWithUserVO> projectWithUserList =
-                    baseFeignClient.listProjectOwnerByIds(projectIdForProjectOwner).getBody();
+            List<ProjectWithUserVO> projectWithUserList = remoteIamOperator.listProjectOwnerByIds(projectIdForProjectOwner);
             projectWithUserList.forEach(x -> {
                 Long projectId = x.getProjectId();
                 userIds.addAll(x.getUserIds());

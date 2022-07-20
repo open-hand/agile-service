@@ -1,15 +1,15 @@
 package io.choerodon.agile.infra.feign;
 
-import io.choerodon.agile.infra.feign.fallback.TestFeignClientFallback;
+import java.util.List;
+
+import io.choerodon.agile.infra.feign.fallback.TestFallbackFactory;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@FeignClient(value = "test-manager-service", fallback = TestFeignClientFallback.class)
+@FeignClient(value = "test-manager-service", fallbackFactory = TestFallbackFactory.class)
 public interface TestFeignClient {
 
     @DeleteMapping(value = "/v1/projects/{project_id}/defect/delete_relation/{defectId}")

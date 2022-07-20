@@ -1,27 +1,42 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.*;
+import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.apache.commons.lang.StringEscapeUtils;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -30,30 +45,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.client.MessageClientC7n;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.core.utils.PageableHelper;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -117,7 +108,7 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String INSERT = "insert";
 
     private static final List<String> PROCESS_PREDEFINED_SYSTEM_FIELDS =
-            Arrays.asList (
+            Arrays.asList(
                     FieldCode.PRIORITY,
                     FieldCode.FIX_VERSION,
                     FieldCode.INFLUENCE_VERSION,
@@ -162,7 +153,7 @@ public class ExcelServiceImpl implements ExcelService {
     private ProjectConfigService projectConfigService;
 
     @Autowired
-    protected BaseFeignClient baseFeignClient;
+    protected RemoteIamOperator remoteIamOperator;
 
     @Autowired
     private FileClient fileClient;
@@ -256,9 +247,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private boolean withFeature(Long projectId, Long organizationId) {
-        ResponseEntity<ProjectVO> response =
-                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
-        return response.getBody() != null;
+        return Objects.isNull(remoteIamOperator.getGroupInfoByEnableProject(organizationId, projectId));
     }
 
     @Override
@@ -351,8 +340,8 @@ public class ExcelServiceImpl implements ExcelService {
         result.add(processIssueTypePredefined(withFeature, projectId, cursor, systemFields));
         result.add(processParentIssuePredefined(projectId, cursor, systemFields));
         PROCESS_PREDEFINED_SYSTEM_FIELDS.forEach(fieldCode ->
-            Optional.ofNullable(excelCommonService.processSystemFieldPredefined(projectId, cursor, withFeature, systemFields, fieldCode))
-                .ifPresent(result::add)
+                Optional.ofNullable(excelCommonService.processSystemFieldPredefined(projectId, cursor, withFeature, systemFields, fieldCode))
+                        .ifPresent(result::add)
         );
         return result;
     }
@@ -626,7 +615,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, Long> rowIssueIdMap = new HashMap<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
         int lastSendCountNum = 0;
-        Map<Long,List<String>> requireFieldMap = new HashMap<>();
+        Map<Long, List<String>> requireFieldMap = new HashMap<>();
         List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
         for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
             if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
@@ -678,7 +667,7 @@ public class ExcelServiceImpl implements ExcelService {
                         rowNum = Collections.max(sonSet);
                         continue;
                     }
-                    List<ComponentIssueRelVO> components =  parent.getComponentIssueRelVOList();
+                    List<ComponentIssueRelVO> components = parent.getComponentIssueRelVOList();
                     Long sprintId = parent.getSprintId();
                     Long epicId = parent.getEpicId();
                     Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
@@ -1279,9 +1268,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void parentRecursive(Map<Integer, Set<Integer>> map,
-                                IssueTypeLinkDTO issueTypeLink,
-                                Integer rowNum,
-                                Map<Integer, ExcelColumnVO> headerMap) {
+                                 IssueTypeLinkDTO issueTypeLink,
+                                 Integer rowNum,
+                                 Map<Integer, ExcelColumnVO> headerMap) {
         if (Boolean.TRUE.equals(issueTypeLink.hasNext())) {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
@@ -1538,10 +1527,10 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     public ExportIssuesVO buildExcelIssueFromIssue(String projectName,
-                                                      Map<Long, Set<Long>> parentSonMap,
-                                                      Map<Long, ExportIssuesVO> issueMap,
-                                                      Map<String, Object> issueValueMap,
-                                                      IssueDTO issue) {
+                                                   Map<Long, Set<Long>> parentSonMap,
+                                                   Map<Long, ExportIssuesVO> issueMap,
+                                                   Map<String, Object> issueValueMap,
+                                                   IssueDTO issue) {
         Map<Long, UserMessageDTO> usersMap = (Map<Long, UserMessageDTO>) issueValueMap.get(USER_MAP);
         Map<Long, IssueTypeVO> issueTypeDTOMap = (Map<Long, IssueTypeVO>) issueValueMap.get(ISSUE_TYPE_MAP);
         Map<Long, StatusVO> statusMapDTOMap = (Map<Long, StatusVO>) issueValueMap.get(STATUS_MAP);
@@ -1621,7 +1610,7 @@ public class ExcelServiceImpl implements ExcelService {
         Long issueId = exportIssuesVO.getIssueId();
         List<IssueLinkDTO> issueLinkList = relatedIssueMap.get(issueId);
         Map<String, List<String>> relMap = new LinkedHashMap<>();
-        if(!ObjectUtils.isEmpty(issueLinkList)) {
+        if (!ObjectUtils.isEmpty(issueLinkList)) {
             int size = issueLinkList.size();
             exportIssuesVO.setRelatedIssueCount(size);
             Iterator<IssueLinkDTO> iterator = issueLinkList.iterator();
@@ -1687,7 +1676,7 @@ public class ExcelServiceImpl implements ExcelService {
         BigDecimal allEstimateTime;
         if (!CollectionUtils.isEmpty(workLogVOList)) {
             spentWorkTime = new BigDecimal(0);
-            for (WorkLogVO workLogVO : workLogVOList){
+            for (WorkLogVO workLogVO : workLogVOList) {
                 spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());
             }
             allEstimateTime = exportIssuesVO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(exportIssuesVO.getRemainingTime());
@@ -1729,14 +1718,14 @@ public class ExcelServiceImpl implements ExcelService {
      * @param userId
      */
     @Override
-    public void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
+    public void downloadWorkBook(Long organizationId, Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
             byte[] content = os.toByteArray();
             MultipartFile file = new MultipartExcel("file", fileName, EXCELCONTENTTYPE, content);
 
             //返回上载结果
-            String path = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(),null, fileName, file);
+            String path = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, file);
             fileOperationHistoryDTO.setStatus(SUCCESS);
             fileOperationHistoryDTO.setFileUrl(path);
         } catch (Exception e) {
@@ -1890,9 +1879,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected String getActiveSprintName(IssueDTO issue) {
-        List<IssueSprintDTO>  issueSprintList = issue.getIssueSprintDTOS();
+        List<IssueSprintDTO> issueSprintList = issue.getIssueSprintDTOS();
         if (!ObjectUtils.isEmpty(issueSprintList)) {
-            for(IssueSprintDTO sprint : issueSprintList) {
+            for (IssueSprintDTO sprint : issueSprintList) {
                 if (!"closed".equals(sprint.getStatusCode())) {
                     return sprint.getSprintName();
                 }
@@ -1988,7 +1977,7 @@ public class ExcelServiceImpl implements ExcelService {
         ObjectMapper m = new ObjectMapper();
 
         Object content = Optional.ofNullable(objectSchemeFieldService
-                .listQuery(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE))
+                        .listQuery(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE))
                 .orElseThrow(() -> new CommonException("error.foundation.listQuery"))
                 .get("content");
 
@@ -1998,11 +1987,11 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     public void processExportField(List<String> exportFieldCodes,
-                                    String[] fieldsName,
-                                    String[] fields,
-                                    Map<String, String[]> fieldMap,
-                                    ObjectMapper m,
-                                    Object content) {
+                                   String[] fieldsName,
+                                   String[] fields,
+                                   Map<String, String[]> fieldMap,
+                                   ObjectMapper m,
+                                   Object content) {
         List<Object> contentList = m.convertValue(content, List.class);
         List<ObjectSchemeFieldDTO> fieldDTOS = new ArrayList<>();
 
@@ -2056,11 +2045,11 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
         StringBuilder sprintName = new StringBuilder();
-        if (!StringUtils.isEmpty(exportIssuesVO.getSprintName())){
+        if (!StringUtils.isEmpty(exportIssuesVO.getSprintName())) {
             sprintName.append("正在使用冲刺:").append(exportIssuesVO.getSprintName());
         }
-        if (!StringUtils.isEmpty(exportIssuesVO.getCloseSprintName())){
-            if (sprintName.length() != 0){
+        if (!StringUtils.isEmpty(exportIssuesVO.getCloseSprintName())) {
+            if (sprintName.length() != 0) {
                 sprintName.append("\r\n");
             }
             sprintName.append("已关闭冲刺:").append(exportIssuesVO.getCloseSprintName());

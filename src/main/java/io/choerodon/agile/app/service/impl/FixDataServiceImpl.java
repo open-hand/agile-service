@@ -1,5 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
@@ -7,7 +11,7 @@ import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
@@ -27,10 +31,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
@@ -40,7 +40,7 @@ public class FixDataServiceImpl implements FixDataService {
     private static final Logger LOGGER = getLogger(FixDataServiceImpl.class);
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectConfigMapper projectConfigMapper;
     @Autowired
@@ -110,7 +110,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("查询出有问题的项目共有{}个，开始修复数据", projectIds.size());
         int count = 0;
         for (Long projectId : projectIds) {
-            ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+            ProjectVO project = remoteIamOperator.queryProject(projectId);
             LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
             if (!project.getCode().equals("def-ops-proj") || !project.getCategory().equals(ProjectCategory.GENERAL) || !project.getCreatedBy().equals(0L)) {
                 LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
@@ -136,7 +136,7 @@ public class FixDataServiceImpl implements FixDataService {
             LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
             return;
         }
-        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO project = remoteIamOperator.queryProject(projectId);
         LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
         if (!project.getCode().equals("def-ops-proj") || !project.getCategory().equals(ProjectCategory.GENERAL) || !project.getCreatedBy().equals(0L)) {
             LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
@@ -339,7 +339,7 @@ public class FixDataServiceImpl implements FixDataService {
                 roleIds = organizationRoleMap.get(organizationId);
                 if (ObjectUtils.isEmpty(roleIds)) {
                     List<RoleVO> roles =
-                            baseFeignClient.listOrganizationRoles(0, 0, null, projectAdminCode, null, organizationId, null, null, null).getBody().getContent();
+                            remoteIamOperator.listOrganizationRoles(0, 0, null, projectAdminCode, null, organizationId, null, null, null).getContent();
                     if (!ObjectUtils.isEmpty(roles)) {
                         roleIds = new HashSet<>();
                         roleIds.addAll(roles.stream().map(RoleVO::getId).collect(Collectors.toList()));
@@ -350,8 +350,7 @@ public class FixDataServiceImpl implements FixDataService {
                 roleIds = projectRoleMap.get(projectId);
                 if (ObjectUtils.isEmpty(roleIds)) {
                     List<RoleVO> roles =
-                            baseFeignClient.listProjectRoles(projectId, null, null)
-                                    .getBody()
+                            remoteIamOperator.listProjectRoles(projectId, null, null)
                                     .stream()
                                     .filter(x -> projectAdminCode.equalsIgnoreCase(x.getCode()))
                                     .collect(Collectors.toList());
@@ -903,7 +902,7 @@ public class FixDataServiceImpl implements FixDataService {
         int totalSize = 0;
         for (int page = 0; page < totalPage; page++) {
             List<Long> list = projectIds.subList(page * size > total ? total : page * size, (page + 1) * size > total ? total : (page + 1) * size);
-            List<ProjectVO> projectVOS = baseFeignClient.queryByIds(new HashSet<>(list)).getBody();
+            List<ProjectVO> projectVOS = remoteIamOperator.queryProjectByIds(new HashSet<>(list));
             for (ProjectVO projectVO : projectVOS) {
                 LOGGER.info("开始修复{}-{}项目所有问题类型的状态机",projectVO.getId(),projectVO.getName());
                 String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
