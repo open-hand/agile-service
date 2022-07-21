@@ -1,5 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.KnowledgeRelationVO;
 import io.choerodon.agile.api.vo.WikiRelationVO;
 import io.choerodon.agile.api.vo.WorkSpaceVO;
@@ -17,13 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/12/03.
@@ -55,7 +55,8 @@ public class WikiRelationServiceImpl implements WikiRelationService {
 
     @Override
     public void create(Long projectId, List<WikiRelationVO> wikiRelationVOList) {
-        List<WikiRelationDTO> wikiRelationDTOList = modelMapper.map(wikiRelationVOList, new TypeToken<List<WikiRelationDTO>>(){}.getType());
+        List<WikiRelationDTO> wikiRelationDTOList = modelMapper.map(wikiRelationVOList, new TypeToken<List<WikiRelationDTO>>() {
+        }.getType());
         if (wikiRelationDTOList != null && !wikiRelationDTOList.isEmpty()) {
             for (WikiRelationDTO wikiRelationDTO : wikiRelationDTOList) {
                 if (!checkRepeat(wikiRelationDTO)) {
@@ -74,8 +75,9 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         List<WikiRelationVO> result = new ArrayList<>();
         if (wikiRelationDTOList != null && !wikiRelationDTOList.isEmpty()) {
             List<Long> spaceIds = wikiRelationDTOList.stream().map(WikiRelationDTO::getSpaceId).collect(Collectors.toList());
-            Map<Long, WorkSpaceVO> workSpaceMap = new HashMap<>();
-            workSpaceMap.putAll(knowledgebaseClientOperator.querySpaceByIds(projectId, spaceIds).stream().collect(Collectors.toMap(WorkSpaceVO::getId, Function.identity())));
+            List<WorkSpaceVO> workSpaceVOS = knowledgebaseClientOperator.querySpaceByIds(projectId, spaceIds);
+            Map<Long, WorkSpaceVO> workSpaceMap = CollectionUtils.isEmpty(workSpaceVOS) ? new HashMap<>()
+                    : new HashMap<>(workSpaceVOS.stream().collect(Collectors.toMap(WorkSpaceVO::getId, Function.identity())));
             for (WikiRelationDTO wikiRelation : wikiRelationDTOList) {
                 WorkSpaceVO workSpaceVO = workSpaceMap.get(wikiRelation.getSpaceId());
                 if (!ObjectUtils.isEmpty(workSpaceVO)) {
@@ -86,9 +88,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
                 }
             }
         }
-        KnowledgeRelationVO knowledgeRelation = new KnowledgeRelationVO();
-        knowledgeRelation.setKnowledgeRelationList(result);
-        return knowledgeRelation;
+        return KnowledgeRelationVO.of(result);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
         wikiRelationDTO.setSpaceId(workSpaceId);
         List<WikiRelationDTO> wikiRelationDTOS = wikiRelationMapper.select(wikiRelationDTO);
-        if(!CollectionUtils.isEmpty(wikiRelationDTOS)){
+        if (!CollectionUtils.isEmpty(wikiRelationDTOS)) {
             wikiRelationDTOS.forEach(v -> iWikiRelationService.deleteBase(wikiRelationDTO));
         }
     }
