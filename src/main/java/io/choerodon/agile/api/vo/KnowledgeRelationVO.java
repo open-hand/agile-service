@@ -10,6 +10,15 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class KnowledgeRelationVO {
+
+    public static KnowledgeRelationVO of(List<WikiRelationVO> knowledgeRelationList) {
+        return new KnowledgeRelationVO(knowledgeRelationList);
+    }
+
+    public KnowledgeRelationVO(List<WikiRelationVO> knowledgeRelationList) {
+        this.knowledgeRelationList = knowledgeRelationList;
+    }
+
     @ApiModelProperty(value = "知识库关联数据")
     private List<WikiRelationVO>  knowledgeRelationList;
 
