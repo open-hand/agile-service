@@ -659,6 +659,7 @@
                 SELECT osfe.field_id
                 FROM fd_object_scheme_field_extend osfe
                 WHERE osfe.field_id = osf.id
+                and osfe.project_id = #{projectId}
                 <if test='issueTypeList == "agileIssueType"'>
                     AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
                 </if>
