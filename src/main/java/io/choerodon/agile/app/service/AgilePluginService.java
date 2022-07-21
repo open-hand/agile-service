@@ -618,6 +618,4 @@ public interface AgilePluginService {
     void createInstanceOpenRel(Long projectId, Long instanceId, String instanceType, InstanceOpenRelVO instanceOpenRelVO);
 
     InstanceOpenRelVO queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
-
-    void updateWorkGroupRelation(Long organizationId, Long projectId, Long workGroupId);
 }
