@@ -99,6 +99,8 @@ public class FixDataServiceImpl implements FixDataService {
     private FixDataMapper fixDataMapper;
     @Autowired
     private StatusTransferSettingMapper statusTransferSettingMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public void fixCreateProject() {
@@ -313,6 +315,13 @@ public class FixDataServiceImpl implements FixDataService {
     public void fixStatusMachineCustomTransferRoleData() {
         fixStatusTransferSetting();
         fixStatusNoticeSetting();
+        migrateWorkGroupData();
+    }
+
+    private void migrateWorkGroupData() {
+        if (!ObjectUtils.isEmpty(agilePluginService)) {
+            agilePluginService.migrateWorkGroupData();
+        }
     }
 
     private void fixStatusNoticeSetting() {
