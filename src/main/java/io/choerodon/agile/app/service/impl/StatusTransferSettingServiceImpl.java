@@ -1,13 +1,20 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.IssueCountDTO;
+import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.StatusTransferType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -25,10 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 /**
  * @author zhaotianxin
  * @date 2020-08-12 10:09
@@ -45,7 +48,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     @Autowired
     private StatusMapper statusMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
@@ -161,7 +164,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (!ObjectUtils.isEmpty(roleIds)) {
 
             List<RoleVO> roles =
-                    baseFeignClient.listRolesByIds(organizationId, new ArrayList<>(roleIds)).getBody();
+                    remoteIamOperator.listRolesByIds(organizationId, new ArrayList<>(roleIds));
             roleMap.putAll(roles.stream().collect(Collectors.toMap(RoleVO::getId, Function.identity())));
         }
     }
@@ -206,7 +209,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (!roleIds.isEmpty()) {
             //查角色下的用户
             String idString = StringUtils.join(roleIds, ",");
-            List<UserVO> users = baseFeignClient.listUsersUnderRoleByIds(projectId, idString).getBody();
+            List<UserVO> users = remoteIamOperator.listUsersUnderRoleByIds(projectId, idString);
             if (!ObjectUtils.isEmpty(users)) {
                 userIds.addAll(users.stream().map(UserVO::getId).collect(Collectors.toList()));
             }

@@ -1,21 +1,21 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.ProjectMessageVO;
-import io.choerodon.agile.app.service.DelayTaskService;
-import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
-import org.hzero.boot.message.entity.MessageSender;
-import org.hzero.boot.message.entity.Receiver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import io.choerodon.agile.api.vo.ProjectMessageVO;
+import io.choerodon.agile.app.service.DelayTaskService;
+import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.feign.operator.NotifyClientOperator;
+import org.hzero.boot.message.entity.MessageSender;
+import org.hzero.boot.message.entity.Receiver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author superlee
@@ -25,13 +25,13 @@ import java.util.stream.Collectors;
 public class DelayTaskServiceImpl implements DelayTaskService {
 
     @Autowired
-    private NotifyFeignClient notifyFeignClient;
+    private NotifyClientOperator notifyClientOperator;
 
     @Override
     public Map<Long, ProjectMessageVO> listEnabledMsgProjects(String msgCode) {
         //获取所有配置过冲刺延期发送消息的项目
         List<ProjectMessageVO> projectMessageList =
-                notifyFeignClient.listEnabledSettingByCode(msgCode, "agile").getBody();
+                notifyClientOperator.listEnabledSettingByCode(msgCode, "agile");
         if (ObjectUtils.isEmpty(projectMessageList)) {
             return new HashMap<>();
         } else {
@@ -63,7 +63,7 @@ public class DelayTaskServiceImpl implements DelayTaskService {
                     end = messageSenders.size();
                 }
                 List<MessageSender> messageSenderList = messageSenders.subList(i, end);
-                notifyFeignClient.batchSendMessage(messageSenderList);
+                notifyClientOperator.batchSendMessage(messageSenderList);
             }
         }
     }

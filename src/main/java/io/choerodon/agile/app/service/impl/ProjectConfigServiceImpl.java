@@ -1,6 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
@@ -10,10 +14,12 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EnumUtil;
+import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -31,10 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 /**
@@ -118,8 +120,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusFieldSettingMapper statusFieldSettingMapper;
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
-    @Autowired
-    private BaseFeignClient baseFeignClient;
     @Autowired
     private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired

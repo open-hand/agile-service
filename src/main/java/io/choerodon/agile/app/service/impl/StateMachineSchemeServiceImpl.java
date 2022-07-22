@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
@@ -11,7 +12,6 @@ import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.enums.StateMachineSchemeDeployStatus;
 import io.choerodon.agile.infra.enums.StateMachineSchemeStatus;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -50,7 +50,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private InitService initService;
     @Autowired
@@ -59,7 +59,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     @Override
     public Page<StateMachineSchemeVO> pageQuery(Long organizationId, PageRequest pageRequest, StateMachineSchemeVO schemeVO, String params) {
         //查询出组织下的所有项目
-        List<ProjectVO> projectVOS = baseFeignClient.listProjectsByOrgId(organizationId).getBody();
+        List<ProjectVO> projectVOS = remoteIamOperator.listProjectsByOrgId(organizationId);
         Map<Long, ProjectVO> projectMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, x -> x));
         //查询组织下的所有问题类型
         Map<Long, IssueTypeDTO> issueTypeMap = new HashMap<>();
