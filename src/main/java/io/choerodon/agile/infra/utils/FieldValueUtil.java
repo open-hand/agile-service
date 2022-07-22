@@ -48,7 +48,7 @@ public class FieldValueUtil {
      */
     public static Map<Long, UserDTO> handleUserMap(List<Long> userIds) {
         Map<Long, UserDTO> map = new HashMap<>(userIds.size());
-        RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBean(RemoteIamOperator.class);
+        RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class);
         if (!userIds.isEmpty()) {
             map = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).stream().collect(Collectors.toMap(UserDTO::getId, x -> x));
         }
@@ -282,7 +282,7 @@ public class FieldValueUtil {
      * @param fieldDetail
      */
     public static void handleDefaultValue(ObjectSchemeFieldDetailVO fieldDetail) {
-        RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBean(RemoteIamOperator.class);
+        RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class);
         switch (fieldDetail.getFieldType()) {
             case FieldType.CHECKBOX:
             case FieldType.MULTIPLE:

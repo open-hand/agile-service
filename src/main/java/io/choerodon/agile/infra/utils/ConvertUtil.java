@@ -87,7 +87,7 @@ public class ConvertUtil {
                 return projectVO;
             }
         } else {
-            ProjectVO projectVO = SpringBeanUtil.getBean(RemoteIamOperator.class).queryProject(projectId);
+            ProjectVO projectVO = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class).queryProject(projectId);
             if (projectVO != null) {
                 if (projectVO.getId() == null) {
                     throw new CommonException("error.queryProject.notFound");
