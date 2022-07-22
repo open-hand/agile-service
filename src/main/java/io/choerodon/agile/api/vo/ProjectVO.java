@@ -1,14 +1,13 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
-import io.choerodon.agile.infra.utils.StringUtil;
-
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -16,6 +15,7 @@ import java.util.Set;
  */
 public class ProjectVO {
 
+    @Encrypt
     @ApiModelProperty(value = "项目主键id")
     private Long id;
     @ApiModelProperty(value = "项目名称")
