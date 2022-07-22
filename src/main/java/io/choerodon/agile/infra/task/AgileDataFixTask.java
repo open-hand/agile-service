@@ -21,9 +21,9 @@ public class AgileDataFixTask {
 
     @JobTask(maxRetryCount = 3,
             code = "fixStatusTransferRoleData",
-            description = "升级到2.2.0,修复状态联动角色数据")
+            description = "升级到2.2.0,修复状态联动角色数据,迁移工作组数据")
     @TimedTask(name = "fixStatusTransferRoleData",
-            description = "升级到2.2.0,修复状态联动角色数据",
+            description = "升级到2.2.0,修复状态联动角色数据,迁移工作组数据",
             oneExecution = true,
             repeatCount = 0,
             repeatInterval = 1,

@@ -619,5 +619,8 @@ public interface AgilePluginService {
 
     InstanceOpenRelVO queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
 
-    void updateWorkGroupRelation(Long organizationId, Long projectId, Long workGroupId);
+    /**
+     * 迁移工作组数据到iam
+     */
+    void migrateWorkGroupData();
 }
