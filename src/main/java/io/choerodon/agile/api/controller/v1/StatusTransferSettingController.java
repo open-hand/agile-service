@@ -1,8 +1,8 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
+import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
-import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -60,9 +60,9 @@ public class StatusTransferSettingController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询当前issue不能流转到的状态")
     @GetMapping(value = "/not_allowed_transfer")
-    public ResponseEntity<List<StatusDTO>> queryNotAllowedTransferStatus(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<List<StatusVO>> queryNotAllowedTransferStatus(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable("project_id") Long projectId,
-                                                                         @ApiParam(value = "问题id", required = true)
+                                                                        @ApiParam(value = "问题id", required = true)
                                                                          @RequestParam @Encrypt Long issueId) {
         return new ResponseEntity<>(statusTransferSettingService.queryNotAllowedTransferStatus(projectId, issueId), HttpStatus.OK);
     }

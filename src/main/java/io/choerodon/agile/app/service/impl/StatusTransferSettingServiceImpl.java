@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.RoleVO;
-import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
-import io.choerodon.agile.api.vo.StatusTransferSettingVO;
-import io.choerodon.agile.api.vo.UserVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -22,6 +19,7 @@ import org.hzero.core.util.Pair;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,8 +62,8 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     private IssueUserRelMapper issueUserRelMapper;
     @Autowired
     private FieldValueMapper fieldValueMapper;
-    private static final List<String> WATERFALL_ISSUE_TYPES = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
 
+    private static final List<String> WATERFALL_ISSUE_TYPES = Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE);
 
     @Override
     public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,String applyType,List<StatusTransferSettingCreateVO> list) {
@@ -302,19 +300,19 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     }
 
     @Override
-    public List<StatusDTO> queryNotAllowedTransferStatus(Long projectId, Long issueId) {
+    public List<StatusVO> queryNotAllowedTransferStatus(Long projectId, Long issueId) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         AssertUtilsForCommonException.notNull(issueDTO, "error.issue.not.existed");
         String typeCode = issueDTO.getTypeCode();
+        List<StatusDTO> notAllowedStatus = new ArrayList<>();
         if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
             if (!ObjectUtils.isEmpty(agileWaterfallService)) {
-                return agileWaterfallService.queryWaterfallNotAllowedTransferStatus(issueDTO);
-            } else {
-                return Collections.emptyList();
+                notAllowedStatus.addAll(agileWaterfallService.queryWaterfallNotAllowedTransferStatus(issueDTO));
             }
         } else {
-            return queryAgileNotAllowedTransferStatus(issueDTO);
+            notAllowedStatus.addAll(queryAgileNotAllowedTransferStatus(issueDTO));
         }
+        return filterByStatusTransform(issueDTO, notAllowedStatus);
     }
 
     private List<StatusDTO> queryAgileNotAllowedTransferStatus(IssueDTO issueDTO) {
@@ -324,6 +322,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (Boolean.TRUE.equals(subIssue)) {
             return new ArrayList<>();
         }
+        //校验任务子级需全部到达已解决配置
         List<Long> statusIds = statusTransferSettingMapper.queryStatusTransferByIssueTypeAndUserType(0L, projectId, issueDTO.getIssueTypeId(), "other");
         if (CollectionUtils.isEmpty(statusIds)) {
             return new ArrayList<>();
@@ -336,6 +335,35 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                 .andWhere(Sqls.custom().andEqualTo("organizationId", ConvertUtil.getOrganizationId(projectId))
                         .andIn("id", statusIds)).build());
         return statusList;
+    }
+
+    private List<StatusVO> filterByStatusTransform(IssueDTO issueDTO,
+                                                   List<StatusDTO> notAllowedStatus) {
+        Long projectId = issueDTO.getProjectId();
+        String typeCode = issueDTO.getTypeCode();
+        Long issueTypeId = issueDTO.getIssueTypeId();
+        String applyType = projectConfigService.getApplyTypeByTypeCode(projectId, typeCode);
+        List<StatusVO> statusList = projectConfigService.queryStatusByIssueTypeId(projectId, issueTypeId, applyType);
+        List<Long> statusIds = statusList.stream().map(StatusVO::getId).collect(Collectors.toList());
+        List<Long> canTransformStatusIds = checkStatusTransform(projectId, statusIds, issueDTO.getIssueId(), issueTypeId);
+        List<StatusVO> result = new ArrayList<>();
+        for (StatusVO status : statusList) {
+            Long id = status.getId();
+            if (!canTransformStatusIds.contains(id)) {
+                result.add(status);
+            }
+        }
+        if (ObjectUtils.isEmpty(notAllowedStatus)) {
+            List<StatusVO> notAllowedStatusList = modelMapper.map(notAllowedStatus, new TypeToken<List<StatusVO>>() {
+            }.getType());
+            Set<Long> statusIdSet = result.stream().map(StatusVO::getId).collect(Collectors.toSet());
+            for (StatusVO status : notAllowedStatusList) {
+                if (!statusIdSet.contains(status.getId())) {
+                    result.add(status);
+                }
+            }
+        }
+        return result;
     }
 
     /**
