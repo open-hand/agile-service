@@ -8,7 +8,6 @@ import io.choerodon.agile.api.vo.AppServiceSimpleVO;
 import io.choerodon.agile.api.vo.IssueWithBranchVO;
 import io.choerodon.agile.infra.feign.DevopsFeignClient;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.utils.FeignClientUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ public class DevopsClientOperator {
     private DevopsFeignClient devopsFeignClient;
 
     public List<AppServiceRepVO> listAppService(Long projectId, int page, int size, Boolean checkMember, Boolean active) {
-        return FeignClientUtils.doRequest(() ->
+        return ResponseUtils.getResponse(
                 devopsFeignClient.listAppService(projectId, page, size, checkMember, active), new TypeReference<Page<AppServiceRepVO>>() {
         }).getContent();
     }
