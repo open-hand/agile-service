@@ -42,4 +42,3 @@ export * from './ExportImportTemplate';
 export * from './KanbanTemplate';
 export * from './CacheColumn';
 export * from './CustomReport';
-export * from './WorkingHours';
