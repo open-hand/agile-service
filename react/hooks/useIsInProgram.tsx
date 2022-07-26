@@ -10,8 +10,8 @@ const { AppState }: { AppState: AppStateProps } = stores;
 // @ts-ignore
 const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
 // const shouldRequest = HAS_AGILE_PRO;
-const isDEV = process.env.NODE_ENV === 'development';
-const shouldRequest = isDEV || HAS_AGILE_PRO;
+// const isDEV = process.env.NODE_ENV === 'development';
+const shouldRequest = HAS_AGILE_PRO;
 
 interface ChildrenProps {
   isInProgram: boolean,

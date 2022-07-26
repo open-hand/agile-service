@@ -333,7 +333,7 @@ const getTableColumns = (visibleColumns: Array<ListLayoutColumnVO & { disable?: 
       const column = systemColumnsMap.get(columnCode)!;
       merge(baseColumn, {
         ...column,
-        label: (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>),
+        label: column.sortable ? (<GanttSortLabel dataKey={column.dataIndex} onChange={onSortChange}>{column?.title}</GanttSortLabel>) : column?.title,
         name: column?.dataIndex,
         render: fieldMapRender[columnCode as keyof typeof fieldMapRender] ?? column?.render,
       });
