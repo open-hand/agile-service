@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -34,6 +36,8 @@ public class WorkBenchController {
 
     @Autowired
     private StatusService statusService;
+    @Autowired
+    private PriorityService priorityService;
 
     @Permission(level = ResourceLevel.ORGANIZATION,permissionLogin = true)
     @ApiOperation("查询工作台个人代办事项")
@@ -95,5 +99,18 @@ public class WorkBenchController {
                                                                 @PathVariable(name = "organization_id") Long organizationId,
                                                                 @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingUserProjectUsers(pageRequest, organizationId, param));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @ApiOperation(value = "工作台查询优先级")
+    @PostMapping(value = "/priority")
+    public ResponseEntity<List<PriorityVO>> queryPriorities(@ApiParam(value = "组织id", required = true)
+                                                            @PathVariable("organization_id") Long organizationId,
+                                                            @ApiParam(value = "模糊搜索")
+                                                            @RequestParam(required = false) String param,
+                                                            @ApiParam(value = "优先级", required = true)
+                                                            @RequestBody PriorityVO priority) {
+        priority.setOrganizationId(organizationId);
+        return new ResponseEntity<>(priorityService.selectAll(priority, param), HttpStatus.OK);
     }
 }
