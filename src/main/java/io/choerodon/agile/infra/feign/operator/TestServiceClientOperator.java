@@ -8,7 +8,6 @@ import io.choerodon.agile.api.vo.ExecutionCaseStatusChangeSettingVO;
 import io.choerodon.agile.api.vo.ProjectInfoVO;
 import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.core.utils.FeignClientUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.stereotype.Component;
@@ -31,14 +30,14 @@ public class TestServiceClientOperator {
     }
 
     public ProjectInfoVO queryProjectInfo(Long projectId) {
-        return FeignClientUtils.doRequest(() -> testFeignClient.queryProjectInfo(projectId), ProjectInfoVO.class);
+        return ResponseUtils.getResponse(testFeignClient.queryProjectInfo(projectId), ProjectInfoVO.class);
     }
 
     public List<ExecutionCaseStatusChangeSettingVO> list(Long projectId, Long organizationId, Long issueTypeId, List<Long> statusIds) {
         if (Boolean.FALSE.equals(ConvertUtil.hasModule(projectId, "N_TEST"))) {
             return new ArrayList<>();
         }
-        return FeignClientUtils.doRequest(() -> testFeignClient.list(projectId, organizationId, issueTypeId, statusIds), new TypeReference<List<ExecutionCaseStatusChangeSettingVO>>() {
+        return ResponseUtils.getResponse(testFeignClient.list(projectId, organizationId, issueTypeId, statusIds), new TypeReference<List<ExecutionCaseStatusChangeSettingVO>>() {
         });
     }
 

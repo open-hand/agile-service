@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.choerodon.agile.api.vo.WorkSpaceVO;
 import io.choerodon.agile.infra.feign.KnowledgebaseFeignClient;
-import io.choerodon.core.utils.FeignClientUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,6 +22,6 @@ public class KnowledgebaseClientOperator {
     }
 
     public List<WorkSpaceVO> querySpaceByIds(Long projectId, List<Long> spaceIds) {
-        return FeignClientUtils.doRequest(() -> knowledgebaseFeignClient.querySpaceByIds(projectId, spaceIds), new TypeReference<List<WorkSpaceVO>>() {});
+        return ResponseUtils.getResponse( knowledgebaseFeignClient.querySpaceByIds(projectId, spaceIds), new TypeReference<List<WorkSpaceVO>>() {});
     }
 }
