@@ -448,7 +448,7 @@ public interface AgilePluginService {
      * @param organizationId
      * @return
      */
-    ProjectVO getProgram(Long projectId, Long organizationId);
+    ProjectVO getProgram(Long organizationId, Long projectId);
 
     /**
      * 特性添加tag
