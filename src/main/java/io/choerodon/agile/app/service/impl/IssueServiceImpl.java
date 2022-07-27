@@ -1,43 +1,52 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
-import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.IssuePayload;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
-import io.choerodon.core.utils.PageUtils;
-import io.choerodon.core.utils.PageableHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
@@ -56,15 +65,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 敏捷开发Issue
@@ -1028,7 +1028,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService == null) {
             belongToProgram = false;
         } else {
-            belongToProgram = baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
+            belongToProgram = agilePluginService.getProgram(organizationId, projectId) != null;
         }
         return belongToProgram;
     }

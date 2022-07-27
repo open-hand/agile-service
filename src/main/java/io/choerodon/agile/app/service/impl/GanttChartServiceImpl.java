@@ -1,5 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +20,6 @@ import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -27,17 +31,10 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -568,9 +565,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, String> rankMap = new HashMap<>();
         if (agilePluginService != null) {
-            ResponseEntity<ProjectVO> response =
-                    baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
-            ProjectVO program = response.getBody();
+            ProjectVO program = agilePluginService.getProgram(organizationId, projectId);
             if (program != null) {
                 projectIds.add(program.getId());
             }
@@ -822,17 +817,21 @@ public class GanttChartServiceImpl implements GanttChartService {
                                        Map<Long, ProjectVO> projectMap) {
         if (GanttDimension.isEpic(dimension)
                 && !ObjectUtils.isEmpty(issueIds)) {
-            List<ProjectVO> programs = queryProgramIds(projectIds);
-            boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programs));
             issueEpicMap.putAll(issueMapper.listIssueWithEpicId(projectIds, issueIds)
                     .stream()
                     .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getEpicId)));
             issueIds.addAll(issueEpicMap.values());
-            if (belongProgram) {
-                programs.forEach(p -> projectMap.put(p.getId(), p));
-                issueFeatureMap.putAll(agilePluginService.queryIssueFeature(projectIds, issueIds));
-                issueFeatureMap.forEach((issueId, feature) -> issueIds.add(feature.getIssueId()));
+            if (agilePluginService == null) {
+                // 商业版
+                return;
             }
+            List<ProjectVO> programs = agilePluginService.queryProgramIdsByProjectIds(projectIds);
+            if (CollectionUtils.isEmpty(projectMap)) {
+                return;
+            }
+            programs.forEach(p -> projectMap.put(p.getId(), p));
+            issueFeatureMap.putAll(agilePluginService.queryIssueFeature(projectIds, issueIds));
+            issueFeatureMap.forEach((issueId, feature) -> issueIds.add(feature.getIssueId()));
         }
     }
 
@@ -1328,18 +1327,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
         });
         return map;
-    }
-
-    private List<ProjectVO> queryProgramIds(Set<Long> projectIds) {
-        Long projectId = new ArrayList<>(projectIds).get(0);
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        ResponseEntity<List<ProjectVO>> response =
-                baseFeignClient.getGroupInfoByEnableProjects(organizationId, projectIds);
-        List<ProjectVO> projects = response.getBody();
-        if (ObjectUtils.isEmpty(projects)) {
-            return Collections.emptyList();
-        }
-        return projects;
     }
 
     @Override

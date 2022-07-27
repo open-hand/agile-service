@@ -1,5 +1,9 @@
 package io.choerodon.agile.infra.feign.fallback;
 
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Set;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
@@ -9,10 +13,6 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -76,11 +76,6 @@ public class BaseFeignClientFallback implements BaseFeignClient {
 
     @Override
     public ResponseEntity<ProjectVO> getGroupInfoByEnableProject(Long organizationId, Long projectId) {
-        throw new CommonException("error.groupInfo.get");
-    }
-
-    @Override
-    public ResponseEntity<List<ProjectVO>> getGroupInfoByEnableProjects(Long organizationId, Set<Long> projectIds) {
         throw new CommonException("error.groupInfo.get");
     }
 
