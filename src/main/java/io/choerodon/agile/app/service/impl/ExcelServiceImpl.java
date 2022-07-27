@@ -1,14 +1,39 @@
 package io.choerodon.agile.app.service.impl;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.*;
+import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -34,33 +59,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.client.MessageClientC7n;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.core.utils.PageableHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -295,9 +293,8 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private boolean withFeature(Long projectId, Long organizationId) {
-        ResponseEntity<ProjectVO> response =
-                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
-        return response.getBody() != null;
+        ProjectVO projectVO = agilePluginService.getProgram(projectId, organizationId);
+        return projectVO != null && projectVO.getId() != null;
     }
 
     @Override

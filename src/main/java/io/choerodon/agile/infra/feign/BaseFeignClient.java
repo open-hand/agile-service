@@ -1,21 +1,20 @@
 package io.choerodon.agile.infra.feign;
 
-import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
-import io.choerodon.core.domain.Page;
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Set;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
+import io.choerodon.core.domain.Page;
 import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -100,10 +99,6 @@ public interface BaseFeignClient {
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/{project_id}/program")
     ResponseEntity<ProjectVO> getGroupInfoByEnableProject(@PathVariable(name = "organization_id") Long organizationId,
                                                           @PathVariable(name = "project_id") Long projectId);
-
-    @PostMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/programs")
-    ResponseEntity<List<ProjectVO>> getGroupInfoByEnableProjects(@PathVariable(name = "organization_id") Long organizationId,
-                                                                 @RequestBody Set<Long> projectIds);
 
     @PostMapping(value = "/choerodon/v1/projects/{project_id}/role_members/users/roles")
     ResponseEntity<Page<UserWithRoleVO>> pagingQueryUsersWithProjectLevelRoles(

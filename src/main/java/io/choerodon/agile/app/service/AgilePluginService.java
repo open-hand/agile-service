@@ -1,5 +1,9 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
@@ -9,10 +13,6 @@ import io.choerodon.agile.infra.dto.business.*;
 import io.choerodon.agile.infra.enums.FieldSql;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -506,4 +506,6 @@ public interface AgilePluginService {
     List<Long> queryNoEpicFeatureIds(List<IssueDTO> issues);
 
     void buildFieldList(List<String> fieldList, IssueUpdateVO issueUpdateVO);
+
+    List<ProjectVO> queryProgramIdsByProjectIds(Set<Long> projectIds);
 }
