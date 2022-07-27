@@ -99,7 +99,7 @@ public class DataLogServiceImpl implements DataLogService {
 
     private Map<Long, RuleLogRelVO> queryCustomFieldRuleLogMap(List<FieldDataLogVO> fieldDataLogs,
                                                                Long projectId) {
-        if (ObjectUtils.isEmpty(fieldDataLogs)) {
+        if (ObjectUtils.isEmpty(fieldDataLogs) || ObjectUtils.isEmpty(agileTriggerService)) {
             return new HashMap<>();
         }
         Set<Long> customFieldLogIds = fieldDataLogs.stream().map(FieldDataLogVO::getId).collect(Collectors.toSet());
