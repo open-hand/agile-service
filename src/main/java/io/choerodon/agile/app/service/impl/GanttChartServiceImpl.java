@@ -1,5 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +23,6 @@ import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -26,20 +30,14 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -581,7 +579,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long, String> rankMap = new HashMap<>();
         if (agilePluginService != null) {
-            ProjectVO program = remoteIamOperator.getGroupInfoByEnableProject(organizationId, projectId);
+            ProjectVO program = agilePluginService.getProgram(organizationId, projectId);
             if (program != null) {
                 projectIds.add(program.getId());
             }
@@ -831,10 +829,10 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public List<IssueDTO> querySubByIssueIds(Set<Long> projectIds,
-                                              List<Long> issueIds,
-                                              Map<String, Object> sortMap,
-                                              boolean ganttDefaultOrder,
-                                              String dimension) {
+                                             List<Long> issueIds,
+                                             Map<String, Object> sortMap,
+                                             boolean ganttDefaultOrder,
+                                             String dimension) {
         //有点慢
         List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, issueIds, sortMap, ganttDefaultOrder, dimension);
         Set<String> colorCodes = new HashSet<>();
@@ -866,7 +864,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 }
             });
         }
-        issueList.forEach(x ->{
+        issueList.forEach(x -> {
             String colorCode = x.getColorCode();
             x.setEpicColor(colorMap.get(colorCode));
             Long projectId = x.getProjectId();
@@ -891,22 +889,27 @@ public class GanttChartServiceImpl implements GanttChartService {
                                        Map<Long, IssueDTO> issueFeatureMap,
                                        Set<Long> projectIds,
                                        Map<Long, ProjectVO> projectMap) {
-        if (!ObjectUtils.isEmpty(issueIds)) {
-            List<ProjectVO> programs = queryProgramIds(projectIds);
-            boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programs));
-            issueEpicMap.putAll(issueMapper.listIssueWithEpicId(projectIds, issueIds)
-                    .stream()
-                    .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getEpicId)));
-            if (GanttDimension.isEpic(dimension)) {
-                issueIds.addAll(issueEpicMap.values());
-            }
-            if (belongProgram) {
-                programs.forEach(p -> projectMap.put(p.getId(), p));
-                issueFeatureMap.putAll(agilePluginService.queryIssueFeature(projectIds, issueIds));
-                if (GanttDimension.isEpic(dimension)) {
-                    issueFeatureMap.forEach((issueId, feature) -> issueIds.add(feature.getIssueId()));
-                }
-            }
+        if (CollectionUtils.isEmpty(issueIds)) {
+            return;
+        }
+        issueEpicMap.putAll(issueMapper.listIssueWithEpicId(projectIds, issueIds)
+                .stream()
+                .collect(Collectors.toMap(IssueDTO::getIssueId, IssueDTO::getEpicId)));
+        if (GanttDimension.isEpic(dimension)) {
+            issueIds.addAll(issueEpicMap.values());
+        }
+        if (agilePluginService == null) {
+            // 商业版
+            return;
+        }
+        List<ProjectVO> programs = agilePluginService.queryProgramIdsByProjectIds(projectIds);
+        if (CollectionUtils.isEmpty(programs)) {
+            return;
+        }
+        programs.forEach(p -> projectMap.put(p.getId(), p));
+        issueFeatureMap.putAll(agilePluginService.queryIssueFeature(projectIds, issueIds));
+        if (GanttDimension.isEpic(dimension)) {
+            issueFeatureMap.forEach((issueId, feature) -> issueIds.add(feature.getIssueId()));
         }
     }
 
@@ -1056,15 +1059,17 @@ public class GanttChartServiceImpl implements GanttChartService {
                                         List<ObjectSchemeFieldVO> displayFields,
                                         Map<String, Object> fieldCodeValues) {
         List<String> fieldCodes = displayFields.stream().map(ObjectSchemeFieldVO::getCode).collect(Collectors.toList());
-        List<ProjectVO> programs = queryProgramIds(projectIds);
-        boolean belongProgram = (agilePluginService != null && !ObjectUtils.isEmpty(programs));
         if (fieldCodes.contains("epic")) {
             fieldCodeValues.put("epic", issueMapper.selectEpicByLinkIssueIds(projectIds, issueIds)
                     .stream()
                     .collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
         }
-        if (belongProgram && fieldCodes.contains("feature")) {
-            if (CollectionUtils.isEmpty(issueFeatureMap)) {
+        if (agilePluginService == null) {
+            return;
+        }
+        List<ProjectVO> programs = agilePluginService.queryProgramIdsByProjectIds(projectIds);
+        if (CollectionUtils.isNotEmpty(programs) && fieldCodes.contains("feature")) {
+            if (MapUtils.isEmpty(issueFeatureMap)) {
                 fieldCodeValues.put("feature", issueFeatureMap);
             } else {
                 programs.forEach(p -> projectMap.put(p.getId(), p));
@@ -1425,7 +1430,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             BigDecimal allEstimateTime;
             if (!CollectionUtils.isEmpty(workLogVOList)) {
                 spentWorkTime = new BigDecimal(0);
-                for (WorkLogVO workLogVO : workLogVOList){
+                for (WorkLogVO workLogVO : workLogVOList) {
                     spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());
                 }
                 allEstimateTime = issueDTO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(issueDTO.getRemainingTime());
@@ -1503,7 +1508,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         for (Map.Entry<Long, Map<String, Object>> entry : allIssueFieldMap.entrySet()) {
             Long issueId = entry.getKey();
             Map<String, Object> value = entry.getValue();
-            if (CollectionUtils.isEmpty(value)) {
+            if (MapUtils.isEmpty(value)) {
                 continue;
             }
             Map<String, Object> filterValue =
@@ -1521,7 +1526,7 @@ public class GanttChartServiceImpl implements GanttChartService {
     }
 
     private Map<Long, IssueSprintDTO> queryIssueSprint(Set<Long> projectIds,
-                                                      List<Long> issueIds) {
+                                                       List<Long> issueIds) {
         if (ObjectUtils.isEmpty(issueIds)) {
             return Collections.emptyMap();
         }
@@ -1556,16 +1561,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             }
         });
         return map;
-    }
-
-    private List<ProjectVO> queryProgramIds(Set<Long> projectIds) {
-        Long projectId = new ArrayList<>(projectIds).get(0);
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<ProjectVO> projects = remoteIamOperator.getGroupInfoByEnableProjects(organizationId, projectIds);
-        if (ObjectUtils.isEmpty(projects)) {
-            return Collections.emptyList();
-        }
-        return projects;
     }
 
     private void getUserIdFromIssueList(List<IssueDTO> issueList, Set<Long> userIds) {
@@ -1707,7 +1702,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
         Map<Long, Object> customFieldMap = (Map<Long, Object>) fieldCodeValues.getOrDefault("foundationCodeValue", new HashMap<>());
         Map<String, Object> fieldCodeValue = (Map<String, Object>) customFieldMap.getOrDefault(issueDTO.getIssueId(), new HashMap<>());
-        if (!CollectionUtils.isEmpty(fieldCodeValue)) {
+        if (MapUtils.isNotEmpty(fieldCodeValue)) {
             ganttChartVO.setFoundationFieldValue(fieldCodeValue);
         }
         if (fieldCodes.contains(PRODUCT) && !ObjectUtils.isEmpty(issueDTO.getProductIds())) {

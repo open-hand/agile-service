@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
-
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -623,4 +622,6 @@ public interface AgilePluginService {
      * 迁移工作组数据到iam
      */
     void migrateWorkGroupData();
+
+    List<ProjectVO> queryProgramIdsByProjectIds(Set<Long> projectIds);
 }

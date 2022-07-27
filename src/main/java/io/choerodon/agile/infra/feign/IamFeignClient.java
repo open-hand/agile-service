@@ -95,14 +95,6 @@ public interface IamFeignClient {
             @PathVariable(name = "project_id") Long sourceId,
             @RequestBody(required = false) @Valid RoleAssignmentSearchVO roleAssignmentSearchVO);
 
-    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/{project_id}/program")
-    ResponseEntity<String> getGroupInfoByEnableProject(@PathVariable(name = "organization_id") Long organizationId,
-                                                       @PathVariable(name = "project_id") Long projectId);
-
-    @PostMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/programs")
-    ResponseEntity<String> getGroupInfoByEnableProjects(@PathVariable(name = "organization_id") Long organizationId,
-                                                        @RequestBody Set<Long> projectIds);
-
     @PostMapping(value = "/choerodon/v1/projects/{project_id}/role_members/users/roles")
     ResponseEntity<String> pagingQueryUsersWithProjectLevelRoles(
             @RequestParam(name = "page") int page,
