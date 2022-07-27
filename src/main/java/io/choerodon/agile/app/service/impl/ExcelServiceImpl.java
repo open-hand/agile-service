@@ -247,7 +247,10 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private boolean withFeature(Long projectId, Long organizationId) {
-        return Objects.isNull(remoteIamOperator.getGroupInfoByEnableProject(organizationId, projectId));
+        if (agilePluginService == null) {
+            return false;
+        }
+        return Objects.isNull(agilePluginService.getProgram(organizationId, projectId).getId());
     }
 
     @Override

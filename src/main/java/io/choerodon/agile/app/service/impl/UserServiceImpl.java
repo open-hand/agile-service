@@ -11,7 +11,6 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.oauth.CustomUserDetails;
@@ -229,11 +228,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDTO> listUsersByIds(Long[] ids) {
         return remoteIamOperator.listUsersByIds(ids, false);
-    }
-
-    @Override
-    public ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId) {
-        return remoteIamOperator.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
     }
 
     @Override

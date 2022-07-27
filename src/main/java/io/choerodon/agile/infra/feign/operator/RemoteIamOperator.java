@@ -106,17 +106,6 @@ public class RemoteIamOperator {
                 });
     }
 
-    public ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId) {
-        return ResponseUtils.getResponse(iamFeignClient.getGroupInfoByEnableProject(organizationId, projectId),
-                ProjectVO.class);
-    }
-
-    public List<ProjectVO> getGroupInfoByEnableProjects(Long organizationId, Set<Long> projectIds) {
-        return ResponseUtils.getResponse(iamFeignClient.getGroupInfoByEnableProjects(organizationId, projectIds),
-                new TypeReference<List<ProjectVO>>() {
-                });
-    }
-
     public Page<UserWithRoleVO> pagingQueryUsersWithProjectLevelRoles(int page, int size,
                                                                       Long sourceId,
                                                                       RoleAssignmentSearchVO roleAssignmentSearchVO,

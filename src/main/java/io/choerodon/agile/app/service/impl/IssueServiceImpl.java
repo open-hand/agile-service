@@ -1216,13 +1216,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private boolean belongToProgram(Long organizationId, Long projectId) {
-        boolean belongToProgram;
         if (agilePluginService == null) {
-            belongToProgram = false;
-        } else {
-            belongToProgram = remoteIamOperator.getGroupInfoByEnableProject(organizationId, projectId) != null;
+            return false;
         }
-        return belongToProgram;
+        return agilePluginService.getProgram(organizationId, projectId).getId() != null;
     }
 
     private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
