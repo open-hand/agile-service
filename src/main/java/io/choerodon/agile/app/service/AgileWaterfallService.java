@@ -98,4 +98,6 @@ public interface AgileWaterfallService {
     void handleMilestoneProgressByStatusId(Long projectId, Long issueId, Long statusId, String typeCode);
 
     List<Long> selectDescendants(Long projectId, Long issueId);
+
+    void deleteByWorkSpaceId(Long projectId, Long workSpaceId);
 }
