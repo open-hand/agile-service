@@ -1196,7 +1196,7 @@ public class ReportServiceImpl implements ReportService {
             case COMPONENT:
                 return handlePieChartByType(projectId, "component_id", false, startDate, endDate, sprintId, versionId);
             case ISSUE_TYPE:
-                return handlePieChartByTypeCode(projectId, startDate, endDate, sprintId, versionId);
+                return handlePieChartByTypeCode(projectId, startDate, endDate, sprintId, versionId, statusId);
             case VERSION:
                 return handlePieChartByType(projectId, "version_id", false, startDate, endDate, sprintId, versionId);
             case PRIORITY:
@@ -1334,10 +1334,15 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private List<PieChartVO> handlePieChartByTypeCode(Long projectId, Date startDate, Date endDate, Long sprintId, Long versionId) {
+    private List<PieChartVO> handlePieChartByTypeCode(Long projectId,
+                                                      Date startDate,
+                                                      Date endDate,
+                                                      Long sprintId,
+                                                      Long versionId,
+                                                      Long statusId) {
         Integer total = reportMapper.queryIssueCountByFieldName(projectId, "type_code", startDate, endDate, sprintId, versionId);
         List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByParam(projectId, true, "issue_type_id", true, total,
-                startDate, endDate, sprintId, versionId, null);
+                startDate, endDate, sprintId, versionId, statusId);
         if (pieChartDTOS != null && !pieChartDTOS.isEmpty()) {
             List<PieChartVO> pieChartVOS = reportAssembler.toTargetList(pieChartDTOS, PieChartVO.class);
             Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
