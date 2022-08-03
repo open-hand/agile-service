@@ -7,7 +7,7 @@ import io.choerodon.agile.app.service.TeamPerformanceService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.TeamPerformanceMapper;
 import io.choerodon.agile.infra.utils.DataUtil;
 import io.choerodon.agile.infra.utils.ListUtil;
@@ -34,7 +34,7 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
     private UserService userService;
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
 
     @Override
     public List<SprintStoryPointVO> querySprintStoryPoint(Long projectId) {
@@ -126,7 +126,7 @@ public class TeamPerformanceServiceImpl implements TeamPerformanceService {
                 responsibleIds.stream().filter(responsibleId -> Objects.nonNull(responsibleId)).collect(Collectors.toList());
         Long[] assigneeIds = new Long[realResponsibleIds.size()];
         realResponsibleIds.toArray(assigneeIds);
-        List<UserDTO> users = baseFeignClient.listUsersByIds(assigneeIds, false).getBody();
+        List<UserDTO> users = remoteIamOperator.listUsersByIds(assigneeIds, false);
         if(responsibleIds.size() != realResponsibleIds.size()){
             users.add(new UserDTO());
         }

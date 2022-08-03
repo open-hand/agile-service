@@ -17,7 +17,7 @@ import io.choerodon.agile.infra.dto.ProjectReportDTO;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.ProjectReportStatus;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.ProjectReportMapper;
 import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -56,7 +56,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Autowired
     private ProjectReportReceiverMapper projectReportReceiverMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private SiteMsgUtil siteMsgUtil;
     @Autowired
@@ -77,12 +77,12 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             List<Long> reportIdList = page.stream().map(ProjectReportVO::getId).collect(Collectors.toList());
             List<ProjectReportReceiverDTO> receiverDTOList = projectReportReceiverMapper.selectReceiver(reportIdList,
                     ProjectReportReceiverDTO.TYPE_RECEIVER);
-            List<UserDTO> createList = baseFeignClient.listUsersByIds(page.stream().map(ProjectReportVO::getCreatedBy)
-                    .toArray(Long[]::new), false).getBody();
+            List<UserDTO> createList = remoteIamOperator.listUsersByIds(page.stream().map(ProjectReportVO::getCreatedBy)
+                    .toArray(Long[]::new), false);
             Map<Long, UserDTO> createMap = createList.stream().collect(Collectors.toMap(UserDTO::getId,
                     Function.identity()));
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
-                    .map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new), false).getBody();
+            List<UserDTO> userList = remoteIamOperator.listUsersByIds(receiverDTOList.stream()
+                    .map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new), false);
             Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
                     Function.identity()));
             Map<Long, List<ProjectReportReceiverDTO>> receiverGroup =
@@ -142,14 +142,14 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         Long[] receiverIds = group.getOrDefault(ProjectReportReceiverDTO.TYPE_RECEIVER, Collections.emptyList())
                 .stream().map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new);
         if (ArrayUtils.isNotEmpty(receiverIds)){
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverIds, false).getBody();
+            List<UserDTO> userList = remoteIamOperator.listUsersByIds(receiverIds, false);
             projectReportVO.setReceiverList(userList);
         }
         // 设置抄送人列表
         Long[] ccIds = group.getOrDefault(ProjectReportReceiverDTO.TYPE_CC, Collections.emptyList())
                 .stream().map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new);
         if (ArrayUtils.isNotEmpty(ccIds)){
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(ccIds, false).getBody();
+            List<UserDTO> userList = remoteIamOperator.listUsersByIds(ccIds, false);
             projectReportVO.setCcList(userList);
         }
         return projectReportVO;

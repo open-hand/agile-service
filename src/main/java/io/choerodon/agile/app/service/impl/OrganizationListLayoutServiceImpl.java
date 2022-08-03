@@ -6,7 +6,7 @@ import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.ListLayoutService;
 import io.choerodon.agile.app.service.OrganizationListLayoutService;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class OrganizationListLayoutServiceImpl implements OrganizationListLayout
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
 
     @Override
     public ListLayoutVO queryByApplyType(Long organizationId, String applyType) {
@@ -65,7 +65,7 @@ public class OrganizationListLayoutServiceImpl implements OrganizationListLayout
         if (projectIds.isEmpty()) {
             return;
         }
-        List<ProjectVO> projects = baseFeignClient.queryProjectByIds(projectIds).getBody();
+        List<ProjectVO> projects = remoteIamOperator.queryProjectByIds(projectIds);
         Map<Long, String> projectNameMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, ProjectVO::getName));
         listLayoutColumnRels.forEach(column -> {
             Long fieldId = column.getFieldId();

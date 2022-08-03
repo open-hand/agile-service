@@ -1,9 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.FieldPermissionDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.FieldPermissionMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
@@ -13,9 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -39,7 +39,7 @@ public class FieldPermissionIssueServiceImpl implements FieldPermissionIssueServ
     @Autowired
     private FieldPermissionMapper fieldPermissionMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
 
     @Override
     public List<PageFieldViewVO> listNoPermissionRequiredFields(Long organizationId,
@@ -88,7 +88,7 @@ public class FieldPermissionIssueServiceImpl implements FieldPermissionIssueServ
             return result;
         }
         Long userId = userDetails.getUserId();
-        List<RoleVO> roles = Optional.ofNullable(baseFeignClient.getUserWithProjLevelRolesByUserId(projectId, userId).getBody()).orElse(new ArrayList<>());
+        List<RoleVO> roles = Optional.ofNullable(remoteIamOperator.getUserWithProjLevelRolesByUserId(projectId, userId)).orElse(new ArrayList<>());
         Set<Long> userRoleIds = new HashSet<>();
         if (!ObjectUtils.isEmpty(roles)) {
             userRoleIds.addAll(roles.stream().map(RoleVO::getId).collect(Collectors.toSet()));

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
-
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -501,7 +500,7 @@ public interface AgilePluginService {
      * @param organizationId
      * @return
      */
-    ProjectVO getProgram(Long projectId, Long organizationId);
+    ProjectVO getProgram(Long organizationId, Long projectId);
 
     /**
      * 特性添加tag
@@ -619,5 +618,10 @@ public interface AgilePluginService {
 
     InstanceOpenRelVO queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
 
-    void updateWorkGroupRelation(Long organizationId, Long projectId, Long workGroupId);
+    /**
+     * 迁移工作组数据到iam
+     */
+    void migrateWorkGroupData();
+
+    List<ProjectVO> queryProgramIdsByProjectIds(Set<Long> projectIds);
 }

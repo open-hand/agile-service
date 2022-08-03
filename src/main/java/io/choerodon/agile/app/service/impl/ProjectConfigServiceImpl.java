@@ -1,6 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
@@ -10,10 +14,12 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EnumUtil;
+import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -31,10 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 /**
@@ -118,8 +120,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusFieldSettingMapper statusFieldSettingMapper;
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
-    @Autowired
-    private BaseFeignClient baseFeignClient;
     @Autowired
     private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired
@@ -334,7 +334,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Map<Long, StatusVO> statusMap = statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, x -> x));
             // 查询哪些状态能够流转
             List<Long> statusIds = transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toList());
-            List<Long> canTransformStatus = statusTransferSettingService.checkStatusTransform(projectId,issueTypeId, statusIds);
+            List<Long> canTransformStatus = statusTransferSettingService.checkStatusTransform(projectId, statusIds, issueId, issueTypeId);
             List<TransformVO> collect = transformVOS.stream().filter(v -> canTransformStatus.contains(v.getEndStatusId())).collect(Collectors.toList());
             collect.forEach(transformVO -> {
                 StatusVO statusVO = statusMap.get(transformVO.getEndStatusId());
@@ -407,7 +407,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 Set<Long> allStatus = new HashSet<>();
                 allStatus.addAll(!ObjectUtils.isEmpty(boardId) ? boardStatus : statusTransferMap.keySet());
                 // 查询能转换的状态
-                List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
+                List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, new ArrayList<>(allStatus), null, issueType.getId());
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
                 statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && boardStatus.contains(entry.getKey())).forEach(entry ->

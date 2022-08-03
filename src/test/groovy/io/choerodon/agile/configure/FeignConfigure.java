@@ -7,7 +7,6 @@ import io.choerodon.agile.app.service.impl.ProductVersionServiceImpl;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.feign.fallback.BaseFeignClientFallback;
-import io.choerodon.agile.infra.feign.fallback.NotifyFeignClientFallback;
 import io.choerodon.asgard.saga.dto.SagaInstanceDTO;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;

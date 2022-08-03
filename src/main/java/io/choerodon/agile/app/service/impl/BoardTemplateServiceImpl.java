@@ -1,5 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.StatusPayload;
@@ -7,7 +11,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.SchemeType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -23,10 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
@@ -98,7 +98,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
     private ColumnStatusRelTemplateMapper columnStatusRelTemplateMapper;
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
 
     @Autowired
     private StatusMachineMapper statusMachineMapper;
@@ -226,7 +226,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
             return new Page<>();
         }
         List<Long> userIds = boardDTOS.stream().map(BoardDTO::getCreatedBy).collect(Collectors.toList());
-        List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true).getBody();
+        List<UserDTO> userDTOS = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true);
         Map<Long, UserDTO> userDTOMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(userDTOS)) {
             userDTOMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));

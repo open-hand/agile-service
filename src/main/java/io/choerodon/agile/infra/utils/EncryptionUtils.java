@@ -62,7 +62,12 @@ public class EncryptionUtils {
                 "statusList","assigneeId","reporterIds","programVersion",
                 "mainResponsibleIds","fixVersion","influenceVersion",
                 "creatorIds", "updatorIds", "statusIds","participantIds",
-                "userIds", "workGroupIds", "productIds"
+                "userIds", "workGroupIds", "productIds",
+                    "categoryIds",
+                    "influenceIds",
+                    "probabilityIds",
+                    "proximityIds",
+                    "relatedPartyIds",
             };
     public static final String[] FILTER_SINGLE_FIELD = {"userId"};
     public static final String[] IGNORE_VALUES = {"0","none"};

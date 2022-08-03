@@ -16,21 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-
 import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
@@ -48,8 +33,8 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
@@ -69,10 +54,23 @@ import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 /**
  * 敏捷开发Issue
@@ -178,7 +176,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private TestServiceClientOperator testServiceClientOperator;
     @Autowired
-    protected BaseFeignClient baseFeignClient;
+    protected RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectUtil projectUtil;
     @Autowired
@@ -1218,13 +1216,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private boolean belongToProgram(Long organizationId, Long projectId) {
-        boolean belongToProgram;
         if (agilePluginService == null) {
-            belongToProgram = false;
-        } else {
-            belongToProgram = baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
+            return false;
         }
-        return belongToProgram;
+        return agilePluginService.getProgram(organizationId, projectId).getId() != null;
     }
 
     private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
@@ -3618,14 +3613,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectUserIdsByProjectIds(Arrays.asList(projectId));
         AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        return remoteIamOperator.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
     }
 
     @Override
     public Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectReporterIdsByProjectId(projectId);
         AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        return remoteIamOperator.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
     }
 
     @Override
@@ -3883,13 +3878,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
-            List<ProjectVO> projectVOS = baseFeignClient.listProjectsByUserIdForSimple(organizationId,userId, null, true).getBody();
+            List<ProjectVO> projectVOS = remoteIamOperator.listProjectsByUserIdForSimple(organizationId,userId, null, true);
             if (!CollectionUtils.isEmpty(projectVOS)) {
                 projectIds.addAll(projectVOS.stream().map(ProjectVO::getId).collect(Collectors.toList()));
                 projects.addAll(projectVOS);
             }
         } else {
-            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
             if (!organizationId.equals(projectVO.getOrganizationId())) {
                 throw new CommonException("error.organization.illegal");
             }
@@ -3909,11 +3904,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         agileUserVO.setProjectIds(new HashSet<>(projectIds));
         agileUserVO.setOrganizationId(organizationId);
-        Page<UserDTO> page = baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        Page<UserDTO> page = remoteIamOperator.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
         Set<Long> ignoredUserIds = agileUserVO.getIgnoredUserIds();
         List<UserDTO> result = new ArrayList<>();
         if (!CollectionUtils.isEmpty(ignoredUserIds)) {
-            result.addAll(baseFeignClient.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false).getBody());
+            result.addAll(remoteIamOperator.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false));
         }
         if (!CollectionUtils.isEmpty(page.getContent())) {
             result.addAll(page.getContent());

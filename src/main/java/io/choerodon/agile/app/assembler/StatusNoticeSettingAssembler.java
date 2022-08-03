@@ -10,7 +10,7 @@ import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.infra.dto.StatusNoticeSettingDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StatusNoticeSettingAssembler {
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
 
@@ -62,7 +62,7 @@ public class StatusNoticeSettingAssembler {
 
     public void addUserInfo(StatusNoticeSettingVO statusNoticeSettingVO, String schemeCode, Long issueTypeId){
         if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getUserIdList())){
-            List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(statusNoticeSettingVO.getUserIdList().toArray(new Long[0]), true).getBody();
+            List<UserDTO> userDTOList = remoteIamOperator.listUsersByIds(statusNoticeSettingVO.getUserIdList().toArray(new Long[0]), true);
             statusNoticeSettingVO.setUserList(userDTOList);
         }
         Set<String> userTypeList = new HashSet<>(statusNoticeSettingVO.getUserTypeList());

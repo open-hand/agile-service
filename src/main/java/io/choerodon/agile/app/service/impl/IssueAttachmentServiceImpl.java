@@ -1,22 +1,25 @@
 package io.choerodon.agile.app.service.impl;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.util.*;
+
 import io.choerodon.agile.api.vo.IssueAttachmentCombineVO;
+import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.IIssueAttachmentService;
+import io.choerodon.agile.app.service.IssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FileUploadBucket;
-import io.choerodon.agile.infra.feign.CustomFileRemoteService;
+import io.choerodon.agile.infra.feign.CustomFileFeignClient;
+import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.agile.api.vo.IssueAttachmentVO;
-import io.choerodon.agile.app.service.IssueAttachmentService;
-import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
 import io.choerodon.core.oauth.DetailsHelper;
-
 import org.hzero.boot.file.FileClient;
 import org.hzero.core.util.ResponseUtils;
 import org.slf4j.Logger;
@@ -29,10 +32,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-
-import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
-import java.util.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -59,7 +58,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     private FileClient fileClient;
 
     @Autowired
-    private CustomFileRemoteService customFileRemoteService;
+    private CustomFileFeignClient customFileFeignClient;
 
     @Autowired
     private ProjectUtil projectUtil;
@@ -110,7 +109,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         Long organizationId = projectUtil.getOrganizationId(projectId);
         Map<String, String> args = new HashMap<>(1);
         args.put("bucketName", FileUploadBucket.AGILE_BUCKET.bucket());
-        String url = ResponseUtils.getResponse(customFileRemoteService.fragmentCombineBlock(
+        String url = ResponseUtils.getResponse(customFileFeignClient.fragmentCombineBlock(
                 organizationId,
                 issueAttachmentCombineVO.getGuid(),
                 issueAttachmentCombineVO.getFileName(),
@@ -193,7 +192,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
             String fullPath = filePathService.generateFullPath(url);
             Long organizationId = projectUtil.getOrganizationId(projectId);
-            ResponseUtils.getResponse(customFileRemoteService.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Arrays.asList(fullPath)), String.class);
+            ResponseUtils.getResponse(customFileFeignClient.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Arrays.asList(fullPath)), String.class);
         } catch (Exception e) {
             LOGGER.error("error.attachment.delete", e);
         }

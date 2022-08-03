@@ -1,5 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.google.common.reflect.TypeToken;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -7,7 +10,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -28,9 +31,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 /**
  * @author zhaotianxin
  * @date 2021-03-22 14:50
@@ -48,7 +48,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     @Autowired
     private StatusMachineMapper statusMachineMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private IssueTypeMapper issueTypeMapper;
     @Autowired
@@ -568,7 +568,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         List<StatusSettingVO> content = statusSettingVOS.getContent();
         if (!CollectionUtils.isEmpty(content)) {
             // 查询项目下用户
-            Page<UserVO> users = baseFeignClient.queryUsersByProject(projectId, null, 0, 0).getBody();
+            Page<UserVO> users = remoteIamOperator.queryUsersByProject(projectId, null, 0, 0);
             List<Long> userIds = new ArrayList<>();
             if (!CollectionUtils.isEmpty(users.getContent())) {
                 userIds.addAll(users.getContent().stream().map(UserVO::getId).collect(Collectors.toList()));
@@ -837,7 +837,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     }
 
     private void initStatusMachine(Long organizationId, Long issueTypeId, Long schemeId) {
-        OrganizationInfoVO organization = baseFeignClient.query(organizationId).getBody();
+        OrganizationInfoVO organization = remoteIamOperator.query(organizationId);
         IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         if (ObjectUtils.isEmpty(issueTypeDTO)) {
             throw new CommonException("error.issue.type.not.exist");

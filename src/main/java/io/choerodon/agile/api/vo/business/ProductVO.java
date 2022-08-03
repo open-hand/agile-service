@@ -1,10 +1,5 @@
 package io.choerodon.agile.api.vo.business;
 
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -12,6 +7,12 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
+
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.feign.vo.HealthStateVO;
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author huaxin.deng@hand-china.com
@@ -61,9 +62,13 @@ public class ProductVO {
     @ApiModelProperty(value = "是否启用")
     private Boolean isEnabled;
 
+    @ApiModelProperty(value = "健康状态编码")
+    private String healthStateCode;
+
     @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
+    @Encrypt
     @ApiModelProperty(value = "关联项目id")
     private List<Long> projectIds;
 
@@ -85,8 +90,12 @@ public class ProductVO {
     @ApiModelProperty(value = "产品状态id")
     @NotNull(message = "error.product.statusId.notNull")
     private Long statusId;
+
     @ApiModelProperty(value = "产品状态")
     private ProductStatusVO productStatusVO;
+
+    @ApiModelProperty(value = "产品健康状态")
+    private HealthStateVO healthStateVO;
 
     public Long getId() {
         return id;
@@ -238,5 +247,21 @@ public class ProductVO {
 
     public void setProductStatusVO(ProductStatusVO productStatusVO) {
         this.productStatusVO = productStatusVO;
+    }
+
+    public String getHealthStateCode() {
+        return healthStateCode;
+    }
+
+    public void setHealthStateCode(String healthStateCode) {
+        this.healthStateCode = healthStateCode;
+    }
+
+    public HealthStateVO getHealthStateVO() {
+        return healthStateVO;
+    }
+
+    public void setHealthStateVO(HealthStateVO healthStateVO) {
+        this.healthStateVO = healthStateVO;
     }
 }
