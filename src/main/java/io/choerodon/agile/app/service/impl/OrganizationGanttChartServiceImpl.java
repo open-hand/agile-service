@@ -10,8 +10,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
@@ -43,7 +42,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     @Autowired
     private GanttChartService ganttChartService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
@@ -80,9 +79,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     @Override
     public List<ProjectVO> listAgileProjects(Long organizationId, String name, String code, String param) {
         Page<ProjectVO> projectPage =
-                baseFeignClient
-                        .pagedQueryProjects(organizationId, 1, 0, name, code, true, true, param)
-                        .getBody();
+                remoteIamOperator.pagedQueryProjects(organizationId, 1, 0, name, code, true, true, param);
         List<ProjectVO> projects = projectPage.getContent();
         projects =
                 projects
@@ -240,7 +237,8 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
             }
         });
         List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(filterProjectIds, issueIds, sortMap, false, null);
+
+        List<IssueDTO> issueList = ganttChartService.querySubByIssueIds(filterProjectIds, issueIds, sortMap, false, null);
         List<GanttChartVO> result = ganttChartService.buildGanttList(filterProjectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId, null);
         return PageUtils.copyPropertiesAndResetContent(issuePage, result);
     }

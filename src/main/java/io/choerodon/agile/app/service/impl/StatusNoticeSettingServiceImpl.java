@@ -13,7 +13,7 @@ import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusNoticeSettingDTO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -47,7 +47,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     @Autowired
     private SendMsgUtil sendMsgUtil;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private FieldValueMapper fieldValueMapper;
     @Autowired
@@ -240,7 +240,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     private void receiverType2User(Long projectId, StatusNoticeSettingDTO noticeDTO, IssueDTO issue, Set<Long> userSet) {
         switch (noticeDTO.getUserType()){
             case StatusNoticeUserType.PROJECT_OWNER:
-                userSet.addAll(baseFeignClient.listProjectOwnerById(projectId).getBody().stream().map(UserVO::getId).collect(Collectors.toSet()));
+                userSet.addAll(remoteIamOperator.listProjectOwnerById(projectId).stream().map(UserVO::getId).collect(Collectors.toSet()));
                 break;
             case StatusNoticeUserType.ASSIGNEE:
                 userSet.add(issue.getAssigneeId());

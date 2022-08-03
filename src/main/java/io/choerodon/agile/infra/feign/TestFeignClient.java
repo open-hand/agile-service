@@ -1,19 +1,20 @@
 package io.choerodon.agile.infra.feign;
 
-import io.choerodon.agile.infra.feign.fallback.TestFeignClientFallback;
+import java.util.List;
+
+import io.choerodon.agile.infra.feign.fallback.TestFallbackFactory;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@FeignClient(value = "test-manager-service", fallback = TestFeignClientFallback.class)
+@FeignClient(value = "test-manager-service", fallbackFactory = TestFallbackFactory.class)
 public interface TestFeignClient {
 
     @DeleteMapping(value = "/v1/projects/{project_id}/defect/delete_relation/{defectId}")
-    ResponseEntity deleteTestRel(@PathVariable(value = "project_id") Long projectId,
-                                 @PathVariable(name = "defectId") Long defectId);
+    ResponseEntity<Void> deleteTestRel(@PathVariable(value = "project_id") Long projectId,
+                                       @PathVariable(name = "defectId") Long defectId);
 
     @DeleteMapping(value = "/v1/projects/{project_id}/project_info")
     ResponseEntity<String> queryProjectInfo(@ApiParam(value = "项目id", required = true)
@@ -26,4 +27,19 @@ public interface TestFeignClient {
                                 @RequestParam Long organizationId,
                                 @RequestParam Long issueTypeId,
                                 @RequestBody List<Long> statusIds);
+
+    @GetMapping("/v1/projects/{project_id}/case_link/check_exist")
+    ResponseEntity<String> checkTestCaseLinkExist(@ApiParam(value = "项目id", required = true)
+                                                   @PathVariable(name = "project_id") Long projectId,
+                                                   @ApiParam(value = "issueId", required = true)
+                                                   @RequestParam(name = "issue_id")
+                                                   @Encrypt Long issueId);
+
+    @GetMapping("/v1/projects/{project_id}/case_link/copy_by_issue_id")
+    ResponseEntity<Void> copyIssueRelatedTestCases(@ApiParam(value = "项目id", required = true)
+                                                   @PathVariable(name = "project_id") Long projectId,
+                                                   @ApiParam(value = "issueId", required = true)
+                                                   @RequestParam @Encrypt Long issueId,
+                                                   @ApiParam(value = "newIssueId", required = true)
+                                                   @RequestParam @Encrypt Long newIssueId);
 }

@@ -1,23 +1,27 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.StatusMachineDTO;
+import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.lang3.BooleanUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -111,7 +115,12 @@ public class InitServiceImpl implements InitService {
 
     @Override
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
-        return initStateMachine(organizationId, projectEvent, "默认状态机【敏捷】", SchemeApplyType.AGILE);
+        Long stateMachineId = initStateMachine(organizationId, projectEvent, "默认状态机【敏捷】", SchemeApplyType.AGILE);
+        if (BooleanUtils.isNotTrue(projectEvent.getUseTemplate())) {
+            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+            boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
+        }
+        return stateMachineId;
     }
 
     @Override
@@ -133,13 +142,8 @@ public class InitServiceImpl implements InitService {
         //创建状态机节点和转换
         createStateMachineDetail(organizationId, statusMachine.getId(), applyType);
         //发布状态机
-        Long stateMachineId = statusMachine.getId();
         //敏捷创建完状态机后需要到敏捷创建列
-        if (ObjectUtils.isEmpty(projectEvent.getUseTemplate()) || Boolean.FALSE.equals(projectEvent.getUseTemplate())) {
-            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
-            boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
-        }
-        return stateMachineId;
+        return statusMachine.getId();
     }
 
     @Override

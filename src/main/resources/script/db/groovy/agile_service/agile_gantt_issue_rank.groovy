@@ -35,5 +35,11 @@ databaseChangeLog(logicalFilePath:'agile_gantt_issue_rank.groovy') {
         }
     }
 
+    changeSet(id: '2022-06-15-agile-gantt-issue-rank-add-index', author: 'kaiwen.li@zknow.com') {
+        createIndex(tableName: "agile_gantt_issue_rank", indexName: "idx_issue_id_dimension") {
+            column(name: "issue_id")
+            column(name: "dimension")
+        }
+    }
 
 }

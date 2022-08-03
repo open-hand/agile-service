@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import springfox.documentation.annotations.ApiIgnore;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueValidator;
@@ -409,20 +411,33 @@ public class IssueController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("复制一个issue")
     @PostMapping("/{issueId}/clone_issue")
-    public ResponseEntity<IssueVO> cloneIssueByIssueId(@ApiParam(value = "项目id", required = true)
-                                                        @PathVariable(name = "project_id") Long projectId,
-                                                       @ApiParam(value = "issueId", required = true)
-                                                        @PathVariable(name = "issueId") @Encrypt Long issueId,
-                                                       @ApiParam(value = "组织id", required = true)
-                                                        @RequestParam Long organizationId,
-                                                       @ApiParam(value = "应用类型", required = true)
-                                                        @RequestParam(value = "applyType") String applyType,
-                                                       @ApiParam(value = "复制条件", required = true)
-                                                        @RequestBody CopyConditionVO copyConditionVO) {
+    public ResponseEntity<Void> cloneIssueByIssueId(@ApiParam(value = "项目id", required = true)
+                                                    @PathVariable(name = "project_id") Long projectId,
+                                                    @ApiParam(value = "issueId", required = true)
+                                                    @PathVariable(name = "issueId") @Encrypt Long issueId,
+                                                    @ApiParam(value = "组织id", required = true)
+                                                    @RequestParam Long organizationId,
+                                                    @ApiParam(value = "应用类型", required = true)
+                                                    @RequestParam(value = "applyType") String applyType,
+                                                    @ApiParam(value = "异步任务id", required = true)
+                                                    @RequestParam(value = "asyncTraceId") String asyncTraceId,
+                                                    @ApiParam(value = "复制条件", required = true)
+                                                    @RequestBody CopyConditionVO copyConditionVO) {
         issueValidator.checkPredefinedFields(copyConditionVO.getPredefinedFieldNames());
-        return Optional.ofNullable(issueService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.issue.cloneIssueByIssueId"));
+        issueOperateService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询工作项复制异步任务执行状态")
+    @GetMapping(value = "/{issueId}/query_async_clone_status")
+    public ResponseEntity<String> queryAsyncCloneStatus(@ApiParam(value = "项目id", required = true)
+                                                        @PathVariable("project_id") Long projectId,
+                                                        @ApiParam(value = "issueId", required = true)
+                                                        @PathVariable(name = "issueId") @Encrypt Long issueId,
+                                                        @ApiParam(value = "异步任务id", required = true)
+                                                        @RequestParam(value = "asyncTraceId") String asyncTraceId) {
+        return ResponseEntity.ok(issueService.queryAsyncCloneStatus(projectId, issueId, asyncTraceId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -660,5 +675,28 @@ public class IssueController {
                                                 @RequestBody ExecutionUpdateIssueVO executionUpdateIssueVO) {
         issueService.executionUpdateStatus(projectId, issueId, executionUpdateIssueVO);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
+    @GetMapping(value = "/{issueId}/list_link_contents")
+    public ResponseEntity<List<String>> listLinkContents(@ApiParam(value = "项目id", required = true)
+                                                         @PathVariable(name = "project_id") Long projectId,
+                                                         @ApiParam(value = "issue id", required = true)
+                                                         @PathVariable @Encrypt Long issueId) {
+        return ResponseEntity.ok(issueService.listLinkContents(projectId, issueId));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
+    @GetMapping(value = "/{issueId}/all_required_field")
+    public ResponseEntity<List<IssueRequiredFields>> listAllRequiredField(@ApiParam(value = "项目id", required = true)
+                                                                          @PathVariable(name = "project_id") Long projectId,
+                                                                          @PathVariable @Encrypt Long issueId,
+                                                                          @ApiParam(value = "组织id", required = true)
+                                                                          @RequestParam Long organizationId,
+                                                                          @ApiParam(value = "是否复制子项", required = true)
+                                                                          @RequestParam Boolean subTask) {
+        return ResponseEntity.ok(issueService.listAllRequiredField(projectId, organizationId, issueId, subTask));
     }
 }

@@ -16,7 +16,7 @@ import io.choerodon.agile.infra.dto.FieldValueDTO;
 import io.choerodon.agile.infra.dto.PageFieldDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.FieldType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -48,9 +48,9 @@ public class FieldValueUtil {
      */
     public static Map<Long, UserDTO> handleUserMap(List<Long> userIds) {
         Map<Long, UserDTO> map = new HashMap<>(userIds.size());
-        BaseFeignClient baseFeignClient = SpringBeanUtil.getBean(BaseFeignClient.class);
+        RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class);
         if (!userIds.isEmpty()) {
-            map = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).getBody().stream().collect(Collectors.toMap(UserDTO::getId, x -> x));
+            map = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false).stream().collect(Collectors.toMap(UserDTO::getId, x -> x));
         }
         return map;
     }
@@ -282,6 +282,7 @@ public class FieldValueUtil {
      * @param fieldDetail
      */
     public static void handleDefaultValue(ObjectSchemeFieldDetailVO fieldDetail) {
+        RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class);
         switch (fieldDetail.getFieldType()) {
             case FieldType.CHECKBOX:
             case FieldType.MULTIPLE:
@@ -295,18 +296,16 @@ public class FieldValueUtil {
             case FieldType.TEXT:
                 break;
             case FieldType.MEMBER:
-                BaseFeignClient baseFeignClient = SpringBeanUtil.getBean(BaseFeignClient.class);
                 if (fieldDetail.getDefaultValue() != null && !"".equals(fieldDetail.getDefaultValue())) {
                     Long defaultValue = Long.valueOf(String.valueOf(fieldDetail.getDefaultValue()));
                     fieldDetail.setDefaultValue(EncryptionUtils.encrypt(defaultValue));
-                    List<UserDTO> list = baseFeignClient.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false).getBody();
+                    List<UserDTO> list = remoteIamOperator.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false);
                     if (!list.isEmpty()) {
                         fieldDetail.setDefaultValueObj(list.get(0));
                     }
                 }
                 break;
             case FieldType.MULTI_MEMBER:
-                BaseFeignClient baseFeignClient1 = SpringBeanUtil.getBean(BaseFeignClient.class);
                 if (fieldDetail.getDefaultValue() != null && !"".equals(fieldDetail.getDefaultValue())) {
                     String[] split = fieldDetail.getDefaultValue().split(",");
                     List<UserDTO> defaultValueObjects = new ArrayList<>();
@@ -314,7 +313,7 @@ public class FieldValueUtil {
                     for (String userId : split) {
                         Long defaultValue = Long.valueOf(userId);
                         defaultValues.add(defaultValue);
-                        List<UserDTO> list = baseFeignClient1.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false).getBody();
+                        List<UserDTO> list = remoteIamOperator.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false);
                         if (!list.isEmpty()) {
                             defaultValueObjects.addAll(list);
                         }

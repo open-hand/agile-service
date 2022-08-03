@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.IssueWorkTimeCountVO;
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.api.validator.WorkLogValidator;
 import io.choerodon.agile.app.service.*;
@@ -90,6 +91,15 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
                                     Long issueId,
                                     List<String> fieldList) {
         issueAccessDataService.update(issueConvertDTO, new String[]{REMAINING_TIME_FIELD});
+    }
+
+    @Override
+    public IssueWorkTimeCountVO countWorkTime(Long projectId, Long issueId) {
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        if (Objects.isNull(issueDTO)) {
+            throw new CommonException("error.issue.not.exist");
+        }
+        return workLogMapper.countWorkTime(issueId, projectId);
     }
 
     @Override

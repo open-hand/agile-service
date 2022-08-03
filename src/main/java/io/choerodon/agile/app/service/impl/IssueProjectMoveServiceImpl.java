@@ -19,7 +19,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -77,7 +77,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     private static final String ERROR_TRANSFER_PROJECT_ILLEGAL = "error.transfer.project.illegal";
     private static final String ISSUE_PROJECT_BATCH_MOVE = "agile-issue-project-batch-move";
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private IssueMapper issueMapper;
     @Autowired
@@ -195,7 +195,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     public List<ProjectVO> listMoveProject(Long projectId, String typeCode) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
-        List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(projectVO.getOrganizationId(), userId).getBody();
+        List<ProjectVO> projectVOS = remoteIamOperator.queryOrgProjects(projectVO.getOrganizationId(), userId);
         if (!CollectionUtils.isEmpty(projectVOS)) {
             return projectVOS.stream()
                     .filter(v -> Boolean.TRUE.equals(v.getEnabled()) && !Objects.equals(v.getId(), projectId))

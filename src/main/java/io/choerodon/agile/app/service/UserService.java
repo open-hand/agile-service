@@ -1,15 +1,15 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.core.domain.Page;
+import java.util.List;
+import java.util.Map;
+
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
 import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-
-import java.util.List;
-import java.util.Map;
+import io.choerodon.core.domain.Page;
 
 /**
  * @author dinghuang123@gmail.com
@@ -57,8 +57,6 @@ public interface UserService {
     Page<UserVO> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO);
 
     List<UserDTO> listUsersByIds(Long[] ids);
-
-    ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId);
 
     /**
      * 查询是否为项目所有者

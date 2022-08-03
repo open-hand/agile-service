@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo.report;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.choerodon.agile.infra.enums.ReportUnitType;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.util.Assert;
 
@@ -11,10 +12,12 @@ import org.springframework.util.Assert;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(name = "text",value = TextUnitVO.class),
-        @JsonSubTypes.Type(name = "chart",value = ChartUnitVO.class),
-        @JsonSubTypes.Type(name = "static_list",value = StaticListUnitVO.class),
-        @JsonSubTypes.Type(name = "dynamic_list",value = DynamicListUnitVO.class)
+        @JsonSubTypes.Type(name = ReportUnitType.TEXT,value = TextUnitVO.class),
+        @JsonSubTypes.Type(name = ReportUnitType.CHART,value = ChartUnitVO.class),
+        @JsonSubTypes.Type(name = ReportUnitType.STATIC_LIST,value = StaticListUnitVO.class),
+        @JsonSubTypes.Type(name = ReportUnitType.STATIC_LIST_RISK,value = StaticListUnitVO.class),
+        @JsonSubTypes.Type(name = ReportUnitType.DYNAMIC_LIST,value = DynamicListUnitVO.class),
+        @JsonSubTypes.Type(name = ReportUnitType.DYNAMIC_LIST_RISK,value = DynamicListUnitVO.class)
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportUnitVO {
