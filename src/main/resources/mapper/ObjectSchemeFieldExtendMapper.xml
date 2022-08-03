@@ -180,6 +180,41 @@
         </choose>
     </select>
 
+    <select id="selectExtendFieldsByOptions"
+            resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
+        select
+        id,
+        issue_type_id,
+        issue_type,
+        project_id,
+        organization_id,
+        field_id,
+        is_required as required,
+        is_created as created,
+        is_edited as edited,
+        rank,
+        object_version_number,
+        default_value
+        from fd_object_scheme_field_extend
+        where 1=1
+        <if test="issueTypeIds != null and issueTypeIds.size > 0">
+            and issue_type_id in
+            <foreach collection="issueTypeIds" item="issueTypeId" index="index" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+        </if>
+        and organization_id = #{organizationId}
+        <if test="fieldIds != null and fieldIds.size() > 0">
+            and field_id in
+            <foreach collection="fieldIds" item="fieldId" index="index" open="(" separator="," close=")">
+                #{fieldId}
+            </foreach>
+        </if>
+        <if test="projectId != null">
+            and project_id = #{projectId}
+        </if>
+    </select>
+
 
     <select id="selectExtendFields" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
         select
