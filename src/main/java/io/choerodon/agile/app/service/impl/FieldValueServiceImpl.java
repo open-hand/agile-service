@@ -190,6 +190,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (!fieldIds.isEmpty()) {
             Long issueTypeId = null;
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            Map<Long, ObjectSchemeFieldDTO> fieldMap =
+                    objectSchemeFieldMapper.selectByIds(StringUtils.join(fieldIds, ","))
+                            .stream()
+                            .collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
             if (ObjectSchemeCode.BACKLOG.equals(schemeCode) && !ObjectUtils.isEmpty(backlogExpandService)) {
                 IssueTypeDTO dto = new IssueTypeDTO();
                 dto.setOrganizationId(organizationId);
@@ -227,8 +231,13 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                             String oldValue = statusLinkedValue.getNumberValue();
                             BigDecimal old = new BigDecimal(oldValue);
                             BigDecimal resultValue = old.add(defaultNumberValue);
-                            statusLinkedValue.setNumberValue(resultValue.toString());
-                            fieldValueMapper.updateByPrimaryKeySelective(statusLinkedValue);
+                            ObjectSchemeFieldDTO field = fieldMap.get(fieldId);
+                            PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
+                            pageFieldViewUpdateVO.setFieldType(field.getFieldType());
+                            pageFieldViewUpdateVO.setFieldId(fieldId);
+                            pageFieldViewUpdateVO.setFieldCode(field.getCode());
+                            pageFieldViewUpdateVO.setValue(resultValue.toString());
+                            updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, pageFieldViewUpdateVO);
                         } else {
                             //有默认值，但没有执行状态联动逻辑，插入
                             result.add(dto);
