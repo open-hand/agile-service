@@ -353,10 +353,16 @@ public interface ReportMapper {
      * @param endDate   endDate
      * @param sprintId  sprintId
      * @param versionId versionId
+     * @param statusId statusId
      * @return Integer
      */
-    Integer queryIssueCountByFieldName(@Param("projectId") Long projectId, @Param("fieldName") String fieldName,
-                                       @Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("sprintId") Long sprintId, @Param("versionId") Long versionId);
+    Integer queryIssueCountByFieldName(@Param("projectId") Long projectId,
+                                       @Param("fieldName") String fieldName,
+                                       @Param("startDate") Date startDate,
+                                       @Param("endDate") Date endDate,
+                                       @Param("sprintId") Long sprintId,
+                                       @Param("versionId") Long versionId,
+                                       @Param("statusId") Long statusId);
 
     List<GroupDataChartListDTO> selectEpicIssueList(@Param("projectId") Long projectId, @Param("epicId") Long epicId);
 
