@@ -1234,7 +1234,7 @@ public class ReportServiceImpl implements ReportService {
                                                          Long versionId,
                                                          Long statusId,
                                                          Long fieldId) {
-        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "customField", startDate, endDate, sprintId, versionId);
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "customField", startDate, endDate, sprintId, versionId, statusId);
         ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldMapper.queryById(fieldId);
         boolean user = FieldType.MEMBER.equals(objectSchemeFieldDTO.getFieldType()) || FieldType.MULTI_MEMBER.equals(objectSchemeFieldDTO.getFieldType());
         List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByCustomField(projectId, false, total,
@@ -1277,7 +1277,7 @@ public class ReportServiceImpl implements ReportService {
                                                   Long statusId,
                                                   String fieldName,
                                                   Boolean own) {
-        Integer total = reportMapper.queryIssueCountByFieldName(projectId, fieldName, startDate, endDate, sprintId, versionId);
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, fieldName, startDate, endDate, sprintId, versionId, null);
         List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByParam(projectId, own, fieldName, false, total,
                 startDate, endDate, sprintId, versionId, null);
         List<PieChartVO> pieChartVOList = reportAssembler.toTargetList(pieChartDTOS, PieChartVO.class);
@@ -1321,7 +1321,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private List<PieChartVO> handlePieChartByStatusType(Long projectId, Date startDate, Date endDate, Long sprintId, Long versionId) {
-        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "status_id", startDate, endDate, sprintId, versionId);
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "status_id", startDate, endDate, sprintId, versionId, null);
         List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByParam(projectId, true, "status_id", false, total,
                 startDate, endDate, sprintId, versionId, null);
         if (pieChartDTOS != null && !pieChartDTOS.isEmpty()) {
@@ -1340,7 +1340,7 @@ public class ReportServiceImpl implements ReportService {
                                                       Long sprintId,
                                                       Long versionId,
                                                       Long statusId) {
-        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "type_code", startDate, endDate, sprintId, versionId);
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "type_code", startDate, endDate, sprintId, versionId, statusId);
         List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByParam(projectId, true, "issue_type_id", true, total,
                 startDate, endDate, sprintId, versionId, statusId);
         if (pieChartDTOS != null && !pieChartDTOS.isEmpty()) {
@@ -1361,18 +1361,18 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private List<PieChartVO> handlePieChartByEpic(Long projectId, Date startDate, Date endDate, Long sprintId, Long versionId) {
-        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "epic_id", startDate, endDate, sprintId, versionId);
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "epic_id", startDate, endDate, sprintId, versionId, null);
         return reportAssembler.toTargetList(reportMapper.queryPieChartByEpic(projectId, total, startDate, endDate, sprintId, versionId), PieChartVO.class);
     }
 
     private List<PieChartVO> handlePieChartByType(Long projectId, String fieldName, Boolean own, Date startDate, Date endDate, Long sprintId, Long versionId) {
-        Integer total = reportMapper.queryIssueCountByFieldName(projectId, fieldName, startDate, endDate, sprintId, versionId);
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, fieldName, startDate, endDate, sprintId, versionId, null);
         List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByParam(projectId, own, fieldName, false, total, startDate, endDate, sprintId, versionId, null);
         return reportAssembler.toTargetList(pieChartDTOS, PieChartVO.class);
     }
 
     private List<PieChartVO> handlePieChartByAssignee(Long projectId, Date startDate, Date endDate, Long sprintId, Long versionId, Long statusId) {
-        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "assignee_id", startDate, endDate, sprintId, versionId);
+        Integer total = reportMapper.queryIssueCountByFieldName(projectId, "assignee_id", startDate, endDate, sprintId, versionId, statusId);
         List<PieChartDTO> pieChartDTOS = reportMapper.queryPieChartByParam(projectId, true, "assignee_id", false, total, startDate, endDate, sprintId, versionId, statusId);
         List<PieChartVO> pieChartVOList = reportAssembler.toTargetList(pieChartDTOS, PieChartVO.class);
         if (pieChartVOList != null && !pieChartVOList.isEmpty()) {

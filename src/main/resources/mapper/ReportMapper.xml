@@ -1974,6 +1974,9 @@
             and ai.issue_id in (select avir.issue_id from agile_version_issue_rel avir where avir.version_id =
             #{versionId} and avir.relation_type = 'fix')
         </if>
+        <if test="statusId != null">
+            and ai.status_id = #{statusId}
+        </if>
     </select>
 
     <select id="selectEpicIssueList" resultType="io.choerodon.agile.infra.dto.business.GroupDataChartListDTO">
