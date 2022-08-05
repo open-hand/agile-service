@@ -20,7 +20,10 @@ import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.file.FileClient;
+import org.hzero.boot.file.dto.FileDTO;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.ResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +31,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -50,9 +53,6 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     private IssueMapper issueMapper;
     @Autowired
     private IIssueAttachmentService iIssueAttachmentService;
-
-//    @Value("${services.attachment.url}")
-//    private String attachmentUrl;
 
     @Autowired
     private FileClient fileClient;
@@ -110,10 +110,10 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         Map<String, String> args = new HashMap<>(1);
         args.put("bucketName", FileUploadBucket.AGILE_BUCKET.bucket());
         String url = ResponseUtils.getResponse(customFileFeignClient.fragmentCombineBlock(
-                organizationId,
-                issueAttachmentCombineVO.getGuid(),
-                issueAttachmentCombineVO.getFileName(),
-                args),
+                        organizationId,
+                        issueAttachmentCombineVO.getGuid(),
+                        issueAttachmentCombineVO.getFileName(),
+                        args),
                 String.class,
                 (httpStatus, response) -> {
                 }, exceptionResponse -> {
@@ -122,6 +122,11 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
                 });
         if (url == null) {
             throw new CommonException("error.attachment.combine.failed");
+        }
+        final boolean isFileSizeOk = this.validateFileSize(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Collections.singleton(url), 30 * 1024 * 1024);
+        if (!isFileSizeOk) {
+            this.customFileFeignClient.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Collections.singletonList(url));
+            throw new CommonException("error.attachment.size.max");
         }
         String relativePath = filePathService.generateRelativePath(url);
         IssueAttachmentDTO result = dealIssue(projectId, issueAttachmentCombineVO.getIssueId(),
@@ -132,17 +137,6 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         issueAttachmentVO.setUrl(fullPath);
         return issueAttachmentVO;
     }
-
-//    private String dealUrl(String url) {
-//        String dealUrl = null;
-//        try {
-//            URL netUrl = new URL(url);
-//            dealUrl = netUrl.getFile().substring(FileUploadBucket.AGILE_BUCKET.bucket().length() + 2);
-//        } catch (MalformedURLException e) {
-//            throw new CommonException("error.malformed.url", e);
-//        }
-//        return dealUrl;
-//    }
 
     @Override
     public List<IssueAttachmentVO> create(Long projectId, Long issueId, HttpServletRequest request) {
@@ -255,4 +249,26 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         });
         issueMapper.updateIssueLastUpdateInfo(newIssueId, projectId, DetailsHelper.getUserDetails().getUserId());
     }
+
+    private boolean validateFileSize(Long tenantId, String bucketName, Collection<String> urls, long maxSize) {
+        Assert.notNull(tenantId, BaseConstants.ErrorCode.NOT_NULL);
+        if (CollectionUtils.isEmpty(urls)) {
+            return true;
+        }
+        final List<FileDTO> files = this.fileClient.getFiles(tenantId, bucketName, new ArrayList<>(urls));
+        if (CollectionUtils.isEmpty(files)) {
+            return true;
+        }
+        for (FileDTO file : files) {
+            final Long fileSize = file.getFileSize();
+            if (fileSize == null) {
+                continue;
+            }
+            if (fileSize > maxSize) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
