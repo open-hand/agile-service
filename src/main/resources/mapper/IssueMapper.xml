@@ -4210,8 +4210,8 @@
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         WHERE ai.project_id = #{projectId}
-        AND ai.type_code in ('story', 'task', 'bug', 'sub_task')
-        AND ai.apply_type = 'agile'
+        AND ai.type_code in ('story', 'task', 'bug', 'sub_task', 'stage', 'milestone', 'activity')
+        AND ai.apply_type in ('agile', 'waterfall')
         AND ai.issue_num = #{issueNum}
     </select>
 
