@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'script/db/agile_issue_sprint_rel.groovy') {
     changeSet(id: '2018-06-15-agile_issue_sprint_rel', author: 'jian_zhang02@163.com') {
-        createTable(tableName: "agile_issue_sprint_rel") {
+        createTable(tableName: "agile_issue_sprint_rel", remarks: 'issue冲刺关联表') {
             column(name: 'issue_id', type: 'BIGINT UNSIGNED', remarks: '问题id') {
                 constraints(nullable: false)
             }

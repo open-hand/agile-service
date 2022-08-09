@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_gantt_dimension_rank.groovy') {
     changeSet(id: '2021-10-09-agile-gantt-dimension-rank', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: "agile_gantt_dimension_rank") {
+        createTable(tableName: "agile_gantt_dimension_rank", remarks: '甘特图纬度排序表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_work_calendar_subscribe.groovy') {
     changeSet(id: '2021-10-12-agile-work-calendar-subscribe', author: 'huaxin.deng@hand-china.com') {
-        createTable(tableName: "agile_work_calendar_subscribe") {
+        createTable(tableName: "agile_work_calendar_subscribe", remarks: '工作日历订阅表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键') {
                 constraints(primaryKey: true)
             }

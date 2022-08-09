@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_board_column_status_rel.groovyoovy') {
     changeSet(id: '2018-05-14-agile-board-column-status-rel', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_board_column_status_rel") {
+        createTable(tableName: "agile_board_column_status_rel", remarks: '敏捷看板中列和状态关联关系表') {
             column(name: 'position', type: 'INTEGER UNSIGNED', remarks: '位置') {
                 constraints(nullable: false)
             }

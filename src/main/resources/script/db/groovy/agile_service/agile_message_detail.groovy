@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_message_detail.groovy') {
     changeSet(id: '2018-08-14-agile-message-detail', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_message_detail") {
+        createTable(tableName: "agile_message_detail", remarks: '敏捷消息详情表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

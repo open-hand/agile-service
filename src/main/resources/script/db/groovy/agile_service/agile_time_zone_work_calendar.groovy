@@ -7,7 +7,7 @@ package script.db.groovy.agile_service
  */
 databaseChangeLog(logicalFilePath: 'script/db/agile_time_zone_work_calendar.groovy') {
     changeSet(id: '2018-05-14-agile-time-zone-work-calendar', author: 'dinghuang123@gmail.com') {
-        createTable(tableName: "agile_time_zone_work_calendar") {
+        createTable(tableName: "agile_time_zone_work_calendar", remarks: '时区工作日历表') {
             column(name: 'time_zone_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键') {
                 constraints(primaryKey: true)
             }

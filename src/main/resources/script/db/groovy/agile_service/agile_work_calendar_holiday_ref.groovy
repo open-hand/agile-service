@@ -7,7 +7,7 @@ package script.db.groovy.agile_service
  */
 databaseChangeLog(logicalFilePath: 'script/db/agile_work_calendar_holiday_ref.groovy') {
     changeSet(id: '2018-10-14-agile-work-calendar-holiday-ref', author: 'dinghuang123@gmail.com') {
-        createTable(tableName: "agile_work_calendar_holiday_ref") {
+        createTable(tableName: "agile_work_calendar_holiday_ref", remarks: '工作日历节假日表') {
             column(name: 'calendar_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键') {
                 constraints(primaryKey: true)
             }

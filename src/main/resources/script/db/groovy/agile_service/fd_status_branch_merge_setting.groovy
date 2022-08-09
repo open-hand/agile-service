@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_status_branch_merge_setting.groovy') {
     changeSet(author: 'kaiwen.li@hand-china.com', id: '2021-04-19-create-table-status-branch-merge-setting') {
-        createTable(tableName: 'fd_status_branch_merge_setting') {
+        createTable(tableName: 'fd_status_branch_merge_setting', remarks: '分支合并状态流转表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

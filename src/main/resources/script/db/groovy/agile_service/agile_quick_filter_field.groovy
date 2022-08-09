@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_quick_filter_field.groovy'){
     changeSet(id: '2018-06-14-agile-quick-filter-field', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_quick_filter_field") {
+        createTable(tableName: "agile_quick_filter_field", remarks: '快速筛选字段表') {
             column(name: 'field_code', type: 'VARCHAR(255)',  remarks: '字段编码') {
                 constraints(primaryKey: true)
             }

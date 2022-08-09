@@ -7,7 +7,7 @@ package script.db.groovy.agile_service
  */
 databaseChangeLog(logicalFilePath: 'script/db/agile_sprint_work_calendar_ref.groovy') {
     changeSet(id: '2018-10-14-agile-sprint-calendar-ref', author: 'dinghuang123@gmail.com') {
-        createTable(tableName: "agile_sprint_work_calendar_ref") {
+        createTable(tableName: "agile_sprint_work_calendar_ref", remarks: '冲刺工作日历关系表') {
             column(name: 'calendar_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键') {
                 constraints(primaryKey: true)
             }
