@@ -3,7 +3,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_organization_config.groovy') {
     changeSet(id: '2021-03-22-create-organization-config', author: 'ztxemail@163.com') {
-        createTable(tableName: 'fd_organization_config') {
+        createTable(tableName: 'fd_organization_config', remarks: '组织方案配置表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: '主键') {
                 constraints(primaryKey: 'true')
             }

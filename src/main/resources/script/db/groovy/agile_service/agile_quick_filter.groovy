@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_quick_filter.groovy') {
     changeSet(id: '2018-06-14-agile-quick-filter', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_quick_filter") {
+        createTable(tableName: "agile_quick_filter", remarks: '快速筛选表') {
             column(name: 'filter_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

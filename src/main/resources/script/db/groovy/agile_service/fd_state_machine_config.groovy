@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_state_machine_config.groovy') {
     changeSet(author: 'shinan.chenX@gmail.com', id: '2018-09-12-state-machine-config') {
-        createTable(tableName: 'fd_state_machine_config') {
+        createTable(tableName: 'fd_state_machine_config', remarks: '状态机配置表（弃用）') {
             column(name: 'id', type: 'BIGINT UNSIGNED', remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

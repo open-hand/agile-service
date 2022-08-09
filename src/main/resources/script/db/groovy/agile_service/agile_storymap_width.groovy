@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'agile_storymap_width.groovy') {
     changeSet(id: '2019-06-03-agile-storymap-width', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_storymap_width") {
+        createTable(tableName: "agile_storymap_width", remarks: '故事地图宽度表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

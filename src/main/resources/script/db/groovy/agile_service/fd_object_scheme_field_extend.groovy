@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
     changeSet(id: '2020-08-09-create-table-object-scheme-field-extend', author: 'superlee') {
-        createTable(tableName: "fd_object_scheme_field_extend") {
+        createTable(tableName: "fd_object_scheme_field_extend", remarks: '字段扩展表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID') {
                 constraints(primaryKey: true)
             }

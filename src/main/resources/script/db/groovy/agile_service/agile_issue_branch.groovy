@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_issue_branch.groovyoovy') {
     changeSet(id: '2018-05-14-agile-issue-branch', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_issue_branch") {
+        createTable(tableName: "agile_issue_branch", remarks: 'issue分支关联关系表') {
             column(name: 'branch_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '分支id') {
                 constraints(primaryKey: true)
             }

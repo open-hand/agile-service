@@ -3,7 +3,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_object_scheme.groovy') {
     changeSet(id: '2019-03-29-create-table-object-scheme', author: 'shinan.chenX@gmail.com') {
-        createTable(tableName: "fd_object_scheme") {
+        createTable(tableName: "fd_object_scheme", remarks: '敏捷方案表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID') {
                 constraints(primaryKey: true)
             }

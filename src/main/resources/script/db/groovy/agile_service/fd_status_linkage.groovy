@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_status_linkage.groovy') {
     changeSet(author: 'ztxemail@163.com', id: '2020-08-17-create-table-status-linkage') {
-        createTable(tableName: 'fd_status_linkage') {
+        createTable(tableName: 'fd_status_linkage', remarks: '状态联动父级联动表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

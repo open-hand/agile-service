@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_board_column.groovyoovy') {
     changeSet(id: '2018-05-14-agile-board-column', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_board_column") {
+        createTable(tableName: "agile_board_column", remarks: '敏捷看板列配置表') {
             column(name: 'column_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '列id') {
                 constraints(primaryKey: true)
             }

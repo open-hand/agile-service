@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'agile_static_file_header.groovy') {
     changeSet(id: '2021-01-13-agile-static-file-header', author: 'chihao.ran@hand-china.com') {
-        createTable(tableName: "agile_static_file_header") {
+        createTable(tableName: "agile_static_file_header", remarks: '敏捷静态文件头列表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_issue_personal_sort.groovy') {
     changeSet(id: '2021-10-26-agile-issue-personal-sort', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: "agile_issue_personal_sort") {
+        createTable(tableName: "agile_issue_personal_sort", remarks: 'issue个人排序记录表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }
