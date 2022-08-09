@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { withRouter } from 'react-router-dom';
+import React, {Component} from 'react';
+import {inject, observer} from 'mobx-react';
+import {withRouter} from 'react-router-dom';
 import TextArea from '@/components/TextArea';
-import { Choerodon } from '@choerodon/boot';
-import { injectIntl } from 'react-intl';
-import { issueApi } from '@/api';
+import {injectIntl} from 'react-intl';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import styles from './FieldSummary.less';
+import {MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
 
 @inject('AppState')
 @observer class FieldSummary extends Component {
@@ -76,7 +75,7 @@ import styles from './FieldSummary.less';
               style={{
                 width: this.ref.current && this.ref.current.parentElement.clientWidth - 64,
               }}
-              maxLength="44"
+              maxLength={MAX_LENGTH_SUMMARY}
               required
               validationRenderer={() => '请输入概要。'}
               labelLayout="float"

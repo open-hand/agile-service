@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo } from 'react';
-import {
-  Form, TextField, Modal, TextArea, DataSet,
-} from 'choerodon-ui/pro';
+import { DataSet, Form, Modal, TextArea, TextField, } from 'choerodon-ui/pro';
 import { C7NFormat } from '@choerodon/master';
-import { stores, Choerodon } from '@choerodon/boot';
-import { issueApi, fieldApi, epicApi } from '@/api';
+import { Choerodon, stores } from '@choerodon/boot';
+import { epicApi, fieldApi, issueApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
+import { MAX_LENGTH_EPIC_NAME, MAX_LENGTH_SUMMARY } from '@/constants/MAX_LENGTH';
 
 const { AppState } = stores;
 
@@ -98,8 +97,8 @@ const CreateEpic = (props) => {
 
   return (
     <Form dataSet={dataSet}>
-      <TextField name="name" maxLength={20} valueChangeAction="input" showLengthInfo />
-      <TextArea name="summary" maxLength={44} valueChangeAction="input" showLengthInfo />
+      <TextField name="name" maxLength={MAX_LENGTH_EPIC_NAME} valueChangeAction="input" showLengthInfo />
+      <TextArea name="summary" maxLength={MAX_LENGTH_SUMMARY} valueChangeAction="input" showLengthInfo />
     </Form>
   );
 };

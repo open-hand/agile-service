@@ -1,7 +1,7 @@
 {
   "name": "@choerodon/agile",
   "routeName": "agile",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "description": " ",
   "main": "./lib/index.js",
   "install": "./lib/install.js",
@@ -11,7 +11,7 @@
   ],
   "dependencies": {
     "@atlaskit/tree": "8.4.0",
-    "@choerodon/gantt": "0.4.0",
+    "@choerodon/gantt": "0.4.1",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
     "ahooks": "^2.7.1",
@@ -48,9 +48,9 @@
     "webuploader": "^0.1.8"
   },
   "devDependencies": {
-    "@choerodon/boot": "1.2.1",
+    "@choerodon/boot": "1.3.0",
     "@choerodon/compiler": "^0.0.1",
-    "@choerodon/master": "2.0.4",
+    "@choerodon/master": "2.1.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
     "@types/file-saver": "^2.0.1",

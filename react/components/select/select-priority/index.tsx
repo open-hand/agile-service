@@ -6,7 +6,7 @@ import { filter } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { fieldApi, priorityApi } from '@/api';
 import { Priority } from '@/common/types';
-import { wrapRequestCallback } from '../utils';
+import useSelectWithRuleConfig, { SelectConfigWithRule } from '../useSelectWithRuleConfig';
 
 export interface SelectPriorityProps extends Partial<SelectProps> {
   priorityId?: number
@@ -22,24 +22,18 @@ export interface SelectPriorityProps extends Partial<SelectProps> {
 }
 
 const SelectPriority: React.FC<SelectPriorityProps> = forwardRef(({
-  priorityId, fieldId, ruleIds, selected, dataRef, afterLoad, afterFirstRequest, flat, projectId, ...otherProps
+  priorityId, dataRef, afterLoad, afterFirstRequest, flat, projectId, ...otherProps
 },
 ref: React.Ref<Select>) => {
-  const args = useMemo(() => ({ ruleIds, selected }), [ruleIds, selected]);
-  const hasRule = !!(!!ruleIds?.length && fieldId);
-
-  const config = useMemo((): SelectConfig => ({
+  const configWithRule = useMemo((): SelectConfigWithRule => ({
     name: 'priority',
     textField: 'name',
     valueField: 'id',
-    requestArgs: args,
-    request: wrapRequestCallback(hasRule
-      ? ({ requestArgs, filter: param, page }) => fieldApi.project(projectId).getCascadeOptions(fieldId!, requestArgs?.selected, requestArgs?.ruleIds, param ?? '', page ?? 0, 0)
-      : () => priorityApi.loadByProject(projectId, [String(priorityId)]), (_, res) => {
-      afterFirstRequest && afterFirstRequest(res);
-    }),
-    middleWare: (data: Priority[]) => {
-      const newData = hasRule ? data : filter(data, (item) => item.enable || item.id === String(priorityId));
+    request: ({ requestArgs, filter: param, page }) => (requestArgs.hasRule ? fieldApi.project(projectId).getCascadeOptions(requestArgs.fieldId!, requestArgs?.selected || [], requestArgs?.ruleIds || [], param ?? '', page ?? 0, 0)
+      : priorityApi.loadByProject(projectId, [String(priorityId)])),
+    afterLoad: afterFirstRequest,
+    middleWare: (data: Priority[], requestArgs) => {
+      const newData = requestArgs.hasRule ? data : filter(data, (item) => item.enable || item.id === String(priorityId));
       if (dataRef) {
         Object.assign(dataRef, {
           current: newData,
@@ -50,8 +44,9 @@ ref: React.Ref<Select>) => {
       }
       return newData;
     },
-    paging: hasRule,
-  }), [afterLoad, args, dataRef, fieldId, hasRule, priorityId, projectId]);
+    paging: false,
+  }), [afterFirstRequest, afterLoad, dataRef, priorityId, projectId]);
+  const config = useSelectWithRuleConfig(configWithRule, otherProps);
   const props = useSelect(config);
   const Component = flat ? FlatSelect : Select;
   return (

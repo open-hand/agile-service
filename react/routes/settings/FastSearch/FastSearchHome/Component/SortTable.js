@@ -1,6 +1,6 @@
-import { Table } from 'choerodon-ui';
-import React, { Component } from 'react';
-import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
+import {Table} from 'choerodon-ui';
+import React, {Component} from 'react';
+import {DragDropContext, DragSource, DropTarget} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import './DrapSortingTable.less';
 
@@ -156,8 +156,6 @@ class SortTable extends Component {
   };
 
   render() {
-    // window.console.log(this.props.dataSource);
-    // window.console.log(this.state.data);
     const {
       columns, dataSource, onChange, pagination,
     } = this.props;

@@ -25,6 +25,10 @@ public class UserMessageDTO extends AuditDomain {
     @Encrypt
     private Long id;
 
+    public UserMessageDTO() {
+
+    }
+
     public UserMessageDTO(String name, String imageUrl, String email) {
         this.name = name;
         this.imageUrl = imageUrl;

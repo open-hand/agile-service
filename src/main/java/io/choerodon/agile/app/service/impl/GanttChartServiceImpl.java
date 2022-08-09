@@ -127,6 +127,10 @@ public class GanttChartServiceImpl implements GanttChartService {
     private IssuePersonalSortMapper issuePersonalSortMapper;
     @Autowired
     private IssuePredecessorMapper issuePredecessorMapper;
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private SprintService sprintService;
 
     @Override
     public Page<GanttChartVO> pagedQuery(Long projectId,
@@ -182,7 +186,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Set<Long> projectIds = new HashSet<>();
         projectIds.add(projectId);
-        List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, new ArrayList<>(issueIds), null, false, null);
+        List<IssueDTO> issueList = querySubByIssueIds(projectIds, new ArrayList<>(issueIds), null, false, null);
         Map<Long, ProjectVO> projectMap = queryProjectMap(projectId);
         Map<Long, Long> issueEpicMap = new HashMap<>();
         Map<Long, IssueDTO> issueFeatureMap = new HashMap<>();
@@ -817,7 +821,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                 childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
             }
             issueIds.addAll(childrenIds);
-            List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, issueIds, sortMap, ganttDefaultOrder, dimension);
+            List<IssueDTO> issueList = querySubByIssueIds(projectIds, issueIds, sortMap, ganttDefaultOrder, dimension);
             List<ObjectSchemeFieldVO> displayFieldCodes = searchVO.getDisplayFields();
             List<GanttChartVO> result = buildGanttList(projectMap, issueIds, issueList, issueEpicMap, issueFeatureMap, displayFieldCodes, organizationId, null);
             return PageUtils.copyPropertiesAndResetContent(page, result);
@@ -825,6 +829,62 @@ public class GanttChartServiceImpl implements GanttChartService {
             return emptyPage;
         }
 
+    }
+
+    @Override
+    public List<IssueDTO> querySubByIssueIds(Set<Long> projectIds,
+                                              List<Long> issueIds,
+                                              Map<String, Object> sortMap,
+                                              boolean ganttDefaultOrder,
+                                              String dimension) {
+        //有点慢
+        List<IssueDTO> issueList = issueMapper.selectWithSubByIssueIds(projectIds, issueIds, sortMap, ganttDefaultOrder, dimension);
+        Set<String> colorCodes = new HashSet<>();
+        issueList.forEach(x -> {
+            if (!ObjectUtils.isEmpty(x.getColorCode())) {
+                colorCodes.add(x.getColorCode());
+            }
+        });
+        Map<String, String> colorMap = new HashMap<>();
+        if (!colorCodes.isEmpty()) {
+            lookupValueService.queryByValueCodes(colorCodes).stream().forEach(x -> {
+                String valueCode = x.getValueCode();
+                String name = x.getName();
+                colorMap.put(valueCode, name);
+            });
+        }
+        Map<Long, String> projectCodeMap =
+                projectInfoMapper.selectByProjectIds(projectIds)
+                        .stream()
+                        .collect(Collectors.toMap(ProjectInfoDTO::getProjectId, ProjectInfoDTO::getProjectCode));
+        Map<Long, List<Long>> productIdMap = new HashMap<>();
+        if (!ObjectUtils.isEmpty(agilePluginService)) {
+            agilePluginService.queryIssueProductRel(issueIds).forEach(x -> {
+                Long issueId = x.getIssueId();
+                Long productId = x.getProductId();
+                List<Long> productIds = productIdMap.computeIfAbsent(issueId, y -> new ArrayList<>());
+                if (!productIds.contains(productId)) {
+                    productIds.add(productId);
+                }
+            });
+        }
+        issueList.forEach(x ->{
+            String colorCode = x.getColorCode();
+            x.setEpicColor(colorMap.get(colorCode));
+            Long projectId = x.getProjectId();
+            String projectCode = projectCodeMap.get(projectId);
+            StringBuilder builder = new StringBuilder();
+            String issueNum = x.getIssueNum();
+            builder.append(projectCode).append("-").append(issueNum);
+            x.setIssueNum(builder.toString());
+            Long issueId = x.getIssueId();
+            List<Long> productIds = productIdMap.get(issueId);
+            if (productIds == null) {
+                productIds = Collections.emptyList();
+            }
+            x.setProductIds(productIds);
+        });
+        return issueList;
     }
 
     private void addEpicIdOrFeatureIds(String dimension,
@@ -936,6 +996,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             Long issueId = i.getIssueId();
             GanttChartVO ganttChart = new GanttChartVO();
             result.add(ganttChart);
+            //这个有点慢，后面试试mapStruct
             BeanUtils.copyProperties(i, ganttChart);
             boolean completed = completedStatusIds.contains(statusId);
             ganttChart.setCompleted(completed);
@@ -1138,13 +1199,20 @@ public class GanttChartServiceImpl implements GanttChartService {
         gantt.setPredecessors(ganttPredecessors);
         predecessors.forEach(predecessor -> {
             Long predecessorId = predecessor.getPredecessorId();
-            GanttChartVO predecessorGantt = ganttMap.get(predecessorId);
-            if (predecessorGantt == null) {
-                return;
+            GanttChartVO ganttChartVO = ganttMap.get(predecessorId);
+            if (ganttChartVO != null) {
+                ganttPredecessors.add(buildPredecessor(ganttChartVO, predecessor));
             }
-            predecessorGantt.setPredecessorType(predecessor.getPredecessorType());
-            ganttPredecessors.add(predecessorGantt);
         });
+    }
+
+    private GanttChartVO buildPredecessor(GanttChartVO ganttChartVO, IssuePredecessorDTO predecessor) {
+        GanttChartVO predecessorGantt = new GanttChartVO();
+        predecessorGantt.setIssueId(ganttChartVO.getIssueId());
+        predecessorGantt.setIssueNum(ganttChartVO.getIssueNum());
+        predecessorGantt.setSummary(ganttChartVO.getSummary());
+        predecessorGantt.setPredecessorType(predecessor.getPredecessorType());
+        return predecessorGantt;
     }
 
     private void calcWorkTimePercentage(Map<Long, Set<Long>> parentSonMap,
@@ -1194,7 +1262,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                     list.add(predecessor);
                 });
         if (!issueNotInGanttMapIds.isEmpty()) {
-            issueMapper.selectWithSubByIssueIds(projectIds, new ArrayList<>(issueNotInGanttMapIds), null, false, null)
+            querySubByIssueIds(projectIds, new ArrayList<>(issueNotInGanttMapIds), null, false, null)
                     .forEach(issue -> {
                         GanttChartVO ganttChart = new GanttChartVO();
                         BeanUtils.copyProperties(issue, ganttChart);
@@ -1461,9 +1529,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         }
         Map<Long, IssueSprintDTO> map = new HashMap<>();
         Map<Long, List<IssueSprintDTO>> issueSprintMap =
-                issueSprintRelMapper.selectIssueSprintByIds(projectIds, new HashSet<>(issueIds), null)
-                        .stream()
-                        .collect(Collectors.groupingBy(IssueSprintDTO::getIssueId));
+                sprintService.queryIssueSprintMap(projectIds, new HashSet<>(issueIds));
         String planning = "sprint_planning";
         String closed = "closed";
         String started = "started";

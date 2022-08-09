@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
+import {ModalProps} from 'choerodon-ui/pro/lib/modal/Modal';
 
 export type Paged<T> = {
   list: T[]
@@ -262,6 +262,9 @@ export type ISubIssue = Issue & {
   realName: string
   imageUrl: string
 }
+
+export type IssueApplyType = 'agile' | 'program' | 'backlog' | 'waterfall' | 'risk';
+
 export interface Issue {
   issueId: string
   issueNum: string
@@ -269,6 +272,7 @@ export interface Issue {
   description: string
   creationDate: string
   typeCode?: string,
+  applyType?: IssueApplyType,
   issueTypeId: string
   issueTypeVO: IIssueType,
   lastUpdateDate: string

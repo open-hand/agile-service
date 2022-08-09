@@ -1,10 +1,12 @@
 import React, { useCallback, useImperativeHandle, useState } from 'react';
-import { Input } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
-import { issueApi, epicApi } from '@/api';
+import { ResizeType } from 'choerodon-ui/pro/lib/text-area/enum';
+import { TextArea } from 'choerodon-ui/pro';
+import { epicApi, issueApi } from '@/api';
 import Card from './Card';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
+import { MAX_LENGTH_EPIC_NAME } from '@/constants/MAX_LENGTH';
 
 interface Props {
   epic: {
@@ -30,8 +32,6 @@ const EditEpic: React.FC<Props> = ({
   }, []);
 
   const handleEditEpic = useCallback(async (newValue) => {
-    console.log('pressEnter');
-
     if (!canEdit) {
       return;
     }
@@ -82,7 +82,9 @@ const EditEpic: React.FC<Props> = ({
         justifyContent: 'center',
       }}
       >
-        <Input autoFocus onPressEnter={() => handleEditEpic(value)} placeholder="修改史诗名称" maxLength={22} value={value} onChange={handleChange} />
+        <TextArea autoFocus onEnterDown={() => handleEditEpic(value)} placeholder="修改史诗名称" rows={1}
+                  resize={ResizeType.vertical}
+                  maxLength={MAX_LENGTH_EPIC_NAME} showLengthInfo={true} value={value} onInput={handleChange} />
       </Card>
     </div>
   );

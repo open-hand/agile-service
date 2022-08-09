@@ -1,23 +1,22 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/state-in-constructor */
-import React, { Component, createRef } from 'react';
+import React, {Component, createRef} from 'react';
 import PropTypes from 'prop-types';
-import { C7NFormat } from '@choerodon/master';
-import { Choerodon } from '@choerodon/boot';
-import {
-  Icon, Dropdown, Input, Menu,
-} from 'choerodon-ui';
-import { Button } from 'choerodon-ui/pro';
-import { debounce, find } from 'lodash';
-import { issueApi, fieldApi } from '@/api';
-import { checkCanQuickCreate, getQuickCreateDefaultObj } from '@/utils/quickCreate';
-import { fields2Map } from '@/utils/defaultValue';
+import {C7NFormat} from '@choerodon/master';
+import {Choerodon} from '@choerodon/boot';
+import {Dropdown, Icon, Menu,} from 'choerodon-ui';
+import {Button, TextField} from 'choerodon-ui/pro';
+import {debounce, find} from 'lodash';
+import {fieldApi, issueApi} from '@/api';
+import {checkCanQuickCreate, getQuickCreateDefaultObj} from '@/utils/quickCreate';
+import {fields2Map} from '@/utils/defaultValue';
 import localCacheStore from '@/stores/common/LocalCacheStore';
-import { SHOW_FEATURE_TYPE_CODES_ALL } from '@/constants/SHOW_FEATURE_TYPE_CODE';
+import {SHOW_FEATURE_TYPE_CODES_ALL} from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import TypeTag from '../TypeTag';
 import './QuickCreateIssue.less';
 import UserDropdown from '../UserDropdown';
-import { WATERFALL_TYPE_CODES } from '../../constants/TYPE_CODE';
+import {WATERFALL_TYPE_CODES} from '../../constants/TYPE_CODE';
+import {MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
 
 const propTypes = {
   defaultPriority: PropTypes.number,
@@ -302,19 +301,23 @@ class QuickCreateIssue extends Component {
                   )
                 }
                 <UserDropdown projectId={this.props.projectId} userDropDownRef={this.userDropDownRef} defaultAssignee={this.props.defaultAssignee} key={this.props.defaultAssignee?.id || 'null'} />
-                <Input
+                <TextField
                   className="hidden-label"
                   autoFocus
                   autoComplete="on"
-                  onPressEnter={this.handleCreate}
-                  onChange={(e) => {
-                    this.setState({
-                      summary: e.target.value,
-                    });
+                  onEnterDown={this.handleCreate}
+                  onInput={(e) =>{
+                    if(e && e.target) {
+                      this.setState({
+                        summary: e.target.value,
+                      })
+                    }
                   }}
                   value={summary}
-                  maxLength={44}
+                  maxLength={MAX_LENGTH_SUMMARY}
+                  showLengthInfo={true}
                   placeholder="请输入工作项概要"
+                  style={{width: '100%'}}
                 />
                 <Button
                   color="primary"

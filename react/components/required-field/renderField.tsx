@@ -1,15 +1,19 @@
 import React from 'react';
 import {
-  Select, TextField, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet, CheckBox,
+  DataSet,
+  DatePicker,
+  DateTimePicker,
+  NumberField,
+  Select,
+  TextArea,
+  TextField,
+  TimePicker,
 } from 'choerodon-ui/pro';
-import { observable } from 'mobx';
-import { includes } from 'lodash';
-import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
+import {includes} from 'lodash';
+import {SelectProps} from 'choerodon-ui/pro/lib/select/Select';
+import {DatePickerProps} from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import moment from 'moment';
-import {
-  IField,
-} from '@/common/types';
+import {IField,} from '@/common/types';
 import SelectUser from '@/components/select/select-user';
 import Editor from '@/components/Editor';
 
@@ -18,9 +22,10 @@ import SelectFeature from '@/components/select/select-feature';
 import SelectCustomField from '@/components/select/select-custom-field';
 import SelectMultiServiceTag from '@/components/select/select-multi-service-tag';
 import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
-import { FORMAT_FIELDS } from '@/constants/DATE_FORMAT';
+import {FORMAT_FIELDS} from '@/constants/DATE_FORMAT';
 import SelectComponent from '../select/select-component';
 import SelectProduct from '../select/select-product';
+import {MAX_LENGTH_EPIC_NAME} from "@/constants/MAX_LENGTH";
 
 const multipleCodes = ['label', 'component', 'fixVersion', 'influenceVersion'];
 export default function renderField<T extends Partial<SelectProps>>({
@@ -138,7 +143,7 @@ export default function renderField<T extends Partial<SelectProps>>({
       return (
         <TextField
           name={fieldCode}
-          maxLength={fieldCode === 'epicName' ? 44 : 100}
+          maxLength={fieldCode === 'epicName' ? MAX_LENGTH_EPIC_NAME : 100}
           valueChangeAction={'input' as any}
           style={{ width: '100%' }}
           {...otherComponentProps}

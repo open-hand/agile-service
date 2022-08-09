@@ -1,18 +1,14 @@
 /* eslint-disable react/jsx-curly-brace-presence */
-import React, { useContext, useCallback } from 'react';
-import { observer } from 'mobx-react-lite';
-import {
-  Progress,
-} from 'choerodon-ui';
-import {
-  Button, Icon, Tooltip,
-} from 'choerodon-ui/pro';
+import React, {useCallback, useContext} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Progress,} from 'choerodon-ui';
+import {Button, Icon, Tooltip,} from 'choerodon-ui/pro';
 import QuickCreateSubIssue from '@/components/QuickCreateSubIssue';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
 import './SubTask.less';
 import Divider from './Divider';
-import { WATERFALL_TYPE_CODES } from '../../../../constants/TYPE_CODE';
+import {BUG_TYPE_CODE, SUB_TASK_TYPE_CODE, WATERFALL_TYPE_CODES} from '../../../../constants/TYPE_CODE';
 
 const SubTask = observer(({
   onDeleteSubIssue, reloadIssue, onUpdate, parentSummary, onCreateSubIssue, onOpenCreateSubTask, checkDescriptionEdit,
@@ -23,7 +19,7 @@ const SubTask = observer(({
   const {
     issueId: parentIssueId, subIssueVOList: agileSubIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId, activeSprint, waterfallIssueVO,
   } = store.getIssue;
-  const disableCreate = disabled || disabledQuickCreate || (typeCode === 'bug' && relateIssueId);
+  const disableCreate = disabled || disabledQuickCreate || (typeCode === BUG_TYPE_CODE && relateIssueId);
   const isWaterfall = WATERFALL_TYPE_CODES.includes(typeCode);
   const subIssueVOList = isWaterfall ? (waterfallIssueVO?.childIssueList || []) : agileSubIssueVOList;
   const waterfallProps = {
@@ -43,7 +39,7 @@ const SubTask = observer(({
       key={issue.issueId}
       issue={{
         ...issue,
-        typeCode: issue.typeCode || 'sub_task',
+        typeCode: issue.typeCode || SUB_TASK_TYPE_CODE,
       }}
       i={i}
       onOpen={() => {

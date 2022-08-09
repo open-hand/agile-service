@@ -27,14 +27,8 @@
     <select id="selectIssueSprintByIds" resultType="io.choerodon.agile.infra.dto.IssueSprintDTO">
         select
         aisr.issue_id,
-        asp.sprint_id,
-        asp.sprint_name,
-        asp.start_date,
-        asp.end_date,
-        asp.actual_end_date,
-        asp.status_code
+        aisr.sprint_id
         from agile_issue_sprint_rel aisr
-        join agile_sprint asp on aisr.sprint_id = asp.sprint_id
         where aisr.project_id in
         <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
             #{projectId}
@@ -43,12 +37,6 @@
         <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
             #{issueId}
         </foreach>
-        <if test="statusCodes != null and statusCodes.size() > 0">
-            and asp.status_code in
-            <foreach collection="statusCodes" item="statusCode" open="(" separator="," close=")">
-                #{statusCode}
-            </foreach>
-        </if>
     </select>
 
     <select id="listByIssueIds" resultType="io.choerodon.agile.api.vo.IssueSprintVO">

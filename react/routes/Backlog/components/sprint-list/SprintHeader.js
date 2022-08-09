@@ -1,7 +1,7 @@
 import React from 'react';
-import { Icon } from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
-import { Permission } from '@choerodon/boot';
+import {Icon} from 'choerodon-ui/pro';
+import {observer} from 'mobx-react-lite';
+import {Permission} from '@choerodon/boot';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import SprintStatus from '@/components/tag/sprint-status-tag/SprintStatus';
 import SprintStoryPointInfo from '@/components/SprintStoryPointInfo';
@@ -38,7 +38,7 @@ function BacklogHeader({ data }) {
     </div>
   );
 }
-function SprintHeader({ data, sprintIndex }) {
+function SprintHeader({ data, sprintIndex, refresh }) {
   const {
     type, expand, sprintId, piId, sprintType,
   } = data;
@@ -77,7 +77,7 @@ function SprintHeader({ data, sprintIndex }) {
           <SprintStatus
             data={data}
           />
-          <WorkLoadBtn data={data} />
+          <WorkLoadBtn data={data} refresh={refresh} />
           <SprintButton
             data={data}
             sprintIndex={sprintIndex}

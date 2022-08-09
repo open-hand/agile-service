@@ -58,6 +58,7 @@ const IssueSearch: React.FC<IssueSearchProps> = ({
         if (store.menuType === 'program' && (isProgram || isInProgram || programId)) {
           !isProgram && store.setProgramId(programId ?? (artInfo as any)?.programId);
           store.loadCustomFields();
+          store.loadMyFilterList();
         }
         break;
       }

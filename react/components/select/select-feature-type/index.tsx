@@ -3,11 +3,11 @@ import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { FlatSelect } from '@choerodon/components';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectFeatureTypeProps extends Partial<SelectProps> {
   flat?: boolean
 }
 
-const SelectFeatureType: React.FC<Props> = forwardRef(({
+const SelectFeatureType: React.FC<SelectFeatureTypeProps> = forwardRef(({
   flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const Component = flat ? FlatSelect : Select;

@@ -1,7 +1,6 @@
-import { find } from 'lodash';
 import React from 'react';
 import {
-  TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet, CheckBox,
+  DatePicker, DateTimePicker, NumberField, TextArea, TextField, TimePicker,
 } from 'choerodon-ui/pro';
 import type { TextFieldProps } from 'choerodon-ui/pro/lib/text-field/TextField';
 import type { NumberFieldProps } from 'choerodon-ui/pro/lib/number-field/NumberField';
@@ -10,7 +9,6 @@ import { TextAreaProps } from 'choerodon-ui/pro/lib/text-area/TextArea';
 import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import SelectStatus from '@/components/select/select-status';
 import SelectPI from '@/components/select/select-pi';
-import DateTimePickerWithDefault from '@/components/date-time-picker';
 import DateTimePickerWithFormat from '@/components/date-time-picker/date-time-pikcer-format';
 import SelectCustomField from '../../select/select-custom-field';
 import SelectEnvironment from '../../select/select-environment';
@@ -21,9 +19,13 @@ import SelectSprint from '../../select/select-sprint';
 import SelectSubProject from '../../select/select-sub-project';
 import SelectUser from '../../select/select-user';
 import type {
-  IFieldOutput, IFieldProcessConfig, IClassComponentType, ICodeDistributeProps, IFieldTypeDistributeProps,
+  IClassComponentType,
+  IComponentFCWithClass,
+  IComponentFCWithClassObject,
   IComponentFCWithClassObjectProps,
-  IComponentFCWithClassObject, IFieldCustomComponentConfig, IComponentFCWithClass, IComponentFCObject, IFieldSystemComponentConfig, IFieldComponentConfig, IFieldSystemConfig,
+  IFieldCustomComponentConfig,
+  IFieldProcessConfig,
+  IFieldSystemComponentConfig,
 } from './type';
 import SelectEpic from '../../select/select-epic';
 import SelectLabel from '../../select/select-label';
@@ -32,13 +34,15 @@ import SelectComponent from '../../select/select-component';
 import SelectVersion from '../../select/select-version';
 import SelectQuickFilterField from '@/components/select/select-quick-filter';
 import SelectProduct from '@/components/select/select-product';
-import { IFieldType } from '@/common/types';
 import type { DateTimePickerProps } from '@/components/date-time-picker/DateTimePicker';
 import { validKeyReturnValue } from '@/common/commonValid';
 import SelectSubFeature from '@/components/select/select-sub-feature';
 import Editor from '@/components/Editor';
 import {
-  SelectRiskCategory, SelectRiskInfluence, SelectRiskProbability, SelectRiskProximity,
+  SelectRiskCategory,
+  SelectRiskInfluence,
+  SelectRiskProbability,
+  SelectRiskProximity,
 } from '@/components/select/select-risk';
 import ComponentCompatibleWrapper from './ComponentStableWrap';
 
@@ -137,6 +141,9 @@ function getElement<T extends IComponentFCWithClassObject,
     element = getSystemsElement(filedProcessConfig as IFieldSystemComponentConfig<T>, systemComponents);
   } else if (Object.keys(customComponents).includes(filedProcessConfig.fieldType!)) {
     element = getCustomElement<C>(filedProcessConfig as IFieldCustomComponentConfig<C>, customComponents);
+    if (element && element.defaultProps && filedProcessConfig?.code === 'summary') {
+      element.defaultProps.showLengthInfo = true;
+    }
   }
   return (
     <ComponentCompatibleWrapper {...filedProcessConfig.props}>

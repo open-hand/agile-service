@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Icon, Tooltip } from 'choerodon-ui';
+import { Icon, Tooltip } from 'choerodon-ui/pro';
 import './TypeTag.less';
 import classNames from 'classnames';
 import { IIssueType, IFeatureType } from '@/common/types';
@@ -36,6 +36,8 @@ const TypeTag: React.FC<Props> = ({
   const tooltipTitle = typeof tooltip === 'boolean' && tooltip ? name : tooltip;
   return (
     <Tooltip
+    // 用以点击外部创建进行匹配过滤使用
+      popupClassName="c7n-agile-type_tag_popup-tip"
       title={tooltipTitle}
     >
       <div className={classNames('c7n-typeTag', className)} style={style}>

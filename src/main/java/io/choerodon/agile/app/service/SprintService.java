@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.business.IssueSearchVO;
 import io.choerodon.agile.api.vo.business.SprintDetailVO;
+import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.core.domain.Page;
@@ -11,6 +12,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/15.
@@ -80,4 +82,13 @@ public interface SprintService {
      * @return
      */
     SprintStartMessageVO selectSprintStartMessage(Long projectId, Long sprintId);
- }
+
+    /**
+     * 拆分agile_issue_sprint_rel join agile_sprint查询慢的问题
+     *
+     * @param projectIds
+     * @param issueIds
+     * @return
+     */
+    Map<Long, List<IssueSprintDTO>> queryIssueSprintMap(Set<Long> projectIds, Set<Long> issueIds);
+}

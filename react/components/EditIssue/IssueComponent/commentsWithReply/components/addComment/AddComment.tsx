@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useImperativeHandle } from 'react';
+import React, {useCallback, useImperativeHandle, useState} from 'react';
 import WYSIWYGEditor from '@/components/CKEditor';
 import './AddComment.less';
 
@@ -84,6 +84,7 @@ const Comments: React.FC<Props> = ({
         onChange={handleChange}
         onOk={handleCreateCommit}
         projectId={projectId}
+        placeholder="请输入评论"
       />
     </div>
   ) : (

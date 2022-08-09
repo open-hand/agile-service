@@ -48,6 +48,10 @@ export interface IssueSearchStoreProps {
   fieldConfigs?: { [key: string]: any }
   defaultTransformKeyMap?: Map<string, string>, // 将转换数据转为筛选可用字段时code映射
   customUpdateFilter?: (key: string, filter: any, fun: (code: string, value: any) => void) => any, // 更新筛选数据方法
+  /**
+   * 转换扁平筛选数据结构（目前仅用于还原我的筛选）
+   */
+  transformFlattenFilter?: (flattenFilter: Record<string, any>) => Record<string, any>
 }
 function isInvalidValue(value: any) {
   if (value === undefined || isNull(value) || (isObject(value) && isEmpty(value))) {
@@ -95,6 +99,8 @@ class IssueSearchStore {
 
   transformFilter: (chosenFields: IChosenFields) => any = () => { }
 
+  transformFlattenFilter: NonNullable<IssueSearchStoreProps['transformFlattenFilter']>;
+
   defaultChosenFields?: IChosenFields;
 
   defaultSearchVO?: ISearchVO
@@ -131,6 +137,7 @@ class IssueSearchStore {
     filterTypeCode,
     defaultTransformKeyMap,
     customUpdateFilter,
+    transformFlattenFilter,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
@@ -146,6 +153,7 @@ class IssueSearchStore {
     this.filterTypeCode = filterTypeCode;
     this.defaultTransformKeyMap = defaultTransformKeyMap;
     this.customUpdateFilter = customUpdateFilter;
+    this.transformFlattenFilter = transformFlattenFilter ?? ((f) => f);
   }
 
   setQuery(query: () => void) {
@@ -168,7 +176,7 @@ class IssueSearchStore {
   }
 
   loadMyFilterList = async () => {
-    const data = this.menuType === 'project' ? await personalFilterApi.menu('project').project(this.projectId || getProjectId()).loadAll(undefined, this.filterTypeCode) : [];
+    const data = this.menuType && ['project', 'program'].includes(this.menuType) ? await personalFilterApi.menu('project').project(this.projectId || getProjectId()).loadAll(undefined, this.filterTypeCode) : [];
     this.setMyFilters(data);
   };
 
@@ -187,7 +195,7 @@ class IssueSearchStore {
   @action
   transformChosenFields() {
     const filter = flattenObject(this.defaultSearchVO || {});
-    this.updateFilter(filter);
+    this.updateFilter(this.transformFlattenFilter ? this.transformFlattenFilter(filter) : filter);
   }
 
   @action updateFilter(filter: { [key: string]: any }) {

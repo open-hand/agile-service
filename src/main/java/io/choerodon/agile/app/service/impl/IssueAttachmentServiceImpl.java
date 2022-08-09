@@ -185,6 +185,10 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         Boolean result = iIssueAttachmentService.deleteBase(issueAttachmentDTO.getAttachmentId());
         BaseFieldUtil.updateIssueLastUpdateInfo(issueAttachmentDTO.getIssueId(), issueAttachmentDTO.getProjectId());
         String url = null;
+        // 判断是否有其他关联
+        if (existAttachmentIssueRel(projectId, issueAttachmentDTO)) {
+            return result;
+        }
         try {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
             String fullPath = filePathService.generateFullPath(url);
@@ -194,6 +198,14 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             LOGGER.error("error.attachment.delete", e);
         }
         return result;
+    }
+
+    private boolean existAttachmentIssueRel(Long projectId, IssueAttachmentDTO issueAttachmentDTO) {
+        IssueAttachmentDTO select = new IssueAttachmentDTO();
+        select.setProjectId(projectId);
+        select.setUrl(issueAttachmentDTO.getUrl());
+        select.setFileName(issueAttachmentDTO.getFileName());
+        return issueAttachmentMapper.selectCount(select) > 0;
     }
 
     @Override
@@ -218,5 +230,30 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         IssueAttachmentDTO issueAttachmentDTO = new IssueAttachmentDTO();
         issueAttachmentDTO.setIssueId(issueId);
         return issueAttachmentMapper.delete(issueAttachmentDTO);
+    }
+
+    @Override
+    public void copyIssueAttachments(Long projectId, Long issueId, Long newIssueId) {
+        IssueAttachmentDTO searchDTO = new IssueAttachmentDTO();
+        searchDTO.setIssueId(issueId);
+        List<IssueAttachmentDTO> issueAttachmentDTOList = issueAttachmentMapper.select(searchDTO);
+        if (ObjectUtils.isEmpty(issueAttachmentDTOList)) {
+            return;
+        }
+        searchDTO.setIssueId(newIssueId);
+        List<IssueAttachmentDTO> existList = issueAttachmentMapper.select(searchDTO);
+        if (!ObjectUtils.isEmpty(existList)) {
+            return;
+        }
+        issueAttachmentDTOList.forEach(v -> {
+            IssueAttachmentDTO create = new IssueAttachmentDTO();
+            create.setIssueId(newIssueId);
+            create.setCommentId(1L);
+            create.setUrl(v.getUrl());
+            create.setFileName(v.getFileName());
+            create.setProjectId(projectId);
+            iIssueAttachmentService.createBase(create);
+        });
+        issueMapper.updateIssueLastUpdateInfo(newIssueId, projectId, DetailsHelper.getUserDetails().getUserId());
     }
 }

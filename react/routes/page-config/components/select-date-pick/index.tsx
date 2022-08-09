@@ -66,6 +66,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
 }, ref) => {
   const innerRef = useRef<Select>();
   const format = useMemo(() => propsFormat || SelectDatePickDateFormat[dateType], [dateType, propsFormat]);
+  const draftValueRef = useRef<any>();
   const [value, setValue] = useState<Moment | undefined>(() => {
     const momentValue = moment(propsValue || defaultValue, ['YYYY-MM-DD HH:mm:ss', 'HH:mm:ss']);
     return momentValue.isValid() ? momentValue : moment();
@@ -100,6 +101,7 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
     setValue(date);
     // onChange && onChange(date.format('YYYY-MM-DD HH:mm:ss'));
     innerRef.current?.choose(new Record({ meaning: date.format(format), value: date.format(format) }));
+    draftValueRef.current = undefined;
   }
   const DateView = DateViews[mode as DateViewsKey] as unknown as React.FC<any>;
 
@@ -118,7 +120,10 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
       {...otherProps}
       // dropdownMatchSelectWidth={false}
       onPopupHiddenChange={(hidden) => {
-        hidden && onBlur && onBlur();
+        if (hidden) {
+          draftValueRef.current && handleChangeDate(draftValueRef.current);
+          onBlur && onBlur();
+        }
         setMode(dateType === 'datetime' ? 'dateTime' : dateType);
       }}
       popupContent={(
@@ -146,10 +151,13 @@ const SelectPickDate = forwardRef<any, DatePickerPageProps>(({
                 date={value || moment()}
                 onSelect={(newDate: any) => handleChangeDate(newDate)}
                 format={format}
-                onViewModeChange={(newMode:any) => {
+                onViewModeChange={(newMode: any) => {
                   setMode(newMode);
                 }}
-                onSelectedDateChange={(date:any) => { setValue(date); }}
+                onDateMouseEnter={(newDate?:Moment) => {
+                  draftValueRef.current = newDate;
+                }}
+                onSelectedDateChange={(date: any) => { setValue(date); }}
                 mode={dateType === 'datetime' ? 'dateTime' : dateType as any}
                 step={{}}
               />
