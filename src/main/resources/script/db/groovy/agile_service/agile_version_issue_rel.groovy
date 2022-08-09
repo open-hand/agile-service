@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'script/db/agile_version_issue_rel.groovy') {
     changeSet(id: '2018-05-14-agile-version-issue-rel', author: 'jian_zhang02@163.com') {
-        createTable(tableName: "agile_version_issue_rel") {
+        createTable(tableName: "agile_version_issue_rel", remarks: 'issue产品版本关系表') {
             column(name: 'version_id', type: 'BIGINT UNSIGNED', remarks: '版本id') {
                 constraints(nullable: false)
             }

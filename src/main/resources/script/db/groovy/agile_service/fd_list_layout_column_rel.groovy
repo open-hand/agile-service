@@ -7,7 +7,7 @@ package script.db.groovy.agile_service
  * */
 databaseChangeLog(logicalFilePath:'fd_list_layout_column_rel.groovy') {
     changeSet(id: '2021-05-07-fd-list-layout-column-rel', author: 'ztxemail@163.com') {
-        createTable(tableName: "fd_list_layout_column_rel") {
+        createTable(tableName: "fd_list_layout_column_rel", remarks: '表单列布局详情表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

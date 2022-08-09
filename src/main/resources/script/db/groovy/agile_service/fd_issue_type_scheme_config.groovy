@@ -3,7 +3,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_issue_type_scheme_config.groovy') {
     changeSet(id: '2018-08-10-create-issue-type-scheme-config', author: 'shinan.chen@hand-china.com') {
-        createTable(tableName: 'fd_issue_type_scheme_config') {
+        createTable(tableName: 'fd_issue_type_scheme_config', remarks: '问题类型方案配置表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
             }

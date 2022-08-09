@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'script/db/agile_personal_filter.groovy') {
     changeSet(id: '2019-02-25-agile-personal-filter', author: 'shinan.chenX@gmail.com') {
-        createTable(tableName: "agile_personal_filter") {
+        createTable(tableName: "agile_personal_filter", remarks: '个人筛选表') {
             column(name: 'filter_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键id') {
                 constraints(primaryKey: true)
             }

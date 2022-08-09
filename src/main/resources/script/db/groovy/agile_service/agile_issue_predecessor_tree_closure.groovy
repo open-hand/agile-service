@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_issue_predecessor_tree_closure.groovy') {
     changeSet(id: '2021-11-15-agile-issue-predecessor-tree-closure', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: "agile_issue_predecessor_tree_closure") {
+        createTable(tableName: "agile_issue_predecessor_tree_closure", remarks: 'issue前置项闭包表，保存祖先后代关系') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

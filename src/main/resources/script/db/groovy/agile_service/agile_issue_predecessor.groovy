@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_issue_predecessor.groovy') {
     changeSet(id: '2021-11-15-agile-issue-predecessor', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: "agile_issue_predecessor") {
+        createTable(tableName: "agile_issue_predecessor", remarks: 'issue前置项表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

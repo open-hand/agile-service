@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_wiki_relation.groovy') {
     changeSet(id: '2018-12-03-agile-wiki-relation', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_wiki_relation") {
+        createTable(tableName: "agile_wiki_relation", remarks: 'issue知识库文档关系表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

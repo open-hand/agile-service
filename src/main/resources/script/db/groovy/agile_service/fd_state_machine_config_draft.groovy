@@ -7,7 +7,7 @@ databaseChangeLog(logicalFilePath: 'fd_state_machine_config_draft.groovy') {
         }
     }
     changeSet(author: 'shinan.chenX@gmail.com', id: '2018-12-13-state-machine-config-draft') {
-        createTable(tableName: 'fd_state_machine_config_draft') {
+        createTable(tableName: 'fd_state_machine_config_draft', remarks: '状态机配置草稿表（弃用）') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
             }

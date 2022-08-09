@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'agile_issue_attachment.groovyoovy') {
     changeSet(id: '2018-05-14-agile-issue-attachment', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_issue_attachment") {
+        createTable(tableName: "agile_issue_attachment", remarks: 'issue附件表') {
             column(name: 'attachment_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '附件id') {
                 constraints(primaryKey: true)
             }
