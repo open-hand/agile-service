@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_status_field_value_setting.groovy') {
     changeSet(author: 'ztxemail@163.com', id: '2020-08-13-create-table-status-field-value-setting') {
-        createTable(tableName: 'fd_status_field_value_setting') {
+        createTable(tableName: 'fd_status_field_value_setting', remarks: '状态联动字段配置值详情表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

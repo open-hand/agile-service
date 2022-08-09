@@ -3,7 +3,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_page.groovy') {
     changeSet(id: '2019-03-29-create-table-page', author: 'shinan.chenX@gmail.com') {
-        createTable(tableName: 'fd_page') {
+        createTable(tableName: 'fd_page', remarks: '页面表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键') {
                 constraints(primaryKey: true)
             }

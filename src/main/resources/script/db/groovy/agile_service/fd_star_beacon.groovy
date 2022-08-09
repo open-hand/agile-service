@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_star_beacon.groovy') {
     changeSet(id: '2020-11-09-fd-star-beacon', author: 'huaxin.deng@hand-china.com') {
-        createTable(tableName: "fd_star_beacon") {
+        createTable(tableName: "fd_star_beacon", remarks: '星标配置表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

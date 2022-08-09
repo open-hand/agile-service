@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath: 'fd_field_permission.groovy') {
     changeSet(id: '2021-07-19-create-table-fd-field-permission', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: "fd_field_permission") {
+        createTable(tableName: "fd_field_permission", remarks: '字段权限表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID') {
                 constraints(primaryKey: true)
             }

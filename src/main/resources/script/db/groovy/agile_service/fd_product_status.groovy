@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_product_status.groovy') {
     changeSet(id: '2022-05-07-fd-product-status', author: 'huaxin.deng@hand-china.com') {
-        createTable(tableName: 'fd_product_status') {
+        createTable(tableName: 'fd_product_status', remarks: '产品状态表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

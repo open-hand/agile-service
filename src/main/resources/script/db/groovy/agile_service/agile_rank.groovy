@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'agile_rank.groovy') {
     changeSet(id: '2019-06-24-agile-rank', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_rank") {
+        createTable(tableName: "agile_rank", remarks: 'issue排序rank表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

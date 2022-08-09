@@ -3,7 +3,7 @@ package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath: 'fd_state_machine_transform.groovy') {
 
     changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state-machine-transform') {
-        createTable(tableName: 'fd_state_machine_transform') {
+        createTable(tableName: 'fd_state_machine_transform', remarks: '状态机转换表（弃用）') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

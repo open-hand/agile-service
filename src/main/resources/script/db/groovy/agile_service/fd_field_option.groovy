@@ -3,7 +3,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_field_option.groovy') {
     changeSet(id: '2019-03-29-create-table-field-field-option', author: 'shinan.chenX@gmail.com') {
-        createTable(tableName: "fd_field_option") {
+        createTable(tableName: "fd_field_option", remarks: '自定义字段选项表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID') {
                 constraints(primaryKey: true)
             }
