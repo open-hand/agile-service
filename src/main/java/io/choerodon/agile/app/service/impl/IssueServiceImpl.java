@@ -1219,7 +1219,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService == null) {
             return false;
         }
-        return agilePluginService.getProgram(organizationId, projectId).getId() != null;
+        return !ObjectUtils.isEmpty(agilePluginService.getProgram(organizationId, projectId));
     }
 
     private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
