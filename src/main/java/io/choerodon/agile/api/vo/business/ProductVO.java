@@ -68,7 +68,6 @@ public class ProductVO {
     @ApiModelProperty(value = "组织id")
     private Long organizationId;
 
-    @Encrypt
     @ApiModelProperty(value = "关联项目id")
     private List<Long> projectIds;
 
