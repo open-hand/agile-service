@@ -257,10 +257,13 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         if (ObjectUtils.isEmpty(sort)) {
             return;
         }
-        if (ObjectUtils.isEmpty(sort.getOrderFor("projectId"))) {
-            Sort.Order projectIdOrder = new Sort.Order(Sort.Direction.DESC, "projectId");
+        Sort.Order order = sort.getOrderFor("projectId");
+        if (ObjectUtils.isEmpty(order)) {
+            Sort.Order projectIdOrder = new Sort.Order(Sort.Direction.DESC, "ai.projectId");
             sort = sort.and(new Sort(projectIdOrder));
             pageRequest.setSort(sort);
+        } else {
+            order.setProperty("ai.projectId");
         }
     }
 
