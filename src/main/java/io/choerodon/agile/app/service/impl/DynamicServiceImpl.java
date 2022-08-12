@@ -26,6 +26,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -125,6 +126,9 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     private void putLogRuleInfoByType(Map<String, RuleLogRelVO> ruleLogRelMap, Long projectId, Set<Long> logIds, String type) {
+        if (ObjectUtils.isEmpty(agileTriggerService)) {
+            return;
+        }
         if (!CollectionUtils.isEmpty(logIds)){
             RuleLogRelVO ruleLogRelVO = new RuleLogRelVO();
             ruleLogRelVO.setSearchLogIds(logIds);

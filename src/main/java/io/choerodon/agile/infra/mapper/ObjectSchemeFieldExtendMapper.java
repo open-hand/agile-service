@@ -75,6 +75,7 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
                                                                 @Param("fieldId") Long fieldId,
                                                                 @Param("projectId") Long projectId);
 
+
     List<ObjectSchemeFieldExtendDTO> selectExtendFieldsByOptions(@Param("issueTypeIds") List<Long> issueTypeIds,
                                                                  @Param("organizationId") Long organizationId,
                                                                  @Param("fieldIds") Set<Long> fieldIds,

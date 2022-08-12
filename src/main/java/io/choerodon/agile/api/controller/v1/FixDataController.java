@@ -170,4 +170,12 @@ public class FixDataController {
         fixDataService.fixAgileAndProgram();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("修复状态机自定义流转角色数据")
+    @GetMapping("/fix_status_transfer_role_data")
+    public ResponseEntity fixStatusTransferRoleData() {
+        fixDataService.fixStatusMachineCustomTransferRoleData();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -116,10 +116,6 @@ public class AgileEventHandler {
         if (!ObjectUtils.isEmpty(projectEventCategories)) {
             initIfAgileProject(projectEvent, projectEventCategories);
         }
-        // 更新工作组关系
-        if (agilePluginService != null) {
-            agilePluginService.updateWorkGroupRelation(projectEvent.getOrganizationId(), projectEvent.getProjectId(), projectEvent.getWorkGroupId());
-        }
         return message;
     }
 
@@ -192,10 +188,6 @@ public class AgileEventHandler {
             initIfAgileProject(projectEvent, projectEventCategories);
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
-        }
-        // 更新工作组关系
-        if (agilePluginService != null) {
-            agilePluginService.updateWorkGroupRelation(projectEvent.getOrganizationId(), projectEvent.getProjectId(), projectEvent.getWorkGroupId());
         }
         // 删除redis的缓存
         SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:" + projectId);

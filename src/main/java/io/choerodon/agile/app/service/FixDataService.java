@@ -17,4 +17,9 @@ public interface FixDataService {
     void fixIssueTypeData();
 
     void fixAgileAndProgram();
+
+    /**
+     * 修复状态机自定义流转角色数据
+     */
+    void fixStatusMachineCustomTransferRoleData();
 }
