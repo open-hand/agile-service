@@ -52,7 +52,8 @@ public class RichTextUtil {
                 }
             });
         }
-        return result.toString().trim();
+        // 纯文本格式直接返回
+        return result.length() < 1 ? str : result.toString().trim();
     }
 
     private static String setListElementStr(StringBuilder result, Element element) {
