@@ -115,12 +115,7 @@ public class InitServiceImpl implements InitService {
 
     @Override
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
-        Long stateMachineId = initStateMachine(organizationId, projectEvent, "默认状态机【敏捷】", SchemeApplyType.AGILE);
-        if (BooleanUtils.isNotTrue(projectEvent.getUseTemplate())) {
-            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
-            boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
-        }
-        return stateMachineId;
+        return initStateMachine(organizationId, projectEvent, "默认状态机【敏捷】", SchemeApplyType.AGILE);
     }
 
     @Override
@@ -142,8 +137,13 @@ public class InitServiceImpl implements InitService {
         //创建状态机节点和转换
         createStateMachineDetail(organizationId, statusMachine.getId(), applyType);
         //发布状态机
+        Long stateMachineId = statusMachine.getId();
         //敏捷创建完状态机后需要到敏捷创建列
-        return statusMachine.getId();
+        if (ObjectUtils.isEmpty(projectEvent.getUseTemplate()) || Boolean.FALSE.equals(projectEvent.getUseTemplate())) {
+            List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+            boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads, applyType);
+        }
+        return stateMachineId;
     }
 
     @Override
