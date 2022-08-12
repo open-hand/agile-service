@@ -64,4 +64,11 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field.groovy') {
     changeSet(id: '2022-01-17-fd-object-scheme-field-drop-index', author: 'huaxin.deng@hand-china.com') {
         dropIndex(tableName: "fd_object_scheme_field", indexName: "pk_object_scheme_field_id")
     }
+
+    changeSet(id: '2022-08-12-modify-object-scheme-field-column', author: 'kaiwen.li@zknow.com') {
+        modifyDataType(tableName: "fd_object_scheme_field", columnName: "code", newDataType: "VARCHAR(64)")
+        if (helper.isMysql()) {
+            sql { " ALTER TABLE fd_object_scheme_field MODIFY COLUMN code varchar(64) NOT NULL COMMENT '字段code' " }
+        }
+    }
 }
