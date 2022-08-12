@@ -250,7 +250,7 @@ public class ExcelServiceImpl implements ExcelService {
         if (agilePluginService == null) {
             return false;
         }
-        return Objects.isNull(agilePluginService.getProgram(organizationId, projectId).getId());
+        return !ObjectUtils.isEmpty(agilePluginService.getProgram(organizationId, projectId));
     }
 
     @Override

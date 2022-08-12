@@ -3,7 +3,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_priority.groovy') {
     changeSet(id: '2018-08-21-create-priority', author: 'cong.cheng@hand-china.com') {
-        createTable(tableName: "fd_priority") {
+        createTable(tableName: "fd_priority", remarks: '优先级表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

@@ -6,7 +6,7 @@ package script.db.groovy.agile_service
  **/
 databaseChangeLog(logicalFilePath: 'script/db/agile_issue_participant_rel.groovy') {
     changeSet(id: '2021-10-12-agile-issue-participant-rel', author: 'ztxemail@163.com') {
-        createTable(tableName: "agile_issue_participant_rel") {
+        createTable(tableName: "agile_issue_participant_rel", remarks: 'issue参与人关联关系表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键id') {
                 constraints(primaryKey: true)
             }

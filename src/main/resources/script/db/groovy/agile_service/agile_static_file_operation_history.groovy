@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_static_file_operation_history.groovy') {
     changeSet(id: '2021-01-21-agile-static-file-operation-history', author: 'chihao.ran@hand-china.com') {
-        createTable(tableName: "agile_static_file_operation_history") {
+        createTable(tableName: "agile_static_file_operation_history", remarks: '敏捷静态历史记录表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

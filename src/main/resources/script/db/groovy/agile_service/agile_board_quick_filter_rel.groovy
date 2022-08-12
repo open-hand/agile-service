@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_board_quick_filter_rel.groovy') {
     changeSet(id: '2021-11-23-agile-board-quick-filter-rel', author: 'kaiwen.li@hand-china.com') {
-        createTable(tableName: "agile_board_quick_filter_rel") {
+        createTable(tableName: "agile_board_quick_filter_rel", remarks: '敏捷看板和快速查询关系表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'id') {
                 constraints(primaryKey: true)
             }

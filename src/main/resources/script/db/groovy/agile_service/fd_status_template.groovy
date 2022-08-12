@@ -6,7 +6,7 @@ package script.db.groovy.agile_service
  **/
 databaseChangeLog(logicalFilePath: 'fd_status_template.groovy') {
     changeSet(author: 'ztxemail@163.com', id: '2021-03-25-create-table-status-template') {
-        createTable(tableName: 'fd_status_template') {
+        createTable(tableName: 'fd_status_template', remarks: '状态模版配置表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

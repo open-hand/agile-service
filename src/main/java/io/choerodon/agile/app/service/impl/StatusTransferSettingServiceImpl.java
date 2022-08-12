@@ -357,13 +357,13 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             }
         }
         if (ObjectUtils.isEmpty(notAllowedStatus)) {
-            List<StatusVO> notAllowedStatusList = modelMapper.map(notAllowedStatus, new TypeToken<List<StatusVO>>() {
-            }.getType());
-            Set<Long> statusIdSet = result.stream().map(StatusVO::getId).collect(Collectors.toSet());
-            for (StatusVO status : notAllowedStatusList) {
-                if (!statusIdSet.contains(status.getId())) {
-                    result.add(status);
-                }
+            return result;
+        }
+        List<StatusVO> notAllowedStatusList = modelMapper.map(notAllowedStatus, new TypeToken<List<StatusVO>>() {}.getType());
+        Set<Long> statusIdSet = result.stream().map(StatusVO::getId).collect(Collectors.toSet());
+        for (StatusVO status : notAllowedStatusList) {
+            if (!statusIdSet.contains(status.getId())) {
+                result.add(status);
             }
         }
         return result;

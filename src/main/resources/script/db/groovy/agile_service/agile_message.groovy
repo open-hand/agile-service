@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_message.groovy') {
     changeSet(id: '2018-08-14-agile-message', author: 'fuqianghuang01@gmail.com') {
-        createTable(tableName: "agile_message") {
+        createTable(tableName: "agile_message", remarks: '敏捷消息表') {
             column(name: 'event', type: 'VARCHAR(255)', remarks: '事件') {
                 constraints(nullable: false)
             }

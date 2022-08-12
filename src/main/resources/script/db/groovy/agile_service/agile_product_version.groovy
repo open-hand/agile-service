@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'script/db/agile_product_version.groovy') {
     changeSet(id: '2018-05-14-agile-product-version', author: 'jian_zhang02@163.com') {
-        createTable(tableName: "agile_product_version") {
+        createTable(tableName: "agile_product_version", remarks: '产品版本表') {
             column(name: 'version_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '版本id') {
                 constraints(primaryKey: true)
             }

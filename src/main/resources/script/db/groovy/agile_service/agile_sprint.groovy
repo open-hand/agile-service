@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'script/db/agile_sprint.groovy') {
     changeSet(id: '2018-05-14-agile-sprint', author: 'jian_zhang02@163.com') {
-        createTable(tableName: "agile_sprint") {
+        createTable(tableName: "agile_sprint", remarks: '敏捷冲刺表') {
             column(name: 'sprint_id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '冲刺id') {
                 constraints(primaryKey: true)
             }

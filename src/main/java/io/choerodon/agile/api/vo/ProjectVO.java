@@ -54,6 +54,16 @@ public class ProjectVO {
     private Set<Long> topProjectIds;
     @ApiModelProperty(value = "模糊搜索参数")
     private String param;
+    @ApiModelProperty(value = "项目状态颜色")
+    private String color;
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public String getParam() {
         return param;

@@ -1,7 +1,7 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'script/db/fd_personal_template.groovy') {
     changeSet(id: '2021-02-02-fd-personal-template', author: 'huaxin.deng@hand-china.com') {
-        createTable(tableName: "fd_personal_template") {
+        createTable(tableName: "fd_personal_template", remarks: '导入导出个人模版表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键id') {
                 constraints(primaryKey: true)
             }

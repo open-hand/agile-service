@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'fd_status_transfer_setting.groovy') {
     changeSet(author: 'ztxemail@163.com', id: '2020-08-12-create-table-status-transfer-setting') {
-        createTable(tableName: 'fd_status_transfer_setting') {
+        createTable(tableName: 'fd_status_transfer_setting', remarks: '状态转换配置表') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: true)
             }

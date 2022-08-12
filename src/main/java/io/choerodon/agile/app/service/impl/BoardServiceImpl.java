@@ -658,10 +658,16 @@ public class BoardServiceImpl implements BoardService {
         boardDTO.setName(boardName);
         boardDTO.setSwimlaneBasedCode(PARENT_CHILD);
         boardDTO.setType(type);
-        if (boardMapper.insertSelective(boardDTO) != 1) {
-            throw new CommonException("error.board.insert");
+        List<BoardDTO> boards = boardMapper.select(boardDTO);
+        //幂等
+        if (boards.isEmpty()) {
+            if (boardMapper.insertSelective(boardDTO) != 1) {
+                throw new CommonException("error.board.insert");
+            }
+            return boardMapper.selectByPrimaryKey(boardDTO.getBoardId());
+        } else {
+            return boards.get(0);
         }
-        return boardMapper.selectByPrimaryKey(boardDTO.getBoardId());
     }
 
     @Override
@@ -714,9 +720,31 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads) {
-        BoardDTO boardResult = createBoard(0L, projectId, boardName, "agile");
+    public void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads, String applyType) {
+        String type = getBoardTypeByApplyType(applyType);
+        if (ObjectUtils.isEmpty(type)) {
+            return;
+        }
+        BoardDTO boardResult = createBoard(0L, projectId, boardName, type);
         boardColumnService.initBoardColumns(projectId, boardResult.getBoardId(), statusPayloads);
+    }
+
+    private String getBoardTypeByApplyType(String applyType) {
+        String type = null;
+        switch (applyType) {
+            case SchemeApplyType.AGILE:
+                type = "agile";
+                break;
+            case SchemeApplyType.PROGRAM:
+                type = "program";
+                break;
+            case SchemeApplyType.WATERFALL:
+                type = "waterfall";
+                break;
+            default:
+                break;
+        }
+        return type;
     }
 
     @Override
