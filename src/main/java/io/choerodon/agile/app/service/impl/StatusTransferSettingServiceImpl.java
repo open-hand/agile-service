@@ -383,7 +383,8 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         Long assigneeId = null;
         Long reporterId = null;
         Long mainResponsibleId = null;
-        if (!ObjectUtils.isEmpty(issue)) {
+        boolean isIssueNull = ObjectUtils.isEmpty(issue);
+        if (!isIssueNull) {
             issueId = issue.getIssueId();
             assigneeId = issue.getAssigneeId();
             reporterId = issue.getReporterId();
@@ -392,9 +393,13 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         Set<Long> roleIds = new HashSet<>();
         boolean verifySubIssueCompleted = false;
         Set<Long> userIds = new HashSet<>();
+        boolean dependOnIssueDetailsTypes = false;
         for (StatusTransferSettingDTO statusTransferSetting : StatusTransferSettingList) {
             String userType = statusTransferSetting.getUserType();
             Long userId = statusTransferSetting.getUserId();
+            //自定义字段或依赖于issue详情的字段
+            boolean dependOnIssueDetails = !StatusTransferType.NOT_DEPEND_ON_ISSUE_DETAILS_TYPES.contains(userType);
+            dependOnIssueDetailsTypes = dependOnIssueDetailsTypes || dependOnIssueDetails;
             switch (userType) {
                 case StatusTransferType.SPECIFIER:
                     userIds.add(userId);
@@ -439,6 +444,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             }
         }
         queryUserIdsByRoleIds(projectId, userIds, roleIds);
+        if (isIssueNull && dependOnIssueDetailsTypes) {
+            //处理拖动流转限制的情况
+            //issue为空，同时还要根据issue详情判断，为了防止限定范围变小，需要这里跳过校验，由/not_allowed_transfer接口判断
+            userIds.clear();
+        }
         return Pair.of(userIds, verifySubIssueCompleted);
     }
 
