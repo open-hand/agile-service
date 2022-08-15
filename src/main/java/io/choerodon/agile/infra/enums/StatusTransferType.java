@@ -31,6 +31,14 @@ public class StatusTransferType {
                     MAIN_RESPONSIBLE,
                     RELATED_PARTIES);
 
+    public static final List<String> NOT_DEPEND_ON_ISSUE_DETAILS_TYPES =
+            Arrays.asList(
+                    SPECIFIER,
+                    PROJECT_OWNER,
+                    OTHER,
+                    ROLE
+            );
+
 
     public static boolean isSpecifier(String value) {
         return SPECIFIER.equals(value);
