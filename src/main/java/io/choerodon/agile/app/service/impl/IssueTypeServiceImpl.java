@@ -108,6 +108,15 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
 
+    @Autowired
+    private StatusLinkageMapper statusLinkageMapper;
+
+    @Autowired
+    private StatusNoticeSettingMapper statusNoticeSettingMapper;
+
+    @Autowired
+    private StatusFieldSettingMapper statusFieldSettingMapper;
+
     private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
                     IssueTypeCode.STORY.value(),
@@ -533,13 +542,20 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (Boolean.FALSE.equals(vo.getDeleted())) {
             throw new CommonException("error.issue.type.not.deleted");
         }
+        Long orgId = organizationId;
         if (!ZERO.equals(projectId)) {
             deleteIssueTypeExtend(organizationId, projectId, issueTypeId);
             deleteIssueTypeAndFieldRel(organizationId, projectId, issueTypeId);
             deleteStateMachineAndIssueTypeConfig(organizationId, projectId, result);
+            orgId = 0L;
         } else {
             deleteIssueTypeAndFieldRel(organizationId, null, issueTypeId);
         }
+        // 删除流转配置(状态联动、更新属性、通知设置、流转条件)
+        statusFieldSettingMapper.deleteByIssueTypeId(orgId, projectId, issueTypeId);
+        statusNoticeSettingMapper.deleteByIssueTypeId(orgId, projectId, issueTypeId);
+        statusLinkageMapper.deleteByIssueTypeId(orgId, projectId, issueTypeId);
+
         issueTypeMapper.deleteByPrimaryKey(result.getId());
     }
 
