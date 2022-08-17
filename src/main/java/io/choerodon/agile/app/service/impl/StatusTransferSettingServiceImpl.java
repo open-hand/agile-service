@@ -184,12 +184,10 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (CollectionUtils.isEmpty(statusTransferSettingList)) {
             return Boolean.FALSE;
         }
-        // 获取当前的用户
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        Pair<Set<Long>, Boolean> pair = queryUserIdsAndVerify(projectId, statusTransferSettingList, issueDTO);
-        Set<Long> userIds = pair.getFirst();
+        Pair<Boolean, Boolean> pair = isCurrentAllowedAndIsVerifySub(projectId, statusTransferSettingList, issueDTO);
+        Boolean isCurrentAllowed = pair.getFirst();
         Boolean verifySubIssueCompleted = pair.getSecond();
-        if (!CollectionUtils.isEmpty(userIds) && !userIds.contains(userId)) {
+        if (!isCurrentAllowed) {
             return Boolean.TRUE;
         }
         // 校验当前问题的子级任务是否都是已解决状态
@@ -236,9 +234,8 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             if (CollectionUtils.isEmpty(statusTransfer)) {
                 list.add(statusId);
             } else {
-                Set<Long> userIds = queryUserIdsAndVerify(projectId, statusTransfer, issue).getFirst();
-                Long userId = DetailsHelper.getUserDetails().getUserId();
-                if (CollectionUtils.isEmpty(userIds) || userIds.contains(userId)) {
+                boolean isCurrentAllowed = isCurrentAllowedAndIsVerifySub(projectId, statusTransfer, issue).getFirst();
+                if (isCurrentAllowed) {
                     list.add(statusId);
                 }
             }
@@ -374,11 +371,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
      * @param projectId
      * @param StatusTransferSettingList
      * @param issue
-     * @return 用户集合， 是否校验子任务已完成
+     * @return 是否允许当前用户流转， 是否校验子任务已完成
      */
-    private Pair<Set<Long>, Boolean> queryUserIdsAndVerify(Long projectId,
-                                                           List<StatusTransferSettingDTO> StatusTransferSettingList,
-                                                           IssueDTO issue) {
+    private Pair<Boolean, Boolean> isCurrentAllowedAndIsVerifySub(Long projectId,
+                                                                  List<StatusTransferSettingDTO> StatusTransferSettingList,
+                                                                  IssueDTO issue) {
         Long issueId = null;
         Long assigneeId = null;
         Long reporterId = null;
@@ -444,12 +441,16 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             }
         }
         queryUserIdsByRoleIds(projectId, userIds, roleIds);
+        boolean isCurrentAllowed = true;
         if (isIssueNull && dependOnIssueDetailsTypes) {
             //处理拖动流转限制的情况
             //issue为空，同时还要根据issue详情判断，为了防止限定范围变小，需要这里跳过校验，由/not_allowed_transfer接口判断
-            userIds.clear();
+            //isCurrentAllowed = true;
+        } else {
+            Long currentUserId = DetailsHelper.getUserDetails().getUserId();
+            isCurrentAllowed = userIds.contains(currentUserId);
         }
-        return Pair.of(userIds, verifySubIssueCompleted);
+        return Pair.of(isCurrentAllowed, verifySubIssueCompleted);
     }
 
     private void baseInsert(StatusTransferSettingDTO statusTransferSettingDTO) {
