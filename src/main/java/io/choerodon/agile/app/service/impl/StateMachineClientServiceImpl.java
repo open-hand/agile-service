@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.IssueSubCreateVO;
 import io.choerodon.agile.api.vo.IssueSubVO;
@@ -236,7 +237,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             // 同步工作项到第三方
             agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
             // 第三方实例关联:yqcloud等
-            agilePluginService.createInstanceOpenRel(projectId, issueId, InstanceType.ISSUE, issueCreateVO.getInstanceOpenRelVO());
+            Optional.ofNullable(issueCreateVO.getInstanceOpenRelVO()).ifPresent(instanceOpenRelVO -> {
+                instanceOpenRelVO.setProjectId(projectId);
+                instanceOpenRelVO.setInstanceId(issueId);
+                instanceOpenRelVO.setInstanceType(InstanceType.ISSUE.value());
+                agilePluginService.createInstanceOpenRel(Lists.newArrayList(instanceOpenRelVO));
+            });
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId,issueId,issueCreateVO);

@@ -1,16 +1,16 @@
 package io.choerodon.agile.api.vo.business;
 
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
 
 /**
  * 敏捷开发Issue
@@ -304,7 +304,7 @@ public class IssueVO {
     private List<Long> productIds;
 
     @ApiModelProperty(value = "第三方实例关联")
-    private InstanceOpenRelVO instanceOpenRelVO;
+    private List<InstanceOpenRelVO> instanceOpenRels;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1063,11 +1063,11 @@ public class IssueVO {
         this.productIds = productIds;
     }
 
-    public InstanceOpenRelVO getInstanceOpenRelVO() {
-        return instanceOpenRelVO;
+    public List<InstanceOpenRelVO> getInstanceOpenRels() {
+        return instanceOpenRels;
     }
 
-    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
-        this.instanceOpenRelVO = instanceOpenRelVO;
+    public void setInstanceOpenRels(List<InstanceOpenRelVO> instanceOpenRels) {
+        this.instanceOpenRels = instanceOpenRels;
     }
 }
