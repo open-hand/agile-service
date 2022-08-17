@@ -1,5 +1,9 @@
 package io.choerodon.agile.api.vo.business;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -7,19 +11,30 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author huaxin.deng@hand-china.com
  * @since 2022/5/24
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceOpenRelVO {
 
+    @ApiModelProperty("项目id")
+    @NotNull
+    private Long projectId;
+
     @ApiModelProperty(value = "第三方实例id")
+    @NotNull
     private Long openInstanceId;
 
     @ApiModelProperty(value = "第三方实例编号")
+    @NotBlank
     private String openInstanceNum;
 
     @ApiModelProperty(value = "来源：如yqcloud等")
+    @NotBlank
     private String source;
+
     @Encrypt
+    @NotNull
     @ApiModelProperty(value = "实例id")
     private Long instanceId;
+
     @ApiModelProperty(value = "实例类型")
     private String instanceType;
 
@@ -62,4 +77,13 @@ public class InstanceOpenRelVO {
     public void setSource(String source) {
         this.source = source;
     }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
 }
