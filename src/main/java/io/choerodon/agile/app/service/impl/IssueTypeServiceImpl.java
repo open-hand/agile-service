@@ -117,6 +117,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
 
+    @Autowired
+    private StatusTransferSettingMapper statusTransferSettingMapper;
+
     private static final List<String> AGILE_CREATE_ISSUE_TYPES =
             Arrays.asList(
                     IssueTypeCode.STORY.value(),
@@ -555,6 +558,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         statusFieldSettingMapper.deleteByIssueTypeId(orgId, projectId, issueTypeId);
         statusNoticeSettingMapper.deleteByIssueTypeId(orgId, projectId, issueTypeId);
         statusLinkageMapper.deleteByIssueTypeId(orgId, projectId, issueTypeId);
+        statusTransferSettingMapper.deleteByIssueTypeId(orgId, projectId, issueTypeId);
 
         issueTypeMapper.deleteByPrimaryKey(result.getId());
     }
