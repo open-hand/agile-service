@@ -65,4 +65,25 @@ databaseChangeLog(logicalFilePath: 'fd_status_linkage.groovy') {
             column(name: 'type', type: 'VARCHAR(255)', defaultValue: "all_transfer" , remarks: '联动校验类型：任一子任务流转（anyone_transfer）,全部子任务流转（all_transfer）')
         }
     }
+
+    changeSet(author: 'tianxin.zhao@zknow.com',id: '2022-08-17-fd-status-linkage-fix-data'){
+        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
+            "delete fsl from fd_status_linkage fsl\n" +
+                    "where \n" +
+                    "fsl.issue_type_id not in (select fit.id from fd_issue_type fit)\n" +
+                    "or fsl.parent_issue_type_id not in (select fit.id from fd_issue_type fit)"
+        }
+
+        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
+            "DELETE fsns FROM fd_status_notice_setting fsns WHERE fsns.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
+        }
+
+        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
+            "DELETE fsfs FROM fd_status_field_setting fsfs WHERE fsfs.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
+        }
+
+        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
+            "DELETE fsrs FROM fd_status_transfer_setting fsrs WHERE fsrs.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
+        }
+    }
 }
