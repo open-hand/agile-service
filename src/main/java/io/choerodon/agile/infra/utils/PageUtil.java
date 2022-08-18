@@ -2,12 +2,11 @@ package io.choerodon.agile.infra.utils;
 
 import java.util.*;
 
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.util.StringUtil;
-
-import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.mybatis.util.StringUtil;
 
 
 /**
@@ -15,8 +14,8 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
  * Email: ettwz@hotmail.com
  */
 public class PageUtil {
-    public static Page buildPageInfoWithPageInfoList(Page page, List list) {
-        Page result = new Page<>();
+    public static <T> Page<T> buildPageInfoWithPageInfoList(Page<?> page, List<T> list) {
+        Page<T> result = new Page<>();
         result.setNumber(page.getNumber());
         result.setSize(page.getSize());
         result.setTotalElements(page.getTotalElements());

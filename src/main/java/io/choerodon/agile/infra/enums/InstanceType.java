@@ -25,7 +25,7 @@ public enum InstanceType {
 
     public static InstanceType of(@NonNull String instanceType) {
         try {
-            return valueOf(instanceType);
+            return valueOf(instanceType.toUpperCase());
         } catch (IllegalArgumentException exception) {
             throw new CommonException("error.instance.transfer", instanceType);
         }
