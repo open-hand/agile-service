@@ -1137,6 +1137,8 @@
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql2"/>
             <!--不包含projectIds-->
             <include refid="io.choerodon.agile.infra.mapper.StarBeaconMapper.filterStarBeaconSql"/>
+            <!--钩子sql，可以在商业版覆盖-->
+            <include refid="io.choerodon.agile.infra.mapper.AgilePluginMapper.yqCloudFilter"/>
         </if>
     </sql>
 
