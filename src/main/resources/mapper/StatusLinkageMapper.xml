@@ -52,11 +52,11 @@
     </select>
 
     <select id="selectExistStatusLink" resultType="io.choerodon.agile.infra.dto.StatusLinkageDTO">
-        SELECT * FROM fd_status_linkage fsl
+        SELECT fsl.* FROM fd_status_linkage fsl
         WHERE fsl.project_id = #{projectId}
         AND fsl.issue_type_id  = #{issueTypeId} AND fsl.status_id = #{statusId}
         UNION ALL
-        SELECT * FROM fd_status_linkage fsl
+        SELECT fsl.* FROM fd_status_linkage fsl
         WHERE fsl.project_id = #{projectId}
         AND fsl.parent_issue_type_id = #{issueTypeId}
         AND fsl.parent_issue_status_setting = #{statusId}
@@ -72,4 +72,17 @@
             #{statusId}
         </foreach>
     </select>
+
+    <delete id="deleteByIssueTypeId">
+        delete from fd_status_linkage
+        <where>
+            <if test="organizationId != null and organizationId != 0">
+                and organization_id = #{organizationId}
+            </if>
+            <if test="projectId != null and projectId != 0">
+                and project_id = #{projectId}
+            </if>
+            and (parent_issue_type_id = #{issueTypeId} or issue_type_id = #{issueTypeId})
+        </where>
+    </delete>
 </mapper>
