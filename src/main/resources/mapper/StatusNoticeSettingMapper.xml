@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="qwe.infra.mapper. statusNoticeSettingMapper">
-	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="io.choerodon.agile.infra.mapper.StatusNoticeSettingMapper">
-        <result column="id" property="id" jdbcType="DECIMAL"/>
-        <result column="issue_type_id" property="issueTypeId" jdbcType="DECIMAL"/>
-        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
-        <result column="status_id" property="statusId" jdbcType="DECIMAL"/>
-        <result column="user_type" property="userType" jdbcType="VARCHAR"/>
-        <result column="user_id" property="userId" jdbcType="DECIMAL"/>
-        <result column="notice_type" property="noticeType" jdbcType="VARCHAR"/>
-        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
-        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
-        <result column="creation_date" property="creationDate" jdbcType="DATE"/>
-        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
-        <result column="last_update_date" property="lastUpdateDate" jdbcType="DATE"/>
-    </resultMap>
+<mapper namespace="io.choerodon.agile.infra.mapper.StatusNoticeSettingMapper">
+    <delete id="deleteByIssueTypeId">
+        delete from fd_status_notice_setting
+        <where>
+            <if test="organizationId != null and organizationId != 0">
+                and organization_id = #{organizationId}
+            </if>
+            <if test="projectId != null and projectId != 0">
+                and project_id = #{projectId}
+            </if>
+            and issue_type_id = #{issueTypeId}
+        </where>
+
+    </delete>
 </mapper>

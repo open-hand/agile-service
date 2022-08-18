@@ -15,4 +15,9 @@ public interface StatusFieldSettingMapper extends BaseMapper<StatusFieldSettingD
     List<StatusFieldSettingVO> listByStatusIds(@Param("projectId") Long projectId,@Param("issueTypeId") Long issueTypeId,@Param("statusIds") List<Long> statusIds);
 
     List<StatusFieldSettingVO> listOptions(@Param("organizationId") Long organizationId,@Param("issueTypeId") Long issueTypeId,@Param("statusIds") List<Long> statusIds);
+
+
+    void deleteByIssueTypeId(@Param("organizationId") Long organizationId,
+                             @Param("projectId") Long projectId,
+                             @Param("issueTypeId") Long issueTypeId);
 }
