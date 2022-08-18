@@ -29,4 +29,17 @@
         AND fsts.issue_type_id = #{issueTypeId}
         AND fsts.user_type = #{userType}
     </select>
+
+    <delete id="deleteByIssueTypeId">
+        delete from fd_status_transfer_setting
+        <where>
+            <if test="organizationId != null and organizationId != 0">
+                and organization_id = #{organizationId}
+            </if>
+            <if test="projectId != null and projectId != 0">
+                and project_id = #{projectId}
+            </if>
+            and issue_type_id = #{issueTypeId}
+        </where>
+    </delete>
 </mapper>
