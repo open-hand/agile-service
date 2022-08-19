@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import io.choerodon.agile.infra.feign.vo.HealthStateVO;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
@@ -56,6 +57,8 @@ public class ProjectVO {
     private String param;
     @ApiModelProperty(value = "项目状态颜色")
     private String color;
+    @ApiModelProperty("健康状态")
+    private HealthStateVO healthStateVO;
 
     public String getColor() {
         return color;
@@ -204,5 +207,13 @@ public class ProjectVO {
 
     public void setTypes(List<String> types) {
         this.types = types;
+    }
+
+    public HealthStateVO getHealthStateVO() {
+        return healthStateVO;
+    }
+
+    public void setHealthStateVO(HealthStateVO healthStateVO) {
+        this.healthStateVO = healthStateVO;
     }
 }
