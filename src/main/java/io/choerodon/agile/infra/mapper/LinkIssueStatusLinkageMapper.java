@@ -13,4 +13,12 @@ import java.util.List;
  */
 public interface LinkIssueStatusLinkageMapper extends BaseMapper<LinkIssueStatusLinkageDTO> {
     List<StatusLinkageVO> selectWithStatusByProjectId(@Param("projectId") Long projectId);
+
+    List<LinkIssueStatusLinkageDTO> selectAllLinkStatusSetting(@Param("projectId") Long projectId,
+                                                               @Param("issueTypeId") Long issueTypeId,
+                                                               @Param("statusId") Long statusId);
+
+    void deleteByIssueTypeId(@Param("organizationId") Long organizationId,
+                             @Param("projectId") Long projectId,
+                             @Param("issueTypeId") Long issueTypeId);
 }
