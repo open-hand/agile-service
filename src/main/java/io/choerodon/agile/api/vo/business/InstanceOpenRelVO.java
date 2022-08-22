@@ -19,11 +19,9 @@ public class InstanceOpenRelVO {
     private Long projectId;
 
     @ApiModelProperty(value = "第三方实例id")
-    @NotNull
     private Long openInstanceId;
 
     @ApiModelProperty(value = "第三方实例编号")
-    @NotBlank
     private String openInstanceNum;
 
     @ApiModelProperty(value = "来源：如yqcloud等")

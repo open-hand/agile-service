@@ -4,16 +4,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.choerodon.agile.api.vo.business.*;
-import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.poi.ss.usermodel.Workbook;
-
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.AllDataLogVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * @author zhaotianxin
@@ -222,4 +224,6 @@ public interface BacklogExpandService {
     Boolean checkExistBacklogRel(Long projectId, Long issueId);
 
     void copyIssueBacklogRel(Long projectId, Long issueId, Long newIssueId);
+
+    Page<BacklogInfoVO> listBacklog(Long projectId, PageRequest pageRequest, SearchVO searchVO);
 }

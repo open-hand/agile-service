@@ -624,4 +624,11 @@ public interface AgilePluginService {
     void migrateWorkGroupData();
 
     List<ProjectVO> queryProgramIdsByProjectIds(Set<Long> projectIds);
+
+    /**
+     * 商业版更新projectInfo
+     * @param projectInfoVO
+     * @return
+     */
+    ProjectInfoVO updateProjectInfo(ProjectInfoVO projectInfoVO);
 }

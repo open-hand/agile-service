@@ -79,7 +79,7 @@ public class EncryptionUtils {
      *
      * @param search SearchVO
      */
-    public static void decryptSearchVO(SearchVO search) {
+    public static <T extends SearchVO> void decryptSearchVO(T search) {
         if (search == null){
             return;
         }
