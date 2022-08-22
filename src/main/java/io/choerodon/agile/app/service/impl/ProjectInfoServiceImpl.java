@@ -6,8 +6,10 @@ import java.util.List;
 import io.choerodon.agile.api.vo.ProjectInfoFixVO;
 import io.choerodon.agile.api.vo.ProjectInfoVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.ProjectInfoService;
+import io.choerodon.agile.domain.repository.ProjectInfoRepository;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
@@ -33,6 +35,10 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private ProjectInfoRepository projectInfoRepository;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public void initializationProjectInfo(ProjectEvent projectEvent) {
@@ -65,10 +71,14 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     @Override
     public ProjectInfoVO updateProjectInfo(ProjectInfoVO projectInfoVO) {
         ProjectInfoDTO projectInfoDTO = modelMapper.map(projectInfoVO, ProjectInfoDTO.class);
-        if (projectInfoMapper.updateByPrimaryKeySelective(projectInfoDTO) != 1) {
-            throw new CommonException("error.projectInfo.update");
+        if (ObjectUtils.isEmpty(agilePluginService)) {
+            if (projectInfoRepository.updateByPrimaryKeySelective(projectInfoDTO) != 1) {
+                throw new CommonException("error.projectInfo.update");
+            }
+            return projectInfoVO;
+        } else {
+            return agilePluginService.updateProjectInfo(projectInfoVO);
         }
-        return projectInfoVO;
     }
 
     @Override
