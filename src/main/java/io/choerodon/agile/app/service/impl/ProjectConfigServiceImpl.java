@@ -140,6 +140,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
 
+    @Autowired
+    private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
+
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
         if (Boolean.FALSE.equals(EnumUtil.contain(SchemeType.class, schemeType))) {
@@ -818,8 +821,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         
         // 校验是否存在关联问题联动设置
-        List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS = linkIssueStatusLinkageService.listByIssueTypeAndStatusId(projectId, organizationId, issueTypeId, currentStatusId);
-        if (!CollectionUtils.isEmpty(linkIssueStatusLinkageVOS)) {
+        List<LinkIssueStatusLinkageDTO> statusLinkageDTOS = linkIssueStatusLinkageMapper.selectAllLinkStatusSetting(projectId, issueTypeId, currentStatusId);
+        if (!CollectionUtils.isEmpty(statusLinkageDTOS)) {
             throw new CommonException("error.link.issue.status.linkage.exist");
         }
 

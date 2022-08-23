@@ -29,4 +29,28 @@
            left join fd_status t3 on t1.status_id = t3.id
            where t1.project_id = #{projectId}
     </select>
+
+    <select id="selectAllLinkStatusSetting" resultType="io.choerodon.agile.infra.dto.LinkIssueStatusLinkageDTO">
+        select
+         *
+        from fd_link_issue_status_linkage
+        where project_id = #{projectId}
+        and (
+            (issue_type_id = #{issueTypeId} and status_id = #{statusId} )
+            or (link_issue_type_id = #{issueTypeId} and link_issue_status_id = #{statusId} )
+            )
+    </select>
+
+    <delete id="deleteByIssueTypeId">
+       delete from fd_link_issue_status_linkage
+       <where>
+           <if test="organizationId != null">
+               and organization_id = #{organizationId}
+           </if>
+           <if test="projectId != null">
+               and project_id = #{projectId}
+           </if>
+           and (issue_type_id = #{issueTypeId} or link_issue_type_id = #{issueTypeId})
+       </where>
+    </delete>
 </mapper>
