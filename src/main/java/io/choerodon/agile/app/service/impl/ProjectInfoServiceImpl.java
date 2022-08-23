@@ -9,7 +9,6 @@ import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.ProjectInfoService;
-import io.choerodon.agile.domain.repository.ProjectInfoRepository;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
@@ -35,8 +34,6 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
-    @Autowired
-    private ProjectInfoRepository projectInfoRepository;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
 
@@ -72,7 +69,7 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     public ProjectInfoVO updateProjectInfo(ProjectInfoVO projectInfoVO) {
         ProjectInfoDTO projectInfoDTO = modelMapper.map(projectInfoVO, ProjectInfoDTO.class);
         if (ObjectUtils.isEmpty(agilePluginService)) {
-            if (projectInfoRepository.updateByPrimaryKeySelective(projectInfoDTO) != 1) {
+            if (projectInfoMapper.updateByPrimaryKeySelective(projectInfoDTO) != 1) {
                 throw new CommonException("error.projectInfo.update");
             }
             return projectInfoVO;
