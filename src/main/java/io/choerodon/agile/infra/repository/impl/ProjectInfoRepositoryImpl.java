@@ -3,12 +3,10 @@ package io.choerodon.agile.infra.repository.impl;
 import io.choerodon.agile.domain.repository.ProjectInfoRepository;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import org.hzero.mybatis.base.impl.BaseRepositoryImpl;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author superlee
  * @since 2022-08-19
  */
-@Repository
 public class ProjectInfoRepositoryImpl extends BaseRepositoryImpl<ProjectInfoDTO> implements ProjectInfoRepository {
 }

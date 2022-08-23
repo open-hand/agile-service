@@ -34,6 +34,7 @@ public class InstanceOpenRelVO {
     private Long instanceId;
 
     @ApiModelProperty(value = "实例类型")
+    @NotBlank
     private String instanceType;
 
     public Long getInstanceId() {

@@ -1,5 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.IssueAccessDataService;
@@ -16,11 +21,6 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -41,8 +41,6 @@ public class PriorityServiceImpl implements PriorityService {
     private IssueAccessDataService issueAccessDataService;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private PriorityService priorityService;
 
     @Override
     public List<PriorityVO> selectAll(PriorityVO priorityVO, String param) {
@@ -140,7 +138,7 @@ public class PriorityServiceImpl implements PriorityService {
         priority.setOrganizationId(organizationId);
         List<PriorityDTO> priorities = priorityMapper.select(priority);
         if (CollectionUtils.isEmpty(priorities)) {
-           return new HashMap<>();
+            return new HashMap<>();
         }
         Map<Long, PriorityVO> result = new HashMap<>();
         List<PriorityVO> priorityVOS = modelMapper.map(priorities, new TypeToken<List<PriorityVO>>() {
@@ -252,7 +250,7 @@ public class PriorityServiceImpl implements PriorityService {
         if (projectIds == null || projectIds.isEmpty()) {
             count = 0L;
         } else {
-            count = priorityService.checkPriorityDelete(organizationId, id, projectIds);
+            count = checkPriorityDelete(organizationId, id, projectIds);
         }
         return count;
     }
@@ -270,7 +268,7 @@ public class PriorityServiceImpl implements PriorityService {
         if (projectIds == null || projectIds.isEmpty()) {
             count = 0L;
         } else {
-            count = priorityService.checkPriorityDelete(organizationId, priorityId, projectIds);
+            count = checkPriorityDelete(organizationId, priorityId, projectIds);
         }
         //执行优先级转换
         if (!count.equals(0L)) {
@@ -278,7 +276,7 @@ public class PriorityServiceImpl implements PriorityService {
                 throw new CommonException(DELETE_ILLEGAL);
             }
             CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
-            priorityService.batchChangeIssuePriority(organizationId, priorityId, changePriorityId, customUserDetails.getUserId(), projectIds);
+            batchChangeIssuePriority(organizationId, priorityId, changePriorityId, customUserDetails.getUserId(), projectIds);
         }
         int isDelete = priorityMapper.deleteByPrimaryKey(priorityId);
         if (isDelete != 1) {
