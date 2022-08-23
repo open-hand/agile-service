@@ -41,4 +41,10 @@ databaseChangeLog(logicalFilePath: 'fd_link_issue_status_linkage.groovy') {
             column(name: 'is_triggered', type: 'TINYINT UNSIGNED', defaultValue: "0", remarks: '联动时是否触发关联的issue')
         }
     }
+
+    changeSet(author: 'tianxin.zhao@zknow.com',id: '2022-08-22-fd_link_issue_status_linkage-fix-data'){
+        sql(stripComments: true, splitStatements: true, endDelimiter: ';') {
+            "DELETE fisl FROM fd_link_issue_status_linkage fisl WHERE fisl.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
+        }
+    }
 }
