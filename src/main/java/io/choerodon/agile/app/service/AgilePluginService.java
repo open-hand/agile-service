@@ -614,7 +614,7 @@ public interface AgilePluginService {
 
     List<IssueProductRelVO> queryIssueProductRel(List<Long> issueIds);
 
-    void createInstanceOpenRel(List<InstanceOpenRelVO> instanceOpenRelVO);
+    void createInstanceOpenRel(Long organizationId, List<InstanceOpenRelVO> instanceOpenRelVO);
 
     List<InstanceOpenRelVO> queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
 

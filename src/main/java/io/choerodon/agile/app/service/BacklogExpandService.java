@@ -226,4 +226,6 @@ public interface BacklogExpandService {
     void copyIssueBacklogRel(Long projectId, Long issueId, Long newIssueId);
 
     Page<BacklogInfoVO> listBacklog(Long projectId, PageRequest pageRequest, SearchVO searchVO);
+
+    List<BacklogInfoVO> selectByIds(Set<Long> backlogIds);
 }
