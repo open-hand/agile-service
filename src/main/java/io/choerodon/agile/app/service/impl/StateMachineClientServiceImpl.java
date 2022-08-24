@@ -241,7 +241,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
                 instanceOpenRelVO.setProjectId(projectId);
                 instanceOpenRelVO.setInstanceId(issueId);
                 instanceOpenRelVO.setInstanceType(InstanceType.ISSUE.value());
-                agilePluginService.createInstanceOpenRel(Lists.newArrayList(instanceOpenRelVO));
+                agilePluginService.createInstanceOpenRel(organizationId, Lists.newArrayList(instanceOpenRelVO));
             });
         }
         if (agileWaterfallService != null) {
