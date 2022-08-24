@@ -1,26 +1,16 @@
 package io.choerodon.agile.app.service.impl;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.event.ProjectEvent;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.RankUtil;
-import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +21,19 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.RankUtil;
+import io.choerodon.core.exception.CommonException;
+
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -330,7 +332,7 @@ public class FixDataServiceImpl implements FixDataService {
     private void fixStatusTransferSetting() {
         LOGGER.info("开始修复fd_status_transfer_setting数据");
         StatusTransferSettingDTO statusTransferSetting = new StatusTransferSettingDTO();
-        statusTransferSetting.setUserType(StatusTransferType.PROJECT_OWNER);
+        statusTransferSetting.setUserType("projectOwner");
         List<StatusTransferSettingDTO> statusTransferSettingList = statusTransferSettingMapper.select(statusTransferSetting);
         if (statusTransferSettingList.isEmpty()) {
             return;

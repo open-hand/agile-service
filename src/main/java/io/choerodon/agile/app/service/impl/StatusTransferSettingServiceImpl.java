@@ -4,6 +4,15 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
 import io.choerodon.agile.app.service.*;
@@ -20,21 +29,14 @@ import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.Pair;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 /**
- * @author zhaotianxin
- * @date 2020-08-12 10:09
+ * @author zhaotianxin 2020-08-12 10:09
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -131,15 +133,15 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (CollectionUtils.isEmpty(statusIds)) {
             throw new CommonException("error.statusIds.null");
         }
-        List<StatusTransferSettingDTO> dtos = statusTransferSettingMapper.listByStatusId(projectId,issueTypeId,statusIds);
-        if(CollectionUtils.isEmpty(dtos)){
+        List<StatusTransferSettingDTO> statusTransferSettings = statusTransferSettingMapper.listByStatusId(projectId,issueTypeId,statusIds);
+        if(CollectionUtils.isEmpty(statusTransferSettings)){
            return new ArrayList<>();
         }
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Map<Long,UserDTO> userDTOMap = new HashMap<>();
         Map<Long,RoleVO> roleMap = new HashMap<>();
-        processUserAndRoleMap(dtos, organizationId, userDTOMap, roleMap);
-        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap, roleMap, ConvertUtil.getOrganizationId(projectId));
+        processUserAndRoleMap(statusTransferSettings, organizationId, userDTOMap, roleMap);
+        return statusTransferSettingAssembler.listDTOToVO(statusTransferSettings,userDTOMap, roleMap, ConvertUtil.getOrganizationId(projectId));
     }
 
     private void processUserAndRoleMap(List<StatusTransferSettingDTO> statusTransferSettingList,
@@ -158,7 +160,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             }
         });
         if(!CollectionUtils.isEmpty(userIds)){
-            List<UserDTO> userDTOS = userService.listUsersByIds(userIds.toArray(new Long[userIds.size()]));
+            List<UserDTO> userDTOS = userService.listUsersByIds(userIds.toArray(new Long[0]));
             userMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
         }
         if (!ObjectUtils.isEmpty(roleIds)) {
@@ -223,24 +225,24 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (!ObjectUtils.isEmpty(issueId)) {
             issue = issueMapper.selectByPrimaryKey(issueId);
         }
-        List<StatusTransferSettingDTO> dtos = statusTransferSettingMapper.listByStatusId(projectId, issueTypeId, statusIds);
-        if (CollectionUtils.isEmpty(dtos)) {
+        List<StatusTransferSettingDTO> statusTransferSettings = statusTransferSettingMapper.listByStatusId(projectId, issueTypeId, statusIds);
+        if (CollectionUtils.isEmpty(statusTransferSettings)) {
             return statusIds;
         }
-        List<Long> list = new ArrayList<>();
-        Map<Long, List<StatusTransferSettingDTO>> statusTransferSettingMap = dtos.stream().collect(Collectors.groupingBy(StatusTransferSettingDTO::getStatusId));
+        List<Long> result = new ArrayList<>();
+        Map<Long, List<StatusTransferSettingDTO>> statusTransferSettingMap = statusTransferSettings.stream().collect(Collectors.groupingBy(StatusTransferSettingDTO::getStatusId));
         for (Long statusId : statusIds) {
             List<StatusTransferSettingDTO> statusTransfer = statusTransferSettingMap.get(statusId);
             if (CollectionUtils.isEmpty(statusTransfer)) {
-                list.add(statusId);
+                result.add(statusId);
             } else {
                 boolean isCurrentAllowed = isCurrentAllowedAndIsVerifySub(projectId, statusTransfer, issue).getFirst();
                 if (isCurrentAllowed) {
-                    list.add(statusId);
+                    result.add(statusId);
                 }
             }
         }
-        return list;
+        return result;
     }
 
     @Override
@@ -289,14 +291,14 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (CollectionUtils.isEmpty(statusIds)) {
             throw new CommonException("error.statusIds.null");
         }
-        List<StatusTransferSettingDTO> dtos = statusTransferSettingMapper.listOptions(organizationId,issueTypeId,statusIds);
-        if(CollectionUtils.isEmpty(dtos)){
+        List<StatusTransferSettingDTO> statusTransferSettings = statusTransferSettingMapper.listOptions(organizationId,issueTypeId,statusIds);
+        if(CollectionUtils.isEmpty(statusTransferSettings)){
             return new ArrayList<>();
         }
         Map<Long, UserDTO> userDTOMap = new HashMap<>();
         Map<Long, RoleVO> roleMap = new HashMap<>();
-        processUserAndRoleMap(dtos, organizationId, userDTOMap, roleMap);
-        return statusTransferSettingAssembler.listDTOToVO(dtos, userDTOMap, roleMap, organizationId);
+        processUserAndRoleMap(statusTransferSettings, organizationId, userDTOMap, roleMap);
+        return statusTransferSettingAssembler.listDTOToVO(statusTransferSettings, userDTOMap, roleMap, organizationId);
     }
 
     @Override
@@ -323,7 +325,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             return new ArrayList<>();
         }
         //校验任务子级需全部到达已解决配置
-        List<Long> statusIds = statusTransferSettingMapper.queryStatusTransferByIssueTypeAndUserType(0L, projectId, issueDTO.getIssueTypeId(), "other");
+        List<Long> statusIds = statusTransferSettingMapper.queryStatusTransferByIssueTypeAndUserType(BaseConstants.DEFAULT_TENANT_ID, projectId, issueDTO.getIssueTypeId(), StatusTransferType.OTHER);
         if (CollectionUtils.isEmpty(statusIds)) {
             return new ArrayList<>();
         }
@@ -331,10 +333,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         if (Objects.equals(0, issueCountDTO.getIssueCount()) || Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
             return new ArrayList<>();
         }
-        List<StatusDTO> statusList = statusMapper.selectByCondition(Condition.builder(StatusDTO.class)
-                .andWhere(Sqls.custom().andEqualTo("organizationId", ConvertUtil.getOrganizationId(projectId))
-                        .andIn("id", statusIds)).build());
-        return statusList;
+        return statusMapper.selectByCondition(Condition.builder(StatusDTO.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StatusDTO.FIELD_ORGANIZATION_ID, ConvertUtil.getOrganizationId(projectId))
+                        .andIn(StatusDTO.FIELD_ID, statusIds))
+                .build());
     }
 
     private List<StatusVO> filterByStatusTransform(IssueDTO issueDTO,
@@ -368,14 +371,24 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
 
     /**
      *
-     * @param projectId
-     * @param StatusTransferSettingList
-     * @param issue
+     * @param projectId projectId
+     * @param statusTransferSettingList statusTransferSettingList
+     * @param issue issue
      * @return 是否允许当前用户流转， 是否校验子任务已完成
      */
     private Pair<Boolean, Boolean> isCurrentAllowedAndIsVerifySub(Long projectId,
-                                                                  List<StatusTransferSettingDTO> StatusTransferSettingList,
+                                                                  List<StatusTransferSettingDTO> statusTransferSettingList,
                                                                   IssueDTO issue) {
+        // 如果没有任何配置, 则直接返回<允许当前用户操作, 不限制子级状态>
+        if(CollectionUtils.isEmpty(statusTransferSettingList)) {
+            return new Pair<>(true, false);
+        }
+        // 如果只有一条配置, 且配置为子级状态限制, 说明不需要考虑用户校验
+        // 直接返回<允许当前用户操作, 配置的子级状态限制>
+        final StatusTransferSettingDTO firstStatusTransferSetting = statusTransferSettingList.get(0);
+        if(statusTransferSettingList.size() == 1 && StatusTransferType.OTHER.equals(firstStatusTransferSetting.getUserType())) {
+            return new Pair<>(true, firstStatusTransferSetting.getVerifySubissueCompleted());
+        }
         Long issueId = null;
         Long assigneeId = null;
         Long reporterId = null;
@@ -391,7 +404,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         boolean verifySubIssueCompleted = false;
         Set<Long> userIds = new HashSet<>();
         boolean dependOnIssueDetailsTypes = false;
-        for (StatusTransferSettingDTO statusTransferSetting : StatusTransferSettingList) {
+        for (StatusTransferSettingDTO statusTransferSetting : statusTransferSettingList) {
             String userType = statusTransferSetting.getUserType();
             Long userId = statusTransferSetting.getUserId();
             //自定义字段或依赖于issue详情的字段
@@ -442,14 +455,15 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
         queryUserIdsByRoleIds(projectId, userIds, roleIds);
         boolean isCurrentAllowed = true;
-        if (isIssueNull && dependOnIssueDetailsTypes) {
-            //处理拖动流转限制的情况
-            //issue为空，同时还要根据issue详情判断，为了防止限定范围变小，需要这里跳过校验，由/not_allowed_transfer接口判断
-            //isCurrentAllowed = true;
-        } else {
+        if (!isIssueNull || !dependOnIssueDetailsTypes) {
             Long currentUserId = DetailsHelper.getUserDetails().getUserId();
             isCurrentAllowed = userIds.contains(currentUserId);
         }
+//        else {
+//            处理拖动流转限制的情况
+//            issue为空，同时还要根据issue详情判断，为了防止限定范围变小，需要这里跳过校验，由/not_allowed_transfer接口判断
+//            isCurrentAllowed = true;
+//        }
         return Pair.of(isCurrentAllowed, verifySubIssueCompleted);
     }
 
