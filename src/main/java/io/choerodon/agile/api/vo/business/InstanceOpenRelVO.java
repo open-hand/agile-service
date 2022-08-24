@@ -18,6 +18,15 @@ public class InstanceOpenRelVO {
     @NotNull
     private Long projectId;
 
+    @Encrypt
+    @NotNull
+    @ApiModelProperty(value = "实例id")
+    private Long instanceId;
+
+    @ApiModelProperty(value = "实例类型")
+    @NotBlank
+    private String instanceType;
+
     @ApiModelProperty(value = "第三方实例id")
     private Long openInstanceId;
 
@@ -28,14 +37,8 @@ public class InstanceOpenRelVO {
     @NotBlank
     private String source;
 
-    @Encrypt
-    @NotNull
-    @ApiModelProperty(value = "实例id")
-    private Long instanceId;
-
-    @ApiModelProperty(value = "实例类型")
-    @NotBlank
-    private String instanceType;
+    @ApiModelProperty(value = "第三方属性, 暂时直接使用obj，为后续拓展准备")
+    private Object thirdPartyProperties;
 
     public Long getInstanceId() {
         return instanceId;
@@ -85,4 +88,11 @@ public class InstanceOpenRelVO {
         this.projectId = projectId;
     }
 
+    public Object getThirdPartyProperties() {
+        return thirdPartyProperties;
+    }
+
+    public void setThirdPartyProperties(Object thirdPartyProperties) {
+        this.thirdPartyProperties = thirdPartyProperties;
+    }
 }
