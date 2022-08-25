@@ -3778,7 +3778,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyTodoIssues(projectIds, userId, searchVO, activeSprintIds));
                 break;
             case WorkBenchSearchType.MY_BUG:
-                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyBugs(projectIds, userId, searchVO, activeSprintIds));
+                if (activeSprintIds.isEmpty()) {
+                    parentPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+                } else {
+                    parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyBugs(projectIds, userId, searchVO, activeSprintIds));
+                }
+                break;
+            case WorkBenchSearchType.MY_REPORTED_BUG:
+                if(activeSprintIds.isEmpty()) {
+                    parentPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+                } else {
+                    parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectReportedBug(projectIds, userId, searchVO, activeSprintIds));
+                }
                 break;
             case WorkBenchSearchType.MY_STAR_BEACON:
                 parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyStarBeacon(projectIds, userId, searchVO));
@@ -3788,9 +3799,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 break;
             case WorkBenchSearchType.MY_ASSIGNED:
                 parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectMyAssigned(projectIds, userId, searchVO, activeSprintIds));
-                break;
-            case WorkBenchSearchType.MY_REPORTED_BUG:
-                parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.selectReportedBug(projectIds, userId, searchVO, activeSprintIds));
                 break;
             default:
                 parentPage = PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
