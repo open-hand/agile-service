@@ -1,7 +1,6 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.ibatis.annotations.Param;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**

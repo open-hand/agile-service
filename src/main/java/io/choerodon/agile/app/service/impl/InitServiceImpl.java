@@ -15,7 +15,6 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.commons.lang3.BooleanUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

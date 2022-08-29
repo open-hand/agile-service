@@ -4,8 +4,6 @@ import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.util.Date;
-
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/5/24
