@@ -150,7 +150,7 @@ public class ExcelUtil {
         //1、创建工作簿
         SXSSFWorkbook workbook = new SXSSFWorkbook();
         //1.3、列标题样式
-        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT.getCode(), true);
+        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT, true);
         //1.4、强制换行
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
@@ -393,15 +393,18 @@ public class ExcelUtil {
      * @param fontSize 字体大小
      * @return 单元格样式
      */
-    protected static CellStyle createCellStyle(Workbook workbook, short fontSize, short aligment, Boolean bold) {
+    protected static CellStyle createCellStyle(Workbook workbook,
+                                               short fontSize,
+                                               HorizontalAlignment horizontalAlignment,
+                                               Boolean bold) {
         CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setAlignment(aligment);
+        cellStyle.setAlignment(horizontalAlignment);
         //垂直居中
-        cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         org.apache.poi.ss.usermodel.Font font = workbook.createFont();
-        if (bold) {
+        if (Boolean.TRUE.equals(bold)) {
             //加粗字体
-            font.setBoldweight(org.apache.poi.ss.usermodel.Font.BOLDWEIGHT_BOLD);
+            font.setBold(true);
         }
         font.setFontHeightInPoints(fontSize);
         cellStyle.setFont(font);
@@ -550,8 +553,8 @@ public class ExcelUtil {
         XSSFDataValidation validation = null;
         // 单元格样式
         CellStyle style = workbook.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         // 循环指定单元格下拉数据
         for (int i = startRow; i <= endRow; i++) {
             XSSFDataValidationConstraint dvConstraint = buildDataValidationConstraint(columnLetter, hiddenSheetName, i, dateSize, dvHelper);
