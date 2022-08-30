@@ -1,11 +1,12 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.infra.dto.StateMachineSchemeDTO;
-import io.choerodon.mybatis.common.BaseMapper;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import io.choerodon.agile.infra.dto.StateMachineSchemeDTO;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author peng.jiang@hand-china.com
@@ -39,8 +40,8 @@ public interface StateMachineSchemeMapper extends BaseMapper<StateMachineSchemeD
     /**
      * 查询出组织下所有方案
      *
-     * @param organizationId
-     * @return
+     * @param organizationId organizationId
+     * @return result
      */
     List<StateMachineSchemeDTO> queryByOrgId(@Param("organizationId") Long organizationId);
 
@@ -57,9 +58,9 @@ public interface StateMachineSchemeMapper extends BaseMapper<StateMachineSchemeD
     /**
      * 更新发布状态
      *
-     * @param organizationId
-     * @param schemeId
-     * @param deployStatus
+     * @param organizationId organizationId
+     * @param schemeId schemeId
+     * @param deployStatus deployStatus
      */
     void updateDeployStatus(@Param("organizationId") Long organizationId, @Param("schemeId") Long schemeId, @Param("deployStatus") String deployStatus);
 }

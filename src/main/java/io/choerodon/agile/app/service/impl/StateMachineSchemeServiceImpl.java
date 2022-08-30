@@ -1,8 +1,15 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.domain.Page;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
@@ -12,20 +19,17 @@ import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.enums.StateMachineSchemeDeployStatus;
 import io.choerodon.agile.infra.enums.StateMachineSchemeStatus;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
+import io.choerodon.agile.infra.utils.ConvertUtils;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -212,10 +216,10 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     /**
      * 处理默认配置到首位
      *
-     * @param organizationId
-     * @param defaultStateMachineId
-     * @param map
-     * @return
+     * @param organizationId organizationId
+     * @param defaultStateMachineId defaultStateMachineId
+     * @param map map
+     * @return result
      */
     private StateMachineSchemeConfigViewVO handleDefaultConfig(Long organizationId, Long defaultStateMachineId, Map<Long, List<IssueTypeDTO>> map) {
         StateMachineSchemeConfigViewVO firstVO = new StateMachineSchemeConfigViewVO();
@@ -230,9 +234,9 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     /**
      * 方案列表填充配置数据
      *
-     * @param schemeVOS
-     * @param issueTypeMap
-     * @param stateMachineVOMap
+     * @param schemeVOS schemeVOS
+     * @param issueTypeMap issueTypeMap
+     * @param stateMachineVOMap stateMachineVOMap
      */
     private void handleSchemeConfig(List<StateMachineSchemeVO> schemeVOS, Map<Long, IssueTypeDTO> issueTypeMap, Map<Long, StatusMachineVO> stateMachineVOMap) {
         schemeVOS.stream().map(StateMachineSchemeVO::getConfigVOS).filter(Objects::nonNull).forEach(machineSchemeVOS -> {
@@ -295,9 +299,9 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     /**
      * 初始化状态机方案
      *
-     * @param name
-     * @param schemeApplyType
-     * @param projectEvent
+     * @param name name
+     * @param schemeApplyType schemeApplyType
+     * @param projectEvent projectEvent
      */
     @Override
     public void initScheme(String name, String schemeApplyType, ProjectEvent projectEvent) {

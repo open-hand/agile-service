@@ -4,6 +4,15 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.CopyPageField;
@@ -16,14 +25,6 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author shinan.chen
@@ -136,7 +137,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     /**
      * 填充contextName
      *
-     * @param pageFieldVOS
+     * @param pageFieldVOS pageFieldVOS
      */
     private void fillContextName(List<PageFieldVO> pageFieldVOS) {
         LookupTypeWithValuesDTO typeWithValues = lookupValueMapper.queryLookupValueByCode(LookupType.CONTEXT);
@@ -154,10 +155,10 @@ public class PageFieldServiceImpl implements PageFieldService {
     /**
      * 若没有项目层配置则获取组织层配置
      *
-     * @param organizationId
-     * @param projectId
-     * @param pageCode
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param pageCode pageCode
+     * @return result
      */
     @Override
     public List<PageFieldDTO> queryPageField(Long organizationId, Long projectId, String pageCode, Long issueTypeId) {

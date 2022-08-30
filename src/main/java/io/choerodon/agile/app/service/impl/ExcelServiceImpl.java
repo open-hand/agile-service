@@ -1,16 +1,34 @@
 package io.choerodon.agile.app.service.impl;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.app.service.*;
@@ -27,24 +45,8 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import org.hzero.boot.file.FileClient;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -547,9 +549,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * @param sheet
+     * @param sheet sheet
      * @param columnNum 数据页总共有多少列数据
-     * @return
+     * @return result
      */
     protected Integer getRealRowCount(Sheet sheet, int columnNum) {
         Integer count = 0;
@@ -1670,8 +1672,8 @@ public class ExcelServiceImpl implements ExcelService {
     /**
      * 设置预估时间和耗费时间
      *
-     * @param workLogVOMap
-     * @param exportIssuesVO
+     * @param workLogVOMap workLogVOMap
+     * @param exportIssuesVO exportIssuesVO
      */
     private void setSpentWorkTimeAndAllEstimateTime(Map<Long, List<WorkLogVO>> workLogVOMap, ExportIssuesVO exportIssuesVO) {
         List<WorkLogVO> workLogVOList = workLogVOMap.get(exportIssuesVO.getIssueId());
@@ -1714,11 +1716,11 @@ public class ExcelServiceImpl implements ExcelService {
     /**
      * 上传文件到minio中
      *
-     * @param organizationId
-     * @param workbook
-     * @param fileName
-     * @param fileOperationHistoryDTO
-     * @param userId
+     * @param organizationId organizationId
+     * @param workbook workbook
+     * @param fileName fileName
+     * @param fileOperationHistoryDTO fileOperationHistoryDTO
+     * @param userId userId
      */
     @Override
     public void downloadWorkBook(Long organizationId, Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
@@ -1968,8 +1970,8 @@ public class ExcelServiceImpl implements ExcelService {
     /**
      * 处理根据界面筛选结果导出的字段
      *
-     * @param exportFieldCodes
-     * @return
+     * @param exportFieldCodes exportFieldCodes
+     * @return result
      */
     protected Map<String, String[]> handleExportFields(List<String> exportFieldCodes,
                                                        Long projectId,

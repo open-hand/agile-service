@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -17,6 +18,10 @@ public class InstanceOpenRelVO {
     @ApiModelProperty("项目id")
     @NotNull
     private Long projectId;
+
+    @ApiModelProperty("组织id")
+    @NotNull
+    private Long organizationId;
 
     @Encrypt
     @NotNull
@@ -44,55 +49,74 @@ public class InstanceOpenRelVO {
         return instanceId;
     }
 
-    public void setInstanceId(Long instanceId) {
+    public InstanceOpenRelVO setInstanceId(Long instanceId) {
         this.instanceId = instanceId;
+        return this;
     }
 
     public String getInstanceType() {
         return instanceType;
     }
 
-    public void setInstanceType(String instanceType) {
+    public InstanceOpenRelVO setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+        return this;
     }
 
     public Long getOpenInstanceId() {
         return openInstanceId;
     }
 
-    public void setOpenInstanceId(Long openInstanceId) {
+    public InstanceOpenRelVO setOpenInstanceId(Long openInstanceId) {
         this.openInstanceId = openInstanceId;
+        return this;
     }
 
     public String getOpenInstanceNum() {
         return openInstanceNum;
     }
 
-    public void setOpenInstanceNum(String openInstanceNum) {
+    public InstanceOpenRelVO setOpenInstanceNum(String openInstanceNum) {
         this.openInstanceNum = openInstanceNum;
+        return this;
     }
 
     public String getSource() {
         return source;
     }
 
-    public void setSource(String source) {
+    public InstanceOpenRelVO setSource(String source) {
         this.source = source;
+        return this;
     }
 
     public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public InstanceOpenRelVO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
+    }
+
+    /**
+     * @return 组织ID
+     */
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public InstanceOpenRelVO setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+        return this;
     }
 
     public Object getThirdPartyProperties() {
         return thirdPartyProperties;
     }
 
-    public void setThirdPartyProperties(Object thirdPartyProperties) {
+    public InstanceOpenRelVO setThirdPartyProperties(Object thirdPartyProperties) {
         this.thirdPartyProperties = thirdPartyProperties;
+        return this;
     }
 }

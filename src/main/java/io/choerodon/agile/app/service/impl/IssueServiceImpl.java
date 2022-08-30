@@ -16,6 +16,21 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+
 import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
@@ -54,23 +69,10 @@ import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 
 /**
  * 敏捷开发Issue
@@ -1121,14 +1123,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void handleData(Map<String, Object> reuslt,
+    public void handleData(Map<String, Object> result,
                            ProjectVO projectVO,
                            IssueDTO issueDTO,
                            ProjectVO targetProjectVO,
                            Long projectId,
                            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
-        Boolean isMove = (Boolean) reuslt.get("isMove");
-        JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
+        boolean isMove = Boolean.TRUE.equals(result.get("isMove"));
+        JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(result.get("jsonObj")));
         try {
             if (isMove) {
                 issueProjectMoveService.handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);

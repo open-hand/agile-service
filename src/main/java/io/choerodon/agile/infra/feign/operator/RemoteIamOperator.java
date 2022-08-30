@@ -4,14 +4,16 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.stereotype.Component;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.IamFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
+
 import org.hzero.core.util.ResponseUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * Copyright (c) 2022. Hand Enterprise Solution Company. All right reserved.
@@ -118,8 +120,8 @@ public class RemoteIamOperator {
     /**
      * 根据组织id查询所有项目
      *
-     * @param organizationId
-     * @return
+     * @param organizationId organizationId
+     * @return result
      */
     public List<ProjectVO> listProjectsByOrgId(Long organizationId) {
         return ResponseUtils.getResponse(iamFeignClient.listProjectsByOrgId(organizationId),
@@ -268,14 +270,14 @@ public class RemoteIamOperator {
 
     /*
      * 分页查询组织下的项目
-     * @param organizationId
-     * @param size
-     * @param code
-     * @param name
-     * @param page
-     * @param enabled
-     * @param params
-     * @return
+     * @param organizationId organizationId
+     * @param size size
+     * @param code code
+     * @param name name
+     * @param page page
+     * @param enabled enabled
+     * @param params params
+     * @return result
      */
     public Page<ProjectVO> pagedQueryProjects(Long organizationId, int page, int size, String name, String code, Boolean enabled, Boolean withAdditionInfo, String params) {
         return ResponseUtils.getResponse(iamFeignClient.pagedQueryProjects(organizationId, page, size, name, code, enabled, withAdditionInfo, params),

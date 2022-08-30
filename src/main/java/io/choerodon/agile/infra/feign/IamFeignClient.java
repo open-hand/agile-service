@@ -1,19 +1,20 @@
 package io.choerodon.agile.infra.feign;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
+import javax.validation.Valid;
+
+import io.swagger.annotations.ApiParam;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.agile.api.vo.AgileUserVO;
 import io.choerodon.agile.api.vo.ProjectSearchVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
 import io.choerodon.agile.infra.feign.fallback.BaseFallbackFactory;
-import io.swagger.annotations.ApiParam;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * @author dinghuang123@gmail.com
@@ -106,15 +107,15 @@ public interface IamFeignClient {
     /**
      * 根据组织id查询所有项目
      *
-     * @param organizationId
-     * @return
+     * @param organizationId organizationId
+     * @return result
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all")
     ResponseEntity<String> listProjectsByOrgId(@PathVariable("organization_id") Long organizationId);
 
     /**
-     * @param organizationId
-     * @return
+     * @param organizationId organizationId
+     * @return result
      */
     @PostMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all_with_category")
     ResponseEntity<String> listWithCategoryByOrganizationIds(@PathVariable("organization_id") Long organizationId,
@@ -126,8 +127,8 @@ public interface IamFeignClient {
     /**
      * 根据组织id获取时区工作日历
      *
-     * @param organizationId
-     * @return
+     * @param organizationId organizationId
+     * @return result
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/time_zone_work_calendars/query_by_org_id")
     ResponseEntity<String> queryTimeZoneDetailByOrganizationId(@ApiParam(value = "组织id", required = true)
@@ -136,9 +137,9 @@ public interface IamFeignClient {
     /**
      * 根据年份查询工作日历假期(包含查询年份和下一年份数据)
      *
-     * @param organizationId
-     * @param year
-     * @return
+     * @param organizationId organizationId
+     * @param year year
+     * @return result
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/work_calendar_holiday_refs")
     ResponseEntity<String> queryWorkCalendarHolidayRelByYear(@ApiParam(value = "项目id", required = true)
@@ -149,9 +150,9 @@ public interface IamFeignClient {
     /**
      * 根据年份查询工作日历，包含当年、去年、明年
      *
-     * @param organizationId
-     * @param year
-     * @return
+     * @param organizationId organizationId
+     * @param year year
+     * @return result
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/work_calendar_holiday_refs/year_include_last_and_next")
     ResponseEntity<String> queryByYearIncludeLastAndNext(@ApiParam(value = "项目id", required = true)
@@ -239,14 +240,14 @@ public interface IamFeignClient {
 
     /*
      * 分页查询组织下的项目
-     * @param organizationId
-     * @param size
-     * @param code
-     * @param name
-     * @param page
-     * @param enabled
-     * @param params
-     * @return
+     * @param organizationId organizationId
+     * @param size size
+     * @param code code
+     * @param name name
+     * @param page page
+     * @param enabled enabled
+     * @param params params
+     * @return result
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects")
     ResponseEntity<String> pagedQueryProjects(@PathVariable(name = "organization_id") Long organizationId,
