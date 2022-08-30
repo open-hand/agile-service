@@ -1,9 +1,9 @@
 package io.choerodon.agile.infra.utils;
 
+import java.lang.reflect.Field;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
 
 /**
  * @author shinan.chen
@@ -17,9 +17,9 @@ public class EnumUtil {
     }
     /**
      * 枚举类通用校验
-     * @param cls
-     * @param statusType
-     * @return
+     * @param cls cls
+     * @param statusType statusType
+     * @return result
      */
     public static Boolean contain(Class cls,String statusType){
         Field[] fields = cls.getDeclaredFields();

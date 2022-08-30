@@ -1,34 +1,8 @@
 package io.choerodon.agile.app.assembler;
 
-import com.google.common.collect.Lists;
-
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.app.service.IssueTypeService;
-import io.choerodon.agile.app.service.LookupValueService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.mapper.IssueStatusMapper;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.dto.*;
-
-import io.choerodon.agile.infra.utils.DateUtil;
-import io.choerodon.agile.infra.utils.ListUtil;
-import io.choerodon.core.exception.CommonException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.hzero.core.base.BaseConstants;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -39,9 +13,38 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.app.service.IssueTypeService;
+import io.choerodon.agile.app.service.LookupValueService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.enums.StatusType;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.DateUtil;
+import io.choerodon.agile.infra.utils.ListUtil;
+import io.choerodon.core.exception.CommonException;
+
+import org.hzero.core.base.BaseConstants;
 
 /**
  * @author dinghuang123@gmail.com
@@ -280,8 +283,8 @@ public class IssueAssembler extends AbstractAssembler {
     /**
      * 设置预估时间和耗费时间
      *
-     * @param workLogVOMap
-     * @param issueListFieldKVVO
+     * @param workLogVOMap workLogVOMap
+     * @param issueListFieldKVVO issueListFieldKVVO
      */
     private void setSpentWorkTimeAndAllEstimateTime(Map<Long, List<WorkLogVO>> workLogVOMap, IssueListFieldKVVO issueListFieldKVVO) {
         List<WorkLogVO> workLogVOList = workLogVOMap.get(issueListFieldKVVO.getIssueId());

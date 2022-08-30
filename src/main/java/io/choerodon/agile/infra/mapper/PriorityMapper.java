@@ -1,13 +1,14 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.infra.dto.PriorityDTO;
-import io.choerodon.mybatis.common.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
+
+import io.choerodon.agile.infra.dto.PriorityDTO;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author cong.cheng
@@ -50,7 +51,7 @@ public interface PriorityMapper extends BaseMapper<PriorityDTO> {
     /**
      * 更新最小的id为默认优先级
      *
-     * @param organizationId
+     * @param organizationId organizationId
      */
     void updateMinSeqAsDefault(@Param("organizationId") Long organizationId);
 

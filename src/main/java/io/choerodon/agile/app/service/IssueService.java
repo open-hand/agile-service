@@ -8,7 +8,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.IssueNumDTO;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import io.choerodon.agile.infra.dto.TestCaseDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -83,20 +86,20 @@ public interface IssueService {
     /**
      * 更新issue的状态
      *
-     * @param projectId
-     * @param issueId
-     * @param transformId
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param transformId transformId
+     * @return result
      */
     IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType);
 
     /**
      * 更新issue的状态
      *
-     * @param projectId
-     * @param issueId
-     * @param transformId
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param transformId transformId
+     * @return result
      */
     IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
                               String applyType, IssueDTO triggerIssue, boolean autoTranferFlag);
@@ -104,20 +107,20 @@ public interface IssueService {
     /**
      * 执行状态机自定义流转
      *
-     * @param projectId
-     * @param issueId
-     * @param applyType
-     * @param influenceIssueIds
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param applyType applyType
+     * @param influenceIssueIds influenceIssueIds
+     * @return result
      */
     IssueVO doStateMachineCustomFlow(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds, TriggerCarrierVO triggerCarrierVO);
 
     /**
      * 更新issue自己的字段
      *
-     * @param issueUpdateVO
-     * @param fieldList
-     * @param projectId
+     * @param issueUpdateVO issueUpdateVO
+     * @param fieldList fieldList
+     * @param projectId projectId
      */
     void handleUpdateIssue(IssueUpdateVO issueUpdateVO, List<String> fieldList, Long projectId, Long issueId);
 
@@ -168,8 +171,8 @@ public interface IssueService {
      *
      * @param issueConvertDTO             issueConvertDTO
      * @param issueUpdateTypeVO issueUpdateTypeVO
-     * @param organizationId
-     * @param projectId
+     * @param organizationId organizationId
+     * @param projectId projectId
      * @return IssueVO
      */
     IssueVO updateIssueTypeCode(IssueConvertDTO issueConvertDTO, IssueUpdateTypeVO issueUpdateTypeVO, Long organizationId, Long projectId);
@@ -210,10 +213,10 @@ public interface IssueService {
     /**
      * 子任务转换为任务
      *
-     * @param issueConvertDTO
-     * @param issueTransformTask
-     * @param organizationId
-     * @return
+     * @param issueConvertDTO issueConvertDTO
+     * @param issueTransformTask issueTransformTask
+     * @param organizationId organizationId
+     * @return result
      */
     IssueVO transformedTask(IssueConvertDTO issueConvertDTO, IssueTransformTask issueTransformTask, Long organizationId);
 
@@ -310,37 +313,37 @@ public interface IssueService {
     /**
      * 分页查询项目下的项目成员和分配过问题的用户
      *
-     * @param pageRequest
-     * @param projectId
-     * @param param
-     * @return
+     * @param pageRequest pageRequest
+     * @param projectId projectId
+     * @param param param
+     * @return result
      */
     Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds);
 
     /**
      * 分页查询项目下的项目成员和分配过问题的报告人
      *
-     * @param pageRequest
-     * @param projectId
-     * @param param
-     * @return
+     * @param pageRequest pageRequest
+     * @param projectId projectId
+     * @param param param
+     * @return result
      */
     Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds);
 
     /**
      * 删除自己的创建的Issue
-     * @param projectId
-     * @param issueId
+     * @param projectId projectId
+     * @param issueId issueId
      */
     void deleteSelfIssue(Long projectId, Long issueId);
 
     /**
      * 个人工作台查询代办事项
-     * @param organizationId
-     * @param projectId
-     * @param pageRequest
-     * @param workBenchIssueSearchVO
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param pageRequest pageRequest
+     * @param workBenchIssueSearchVO workBenchIssueSearchVO
+     * @return result
      */
     Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId,
                                                           Long projectId,
@@ -350,11 +353,11 @@ public interface IssueService {
     /**
      * 根据项目id和问题类型分页查询可以选择的父问题
      *
-     * @param pageRequest
-     * @param projectId
-     * @param issueType
-     * @param param
-     * @return
+     * @param pageRequest pageRequest
+     * @param projectId projectId
+     * @param issueType issueType
+     * @param param param
+     * @return result
      */
     Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest, Long projectId, String issueType, String param);
 
@@ -366,8 +369,8 @@ public interface IssueService {
 
     /**
      * 根据filter id获得sql
-     * @param quickFilterIds
-     * @return
+     * @param quickFilterIds quickFilterIds
+     * @return result
      */
     String getQuickFilter(List<Long> quickFilterIds);
 
@@ -380,10 +383,10 @@ public interface IssueService {
     /**
      * 分页查询我的报告
      *
-     * @param organizationId
-     * @param projectId
-     * @param pageRequest
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param pageRequest pageRequest
+     * @return result
      */
     Page<IssueListFieldKVVO> pagedQueryMyReported(Long organizationId,
                                                   Long projectId,
@@ -393,30 +396,30 @@ public interface IssueService {
     /**
      * 工作台查询我经手的
      *
-     * @param organizationId
-     * @param projectId
-     * @param pageRequest
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param pageRequest pageRequest
+     * @return result
      */
     Page<IssueListFieldKVVO> pagedQueryMyAssigned(Long organizationId, Long projectId, PageRequest pageRequest, WorkBenchIssueSearchVO workBenchIssueSearchVO);
 
     /**
      * 处理更新tag
      *
-     * @param tags
-     * @param projectId
-     * @param issueId
+     * @param tags tags
+     * @param projectId projectId
+     * @param issueId issueId
      */
     void handleUpdateTagIssueRel(List<TagVO> tags, Long projectId, Long issueId);
 
     /**
      * 查询issue在issueType下必填字段为空的字段
      *
-     * @param projectId
-     * @param organizationId
-     * @param issueId
-     * @param issueTypeId
-     * @return
+     * @param projectId projectId
+     * @param organizationId organizationId
+     * @param issueId issueId
+     * @param issueTypeId issueTypeId
+     * @return result
      */
     List<PageFieldViewVO> listRequiredFieldByIssueType(Long projectId,
                                                        Long organizationId,
@@ -493,7 +496,7 @@ public interface IssueService {
 
     void handleUpdateParticipantWithoutRuleNotice(List<Long> participantIds, Long projectId, Long issueId);
 
-    void handleData(Map<String, Object> reuslt,
+    void handleData(Map<String, Object> result,
                     ProjectVO projectVO,
                     IssueDTO issueDTO,
                     ProjectVO targetProjectVO,

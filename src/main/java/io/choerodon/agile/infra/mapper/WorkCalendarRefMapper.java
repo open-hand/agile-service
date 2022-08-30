@@ -1,11 +1,12 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.infra.dto.WorkCalendarRefDTO;
-import io.choerodon.mybatis.common.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.Date;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import io.choerodon.agile.infra.dto.WorkCalendarRefDTO;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author dinghuang123@gmail.com
@@ -44,9 +45,9 @@ public interface WorkCalendarRefMapper extends BaseMapper<WorkCalendarRefDTO> {
     /**
      * 根据项目id查工作日历设置
      *
-     * @param projectId
-     * @param year
-     * @return
+     * @param projectId projectId
+     * @param year year
+     * @return result
      */
     List<WorkCalendarRefDTO> listByProjectId(@Param("projectId") Long projectId, @Param("year") Integer year);
 

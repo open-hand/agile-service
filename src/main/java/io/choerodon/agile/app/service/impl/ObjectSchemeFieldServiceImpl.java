@@ -4,27 +4,28 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
-import org.springframework.util.ObjectUtils;
+import io.choerodon.core.oauth.DetailsHelper;
+
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 
 /**
@@ -1945,7 +1946,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     case FieldCode.PROGRAM_VERSION:
                     case FieldCode.PRODUCT:
                         if (agilePluginService != null) {
-                            agilePluginService.setBussinessDefaultValueObjs(pageFieldViews, projectId, organizationId);
+                            agilePluginService.setBusinessDefaultValueObjs(pageFieldViews, projectId, organizationId);
                         }
                         break;
                     case FieldCode.BACKLOG_TYPE:

@@ -1,9 +1,9 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.business.RuleLogRelVO;
-
 import java.util.List;
 import java.util.Set;
+
+import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 
 /**
  * @author superlee
@@ -14,8 +14,8 @@ public interface AgileTriggerService {
     /**
      * 查询ruleLogRel
      *
-     * @param ruleLogRelVO
-     * @return
+     * @param ruleLogRelVO ruleLogRelVO
+     * @return result
      */
     List<RuleLogRelVO> queryRuleLogRelList(RuleLogRelVO ruleLogRelVO);
 
@@ -24,9 +24,9 @@ public interface AgileTriggerService {
     /**
      * 修改issue相关的触发器日志的projectId
      *
-     * @param projectId
-     * @param targetProjectId
-     * @param issueId
+     * @param projectId projectId
+     * @param targetProjectId targetProjectId
+     * @param issueId issueId
      */
     void updateRuleLogProjectId(Long projectId, Long targetProjectId, Long issueId);
 

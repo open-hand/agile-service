@@ -10,11 +10,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Ordering;
-import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
-import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarRefDTO;
-import io.choerodon.agile.infra.dto.WorkCalendarHolidayRefDTO;
-import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -22,6 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+
+import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
+import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarRefDTO;
+import io.choerodon.agile.infra.dto.WorkCalendarHolidayRefDTO;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/31.
@@ -467,9 +468,9 @@ public class DateUtil {
 
     /**
      * 计算两个日期的日期差
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param startDate startDate
+     * @param endDate endDate
+     * @return result
      */
     public static int differentDays(Date startDate, Date endDate) {
         if (startDate.after(endDate)) {

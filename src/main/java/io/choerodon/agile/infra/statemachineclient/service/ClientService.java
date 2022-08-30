@@ -1,10 +1,10 @@
 package io.choerodon.agile.infra.statemachineclient.service;
 
+import java.util.List;
+
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.TransformInfo;
-
-import java.util.List;
 
 /**
  * 状态机客户端回调service
@@ -28,29 +28,29 @@ public interface ClientService {
     /**
      * 执行条件
      *
-     * @param targetStatusId
-     * @param conditionStrategy
-     * @param inputDTO
-     * @return
+     * @param targetStatusId targetStatusId
+     * @param conditionStrategy conditionStrategy
+     * @param inputDTO inputDTO
+     * @return result
      */
     ExecuteResult configExecuteCondition(Long targetStatusId, String conditionStrategy, InputDTO inputDTO);
 
     /**
      * 执行验证
      *
-     * @param targetStatusId
-     * @param inputDTO
-     * @return
+     * @param targetStatusId targetStatusId
+     * @param inputDTO inputDTO
+     * @return result
      */
     ExecuteResult configExecuteValidator(Long targetStatusId, InputDTO inputDTO);
 
     /**
      * 执行后置动作，单独出来，才能生效回归
      *
-     * @param targetStatusId
-     * @param transformType
-     * @param inputDTO
-     * @return
+     * @param targetStatusId targetStatusId
+     * @param transformType transformType
+     * @param inputDTO inputDTO
+     * @return result
      */
     ExecuteResult configExecutePostAction(Long targetStatusId, String transformType, InputDTO inputDTO);
 }

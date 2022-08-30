@@ -1,10 +1,15 @@
 package io.choerodon.agile.infra.utils;
-import io.choerodon.agile.api.vo.business.ExportIssuesVO;
-import io.choerodon.agile.infra.dto.ExcelCursorDTO;
-import io.choerodon.agile.infra.enums.ExcelImportTemplate;
-import io.choerodon.agile.infra.enums.FieldCode;
-import io.choerodon.agile.infra.enums.IssueConstant;
-import io.choerodon.core.exception.CommonException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import javax.servlet.http.HttpServletResponse;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
@@ -23,15 +28,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
+import io.choerodon.agile.infra.dto.ExcelCursorDTO;
+import io.choerodon.agile.infra.enums.ExcelImportTemplate;
+import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.IssueConstant;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author dinghuang123@gmail.com
@@ -522,7 +524,7 @@ public class ExcelUtil {
      * @param endCol           结束列
      * @param hiddenSheetName  隐藏的sheet名
      * @param hiddenSheetIndex 隐藏的sheet索引
-     * @return
+     * @return result
      * @throws Exception
      */
     public static XSSFWorkbook dropDownList2007(Workbook wb, Sheet realSheet, List<String> datas, int startRow, int endRow,
@@ -570,12 +572,12 @@ public class ExcelUtil {
     /**
      * 公式讲解参考
      * @see <a href="https://zhuanlan.zhihu.com/p/38156200">参考</a>
-     * @param columnLetter
-     * @param hiddenSheetName
-     * @param rowNum
-     * @param dateSize
-     * @param dvHelper
-     * @return
+     * @param columnLetter columnLetter
+     * @param hiddenSheetName hiddenSheetName
+     * @param rowNum rowNum
+     * @param dateSize dateSize
+     * @param dvHelper dvHelper
+     * @return result
      */
     private static XSSFDataValidationConstraint buildDataValidationConstraint(String columnLetter,
                                                                               String hiddenSheetName,

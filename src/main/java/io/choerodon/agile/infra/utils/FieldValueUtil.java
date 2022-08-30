@@ -7,6 +7,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
@@ -20,8 +23,6 @@ import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author shinan.chen
@@ -43,8 +44,8 @@ public class FieldValueUtil {
     /**
      * 获取人员信息
      *
-     * @param userIds
-     * @return
+     * @param userIds userIds
+     * @return result
      */
     public static Map<Long, UserDTO> handleUserMap(List<Long> userIds) {
         Map<Long, UserDTO> map = new HashMap<>(userIds.size());
@@ -58,9 +59,9 @@ public class FieldValueUtil {
     /**
      * 处理FieldValueDTO为value
      *
-     * @param view
-     * @param fieldType
-     * @param values
+     * @param view view
+     * @param fieldType fieldType
+     * @param values values
      */
     public static void handleDTO2Value(PageFieldViewVO view, String fieldType, List<FieldValueDTO> values, Map<Long, UserDTO> userMap, Boolean isJustStr) {
         Object valueStr = null;
@@ -172,7 +173,7 @@ public class FieldValueUtil {
     /**
      * 处理默认值
      *
-     * @param pageFieldViews
+     * @param pageFieldViews pageFieldViews
      */
     public static void handleDefaultValue(List<PageFieldViewVO> pageFieldViews) {
         List<Long> userIds = getUserIds(pageFieldViews);
@@ -260,7 +261,7 @@ public class FieldValueUtil {
     /**
      * 处理默认值多选id
      *
-     * @param view
+     * @param view view
      */
     public static void handleDefaultValueIds(PageFieldViewVO view) {
         Object defaultValue = view.getDefaultValue();
@@ -279,7 +280,7 @@ public class FieldValueUtil {
     /**
      * 处理默认值
      *
-     * @param fieldDetail
+     * @param fieldDetail fieldDetail
      */
     public static void handleDefaultValue(ObjectSchemeFieldDetailVO fieldDetail) {
         RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class);
@@ -330,8 +331,8 @@ public class FieldValueUtil {
     /**
      * 处理valueStr为FieldValue
      *
-     * @param fieldValues
-     * @param create
+     * @param fieldValues fieldValues
+     * @param create create
      */
     public static void handleDefaultValue2DTO(List<FieldValueDTO> fieldValues, PageFieldDTO create) {
         String defaultValue = create.getDefaultValue();
@@ -408,9 +409,9 @@ public class FieldValueUtil {
     /**
      * 处理value为FieldValue
      *
-     * @param fieldValues
-     * @param fieldType
-     * @param value
+     * @param fieldValues fieldValues
+     * @param fieldType fieldType
+     * @param value value
      */
     public static void handleValue2DTO(List<FieldValueDTO> fieldValues, String fieldType, Object value) {
         FieldValueDTO fieldValue = new FieldValueDTO();
@@ -527,14 +528,14 @@ public class FieldValueUtil {
     /**
      * 处理自定义字段日志
      *
-     * @param organizationId
-     * @param projectId
-     * @param instanceId
-     * @param fieldId
-     * @param fieldType
-     * @param schemeCode
-     * @param oldFieldValues
-     * @param newFieldValues
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param instanceId instanceId
+     * @param fieldId fieldId
+     * @param fieldType fieldType
+     * @param schemeCode schemeCode
+     * @param oldFieldValues oldFieldValues
+     * @param newFieldValues newFieldValues
      */
     public static void handleDataLog(Long organizationId, Long projectId, Long instanceId, Long fieldId, String fieldType, String schemeCode, List<FieldValueDTO> oldFieldValues, List<FieldValueDTO> newFieldValues) {
         handleAgileDataLog(organizationId, projectId, instanceId, fieldId, fieldType, oldFieldValues, newFieldValues, schemeCode);
@@ -543,13 +544,13 @@ public class FieldValueUtil {
     /**
      * 处理敏捷问题自定义字段日志
      *
-     * @param organizationId
-     * @param projectId
-     * @param instanceId
-     * @param fieldId
-     * @param fieldType
-     * @param oldFieldValues
-     * @param newFieldValues
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param instanceId instanceId
+     * @param fieldId fieldId
+     * @param fieldType fieldType
+     * @param oldFieldValues oldFieldValues
+     * @param newFieldValues newFieldValues
      */
     private static void handleAgileDataLog(Long organizationId,
                                            Long projectId,

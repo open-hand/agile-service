@@ -5,6 +5,14 @@ import java.util.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.IssueSubCreateVO;
 import io.choerodon.agile.api.vo.IssueSubVO;
@@ -45,13 +53,6 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author shinan.chen
@@ -149,9 +150,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     /**
      * 创建issue，用于敏捷和测试
      *
-     * @param issueCreateVO
-     * @param applyType
-     * @return
+     * @param issueCreateVO issueCreateVO
+     * @param applyType applyType
+     * @return result
      */
     @Override
     public IssueVO createIssue(IssueCreateVO issueCreateVO, String applyType) {
@@ -260,8 +261,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     /**
      * 创建subIssue，用于敏捷
      *
-     * @param issueSubCreateVO
-     * @return
+     * @param issueSubCreateVO issueSubCreateVO
+     * @return result
      */
     @Override
     public IssueSubVO createSubIssue(IssueSubCreateVO issueSubCreateVO) {
@@ -366,13 +367,13 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     /**
      * 专用于demo的状态转换，demo创建数据不走状态机
      *
-     * @param projectId
-     * @param issueId
-     * @param transformId
-     * @param objectVersionNumber
-     * @param applyType
-     * @param inputDTO
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param transformId transformId
+     * @param objectVersionNumber objectVersionNumber
+     * @param applyType applyType
+     * @param inputDTO inputDTO
+     * @return result
      */
     @Override
     public ExecuteResult executeTransformForDemo(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO) {

@@ -3,6 +3,13 @@ package io.choerodon.agile.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.service.*;
@@ -167,8 +174,8 @@ public class InitServiceImpl implements InitService {
     /**
      * 创建状态机节点和转换
      *
-     * @param organizationId
-     * @param stateMachineId
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
      */
     @Override
     public void createStateMachineDetail(Long organizationId, Long stateMachineId, String applyType) {
