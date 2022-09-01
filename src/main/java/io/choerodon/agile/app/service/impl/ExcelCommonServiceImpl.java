@@ -1,8 +1,30 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
@@ -13,36 +35,15 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hzero.boot.file.FileClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import org.hzero.boot.file.FileClient;
 
 /**
  * @author huaxin.deng@hand-china.com
@@ -107,7 +108,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private FileOperationHistoryMapper fileOperationHistoryMapper;
     @Autowired
@@ -384,7 +385,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (col == -1) {
             return null;
         }
-        List<ProjectStatusVO> projectStatusVOList = statusMapper.listStatusByProjectId(projectId, organizationId,null);
+        List<ProjectStatusVO> projectStatusVOList = statusMapper.listStatusByProjectId(projectId, organizationId, null);
         List<String> values = new ArrayList<>();
         projectStatusVOList.forEach(i -> values.add(i.getName()));
         return new PredefinedDTO(values,
@@ -404,7 +405,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (col == -1) {
             return null;
         }
-        List<ProductVO> productVOList  = new ArrayList<>();
+        List<ProductVO> productVOList = new ArrayList<>();
         if (agilePluginService != null) {
             productVOList = agilePluginService.listProductByProjectId(organizationId, projectId);
         }
@@ -467,8 +468,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> customFieldCodes = new ArrayList<>();
         List<String> fieldTypes = Arrays.asList(FieldType.MULTIPLE, FieldType.SINGLE, FieldType.CHECKBOX, FieldType.RADIO);
         List<String> userNames =
-                Optional.ofNullable(baseFeignClient.listUsersByProjectId(projectId, 1, 0, null)
-                        .getBody()).orElse(new Page<>())
+                Optional.ofNullable(remoteIamOperator.listUsersByProjectId(projectId, 1, 0, null)).orElse(new Page<>())
                         .getContent()
                         .stream()
                         .map(UserDTO::getRealName)
@@ -509,7 +509,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void isCustomFieldsIllegal(List<String> customFields, List<String> customFieldCodes) {
         customFields.forEach(c -> {
             if (!customFieldCodes.contains(c)) {
-                throw new CommonException("error.illegal.custom.field.code."+ c);
+                throw new CommonException("error.illegal.custom.field.code." + c);
             }
         });
     }
@@ -538,8 +538,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     @Override
     public Map<String, Long> getManagers(Long projectId) {
         Map<String, Long> managerMap = new HashMap<>();
-        ResponseEntity<Page<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0, null);
-        List<UserDTO> users = Optional.ofNullable(response.getBody()).orElse(new Page<>()).getContent();
+        Page<UserDTO> response = remoteIamOperator.listUsersByProjectId(projectId, 1, 0, null);
+        List<UserDTO> users = Optional.ofNullable(response).orElse(new Page<>()).getContent();
         users.forEach(u -> {
             if (Boolean.TRUE.equals(u.getEnabled())) {
                 String realName = u.getRealName();
@@ -644,7 +644,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetails =
                 objectSchemeFieldService.queryCustomFieldList(projectId, issueTypeList);
         List<UserDTO> users =
-                baseFeignClient.listUsersByProjectId(projectId, 1, 0, null).getBody();
+                remoteIamOperator.listUsersByProjectId(projectId, 1, 0, null);
         List<String> userNames = new ArrayList<>();
         Map<String, Long> userMap = new HashMap<>();
         users.forEach(u -> {
@@ -655,7 +655,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
         objectSchemeFieldDetails.forEach(o -> fieldMap.put(o.getName(), o));
         StringBuilder status = new StringBuilder("error_custom_field_header_");
-        List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple","multiMember");
+        List<String> multiValueFieldType = Arrays.asList("checkbox", "multiple", "multiMember");
         List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
         List<String> dateTypes = Arrays.asList("date", "datetime", "time");
         for (ExcelColumnVO excelColumn : customFields) {
@@ -808,7 +808,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                 int colNum,
                                 Sheet sheet,
                                 Map<Integer, ExcelColumnVO> headerMap) {
-        XSSFWorkbook workbook = (XSSFWorkbook)sheet.getWorkbook();
+        XSSFWorkbook workbook = (XSSFWorkbook) sheet.getWorkbook();
         XSSFCellStyle ztStyle = workbook.createCellStyle();
         Font ztFont = workbook.createFont();
         ztFont.setColor(Font.COLOR_RED);
@@ -828,8 +828,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     CellStyle cellStyle = workbook.createCellStyle();
                     cellStyle.cloneStyleFrom(originCell.getCellStyle());
                     cell.setCellStyle(cellStyle);
-                    if (!errorCol.contains(i) && excelColumnVO.isDateType()){
-                        if (originCell.getCellTypeEnum().equals(CellType.NUMERIC)){
+                    if (!errorCol.contains(i) && excelColumnVO.isDateType()) {
+                        if (originCell.getCellTypeEnum().equals(CellType.NUMERIC)) {
                             cell.setCellValue(originCell.getDateCellValue());
                         } else {
                             cell.setCellValue(originCell.getStringCellValue());
@@ -1127,15 +1127,15 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     /**
+     * @param cell cell
+     * @param rowNum rowNum
+     * @param col col
+     * @param errorRowColMap errorRowColMap
+     * @param format format
+     * @param formatTimeOnly formatTimeOnly
+     * @param formatYearOnly formatYearOnly
+     * @return result
      * @see <a href="https://stackoverflow.com/questions/15710888/reading-time-values-from-spreadsheet-using-poi-api"></a>
-     * @param cell
-     * @param rowNum
-     * @param col
-     * @param errorRowColMap
-     * @param format
-     * @param formatTimeOnly
-     * @param formatYearOnly
-     * @return
      */
     private String parseDateToString(Cell cell,
                                      int rowNum,
@@ -1185,7 +1185,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     @Override
-    public void handlerRequireFiled(ExcelColumnVO excelColumn, Map<Long, List<String>> requireFieldMap, IssueCreateVO issueCreateVO, Long projectId){
+    public void handlerRequireFiled(ExcelColumnVO excelColumn, Map<Long, List<String>> requireFieldMap, IssueCreateVO issueCreateVO, Long projectId) {
         if ("issueType".equals(excelColumn.getFieldCode()) && !ObjectUtils.isEmpty(issueCreateVO.getIssueTypeId())) {
             List<String> list = requireFieldMap.get(issueCreateVO.getIssueTypeId());
             if (CollectionUtils.isEmpty(list)) {
@@ -1341,16 +1341,16 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     private void validateAndSetIssueType(Row row,
-                                           Integer col,
-                                           ExcelColumnVO excelColumn,
-                                           Map<Integer, List<Integer>> errorRowColMap,
-                                           IssueCreateVO issueCreateVO) {
+                                         Integer col,
+                                         ExcelColumnVO excelColumn,
+                                         Map<Integer, List<Integer>> errorRowColMap,
+                                         IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
         Integer rowNum = row.getRowNum();
         String value = cell.toString();
         Map<String, IssueTypeVO> issueTypeMap = excelColumn.getIssueTypeMap();
         List<String> values = excelColumn.getPredefinedValues();
-        if (!values.contains(value)){
+        if (!values.contains(value)) {
             cell.setCellValue(buildWithErrorMsg(value, IssueConstant.ISSUE_TYPE_CN + "错误"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
@@ -1594,7 +1594,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     private void resetEpicSummary(Map<Integer, ExcelColumnVO> headerMap, String value, Row row) {
-        for (Map.Entry<Integer, ExcelColumnVO> entry: headerMap.entrySet())  {
+        for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
             ExcelColumnVO excelColumn = entry.getValue();
             String fieldCode = excelColumn.getFieldCode();
             if (FieldCode.SUMMARY.equals(fieldCode)) {
@@ -1611,7 +1611,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                        IssueCreateVO issueCreateVO,
                                        String issueTypeCode,
                                        String issueType) {
-        if(IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode) && !SUB_BUG_CN.equals(issueType)) {
+        if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode) && !SUB_BUG_CN.equals(issueType)) {
             Cell cell = row.getCell(col);
             if (!isCellEmpty(cell)) {
                 int rowNum = row.getRowNum();
@@ -1644,7 +1644,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                     IssueVO parentIssue,
                                     String issueType) {
 
-        if(IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
+        if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
             if (SUB_BUG_CN.equals(issueType) && parentIssue != null) {
                 issueCreateVO.setEpicId(parentIssue.getEpicId());
             } else {
@@ -1674,11 +1674,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         int rowNum = row.getRowNum();
         String value = "";
         if (isCellEmpty(cell)) {
-            row.createCell(col).setCellValue(buildWithErrorMsg(value,  "概要不能为空"));
+            row.createCell(col).setCellValue(buildWithErrorMsg(value, "概要不能为空"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
             value = cell.toString();
-            if (value.length() > 44) {
+            if (value.length() > IssueConstant.SUMMARY_LENGTH) {
                 cell.setCellValue(buildWithErrorMsg(value, "概要过长"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
@@ -1696,7 +1696,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                            String issueTypeCode) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if(isCellEmpty(cell)) {
+        if (isCellEmpty(cell)) {
             cell = row.createCell(col);
         }
         String value = cell.toString();
@@ -1720,7 +1720,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         Cell cell = row.getCell(col);
         if (!isCellEmpty(cell)) {
             String value = cell.toString();
-            issueCreateVO.setDescription("<p>"+ value + "</p>");
+            issueCreateVO.setDescription("<p>" + value + "</p>");
         }
     }
 
@@ -1771,7 +1771,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (sprintId != null && !Objects.equals(0L, sprintId)) {
                 issueCreateVO.setSprintId(sprintId);
             }
-        } else if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)){
+        } else if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
             Cell cell = row.getCell(col);
             int rowNum = row.getRowNum();
             if (!isCellEmpty(cell)) {
@@ -1926,7 +1926,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                             break;
                         } else {
                             Boolean isSubTask = IssueTypeCode.isSubTask(issueVO.getTypeCode());
-                            if (isSubTask){
+                            if (isSubTask) {
                                 break;
                             }
                             relatedIssueIds.add(issueVO.getIssueId());

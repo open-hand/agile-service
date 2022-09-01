@@ -52,6 +52,16 @@
         group by issue_id
     </select>
 
+    <select id="countWorkTime" resultType="io.choerodon.agile.api.vo.IssueWorkTimeCountVO">
+        SELECT
+            issue_id,
+            count(log_id) workLogCount,
+            IFNULL(SUM(work_time), 0) workTimeCount
+        FROM agile_work_log
+        WHERE project_id = #{projectId}
+        AND issue_id = #{issueId}
+    </select>
+
     <update id="updateProject">
         update agile_work_log set project_id = #{targetProjectId}
         where project_id = #{projectId}

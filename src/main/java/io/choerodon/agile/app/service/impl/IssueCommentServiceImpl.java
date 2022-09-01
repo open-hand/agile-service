@@ -318,5 +318,41 @@ public class IssueCommentServiceImpl implements IssueCommentService {
         return issueCommentVO;
     }
 
+    @Override
+    public void copyIssueComments(Long projectId, Long issueId, Long newIssueId) {
+        List<IssueCommentDTO> issueCommentDTOS = issueCommentMapper.queryAllIssueCommentList(projectId, issueId);
+        if (ObjectUtils.isEmpty(issueCommentDTOS)) {
+            return;
+        }
+        Map<Long, List<IssueCommentDTO>> sonCommentMap = issueCommentDTOS.stream().collect(Collectors.groupingBy(IssueCommentDTO::getParentId));
+        // 按照id倒序创建
+        List<IssueCommentDTO> parentCommentList = sonCommentMap.get(0L);
+        parentCommentList.sort(Comparator.comparing(IssueCommentDTO::getCommentId));
+        parentCommentList.forEach(comment -> {
+            IssueCommentDTO create = new IssueCommentDTO();
+            create.setIssueId(newIssueId);
+            create.setCommentText(comment.getCommentText());
+            create.setUserId(comment.getUserId());
+            create.setProjectId(projectId);
+            create.setParentId(0L);
+            create.setReplyToUserId(0L);
+            IssueCommentDTO newComment = iIssueCommentService.createBase(create);
+            List<IssueCommentDTO> sonCommentList = sonCommentMap.get(comment.getCommentId());
+            if (ObjectUtils.isEmpty(sonCommentList)) {
+                return;
+            }
+            sonCommentList.sort(Comparator.comparing(IssueCommentDTO::getCommentId));
+            sonCommentList.forEach(sonComment -> {
+                IssueCommentDTO sonCreate = new IssueCommentDTO();
+                sonCreate.setIssueId(newIssueId);
+                sonCreate.setCommentText(sonComment.getCommentText());
+                sonCreate.setUserId(sonComment.getUserId());
+                sonCreate.setProjectId(projectId);
+                sonCreate.setParentId(newComment.getCommentId());
+                sonCreate.setReplyToUserId(comment.getUserId());
+                iIssueCommentService.createBase(sonCreate);
+            });
+        });
+    }
 
 }

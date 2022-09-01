@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueWorkTimeCountVO;
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
@@ -29,4 +30,5 @@ public interface WorkLogService {
                              Long issueId,
                              List<String> fieldList);
 
+    IssueWorkTimeCountVO countWorkTime(Long projectId, Long issueId);
 }

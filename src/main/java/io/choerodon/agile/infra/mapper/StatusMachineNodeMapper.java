@@ -1,13 +1,14 @@
 package io.choerodon.agile.infra.mapper;
 
+import java.util.List;
+import java.util.Set;
+
+import org.apache.ibatis.annotations.Param;
+
 import io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO;
 import io.choerodon.agile.infra.dto.IssueCountDTO;
 import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
 import io.choerodon.mybatis.common.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -30,8 +31,8 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
     /**
      * 获取最大的postionY
      *
-     * @param stateMachineId
-     * @return
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     StatusMachineNodeDTO selectMaxPositionY(@Param("stateMachineId") Long stateMachineId);
 
@@ -44,8 +45,8 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
 
     /**
      * 批量插入node
-     * @param nodeList
-     * @return
+     * @param nodeList nodeList
+     * @return result
      */
     int batchInsert(@Param("list") List<StatusMachineNodeDTO> nodeList);
 

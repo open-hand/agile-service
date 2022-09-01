@@ -95,4 +95,6 @@ public interface IssueCommentService {
      * @return 问题评论
      */
     Page<IssueCommentVO> queryIssueCommentPage(PageRequest pageRequest, Long issueId, Long projectId);
+
+    void copyIssueComments(Long projectId, Long issueId, Long newIssueId);
 }

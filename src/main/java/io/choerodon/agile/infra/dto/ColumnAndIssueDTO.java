@@ -1,7 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;

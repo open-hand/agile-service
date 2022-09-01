@@ -3,7 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -51,7 +51,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectConfigMapper projectConfigMapper;
     @Autowired
@@ -771,9 +771,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             ProjectSearchVO projectSearchVO = new ProjectSearchVO();
             projectSearchVO.setEnable(true);
             projectSearchVO.setCategoryCodes(categories);
-            Page<ProjectVO> page =
-                    baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, pageRequest.getPage(), pageRequest.getSize())
-                            .getBody();
+            Page<ProjectVO> page = remoteIamOperator.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, pageRequest.getPage(), pageRequest.getSize());
             List<ProjectVO> projects = page.getContent();
             Set<Long> ids = projects.stream().map(ProjectVO::getId).collect(Collectors.toSet());
             if (ids.isEmpty()) {
@@ -803,7 +801,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                             .collect(Collectors.toMap(IssueTypeExtendDTO::getProjectId, IssueTypeExtendDTO::getEnabled));
             Set<Long> projectIds =
                     list.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
-            List<ProjectVO> projects = baseFeignClient.queryByIds(projectIds).getBody();
+            List<ProjectVO> projects = remoteIamOperator.queryProjectByIds(projectIds);
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
         }
@@ -965,7 +963,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private Map<String, Set<Long>> listProjectIdsGroupByCategory(Long organizationId) {
         ProjectSearchVO projectSearchVO = new ProjectSearchVO();
         projectSearchVO.setEnable(true);
-        Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 1, 0).getBody();
+        Page<ProjectVO> page = remoteIamOperator.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 1, 0);
         List<ProjectVO> projects = page.getContent();
         Map<String, Set<Long>> map = new HashMap<>();
         projects.forEach(p -> {
@@ -1217,7 +1215,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (CollectionUtils.isEmpty(projectIds)) {
             projectIds = new ArrayList<>();
             Long userId = DetailsHelper.getUserDetails().getUserId();
-            List<ProjectVO> list = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  null, true).getBody();
+            List<ProjectVO> list = remoteIamOperator.listProjectsByUserIdForSimple(organizationId, userId, null, true);
             if (CollectionUtils.isEmpty(list)) {
                 return new Page<>();
             }

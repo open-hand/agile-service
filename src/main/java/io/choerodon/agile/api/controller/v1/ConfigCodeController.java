@@ -1,11 +1,13 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.base.BaseController;
-import io.choerodon.core.exception.CommonException;
+import java.util.List;
+import java.util.Optional;
+
 import io.choerodon.agile.api.vo.ConfigCodeVO;
 import io.choerodon.agile.app.service.ConfigCodeService;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -14,16 +16,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
  * @author shinan.chen
  * @date 2018/10/10
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/config_code")
-public class ConfigCodeController extends BaseController {
+public class ConfigCodeController {
 
     @Autowired
     private ConfigCodeService configCodeService;

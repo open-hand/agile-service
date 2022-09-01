@@ -1,19 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.event.*;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.cache.InstanceCache;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
+import static java.util.Comparator.comparingLong;
+import static java.util.stream.Collectors.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -24,11 +16,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.Comparator.comparingLong;
-import static java.util.stream.Collectors.*;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.cache.InstanceCache;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author shinan.chen
@@ -409,10 +410,10 @@ public class StateMachineServiceImpl implements StateMachineService {
     /**
      * 【内部调用】发布状态机时对增加与减少的状态进行处理，影响到的项目是否需要增加与减少相应的状态
      *
-     * @param organizationId
-     * @param stateMachineId
-     * @param changeStatus
-     * @return
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
+     * @param changeStatus changeStatus
+     * @return result
      */
     @Override
     public DeployStateMachinePayload handleStateMachineChangeStatusByStateMachineId(Long organizationId, Long stateMachineId, ChangeStatus changeStatus) {
@@ -615,7 +616,7 @@ public class StateMachineServiceImpl implements StateMachineService {
     /**
      * 处理发布状态机时，节点状态的变化
      *
-     * @param stateMachineId
+     * @param stateMachineId stateMachineId
      */
     private void deployHandleChange(Map<String, List<StatusDTO>> changeMap, Long stateMachineId) {
         //获取旧节点
@@ -644,7 +645,7 @@ public class StateMachineServiceImpl implements StateMachineService {
     /**
      * 处理发布状态机时，
      *
-     * @param stateMachineId
+     * @param stateMachineId stateMachineId
      */
     private Boolean deployCheckDelete(Long organizationId, Map<String, List<StatusDTO>> changeMap, Long stateMachineId) {
         List<StatusDTO> deleteStatuses = changeMap.get("deleteList");

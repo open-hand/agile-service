@@ -7,7 +7,6 @@ import io.choerodon.agile.infra.dto.LinkIssueStatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.IssueLinkTypeMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;

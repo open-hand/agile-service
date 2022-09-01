@@ -1,10 +1,11 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.infra.dto.StateMachineNodeDraftDTO;
-import io.choerodon.mybatis.common.BaseMapper;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import io.choerodon.agile.infra.dto.StateMachineNodeDraftDTO;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -22,8 +23,8 @@ public interface StateMachineNodeDraftMapper extends BaseMapper<StateMachineNode
     /**
      * 获取最大的postionY
      *
-     * @param stateMachineId
-     * @return
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     StateMachineNodeDraftDTO selectMaxPositionY(@Param("stateMachineId") Long stateMachineId);
 

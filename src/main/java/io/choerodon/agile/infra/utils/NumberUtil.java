@@ -14,8 +14,8 @@ public class NumberUtil {
     /**
      * 判断字符串是否为数字
      *
-     * @param str
-     * @return
+     * @param str str
+     * @return result
      */
     public static Boolean isNumeric(String str) {
         try {

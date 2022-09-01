@@ -34,4 +34,6 @@ public interface IssuePredecessorService {
     List<IssuePredecessorVO> queryByIssueId(Long projectId, Long currentIssueId, boolean withInfo);
 
     void deletePredecessor(Long projectId, Long predecessorId, Long currentIssueId);
+
+    void copyIssuePredecessors(Long projectId, Long issueId, Long newIssueId);
 }

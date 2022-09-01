@@ -4,8 +4,6 @@ import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.util.Date;
-
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/5/24
@@ -24,6 +22,10 @@ public class UserMessageDTO extends AuditDomain {
     private Boolean ldap;
     @Encrypt
     private Long id;
+
+    public UserMessageDTO() {
+
+    }
 
     public UserMessageDTO(String name, String imageUrl, String email) {
         this.name = name;

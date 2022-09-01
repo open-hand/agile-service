@@ -1,13 +1,14 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.waterfall.GanttParentInfoVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author superlee
@@ -18,9 +19,9 @@ public interface GanttChartService {
     /**
      * 查询甘特图列表数据(任务视图)
      *
-     * @param projectId
-     * @param searchVO
-     * @return
+     * @param projectId projectId
+     * @param searchVO searchVO
+     * @return result
      */
     Page<GanttChartVO> pagedQuery(Long projectId, SearchVO searchVO, PageRequest pageRequest);
 
@@ -52,4 +53,10 @@ public interface GanttChartService {
     void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts);
 
     List<IssuePersonalSortVO> listLatestSort(Long projectId);
+
+    List<IssueDTO> querySubByIssueIds(Set<Long> projectIds,
+                                      List<Long> issueIds,
+                                      Map<String, Object> sortMap,
+                                      boolean ganttDefaultOrder,
+                                      String dimension);
 }

@@ -30,7 +30,7 @@ public interface UserSettingService {
      * @param boardId   boardId
      * @param projectId projectId
      * @param userId    userId
-     * @return
+     * @return result
      */
     Integer updateOtherBoardNoDefault(Long boardId, Long projectId, Long userId);
 }

@@ -1,10 +1,10 @@
 package io.choerodon.agile.infra.statemachineclient.client;
 
-import io.choerodon.core.exception.CommonException;
+import java.util.List;
+
 import io.choerodon.agile.infra.statemachineclient.dto.*;
 import io.choerodon.agile.infra.statemachineclient.service.ClientService;
-
-import java.util.List;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author shinan.chen
@@ -23,7 +23,7 @@ public class StateMachineClient {
     /**
      * 获取状态机客户端的属性配置
      *
-     * @return
+     * @return result
      */
     public PropertyData getStateMachinePropertyData() {
         return stateMachinePropertyData;
@@ -32,8 +32,8 @@ public class StateMachineClient {
     /**
      * 通过状态机客户端创建实例，不走状态机服务端流程，避免事务问题和过多的实例产生
      *
-     * @param initTransform
-     * @param inputDTO
+     * @param initTransform initTransform
+     * @param inputDTO inputDTO
      */
     public void createInstance(StateMachineTransformDTO initTransform, InputDTO inputDTO) {
         //获取初始状态

@@ -1,6 +1,19 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.statemachine.StateContext;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.StateMachineConfigVO;
 import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.event.TransformInfo;
@@ -16,22 +29,10 @@ import io.choerodon.agile.infra.factory.MachineFactory;
 import io.choerodon.agile.infra.mapper.StatusMachineMapper;
 import io.choerodon.agile.infra.mapper.StatusMachineNodeMapper;
 import io.choerodon.agile.infra.mapper.StatusMachineTransformMapper;
-import io.choerodon.core.exception.CommonException;
+import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.statemachineclient.service.ClientService;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.statemachine.StateContext;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author shinan.chen
@@ -239,9 +240,9 @@ public class InstanceServiceImpl implements InstanceService {
     /**
      * 创建实例时，获取状态机的初始转换
      *
-     * @param organizationId
-     * @param stateMachineId
-     * @return
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     @Override
     public StatusMachineTransformVO queryInitTransform(Long organizationId, Long stateMachineId) {

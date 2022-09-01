@@ -2,7 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
-import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 
@@ -24,7 +24,10 @@ public interface StatusTransferSettingService {
 
     void checkStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId);
 
-    List<Long> checkStatusTransform(Long projectId,Long issueTypeId, List<Long> statusIds);
+    List<Long> checkStatusTransform(Long projectId,
+                                    List<Long> statusIds,
+                                    Long issueId,
+                                    Long issueTypeId);
 
     void saveStatusTransfer(Long organizationId, Long issueTypeId, Long statusId, Long objectVersionNumber, List<StatusTransferSettingCreateVO> list);
 
@@ -34,5 +37,5 @@ public interface StatusTransferSettingService {
 
     Boolean verifyStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId);
 
-    List<StatusDTO> queryNotAllowedTransferStatus(Long projectId, Long issueId);
+    List<StatusVO> queryNotAllowedTransferStatus(Long projectId, Long issueId);
 }
