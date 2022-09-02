@@ -588,7 +588,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO issueVO = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         if (agilePluginService != null) {
-            agilePluginService.businessIssueDetailDTOToVO(issueVO, issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
+            agilePluginService.businessIssueDetailDTOToVO(organizationId, issueVO, issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.waterfallIssueDetailDTOToVO(issueVO, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
