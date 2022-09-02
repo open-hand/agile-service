@@ -5,11 +5,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -217,6 +219,9 @@ public class IssueVO {
 
     @ApiModelProperty(value = "feature名称")
     private String featureName;
+
+    @ApiModelProperty(value = "项目群信息")
+    private ProjectVO programInfo;
 
     @ApiModelProperty(value = "活跃pi")
     private PiNameVO activePi;
@@ -888,6 +893,17 @@ public class IssueVO {
 
     public void setFeatureName(String featureName) {
         this.featureName = featureName;
+    }
+
+    /**
+     * @return 项目群信息
+     */
+    public ProjectVO getProgramInfo() {
+        return programInfo;
+    }
+
+    public void setProgramInfo(ProjectVO programInfo) {
+        this.programInfo = programInfo;
     }
 
     public PiNameVO getActivePi() {

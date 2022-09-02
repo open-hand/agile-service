@@ -143,7 +143,14 @@ public interface AgilePluginService {
      * @param issueVO issueVO
      * @param issue issue
      */
-    void businessIssueDetailDTOToVO(IssueVO issueVO, IssueDetailDTO issue, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap);
+    void businessIssueDetailDTOToVO(
+            Long organizationId,
+            IssueVO issueVO,
+            IssueDetailDTO issue,
+            Map<Long, IssueTypeVO> issueTypeDTOMap,
+            Map<Long, StatusVO> statusMapDTOMap,
+            Map<Long, PriorityVO> priorityDTOMap
+    );
 
     /**
      * 创建issue之前校验特性是否合法
