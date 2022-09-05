@@ -362,7 +362,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (Boolean.FALSE.equals(executeResult.getSuccess())) {
             throw new CommonException("error.stateMachine.executeTransform", executeResult.getException());
         }
-        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
+        if (!onlyUpdateRank) {
+            statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
+        }
         return executeResult;
     }
 
