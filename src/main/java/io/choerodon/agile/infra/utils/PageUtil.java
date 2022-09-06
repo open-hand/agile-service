@@ -2,12 +2,11 @@ package io.choerodon.agile.infra.utils;
 
 import java.util.*;
 
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.util.StringUtil;
-
-import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.mybatis.util.StringUtil;
 
 
 /**
@@ -15,8 +14,13 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
  * Email: ettwz@hotmail.com
  */
 public class PageUtil {
-    public static Page buildPageInfoWithPageInfoList(Page page, List list) {
-        Page result = new Page<>();
+
+    protected PageUtil() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static <T,R> Page<R> buildPageInfoWithPageInfoList(Page<T> page, List<R> list) {
+        Page<R> result = new Page<>();
         result.setNumber(page.getNumber());
         result.setSize(page.getSize());
         result.setTotalElements(page.getTotalElements());
@@ -54,25 +58,25 @@ public class PageUtil {
 
     public static int getBegin(int page, int size) {
         page++;
-        page = page <= 1 ? 1 : page;
+        page = Math.max(page, 1);
         return (page - 1) * size;
     }
 
-    public static Page emptyPage(int page, int size) {
+    public static <T> Page<T> emptyPage(int page, int size) {
         PageInfo pageInfo = new PageInfo(page, size);
-        return new Page(new ArrayList(), pageInfo, 0);
+        return new Page<>(new ArrayList<>(), pageInfo, 0);
     }
 
-    public static Page getPageInfo(int page, int size, int total, Collection list) {
-        Page result = new Page();
+    public static <T> Page<T> getPageInfo(int page, int size, int total, Collection<T> list) {
+        Page<T> result = new Page<>();
         result.setNumber(page);
         result.setSize(size);
         result.setTotalElements(total);
-        result.setContent(Arrays.asList(list.toArray()));
+        result.setContent(list == null ? Collections.emptyList() : new ArrayList<>(list));
         return result;
     }
 
-    public static void buildPage(Page page, PageRequest pageRequest, List<Long> all){
+    public static <T> void buildPage(Page<T> page, PageRequest pageRequest, List<Long> all){
         boolean queryAll = pageRequest.getPage() < 0 || pageRequest.getSize() == 0;
         page.setSize(queryAll ? all.size() : pageRequest.getSize());
         page.setNumber(pageRequest.getPage());
