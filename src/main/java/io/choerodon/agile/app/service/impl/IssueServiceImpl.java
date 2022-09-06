@@ -13,6 +13,17 @@ import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.infra.annotation.RuleNotice;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
+import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
+import io.choerodon.core.domain.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -36,29 +47,19 @@ import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.IssuePayload;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
-import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.client.MessageClientC7n;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -4026,11 +4027,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                         TriggerCarrierVO triggerCarrierVO, Boolean isDemo,
                                                         Long transformId, InputDTO inputDTO){
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        ExecuteResult executeResult;
         if (Boolean.TRUE.equals(isDemo)) {
-            stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issue.getObjectVersionNumber(),
+            executeResult = stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issue.getObjectVersionNumber(),
                     applyType, inputDTO);
         } else {
-            stateMachineClientService.executeTransform(projectId, issueId, transformId, issue.getObjectVersionNumber(),
+            executeResult = stateMachineClientService.executeTransform(projectId, issueId, transformId, issue.getObjectVersionNumber(),
                     applyType, inputDTO);
         }
         if (SchemeApplyType.AGILE.equals(applyType)) {
@@ -4040,7 +4042,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
             issueAccessDataService.updateSelective(issueConvertDTO);
         }
-        return doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, triggerCarrierVO);
+        Boolean onlyUpdateRank = executeResult.getOnlyUpdateRank();
+        if (Boolean.TRUE.equals(onlyUpdateRank)) {
+            return modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueVO.class);
+        } else {
+            return doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, triggerCarrierVO);
+        }
     }
 
     @Override

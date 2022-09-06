@@ -368,6 +368,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (!onlyUpdateRank) {
             statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
         }
+        executeResult.setOnlyUpdateRank(onlyUpdateRank);
         return executeResult;
     }
 

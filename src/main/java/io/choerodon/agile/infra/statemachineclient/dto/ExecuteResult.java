@@ -22,6 +22,8 @@ public class ExecuteResult {
 
     @JsonIgnore
     private Exception exception;
+    @JsonIgnore
+    private Boolean onlyUpdateRank;
 
     public ExecuteResult() {
     }
@@ -30,6 +32,14 @@ public class ExecuteResult {
         this.isSuccess = isSuccess;
         this.resultStatusId = resultStatusId;
         this.errorMessage = errorMessage;
+    }
+
+    public Boolean getOnlyUpdateRank() {
+        return onlyUpdateRank;
+    }
+
+    public void setOnlyUpdateRank(Boolean onlyUpdateRank) {
+        this.onlyUpdateRank = onlyUpdateRank;
     }
 
     public Exception getException() {
