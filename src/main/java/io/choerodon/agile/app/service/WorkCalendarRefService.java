@@ -1,11 +1,11 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+
 import io.choerodon.agile.api.vo.SprintWorkCalendarVO;
 import io.choerodon.agile.api.vo.WorkCalendarRefCreateVO;
 import io.choerodon.agile.api.vo.WorkCalendarRefVO;
 import io.choerodon.agile.infra.dto.WorkCalendarRefDTO;
-
-import java.util.List;
 
 /**
  * @author shinan.chen
@@ -53,9 +53,9 @@ public interface WorkCalendarRefService {
     /**
      * 根据项目id获取工作日历设置
      *
-     * @param projectId
-     * @param year
-     * @return
+     * @param projectId projectId
+     * @param year year
+     * @return result
      */
     List<WorkCalendarRefVO> list(Long projectId, Integer year);
 }

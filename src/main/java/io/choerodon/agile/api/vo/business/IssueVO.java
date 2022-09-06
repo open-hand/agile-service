@@ -1,16 +1,18 @@
 package io.choerodon.agile.api.vo.business;
 
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import io.swagger.annotations.ApiModelProperty;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * 敏捷开发Issue
@@ -218,6 +220,9 @@ public class IssueVO {
     @ApiModelProperty(value = "feature名称")
     private String featureName;
 
+    @ApiModelProperty(value = "项目群信息")
+    private ProjectVO programInfo;
+
     @ApiModelProperty(value = "活跃pi")
     private PiNameVO activePi;
 
@@ -304,7 +309,7 @@ public class IssueVO {
     private List<Long> productIds;
 
     @ApiModelProperty(value = "第三方实例关联")
-    private InstanceOpenRelVO instanceOpenRelVO;
+    private List<InstanceOpenRelVO> instanceOpenRels;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -890,6 +895,17 @@ public class IssueVO {
         this.featureName = featureName;
     }
 
+    /**
+     * @return 项目群信息
+     */
+    public ProjectVO getProgramInfo() {
+        return programInfo;
+    }
+
+    public void setProgramInfo(ProjectVO programInfo) {
+        this.programInfo = programInfo;
+    }
+
     public PiNameVO getActivePi() {
         return activePi;
     }
@@ -1063,11 +1079,11 @@ public class IssueVO {
         this.productIds = productIds;
     }
 
-    public InstanceOpenRelVO getInstanceOpenRelVO() {
-        return instanceOpenRelVO;
+    public List<InstanceOpenRelVO> getInstanceOpenRels() {
+        return instanceOpenRels;
     }
 
-    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
-        this.instanceOpenRelVO = instanceOpenRelVO;
+    public void setInstanceOpenRels(List<InstanceOpenRelVO> instanceOpenRels) {
+        this.instanceOpenRels = instanceOpenRels;
     }
 }

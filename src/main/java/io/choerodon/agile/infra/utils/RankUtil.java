@@ -18,8 +18,8 @@ public class RankUtil {
     /**
      * 获取比rank大的排序值
      *
-     * @param rank
-     * @return
+     * @param rank rank
+     * @return result
      */
     public static String genNext(String rank){
         return AgileRank.parse(rank).genNext().format();
@@ -28,8 +28,8 @@ public class RankUtil {
     /**
      * 获取比minRank小的排序值
      *
-     * @param minRank
-     * @return
+     * @param minRank minRank
+     * @return result
      */
     public static String genPre(String minRank) {
         return AgileRank.parse(minRank).genPrev().format();

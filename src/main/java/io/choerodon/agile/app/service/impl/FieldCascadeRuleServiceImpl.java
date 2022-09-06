@@ -1,17 +1,17 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Resource;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.annotation.Resource;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueVO;
@@ -23,7 +23,7 @@ import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.PageCode;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -72,7 +72,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
     @Resource
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Resource
     private IssueMapper issueMapper;
     @Autowired(required = false)
@@ -354,7 +354,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         Set<Long> componentIds = new HashSet<>();
         Set<Long> programVersionIds = new HashSet<>();
 
-        IssueDetailDTO issueDetailDTO = getIssueDetail(projectId, instanceId, componentIds, influenceVersionIds, fixVersionIds, programVersionIds);
+        IssueDetailDTO issueDetailDTO = getIssueDetail(organizationId, projectId, instanceId, componentIds, influenceVersionIds, fixVersionIds, programVersionIds);
         Map<Long, PageFieldViewVO> pageFieldViewMap = pageFieldViews
                 .stream()
                 .filter(pageFieldViewVO -> !Boolean.TRUE.equals(pageFieldViewVO.getSystem())
@@ -451,7 +451,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 optionNameMap = componentList.stream().collect(Collectors.toMap(ComponentForListDTO::getComponentId, ComponentForListDTO::getName));
                 break;
             case MEMBER:
-                List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).toArray(Long[]::new), false).getBody();
+                List<UserDTO> userDTOS = remoteIamOperator.listUsersByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).toArray(Long[]::new), false);
                 if (!CollectionUtils.isEmpty(userDTOS)) {
                     optionNameMap = userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getRealName));
                 }
@@ -465,7 +465,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
                 optionNameMap = productVersionNameList.stream().collect(Collectors.toMap(ProductVersionNameDTO::getVersionId, ProductVersionNameDTO::getName));
                 break;
             case SUB_PROJECT:
-                List<ProjectVO> projectVOList = baseFeignClient.queryByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).collect(Collectors.toSet())).getBody();
+                List<ProjectVO> projectVOList = remoteIamOperator.queryProjectByIds(result.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).collect(Collectors.toSet()));
                 if (!CollectionUtils.isEmpty(projectVOList)) {
                     optionNameMap = projectVOList.stream().collect(Collectors.toMap(ProjectVO::getId, ProjectVO::getName));
                 }
@@ -512,7 +512,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
     }
 
-    private IssueDetailDTO getIssueDetail(Long projectId, Long instanceId, Set<Long> componentIds, Set<Long> influenceVersionIds, Set<Long> fixVersionIds, Set<Long> programVersionIds) {
+    private IssueDetailDTO getIssueDetail(Long organizationId, Long projectId, Long instanceId, Set<Long> componentIds, Set<Long> influenceVersionIds, Set<Long> fixVersionIds, Set<Long> programVersionIds) {
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, instanceId);
         Optional.ofNullable(issueDetailDTO.getComponentIssueRelDTOList())
                 .ifPresent(componentList -> componentList.forEach(component -> componentIds.add(component.getId())));
@@ -527,7 +527,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         if (agilePluginService != null) {
             agilePluginService.setBusinessAttributes(issueDetailDTO);
             IssueVO issueVO = modelMapper.map(issueDetailDTO, IssueVO.class);
-            agilePluginService.businessIssueDetailDTOToVO(issueVO, issueDetailDTO, new HashMap<>(), new HashMap<>(), new HashMap<>());
+            agilePluginService.businessIssueDetailDTOToVO(organizationId, issueVO, issueDetailDTO, new HashMap<>(), new HashMap<>(), new HashMap<>());
             Optional.ofNullable(issueVO.getProgramVersionFeatureRelVOS())
                     .ifPresent(programVersionList -> programVersionList.forEach(
                             programVersion -> programVersionIds.add(programVersion.getProgramVersionId())));
@@ -640,15 +640,15 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         if (CollectionUtils.isEmpty(cascadeFieldOptionSearchVO.getFieldCascadeRuleIds())) {
             Set<Long> visibleOptionIds = fieldCascadeRuleOptionMapper.selectVisibleOptionIds(projectId, cascadeFieldOptionSearchVO.getFieldCascadeRuleIds());
             AgileUserVO agileUserVO = new AgileUserVO(visibleOptionIds, null, cascadeFieldOptionSearchVO.getSearchParam(), null, null);
-            result = baseFeignClient.agileUsers(
+            result = remoteIamOperator.agileUsers(
                     projectId,
                     pageRequest.getPage(), pageRequest.getSize(),
-                    agileUserVO).getBody();
+                    agileUserVO);
         } else {
-            result = baseFeignClient.listUsersByProjectId(
+            result = remoteIamOperator.listUsersByProjectId(
                     projectId,
                     pageRequest.getPage(), pageRequest.getSize(),
-                    cascadeFieldOptionSearchVO.getSearchParam()).getBody();
+                    cascadeFieldOptionSearchVO.getSearchParam());
         }
         return result;
     }

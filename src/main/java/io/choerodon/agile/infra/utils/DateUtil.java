@@ -1,19 +1,5 @@
 package io.choerodon.agile.infra.utils;
 
-import com.google.common.collect.Ordering;
-import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
-import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarRefDTO;
-import io.choerodon.agile.infra.dto.WorkCalendarHolidayRefDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.core.exception.CommonException;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -22,6 +8,21 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Ordering;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+
+import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
+import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarRefDTO;
+import io.choerodon.agile.infra.dto.WorkCalendarHolidayRefDTO;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/31.
@@ -32,7 +33,7 @@ public class DateUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -66,7 +67,7 @@ public class DateUtil {
             throw new IllegalArgumentException("date can't be null");
         } else {
             Set<Integer> year = new HashSet<>();
-            TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = baseFeignClient.queryTimeZoneDetailByOrganizationId(organizationId).getBody();
+            TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = remoteIamOperator.queryTimeZoneDetailByOrganizationId(organizationId);
             getWorkDaysInterval(timeZoneWorkCalendarDTO, startTime, endTime, result, year);
             handleHolidays(result, year, startTime, endTime, timeZoneWorkCalendarDTO);
         }
@@ -94,7 +95,7 @@ public class DateUtil {
             if (dayOne.after(dayTwo)) {
                 return 0;
             }
-            TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = baseFeignClient.queryTimeZoneDetailByOrganizationId(organizationId).getBody();
+            TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = remoteIamOperator.queryTimeZoneDetailByOrganizationId(organizationId);
             Integer i = getWorkDaysInterval(timeZoneWorkCalendarDTO, dayOne, dayTwo, dates, year);
             handleHolidays(dates, year, dayOne, dayTwo, timeZoneWorkCalendarDTO);
             handleTimeZoneWorkCalendarRefRemoveAndAdd(dates, timeZoneWorkCalendarDTO, dayOne, dayTwo);
@@ -180,7 +181,7 @@ public class DateUtil {
     }
 
     private Set<Date> handleDifferentDayWorkDays(Date dayOne, Date dayTwo, Long organizationId) {
-        TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = baseFeignClient.queryTimeZoneDetailByOrganizationId(organizationId).getBody();
+        TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = remoteIamOperator.queryTimeZoneDetailByOrganizationId(organizationId);
         Set<Integer> year = new HashSet<>();
         Set<Date> dates = new HashSet<>();
         if (dayOne.after(dayTwo)) {
@@ -260,7 +261,7 @@ public class DateUtil {
         if (!dates.isEmpty() && timeZoneWorkCalendarDTO != null) {
             Set<WorkCalendarHolidayRefDTO> holidays = new HashSet<>();
             year.forEach(y -> holidays.addAll(new HashSet<>(
-                    modelMapper.map(baseFeignClient.queryWorkCalendarHolidayRelByYear(0L, y).getBody(), new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
+                    modelMapper.map(remoteIamOperator.queryWorkCalendarHolidayRelByYear(0L, y), new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
                     }.getType()))));
             if (timeZoneWorkCalendarDTO.getUseHoliday() && !holidays.isEmpty()) {
                 handleHolidaysRemoveAndAdd(dates, holidays, startDate, endDate);
@@ -268,7 +269,7 @@ public class DateUtil {
         } else if (dates.isEmpty() && timeZoneWorkCalendarDTO != null && timeZoneWorkCalendarDTO.getUseHoliday()) {
             Set<WorkCalendarHolidayRefDTO> holidays = new HashSet<>();
             year.forEach(y -> holidays.addAll(new HashSet<>(
-                    modelMapper.map(baseFeignClient.queryWorkCalendarHolidayRelByYear(0L, y).getBody(), new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
+                    modelMapper.map(remoteIamOperator.queryWorkCalendarHolidayRelByYear(0L, y), new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
                     }.getType()))));
             if (!holidays.isEmpty()) {
                 SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.CHINA);
@@ -366,7 +367,7 @@ public class DateUtil {
 
 
     private Set<Date> handleSameDayWorkDays(Date date, Long organizationId) {
-        TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = baseFeignClient.queryTimeZoneDetailByOrganizationId(organizationId).getBody();
+        TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO = remoteIamOperator.queryTimeZoneDetailByOrganizationId(organizationId);
         Set<Date> dates = new HashSet<>(1);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -408,7 +409,7 @@ public class DateUtil {
     private void handleSameDayHoliday(Calendar calendar, TimeZoneWorkCalendarDTO timeZoneWorkCalendarDTO, Set<Date> dates, Date date) {
         if (timeZoneWorkCalendarDTO.getUseHoliday()) {
             Set<WorkCalendarHolidayRefDTO> holidays = (new HashSet<>(
-                    modelMapper.map(baseFeignClient.queryWorkCalendarHolidayRelByYear(0L, calendar.get(Calendar.YEAR)).getBody(), new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
+                    modelMapper.map(remoteIamOperator.queryWorkCalendarHolidayRelByYear(0L, calendar.get(Calendar.YEAR)), new TypeToken<List<WorkCalendarHolidayRefDTO>>() {
                     }.getType())));
             if (!holidays.isEmpty()) {
                 try {
@@ -467,9 +468,9 @@ public class DateUtil {
 
     /**
      * 计算两个日期的日期差
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param startDate startDate
+     * @param endDate endDate
+     * @return result
      */
     public static int differentDays(Date startDate, Date endDate) {
         if (startDate.after(endDate)) {

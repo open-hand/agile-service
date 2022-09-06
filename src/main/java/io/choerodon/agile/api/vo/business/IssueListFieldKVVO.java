@@ -212,6 +212,22 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "产品")
     private List<ProductVO> productVOList;
 
+    @ApiModelProperty(value = "敏捷子任务数量")
+    private Integer totalSubIssues;
+
+    @ApiModelProperty(value = "敏捷已完成子任务数量")
+    private Integer completedSubIssues;
+    @ApiModelProperty(value = "第三方实例关联关系")
+    private List<InstanceOpenRelVO> instanceOpenRelList;
+
+    public List<InstanceOpenRelVO> getInstanceOpenRelList() {
+        return instanceOpenRelList;
+    }
+
+    public void setInstanceOpenRelList(List<InstanceOpenRelVO> instanceOpenRelList) {
+        this.instanceOpenRelList = instanceOpenRelList;
+    }
+
     public Integer getProgress() {
         return progress;
     }
@@ -752,5 +768,21 @@ public class IssueListFieldKVVO {
 
     public void setProductVOList(List<ProductVO> productVOList) {
         this.productVOList = productVOList;
+    }
+
+    public Integer getTotalSubIssues() {
+        return totalSubIssues;
+    }
+
+    public void setTotalSubIssues(Integer totalSubIssues) {
+        this.totalSubIssues = totalSubIssues;
+    }
+
+    public Integer getCompletedSubIssues() {
+        return completedSubIssues;
+    }
+
+    public void setCompletedSubIssues(Integer completedSubIssues) {
+        this.completedSubIssues = completedSubIssues;
     }
 }

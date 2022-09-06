@@ -1,11 +1,12 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.infra.dto.ProjectConfigDTO;
-import io.choerodon.mybatis.common.BaseMapper;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import io.choerodon.agile.infra.dto.ProjectConfigDTO;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author shinan.chen
@@ -27,9 +28,9 @@ public interface ProjectConfigMapper extends BaseMapper<ProjectConfigDTO> {
     /**
      * 通过方案ids查询出关联的项目（项目关联的状态机方案）
      *
-     * @param schemeIds
-     * @param schemeType
-     * @return
+     * @param schemeIds schemeIds
+     * @param schemeType schemeType
+     * @return result
      */
     List<ProjectConfigDTO> handleRemoveStatus(@Param("schemeIds") List<Long> schemeIds, @Param("schemeType") String schemeType);
 

@@ -4,11 +4,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.choerodon.agile.api.vo.business.*;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.AllDataLogVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import io.choerodon.core.domain.Page;
@@ -23,58 +26,58 @@ public interface BacklogExpandService {
     /**
      * 删除issue和backlog的关联关系
      *
-     * @param issueId
+     * @param issueId issueId
      */
     void deleteIssueBacklogRel(Long issueId);
 
     /**
      * 自动变更backlog的状态
      *
-     * @param issueId
-     * @param projectId
-     * @param organizationId
+     * @param issueId issueId
+     * @param projectId projectId
+     * @param organizationId organizationId
      */
     void changeDetection(Long issueId, Long projectId, Long organizationId);
 
     /**
      * 是否启用需求池
      *
-     * @param projectId
-     * @return
+     * @param projectId projectId
+     * @return result
      */
     Boolean enabled(Long projectId);
 
     /**
      * 查询需求的页面字段
      *
-     * @param issueType
-     * @return
+     * @param issueType issueType
+     * @return result
      */
     Map<String, PageConfigFieldEditedVO> fieldEdited(String issueType);
 
     /**
      * 返回需求的context
      *
-     * @param code
-     * @return
+     * @param code code
+     * @return result
      */
     String getSystemFieldContext(String code);
 
     /**
      * 处理需求的字段
      *
-     * @param editPageId
-     * @param dataMap
-     * @param rankMap
-     * @param fields
+     * @param editPageId editPageId
+     * @param dataMap dataMap
+     * @param rankMap rankMap
+     * @param fields fields
      */
     void processBacklogFields(Long editPageId, MultiKeyMap dataMap, MultiKeyMap rankMap, List<ObjectSchemeFieldDTO> fields);
 
     /**
      * 初始化需求的maxNum
      *
-     * @param projectId
-     * @param maxNum
+     * @param projectId projectId
+     * @param maxNum maxNum
      */
     void initBacklogMaxNum(Long projectId, Long maxNum);
 
@@ -88,34 +91,34 @@ public interface BacklogExpandService {
     /**
      * 判断需求是否存在
      *
-     * @param starBeaconDTO
+     * @param starBeaconDTO starBeaconDTO
      */
     void selectBacklogByStar(StarBeaconDTO starBeaconDTO);
 
     /**
      * 删除项目群版本和需求的关联关系
      *
-     * @param programId
-     * @param organizationId
-     * @param programVersionId
-     * @param targetProgramVersion
+     * @param programId programId
+     * @param organizationId organizationId
+     * @param programVersionId programVersionId
+     * @param targetProgramVersion targetProgramVersion
      */
     void deleteVersionBacklogRelByProgramVersionId(Long programId, Long organizationId, Long programVersionId, Long targetProgramVersion);
 
     /**
      * 发布项目群版本时,将关联的需求置为已发布
      *
-     * @param programId
-     * @param organizationId
-     * @param programVersionId
+     * @param programId programId
+     * @param organizationId organizationId
+     * @param programVersionId programVersionId
      */
     void releaseProgramVersion(Long programId, Long organizationId, Long programVersionId);
 
     /**
      * 获取需求的字段code集合
      *
-     * @param fieldCodes
-     * @param issueTypeId
+     * @param fieldCodes fieldCodes
+     * @param issueTypeId issueTypeId
      */
     void getBacklogFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
@@ -124,9 +127,9 @@ public interface BacklogExpandService {
     /**
      * 设置需求预定义字段的默认值对象
      *
-     * @param pageFieldViews
-     * @param projectId
-     * @param organizationId
+     * @param pageFieldViews pageFieldViews
+     * @param projectId projectId
+     * @param organizationId organizationId
      */
     void setBacklogDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
 
@@ -140,8 +143,8 @@ public interface BacklogExpandService {
     /**
      * 根据特性id集合，将特性关联的需求和版本进行关联
      *
-     * @param issueIds
-     * @param programVersionId
+     * @param issueIds issueIds
+     * @param programVersionId programVersionId
      */
     void associateWithBacklogAndVersionByFeatureIds(Set<Long> issueIds,
                                                     Long programVersionId,
@@ -151,12 +154,12 @@ public interface BacklogExpandService {
     /**
      * 版本关联的需求写入excel
      *
-     * @param workbook
-     * @param sheetName
-     * @param projectId
-     * @param programVersionId
-     * @param startRow
-     * @return
+     * @param workbook workbook
+     * @param sheetName sheetName
+     * @param projectId projectId
+     * @param programVersionId programVersionId
+     * @param startRow startRow
+     * @return result
      */
     int writeProgramVersionBacklog(Workbook workbook,
                                    String sheetName,
@@ -216,4 +219,14 @@ public interface BacklogExpandService {
     List<BacklogDataVO> listBacklogStatus(List<Long> backlogIds);
 
     List<BacklogInfoVO> listBacklogByIdsWithOption(List<Long> backlogIds, String param);
+
+    void startBacklog(Long projectId);
+
+    Boolean checkExistBacklogRel(Long projectId, Long issueId);
+
+    void copyIssueBacklogRel(Long projectId, Long issueId, Long newIssueId);
+
+    Page<BacklogInfoVO> listBacklog(Long projectId, PageRequest pageRequest, SearchVO searchVO);
+
+    List<BacklogInfoVO> selectByIds(Set<Long> backlogIds);
 }

@@ -1,9 +1,5 @@
 package io.choerodon.agile.infra.aspect;
 
-import io.choerodon.agile.infra.mapper.PageFieldMapper;
-import io.choerodon.agile.infra.mapper.ProjectPageFieldMapper;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.agile.app.service.PageFieldService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,6 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import io.choerodon.agile.app.service.PageFieldService;
+import io.choerodon.agile.infra.mapper.PageFieldMapper;
+import io.choerodon.agile.infra.mapper.ProjectPageFieldMapper;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author shinan.chen
@@ -68,8 +69,8 @@ public class CopyPageFieldAspect {
     /**
      * 复制组织层（页面字段）到项目层
      *
-     * @param organizationId
-     * @param projectId
+     * @param organizationId organizationId
+     * @param projectId projectId
      */
     private synchronized void copyOrgPageFieldToPro(Long organizationId, Long projectId) {
         //初始化数据

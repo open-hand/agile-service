@@ -1,10 +1,15 @@
 package io.choerodon.agile.infra.utils;
-import io.choerodon.agile.api.vo.business.ExportIssuesVO;
-import io.choerodon.agile.infra.dto.ExcelCursorDTO;
-import io.choerodon.agile.infra.enums.ExcelImportTemplate;
-import io.choerodon.agile.infra.enums.FieldCode;
-import io.choerodon.agile.infra.enums.IssueConstant;
-import io.choerodon.core.exception.CommonException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import javax.servlet.http.HttpServletResponse;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
@@ -23,15 +28,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
+import io.choerodon.agile.infra.dto.ExcelCursorDTO;
+import io.choerodon.agile.infra.enums.ExcelImportTemplate;
+import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.IssueConstant;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author dinghuang123@gmail.com
@@ -148,7 +150,7 @@ public class ExcelUtil {
         //1、创建工作簿
         SXSSFWorkbook workbook = new SXSSFWorkbook();
         //1.3、列标题样式
-        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT.getCode(), true);
+        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT, true);
         //1.4、强制换行
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
@@ -391,15 +393,18 @@ public class ExcelUtil {
      * @param fontSize 字体大小
      * @return 单元格样式
      */
-    protected static CellStyle createCellStyle(Workbook workbook, short fontSize, short aligment, Boolean bold) {
+    protected static CellStyle createCellStyle(Workbook workbook,
+                                               short fontSize,
+                                               HorizontalAlignment horizontalAlignment,
+                                               Boolean bold) {
         CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setAlignment(aligment);
+        cellStyle.setAlignment(horizontalAlignment);
         //垂直居中
-        cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         org.apache.poi.ss.usermodel.Font font = workbook.createFont();
-        if (bold) {
+        if (Boolean.TRUE.equals(bold)) {
             //加粗字体
-            font.setBoldweight(org.apache.poi.ss.usermodel.Font.BOLDWEIGHT_BOLD);
+            font.setBold(true);
         }
         font.setFontHeightInPoints(fontSize);
         cellStyle.setFont(font);
@@ -519,7 +524,7 @@ public class ExcelUtil {
      * @param endCol           结束列
      * @param hiddenSheetName  隐藏的sheet名
      * @param hiddenSheetIndex 隐藏的sheet索引
-     * @return
+     * @return result
      * @throws Exception
      */
     public static XSSFWorkbook dropDownList2007(Workbook wb, Sheet realSheet, List<String> datas, int startRow, int endRow,
@@ -548,8 +553,8 @@ public class ExcelUtil {
         XSSFDataValidation validation = null;
         // 单元格样式
         CellStyle style = workbook.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         // 循环指定单元格下拉数据
         for (int i = startRow; i <= endRow; i++) {
             XSSFDataValidationConstraint dvConstraint = buildDataValidationConstraint(columnLetter, hiddenSheetName, i, dateSize, dvHelper);
@@ -567,12 +572,12 @@ public class ExcelUtil {
     /**
      * 公式讲解参考
      * @see <a href="https://zhuanlan.zhihu.com/p/38156200">参考</a>
-     * @param columnLetter
-     * @param hiddenSheetName
-     * @param rowNum
-     * @param dateSize
-     * @param dvHelper
-     * @return
+     * @param columnLetter columnLetter
+     * @param hiddenSheetName hiddenSheetName
+     * @param rowNum rowNum
+     * @param dateSize dateSize
+     * @param dvHelper dvHelper
+     * @return result
      */
     private static XSSFDataValidationConstraint buildDataValidationConstraint(String columnLetter,
                                                                               String hiddenSheetName,

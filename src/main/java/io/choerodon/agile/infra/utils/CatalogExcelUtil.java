@@ -1,11 +1,13 @@
 package io.choerodon.agile.infra.utils;
 
-import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.*;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/28.
@@ -18,8 +20,8 @@ public class CatalogExcelUtil {
     /**
      * 创建Workbook
      *
-     * @param in
-     * @return
+     * @param in in
+     * @return result
      * @throws Exception
      */
     public static Workbook createWorkBook(InputStream in) throws IOException {
@@ -31,8 +33,8 @@ public class CatalogExcelUtil {
     /**
      * 获取单单元格字符串值
      *
-     * @param cell
-     * @return
+     * @param cell cell
+     * @return result
      */
     public static String getCellStringValue(Cell cell) {
         if (cell == null) {
@@ -47,9 +49,9 @@ public class CatalogExcelUtil {
     /**
      * 初始化Excel单元格, 设置单元格值和样式
      *
-     * @param cell
-     * @param style
-     * @param value
+     * @param cell cell
+     * @param style style
+     * @param value value
      */
     public static void initCell(Cell cell, CellStyle style, String value) {
         cell.setCellStyle(style);
@@ -59,10 +61,10 @@ public class CatalogExcelUtil {
     /**
      * 初始化Excel单元格, 设置单元格值、样式和备注
      *
-     * @param cell
-     * @param style
-     * @param value
-     * @param comment
+     * @param cell cell
+     * @param style style
+     * @param value value
+     * @param comment comment
      */
     public static void initCell(Cell cell, CellStyle style, String value, Comment comment) {
         cell.setCellStyle(style);
@@ -73,10 +75,10 @@ public class CatalogExcelUtil {
     /**
      * 获取Excel单元格备注
      *
-     * @param drawing
-     * @param anchor
-     * @param content
-     * @return
+     * @param drawing drawing
+     * @param anchor anchor
+     * @param content content
+     * @return result
      */
     public static Comment getCellComment(Drawing drawing, HSSFClientAnchor anchor, String content) {
         Comment comment = drawing.createCellComment(anchor);
@@ -87,8 +89,8 @@ public class CatalogExcelUtil {
     /**
      * 获取Excel标题单元格样式
      *
-     * @param wb
-     * @return
+     * @param wb wb
+     * @return result
      */
     public static CellStyle getHeadStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
@@ -111,8 +113,8 @@ public class CatalogExcelUtil {
     /**
      * 获取Excel数据单元格样式
      *
-     * @param wb
-     * @return
+     * @param wb wb
+     * @return result
      */
     public static CellStyle getBodyStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
@@ -126,8 +128,8 @@ public class CatalogExcelUtil {
     /**
      * 获取Excel错误单元格样式
      *
-     * @param wb
-     * @return
+     * @param wb wb
+     * @return result
      */
     public static CellStyle getErrorStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();

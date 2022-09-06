@@ -1,15 +1,8 @@
 package io.choerodon.agile.infra.factory;
 
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.cache.InstanceCache;
-import io.choerodon.agile.infra.dto.StatusMachineDTO;
-import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
-import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
-import io.choerodon.agile.infra.enums.TransformType;
-import io.choerodon.agile.infra.mapper.StatusMachineNodeMapper;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
-import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +14,16 @@ import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.cache.InstanceCache;
+import io.choerodon.agile.infra.dto.StatusMachineDTO;
+import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
+import io.choerodon.agile.infra.enums.TransformType;
+import io.choerodon.agile.infra.mapper.StatusMachineNodeMapper;
+import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
+import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author shinan.chen
@@ -113,9 +114,9 @@ public class MachineFactory {
     /**
      * 开始实例
      *
-     * @param serviceCode
-     * @param stateMachineId
-     * @return
+     * @param serviceCode serviceCode
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, InputDTO inputDTO) {
         StateMachine<String, String> instance = buildInstance(organizationId, serviceCode, stateMachineId);
@@ -141,11 +142,11 @@ public class MachineFactory {
     /**
      * 状态转换
      *
-     * @param serviceCode
-     * @param stateMachineId
-     * @param currentStatusId
-     * @param transformId
-     * @return
+     * @param serviceCode serviceCode
+     * @param stateMachineId stateMachineId
+     * @param currentStatusId currentStatusId
+     * @param transformId transformId
+     * @return result
      */
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
         try {
@@ -232,8 +233,8 @@ public class MachineFactory {
     /**
      * 初始化动作
      *
-     * @param serviceCode
-     * @return
+     * @param serviceCode serviceCode
+     * @return result
      */
     private Action<String, String> initialAction(Long organizationId, String serviceCode) {
         return context ->
@@ -245,8 +246,8 @@ public class MachineFactory {
     /**
      * 转换动作
      *
-     * @param serviceCode
-     * @return
+     * @param serviceCode serviceCode
+     * @return result
      */
     private Action<String, String> action(Long organizationId, String serviceCode) {
         return context -> {
@@ -263,8 +264,8 @@ public class MachineFactory {
     /**
      * 转换出错动作
      *
-     * @param serviceCode
-     * @return
+     * @param serviceCode serviceCode
+     * @return result
      */
     private Action<String, String> errorAction(Long organizationId, String serviceCode) {
         return context -> {
@@ -278,8 +279,8 @@ public class MachineFactory {
     /**
      * 条件验证是否转换
      *
-     * @param serviceCode
-     * @return
+     * @param serviceCode serviceCode
+     * @return result
      */
     private Guard<String, String> guard(Long organizationId, String serviceCode) {
         return context -> {

@@ -87,4 +87,17 @@
         </foreach>
         ORDER BY comment_id DESC
     </select>
+
+    <select id="queryAllIssueCommentList" resultType="io.choerodon.agile.infra.dto.IssueCommentDTO">
+        SELECT
+            comment_id,
+            user_id,
+            issue_id,
+            comment_text,
+            project_id,
+            parent_id,
+            reply_to_user_id
+        FROM agile_issue_comment
+        WHERE issue_id = #{issueId} AND project_id = #{projectId}
+    </select>
 </mapper>

@@ -1,27 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
-import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
-import io.choerodon.agile.api.vo.IssueTypeSchemeWithInfoVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.InitIssueType;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.enums.SchemeType;
-import io.choerodon.agile.infra.mapper.IssueTypeMapper;
-import io.choerodon.agile.infra.mapper.IssueTypeSchemeConfigMapper;
-import io.choerodon.agile.infra.mapper.IssueTypeSchemeMapper;
-import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
-import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.agile.infra.utils.ProjectUtil;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +11,28 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
+import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
+import io.choerodon.agile.api.vo.IssueTypeSchemeWithInfoVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.InitIssueType;
+import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.enums.SchemeType;
+import io.choerodon.agile.infra.mapper.IssueTypeMapper;
+import io.choerodon.agile.infra.mapper.IssueTypeSchemeConfigMapper;
+import io.choerodon.agile.infra.mapper.IssueTypeSchemeMapper;
+import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author shinan.chen
@@ -265,12 +266,12 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     /**
      * 初始化方案
      *
-     * @param projectId
-     * @param organizationId
-     * @param name
-     * @param defaultIssueTypeId
-     * @param schemeApplyType
-     * @param issueTypeMap
+     * @param projectId projectId
+     * @param organizationId organizationId
+     * @param name name
+     * @param defaultIssueTypeId defaultIssueTypeId
+     * @param schemeApplyType schemeApplyType
+     * @param issueTypeMap issueTypeMap
      */
     @Override
     public void initScheme(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap) {

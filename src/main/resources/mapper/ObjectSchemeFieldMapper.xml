@@ -65,6 +65,16 @@
                 fd_object_scheme_field_extend osfe
                 WHERE
                 osfe.field_id = osf.id
+                AND
+                (
+                osfe.project_id is null
+                <if test="projectIds != null and projectIds.size > 0">
+                    or osfe.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
+                </if>
+                )
                 <choose>
                     <when test="issueTypes != null and issueTypes.size > 0">
                         and osfe.issue_type in
@@ -527,6 +537,8 @@
             t1.is_system,
             t1.extra_config,
             t1.is_required,
+            t1.organization_id,
+            t1.project_id,
             flv.name as field_type_name,
             t1.is_required as required,
             ffo.id as ffo_id,
@@ -537,7 +549,8 @@
         from fd_object_scheme_field t1
         left join lookup_value flv on flv.value_code = t1.field_type and flv.type_code = 'field_type'
         left join fd_field_option ffo on t1.id = ffo.field_id
-        where t1.code in
+        where t1.organization_id = #{organizationId}
+        and t1.code in
         <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
            #{fieldCode}
         </foreach>
@@ -656,6 +669,7 @@
                 SELECT osfe.field_id
                 FROM fd_object_scheme_field_extend osfe
                 WHERE osfe.field_id = osf.id
+                and (osfe.project_id = #{projectId} or osfe.project_id is null)
                 <if test='issueTypeList == "agileIssueType"'>
                     AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
                 </if>

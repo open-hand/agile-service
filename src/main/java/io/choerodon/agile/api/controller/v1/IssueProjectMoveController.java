@@ -1,24 +1,26 @@
 package io.choerodon.agile.api.controller.v1;
 
+import java.util.List;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.app.service.IssueProjectMoveService;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.List;
-import java.util.Map;
+import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.app.service.IssueProjectMoveService;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
+
+import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
  * @author zhaotianxin
@@ -33,7 +35,7 @@ public class IssueProjectMoveController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("跨项目转交问题")
     @PostMapping(value = "/{issue_id}")
-    public ResponseEntity issueProjectMove(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> issueProjectMove(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "问题Id", required = true)
                                            @PathVariable(name = "issue_id") @Encrypt Long issueId,
@@ -42,7 +44,7 @@ public class IssueProjectMoveController {
                                            @ApiParam(value = "请求数据", required = true)
                                            @RequestBody JSONObject jsonObject) {
         issueProjectMoveService.issueProjectMove(projectId, issueId, targetProjectId,jsonObject);
-        return new ResponseEntity(HttpStatus.CREATED);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -52,7 +54,7 @@ public class IssueProjectMoveController {
                                                            @PathVariable(name = "project_id") Long projectId,
                                                            @ApiParam(value = "问题类型编码", required = true)
                                                            @RequestParam String typeCode) {
-        return new ResponseEntity(issueProjectMoveService.listMoveProject(projectId, typeCode), HttpStatus.OK);
+        return Results.success(issueProjectMoveService.listMoveProject(projectId, typeCode));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -66,20 +68,20 @@ public class IssueProjectMoveController {
                                                                    @RequestParam @Encrypt Long issueId,
                                                                    @ApiParam(value = "问题类型id", required = true)
                                                                    @RequestParam @Encrypt Long issueTypeId) {
-        return new ResponseEntity(issueProjectMoveService.listLostField(projectId, issueId, targetProject, issueTypeId), HttpStatus.OK);
+        return Results.success(issueProjectMoveService.listLostField(projectId, issueId, targetProject, issueTypeId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("跨项目转交问题")
     @PostMapping(value = "/batch_move")
-    public ResponseEntity issueProjectBatchMove(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> issueProjectBatchMove(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                 @ApiParam(value = "目标项目id", required = true)
                                                 @RequestParam Long targetProjectId,
                                                 @ApiParam(value = "请求数据", required = true)
                                                 @RequestBody JSONObject jsonObject) {
         issueProjectMoveService.issueProjectBatchMove(projectId, targetProjectId, jsonObject, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
-        return new ResponseEntity(HttpStatus.CREATED);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -89,6 +91,6 @@ public class IssueProjectMoveController {
                                                                     @PathVariable(name = "project_id") Long projectId,
                                                                     @ApiParam(value = "问题id集合", required = true)
                                                                     @RequestBody @Encrypt List<Long> issueIds) {
-        return new ResponseEntity(issueProjectMoveService.issueTypeStatusMap(projectId, issueIds), HttpStatus.OK);
+        return Results.success(issueProjectMoveService.issueTypeStatusMap(projectId, issueIds));
     }
 }

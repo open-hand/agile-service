@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.IssueWorkTimeCountVO;
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -35,4 +36,6 @@ public interface WorkLogMapper extends BaseMapper<WorkLogDTO> {
 
     List<WorkLogVO> selectTotalWorkTimeByIssueId(@Param("projectIds") Set<Long> projectIds,
                                                  @Param("issueIds") List<Long> issueIds);
+
+    IssueWorkTimeCountVO countWorkTime(@Param("issueId") Long issueId, @Param("projectId") Long projectId);
 }

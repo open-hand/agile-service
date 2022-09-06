@@ -1,13 +1,14 @@
 package io.choerodon.agile.infra.mapper;
 
+import java.util.List;
+import java.util.Set;
+
+import org.apache.ibatis.annotations.Param;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusWithInfoDTO;
 import io.choerodon.mybatis.common.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -25,9 +26,9 @@ public interface StatusMapper extends BaseMapper<StatusDTO> {
     /**
      * 查询状态机下的所有状态
      *
-     * @param organizationId
-     * @param stateMachineIds
-     * @return
+     * @param organizationId organizationId
+     * @param stateMachineIds stateMachineIds
+     * @return result
      */
     List<StatusDTO> queryByStateMachineIds(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds);
 

@@ -511,4 +511,28 @@ public class IssuePredecessorServiceImpl implements IssuePredecessorService {
         }
         return ISSUE_TYPE_CODES;
     }
+
+    @Override
+    public void copyIssuePredecessors(Long projectId, Long issueId, Long newIssueId) {
+        List<IssuePredecessorDTO> issuePredecessorDTOS = issuePredecessorMapper.selectByIssueIds(Collections.singleton(projectId), Collections.singleton(issueId));
+        if (ObjectUtils.isEmpty(issuePredecessorDTOS)) {
+            return;
+        }
+        List<IssuePredecessorDTO> existList = issuePredecessorMapper.selectByIssueIds(Collections.singleton(projectId), Collections.singleton(newIssueId));
+        if (!ObjectUtils.isEmpty(existList)) {
+            return;
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<IssuePredecessorVO> createList = new ArrayList<>();
+        issuePredecessorDTOS.forEach(v -> {
+            IssuePredecessorVO create = new IssuePredecessorVO();
+            create.setIssueId(newIssueId);
+            create.setProjectId(projectId);
+            create.setOrganizationId(organizationId);
+            create.setPredecessorId(v.getPredecessorId());
+            create.setPredecessorType(v.getPredecessorType());
+            createList.add(create);
+        });
+        updatePredecessors(projectId, createList, newIssueId);
+    }
 }

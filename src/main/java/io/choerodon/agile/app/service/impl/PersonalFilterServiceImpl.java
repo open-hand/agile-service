@@ -37,7 +37,13 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public static final String NAME_EXIST = "error.personalFilter.nameExist";
     public static final String TYPE_CODE_ILLEGAL = "error.personalFilter.typeCode.illegal";
     public static final String TYPE_CODE_NOT_NULL = "error.personalFilter.typeCode.notNull";
-    private static final String[] FILTER_TYPE_CODES = {PersonalFilterTypeCode.AGILE_ISSUE, PersonalFilterTypeCode.AGILE_WORK_HOURS, PersonalFilterTypeCode.RISK_ISSUE};
+    private static final String[] FILTER_TYPE_CODES = {
+            PersonalFilterTypeCode.AGILE_ISSUE,
+            PersonalFilterTypeCode.AGILE_WORK_HOURS,
+            PersonalFilterTypeCode.RISK_ISSUE,
+            PersonalFilterTypeCode.FEATURE_ISSUE,
+            PersonalFilterTypeCode.WATERFALL_ISSUE,
+    };
 
     @Autowired
     private ModelMapper modelMapper;

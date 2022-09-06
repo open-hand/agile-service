@@ -1,6 +1,12 @@
 package io.choerodon.agile.app.service;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.alibaba.fastjson.JSONObject;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -11,284 +17,322 @@ import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * @author zhaotianxin
- * @date 2020-10-12 10:35
+ * @author zhaotianxin 2020-10-12 10:35
  */
 public interface AgilePluginService {
     /**
      * 根据code判断问题类型code
-     * @param code
-     * @return
+     *
+     * @param code code
+     * @return result
      */
     List<String> getSystemFieldContext(String code);
 
     /**
      * 删除issue时,商业版要执行的逻辑
-     * @param issueConvertDTO
+     *
+     * @param issueConvertDTO issueConvertDTO
      */
     void deleteIssueForBusiness(IssueConvertDTO issueConvertDTO);
 
     /**
      * 保存快速筛选处理商业版字段的sql
-     * @param sqlQuery
-     * @param quickFilterValueVO
-     * @param value
-     * @param operation
-     * @param projectId
+     *
+     * @param sqlQuery sqlQuery
+     * @param quickFilterValueVO quickFilterValueVO
+     * @param value value
+     * @param operation operation
+     * @param projectId projectId
      */
-    void appendProgramFieldSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, String value, String operation,Long projectId);
+    void appendProgramFieldSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, String value, String operation, Long projectId);
 
     /**
      * 处理特性的rank值
-     * @param projectId
-     * @param type
+     *
+     * @param projectId projectId
+     * @param type type
      */
     void handlerFeatureRank(Long projectId, String type);
 
     /**
      * 查询项目群的史诗
-     * @param epicIds
-     * @param projectId
+     *
+     * @param epicIds epicIds
+     * @param projectId projectId
      */
     void getProgramEpicIds(List<Long> epicIds, Long projectId);
 
     /**
      * 过滤出项目群字段
-     * @param projectId
-     * @param issueTypeId
-     * @param pageFields
-     * @return
+     *
+     * @param projectId projectId
+     * @param issueTypeId issueTypeId
+     * @param pageFields pageFields
+     * @return result
      */
     List<PageFieldDTO> handlerProgramPageField(Long projectId, Long issueTypeId, List<PageFieldDTO> pageFields, Boolean created, Boolean edited);
 
     /**
      * 创建issue初始化特性相关的值
-     * @param colorList
-     * @param issueConvertDTO
+     *
+     * @param colorList colorList
+     * @param issueConvertDTO issueConvertDTO
      */
     void handleInitIssue(List<LookupValueDTO> colorList, IssueConvertDTO issueConvertDTO);
 
     /**
      * 修改issue时,如果是故事，关联的有特性，则冲刺也要关联特性
-     * @param oldIssue
-     * @param projectId
-     * @param sprintId
-     * @param issueType
+     *
+     * @param oldIssue oldIssue
+     * @param projectId projectId
+     * @param sprintId sprintId
+     * @param issueType issueType
      */
     void updateIssueSprintChanged(IssueConvertDTO oldIssue, Long projectId, Long sprintId, String issueType);
 
     /**
      * 修改issue,修改一些商业版属性的值
-     * @param issueType
-     * @param fieldList
-     * @param projectId
-     * @param issueUpdateVO
-     * @param originIssue
+     *
+     * @param issueType issueType
+     * @param fieldList fieldList
+     * @param projectId projectId
+     * @param issueUpdateVO issueUpdateVO
+     * @param originIssue originIssue
      */
     void handlerBusinessUpdateIssue(String issueType, List<String> fieldList, Long projectId, IssueUpdateVO issueUpdateVO, IssueDTO originIssue);
 
     /**
      * 修改issue时,校验特性
-     * @param issueUpdateVO
-     * @param projectId
+     *
+     * @param issueUpdateVO issueUpdateVO
+     * @param projectId projectId
      */
     void checkFeatureBeforeUpdateIssue(IssueUpdateVO issueUpdateVO, Long projectId);
 
     /**
      * issue批量移动到冲刺，如果关联特性要将特性和冲刺建立联系
-     * @param projectId
-     * @param sprintId
-     * @param frontIncomingIssues
-     * @param issueSearchDTOList
+     *
+     * @param projectId projectId
+     * @param sprintId sprintId
+     * @param frontIncomingIssues frontIncomingIssues
+     * @param issueSearchDTOList issueSearchDTOList
      */
     void handlerAssociateSprintsWithFeature(Long projectId, Long sprintId, List<Long> frontIncomingIssues, List<IssueSearchDTO> issueSearchDTOList);
 
     /**
      * 克隆issue时,克隆特性的特性价值以及验收标准等
-     * @param issueId
-     * @param issueCreateVO
-     * @param applyType
-     * @param projectId
+     *
+     * @param issueId issueId
+     * @param issueCreateVO issueCreateVO
+     * @param applyType applyType
+     * @param projectId projectId
      */
     void handlerCloneFeature(Long issueId, IssueCreateVO issueCreateVO, String applyType, Long projectId);
 
     /**
      * 查询issue详情时，设置商业版特有的属性值
-     * @param issue
+     *
+     * @param issue issue
      */
     void setBusinessAttributes(IssueDetailDTO issue);
 
     /**
      * 对issueVO商业版的属性进行单独转换
-     * @param issueVO
-     * @param issue
+     *
+     * @param issueVO issueVO
+     * @param issue issue
      */
-    void businessIssueDetailDTOToVO(IssueVO issueVO, IssueDetailDTO issue, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap);
+    void businessIssueDetailDTOToVO(
+            Long organizationId,
+            IssueVO issueVO,
+            IssueDetailDTO issue,
+            Map<Long, IssueTypeVO> issueTypeDTOMap,
+            Map<Long, StatusVO> statusMapDTOMap,
+            Map<Long, PriorityVO> priorityDTOMap
+    );
 
     /**
      * 创建issue之前校验特性是否合法
-     * @param issueCreateVO
-     * @param applyType
+     *
+     * @param issueCreateVO issueCreateVO
+     * @param applyType applyType
      */
-    void checkBeforeCreateIssue(IssueCreateVO issueCreateVO,String applyType);
+    void checkBeforeCreateIssue(IssueCreateVO issueCreateVO, String applyType);
 
     /**
      * 创建issue后对商业版特有属性进行单独赋值
-     * @param issueConvertDTO
-     * @param projectId
-     * @param issueId
-     * @param issueCreateVO
+     *
+     * @param issueConvertDTO issueConvertDTO
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param issueCreateVO issueCreateVO
      */
     void handlerBusinessAfterCreateIssue(IssueConvertDTO issueConvertDTO, Long projectId, Long issueId, IssueCreateVO issueCreateVO);
 
     /**
      * 批量修改之前处理项目群的字段
-     * @param projectId
-     * @param predefinedFields
-     * @param programMap
-     * @param applyType
+     *
+     * @param projectId projectId
+     * @param predefinedFields predefinedFields
+     * @param programMap programMap
+     * @param applyType applyType
      */
-    void handlerProgramPredefinedFields(Long projectId,JSONObject predefinedFields, Map<String, Object> programMap,String applyType);
+    void handlerProgramPredefinedFields(Long projectId, JSONObject predefinedFields, Map<String, Object> programMap, String applyType);
 
     /**
      * 设置featureId
-     * @param issueUpdateVO
-     * @param programMap
-     * @param fieldList
+     *
+     * @param issueUpdateVO issueUpdateVO
+     * @param programMap programMap
+     * @param fieldList fieldList
      */
-    void setFeatureId(IssueUpdateVO issueUpdateVO, Map<String, Object> programMap,List<String> fieldList);
+    void setFeatureId(IssueUpdateVO issueUpdateVO, Map<String, Object> programMap, List<String> fieldList);
 
     /**
      * 批量修改特性的Pi、负责子团队以及冲刺
-     * @param projectId
-     * @param issueDTO
-     * @param programMap
+     *
+     * @param projectId projectId
+     * @param issueDTO issueDTO
+     * @param programMap programMap
      */
     void handlerFeatureField(Long projectId, IssueDTO issueDTO, Map<String, Object> programMap, TriggerCarrierVO triggerCarrierVO);
 
     /**
      * 过滤项目群类型
-     * @param projectId
-     * @param typeWithValues
-     * @return
+     *
+     * @param projectId projectId
+     * @param typeWithValues typeWithValues
+     * @return result
      */
     List<LookupValueDTO> filterProgramType(Long projectId, LookupTypeWithValuesDTO typeWithValues);
 
     /**
      * 查询项目群的问题类型
-     * @param issueTypes
-     * @param issueTypeIds
-     * @return
+     *
+     * @param issueTypes issueTypes
+     * @param issueTypeIds issueTypeIds
+     * @return result
      */
     List<IssueTypeVO> filterProgramIssueTypes(List<IssueTypeVO> issueTypes, List<Long> issueTypeIds);
 
     /**
      * 项目群史诗查询pageConfig
-     * @param projectId
-     * @param issueTypeId
-     * @param pageConfigFieldVOS
-     * @return
+     *
+     * @param projectId projectId
+     * @param issueTypeId issueTypeId
+     * @param pageConfigFieldVOS pageConfigFieldVOS
+     * @return result
      */
     List<PageConfigFieldVO> queryProgramPageConfigFields(Long projectId, Long issueTypeId, List<PageConfigFieldVO> pageConfigFieldVOS);
 
     /**
      * 添加项目群问题类型
-     * @return
+     *
+     * @return result
      */
     List<String> addProgramIssueType();
 
     /**
      * 对项目群史诗进行处理
-     * @param objectSchemeFieldDTOS
-     * @return
+     *
+     * @param objectSchemeFieldDTOS objectSchemeFieldDTOS
+     * @return result
      */
     List<ObjectSchemeFieldDTO> filterProgramEpic(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS);
 
 
     /**
      * 创建项目群时初始化项目群特有的问题类型和方案
-     * @param projectEvent
+     *
+     * @param projectEvent projectEvent
      */
     void initProjectIssueTypeSchemeAndArt(ProjectEvent projectEvent, Set<String> codes);
 
     /**
      * 初始化项目群状态机
-     * @param organizationId
-     * @param projectEvent
-     * @return
+     *
+     * @param organizationId organizationId
+     * @param projectEvent projectEvent
+     * @return result
      */
     Long initPRStateMachine(Long organizationId, ProjectEvent projectEvent);
 
     /**
      * 查询项目群子项目故事地图
-     * @param projectId
-     * @param epicIds
-     * @param searchVO
-     * @return
+     *
+     * @param projectId projectId
+     * @param epicIds epicIds
+     * @param searchVO searchVO
+     * @return result
      */
     StoryMapVO handlerBusinessQueryStoryMap(Long projectId, List<Long> epicIds, SearchVO searchVO);
 
     /**
      * 故事地图移动特性
-     * @param projectId
-     * @param storyMapDragVO
+     *
+     * @param projectId projectId
+     * @param storyMapDragVO storyMapDragVO
      */
     void handlerStoryMapMoveFeature(Long projectId, StoryMapDragVO storyMapDragVO);
 
     /**
      * 设置ApplyTypes
-     * @param schemeVO
-     * @param schemeId
+     *
+     * @param schemeVO schemeVO
+     * @param schemeId schemeId
      */
     void addApplyTypesToStateMachine(StateMachineSchemeVO schemeVO, Long schemeId);
 
     /**
      * 创建项目群子项目的冲刺
-     * @param projectId
-     * @param sprintConvertDTO
+     *
+     * @param projectId projectId
+     * @param sprintConvertDTO sprintConvertDTO
      */
     SprintConvertDTO createSubProjectSprint(Long projectId, SprintConvertDTO sprintConvertDTO);
 
     /**
      * 如果项目是项目群子项目,开启冲刺时设置开始时间为当前时间
-     * @param projectId
-     * @param sprintConvertDTO
+     *
+     * @param projectId projectId
+     * @param sprintConvertDTO sprintConvertDTO
      */
     void handlerSprintStartDate(Long projectId, SprintConvertDTO sprintConvertDTO);
 
     /**
      * 迭代计划添加商业版属性
-     * @param projectId
-     * @param issueIds
-     * @param result
+     *
+     * @param projectId projectId
+     * @param issueIds issueIds
+     * @param result result
      */
-    void addProgramAttr(Long projectId, List<Long> issueIds,Map<String, Object> result);
+    void addProgramAttr(Long projectId, List<Long> issueIds, Map<String, Object> result);
 
     /**
      * 查询单个冲刺的PI和类型
-     * @param projectId
-     * @param sprintId
-     * @param sprintDetailVO
-     * @return
+     *
+     * @param projectId projectId
+     * @param sprintId sprintId
+     * @param sprintDetailVO sprintDetailVO
+     * @return result
      */
     SprintDetailVO setSprintPiAndType(Long projectId, Long sprintId, SprintDetailVO sprintDetailVO);
 
     /**
-     * do 转issueListFieldKVDTOList 设置特性的属性
-     * @param projectIds
-     * @param issueListFieldKVDTOList
+     * do 转issueListFieldKVDTOList 设置商业版属性
+     *
+     * @param projectIds projectIds
+     * @param issueListFieldKVDTOList issueListFieldKVDTOList
+     * @param countSubIssue countSubIssue
      */
-    void doToIssueListFieldKVDTO(List<Long> projectIds,List<IssueListFieldKVVO> issueListFieldKVDTOList);
+    void doToIssueListFieldKVDTO(List<Long> projectIds, List<IssueListFieldKVVO> issueListFieldKVDTOList, boolean countSubIssue);
 
     /**
      * 项目群子项目下载issue 替换史诗列为特性
-     * @param copyFieldsName
-     * @return
+     *
+     * @param copyFieldsName copyFieldsName
+     * @return result
      */
     String[] changeFeatureHeaders(String[] copyFieldsName);
 
@@ -298,8 +342,9 @@ public interface AgilePluginService {
 
     /**
      * 删除子项目版本时，删除和项目群版本的关联关系
-     * @param projectId
-     * @param versionId
+     *
+     * @param projectId projectId
+     * @param versionId versionId
      */
     void deleteProgramVersionRel(Long projectId, Long versionId);
 
@@ -309,154 +354,169 @@ public interface AgilePluginService {
 
     /**
      * 故事改变状态联动改变特性的状态
-     * @param projectId
-     * @param issueDTO
-     * @param applyType
+     *
+     * @param projectId projectId
+     * @param issueDTO issueDTO
+     * @param applyType applyType
      */
     void storyLinkageFeature(Long projectId, IssueDTO issueDTO, String applyType);
 
     /**
      * 设置特性类型和团队信息
-     * @param issues
-     * @param organizationId
+     *
+     * @param issues issues
+     * @param organizationId organizationId
      */
-    void setFeatureTypeAndFeatureTeams(List<IssueListFieldKVVO> issues,  Long organizationId);
+    void setFeatureTypeAndFeatureTeams(List<IssueListFieldKVVO> issues, Long organizationId);
 
     /**
      * 项目群子项目版本列表要返回关联的项目群版本信息
-     * @param productVersionPageVOS
-     * @param projectId
-     * @param content
+     *
+     * @param productVersionPageVOS productVersionPageVOS
+     * @param projectId projectId
+     * @param content content
      */
     void settingProgramVersions(List<ProductVersionPageVO> productVersionPageVOS, Long projectId, List<Long> content);
 
     /**
      * 版本关联特性
-     * @param programId
-     * @param organizationId
-     * @param featureIds
-     * @param programVersionIds
+     *
+     * @param programId programId
+     * @param organizationId organizationId
+     * @param featureIds featureIds
+     * @param programVersionIds programVersionIds
      */
-    void linkFeatureByBacklog(Long programId,Long organizationId, List<Long> featureIds, List<Long> programVersionIds);
+    void linkFeatureByBacklog(Long programId, Long organizationId, List<Long> featureIds, List<Long> programVersionIds);
 
     /**
      * 获取字段Code
-     * @param fieldCodes
-     * @param issueTypeId
+     *
+     * @param fieldCodes fieldCodes
+     * @param issueTypeId issueTypeId
      */
     void getIssueTypeFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
     /**
      * 处理冲刺是否是规划中
-     * @param projectId
-     * @param list
+     *
+     * @param projectId projectId
+     * @param list list
      */
     void handlerSprintPlanInfo(Long projectId, List<SprintSearchVO> list);
 
     /**
      * 故事地图分页查询
-     * @param projectId
-     * @param epicIds
-     * @param searchVO
-     * @param page
-     * @param size
-     * @return
+     *
+     * @param projectId projectId
+     * @param epicIds epicIds
+     * @param searchVO searchVO
+     * @param page page
+     * @param size size
+     * @return result
      */
     StoryMapVO handlerBusinessPageStoryMap(Long projectId, List<Long> epicIds, SearchVO searchVO, Integer page, Integer size);
 
     /**
      * 状态机流转处理特性的项目群版本
-     * @param issueDTO
-     * @param specifyMap
+     *
+     * @param issueDTO issueDTO
+     * @param specifyMap specifyMap
      */
     void handlerSpecifyProgramField(IssueDTO issueDTO, Map<String, Object> specifyMap, boolean doRuleNotice, TriggerCarrierVO triggerCarrierVO);
 
     /**
      * 处理状态机自定义流转项目群字段属性
      *
-     * @param statusFieldSettingVO
-     * @param statusFieldValueSettingDTOS
+     * @param statusFieldSettingVO statusFieldSettingVO
+     * @param statusFieldValueSettingDTOS statusFieldValueSettingDTOS
      */
     void handlerProgramFieldValue(StatusFieldSettingVO statusFieldSettingVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS);
 
     /**
      * 跨项目转交处理Feature需要清空得数据
-     * @param projectId
-     * @param issueDTO
+     *
+     * @param projectId projectId
+     * @param issueDTO issueDTO
      */
     void handlerBusinessCleanValue(Long projectId, IssueDetailDTO issueDTO);
 
     /**
      * 项目群子项目需要清空逻辑
-     * @param issueDTO
-     * @param issueUpdateVO
-     * @param fieldList
+     *
+     * @param issueDTO issueDTO
+     * @param issueUpdateVO issueUpdateVO
+     * @param fieldList fieldList
      */
     void handlerFeatureSelfValue(IssueDetailDTO issueDTO, IssueUpdateVO issueUpdateVO, List<String> fieldList);
 
     /**
      * 修改agile_feature和wsjf表中数据的projectId
-     * @param projectId
-     * @param issueDTO
-     * @param targetProjectId
+     *
+     * @param projectId projectId
+     * @param issueDTO issueDTO
+     * @param targetProjectId targetProjectId
      */
     void projectMoveUpdateFeatureValue(Long projectId, IssueDTO issueDTO, Long targetProjectId);
 
     /**
      * 设置商业版预定义字段的默认值对象
-     * @param pageFieldViews
-     * @param projectId
-     * @param organizationId
+     *
+     * @param pageFieldViews pageFieldViews
+     * @param projectId projectId
+     * @param organizationId organizationId
      */
-    void setBussinessDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
+    void setBusinessDefaultValueObjs(List<PageFieldViewVO> pageFieldViews, Long projectId, Long organizationId);
 
     /**
      * 变更属性时处理feature的特有的系统字段
-     * @param fieldCode
-     * @param issueUpdateVO
-     * @param specifyMap
-     * @param statusFieldValueSettingDTOS
+     *
+     * @param fieldCode fieldCode
+     * @param issueUpdateVO issueUpdateVO
+     * @param specifyMap specifyMap
+     * @param statusFieldValueSettingDTOS statusFieldValueSettingDTOS
      */
     void handlerFeatureFieldValue(String fieldCode, IssueUpdateVO issueUpdateVO, Map<String, Object> specifyMap, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS, IssueDTO issueDTO, List<String> fieldList);
 
     /**
      * 如果是开源版升级到商业版，需要补充feature、risk问题类型
-     * @param organizationId
-     * @param issueTypes
+     *
+     * @param organizationId organizationId
+     * @param issueTypes issueTypes
      */
     void initBusinessType(Long organizationId, List<IssueTypeDTO> issueTypes);
 
     /**
      * 删除publishVersion关联数据
      *
-     * @param publishVersionId
+     * @param publishVersionId publishVersionId
      */
     void deleteAssociatedPublishVersion(Long publishVersionId);
 
     /**
      * 批量修改特性时，判断关联史诗的特性名称是否重复并返回判断标识
-     * @param issueUpdateVO
-     * @param projectId
-     * @return
+     *
+     * @param issueUpdateVO issueUpdateVO
+     * @param projectId projectId
+     * @return result
      */
     boolean checkFeatureSummaryAndReturn(IssueUpdateVO issueUpdateVO, Long projectId);
 
     /**
      * 获取项目群
      *
-     * @param projectId
-     * @param organizationId
-     * @return
+     * @param projectId projectId
+     * @param organizationId organizationId
+     * @return result
      */
-    ProjectVO getProgram(Long projectId, Long organizationId);
+    ProjectVO getProgram(Long organizationId, Long projectId);
 
     /**
      * 特性添加tag
      *
-     * @param issueId
-     * @param programId
-     * @param organizationId
-     * @param tag
+     * @param issueId issueId
+     * @param programId programId
+     * @param organizationId organizationId
+     * @param tag tag
      */
     void addTagToFeature(Long issueId, Long programId, Long organizationId, TagVO tag);
 
@@ -472,6 +532,7 @@ public interface AgilePluginService {
 
     /**
      * 获取商业版字段sql
+     *
      * @param fieldCode 字段code
      * @return 商业版字段sql
      */
@@ -485,9 +546,10 @@ public interface AgilePluginService {
 
     /**
      * 获取商业版项目关联信息
-     * @param organizationId 组织id
-     * @param projectId 项目id
-     * @param parentId 父级id
+     *
+     * @param organizationId   组织id
+     * @param projectId        项目id
+     * @param parentId         父级id
      * @param onlySelectEnable 是否启用
      * @return 项目关联信息
      */
@@ -515,9 +577,10 @@ public interface AgilePluginService {
 
     /**
      * 同步工作项到第三方
-     * @param tenantId 组织id
-     * @param issueId  问题id
-     * @param openAppType 第三方类型 ding_talk 等
+     *
+     * @param tenantId      组织id
+     * @param issueId       问题id
+     * @param openAppType   第三方类型 ding_talk 等
      * @param operationType 操作类型 create等
      */
     void issueSyncByIssueId(Long tenantId, Long issueId, String openAppType, OpenAppIssueSyncConstant.OperationType operationType);
@@ -526,14 +589,16 @@ public interface AgilePluginService {
 
     /**
      * 商业版创建项目时初始化风险问题类型和方案
-     * @param projectEvent
+     *
+     * @param projectEvent projectEvent
      */
     void initProjectRiskIssueTypeScheme(ProjectEvent projectEvent, Set<String> codes);
 
     /**
      * 风险问题类型字段默认顺序
-     * @param issueType
-     * @return
+     *
+     * @param issueType issueType
+     * @return result
      */
     List<String> queryFieldOrderByIssueType(String issueType);
 
@@ -555,7 +620,39 @@ public interface AgilePluginService {
 
     List<String> getOpenUserIdsByUserIds(List<Long> userIds, String openAppCode);
 
-    void createInstanceOpenRel(Long projectId, Long instanceId, String instanceType, InstanceOpenRelVO instanceOpenRelVO);
+    List<IssueProductRelVO> queryIssueProductRel(List<Long> issueIds);
 
-    InstanceOpenRelVO queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
+    void createInstanceOpenRel(Long organizationId, List<InstanceOpenRelVO> instanceOpenRelVO);
+
+    void deleteInstanceOpenRel(Long organizationId, Long instanceId, String instanceType);
+
+    List<InstanceOpenRelVO> queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
+
+    /**
+     * 迁移工作组数据到iam
+     */
+    void migrateWorkGroupData();
+
+    List<ProjectVO> queryProgramIdsByProjectIds(Set<Long> projectIds);
+
+    /**
+     * 商业版更新projectInfo
+     * @param projectInfoVO projectInfoVO
+     * @return return
+     */
+    ProjectInfoVO updateProjectInfo(ProjectInfoVO projectInfoVO);
+
+    /**
+     * 商业版工作项移动项目后置处理
+     * @param organizationId 租户ID
+     * @param issueIds 工作项ID集合
+     */
+    void afterIssueMoveProject(Long organizationId, Collection<Long> issueIds);
+
+    /**
+     * 商业版需求移动项目后置处理
+     * @param organizationId 租户ID
+     * @param instanceOpenRelVOCollection 由需求生成的关系VO集合
+     */
+    void afterBackLogMoveProject(Long organizationId, Collection<? extends InstanceOpenRelVO> instanceOpenRelVOCollection);
 }

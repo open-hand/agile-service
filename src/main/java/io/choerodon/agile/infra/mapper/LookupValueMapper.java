@@ -2,6 +2,10 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -15,4 +19,6 @@ public interface LookupValueMapper extends BaseMapper<LookupValueDTO> {
     LookupTypeWithValuesDTO queryLookupValueByCode(String typeCode);
 
     String selectNameByValueCode(String valueCode);
+
+    List<LookupValueDTO> selectByValueCodes(@Param("valueCodes") Set<String> valueCodes);
 }

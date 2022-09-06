@@ -1,9 +1,22 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.StatusMachineDTO;
+import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.RankUtil;
@@ -15,9 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -137,7 +147,7 @@ public class InitServiceImpl implements InitService {
         //敏捷创建完状态机后需要到敏捷创建列
         if (ObjectUtils.isEmpty(projectEvent.getUseTemplate()) || Boolean.FALSE.equals(projectEvent.getUseTemplate())) {
             List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
-            boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
+            boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads, applyType);
         }
         return stateMachineId;
     }
@@ -164,8 +174,8 @@ public class InitServiceImpl implements InitService {
     /**
      * 创建状态机节点和转换
      *
-     * @param organizationId
-     * @param stateMachineId
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
      */
     @Override
     public void createStateMachineDetail(Long organizationId, Long stateMachineId, String applyType) {

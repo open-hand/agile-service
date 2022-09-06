@@ -1,9 +1,9 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.IssueSubVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.IssueSubCreateVO;
+import io.choerodon.agile.api.vo.IssueSubVO;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 
@@ -20,11 +20,11 @@ public interface StateMachineClientService {
     /**
      * 执行状态转换
      *
-     * @param projectId
-     * @param issueId
-     * @param transformId
-     * @param inputDTO
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param transformId transformId
+     * @param inputDTO inputDTO
+     * @return result
      */
     ExecuteResult executeTransform(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO);
 

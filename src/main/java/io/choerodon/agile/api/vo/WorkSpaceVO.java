@@ -18,6 +18,9 @@ public class WorkSpaceVO {
     @ApiModelProperty("文件的类型")
     private String fileType;
 
+    @ApiModelProperty(value = "知识库名称")
+    private String baseName;
+
     public Long getId() {
         return id;
     }
@@ -56,5 +59,13 @@ public class WorkSpaceVO {
 
     public void setFileType(String fileType) {
         this.fileType = fileType;
+    }
+
+    public String getBaseName() {
+        return baseName;
+    }
+
+    public void setBaseName(String baseName) {
+        this.baseName = baseName;
     }
 }
