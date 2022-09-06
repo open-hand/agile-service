@@ -27,6 +27,7 @@ import io.choerodon.core.domain.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -38,7 +39,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -397,7 +397,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void handlerParticipantRel(IssueConvertDTO issueConvertDTO, Long projectId, Long issueId) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         if (!CollectionUtils.isEmpty(issueConvertDTO.getParticipantIds())) {
             issueParticipantRelService.createParticipantRel(issueId, projectId, issueConvertDTO.getParticipantIds());
         }
@@ -440,10 +439,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueConvertDTO.initializationIssue(statusId, projectInfoDTO);
         projectInfoService.updateIssueMaxNum(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueNum());
         //初始化排序
-        if (issueConvertDTO.isIssueRank()) {
+        if (Boolean.TRUE.equals(issueConvertDTO.isIssueRank())) {
             calculationRank(issueConvertDTO.getProjectId(), issueConvertDTO);
         }
-        if (issueConvertDTO.isIssueMapRank()) {
+        if (Boolean.TRUE.equals(issueConvertDTO.isIssueMapRank())) {
             calculationMapRank(issueConvertDTO);
         }
         issueValidator.verifyStoryPoints(issueConvertDTO);
@@ -750,7 +749,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (ObjectUtils.isEmpty(pageRequest.getSort())) {
             return sortMap;
         }
-        if (!handleSortField(pageRequest).equals("")) {
+        if (!handleSortField(pageRequest).equals(StringUtils.EMPTY)) {
             setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
         } else {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
@@ -904,15 +903,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public String handleSortField(PageRequest pageRequest) {
         if (!ObjectUtils.isEmpty(pageRequest.getSort())) {
             Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
-            String fieldCode = "";
+            String fieldCode = StringUtils.EMPTY;
             while (iterator.hasNext()) {
                 Sort.Order order = iterator.next();
                 fieldCode = order.getProperty();
             }
             if (fieldCode.contains("foundation.")) {
                 return fieldCode;
-            } else return "";
-        } else return "";
+            } else return StringUtils.EMPTY;
+        } else return StringUtils.EMPTY;
     }
 
     /**
@@ -970,7 +969,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private Boolean handlerUserSearch(Long projectId, String userName, SearchVO searchVO, String key) {
-        if (userName != null && !"".equals(userName)) {
+        if (StringUtils.isNotBlank(userName)) {
             List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
             if (!CollectionUtils.isEmpty(userVOS)) {
                 searchVO.getAdvancedSearchArgs().put(key, userVOS.stream().map(UserVO::getId).collect(Collectors.toList()));
@@ -1131,7 +1130,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                            Long projectId,
                            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
         boolean isMove = Boolean.TRUE.equals(result.get("isMove"));
-        JSONObject issueJSONObject = JSONObject.parseObject(JSON.toJSONString(result.get("jsonObj")));
+        JSONObject issueJSONObject = JSON.parseObject(JSON.toJSONString(result.get("jsonObj")));
         try {
             if (isMove) {
                 issueProjectMoveService.handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
@@ -1579,7 +1578,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private String getPredecessorType(String predecessorType) {
-        String result = "";
+        String result = StringUtils.EMPTY;
         switch(predecessorType) {
             case "predecessor_fs":
                 result = "完成-开始（FS）";
@@ -2249,7 +2248,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, isBatch = true, allFieldCheck = true)
     public void batchCreateIssueInvokeTrigger(List<TriggerCarrierVO> triggerCarriers) {
-
+        // TODO document why this method is empty
     }
 
     @Override
@@ -2788,7 +2787,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId) {
         String key = CLONE_ISSUE_KEY + issueId + ":" + asyncTraceId;
         Object object = redisUtil.get(key);
-        String status = "";
+        String status = StringUtils.EMPTY;
         if (!Objects.isNull(object)) {
             status = object.toString();
         }
@@ -3511,7 +3510,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         IssuePayload issuePayload = new IssuePayload();
         issuePayload.setIssueId(issueId);
         issuePayload.setProjectId(projectId);
-        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
+        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), StringUtils.EMPTY, StringUtils.EMPTY, ResourceLevel.PROJECT.value(), projectId));
     }
 
     @Override
@@ -3933,7 +3932,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                      String issueType,
                                                      String param) {
         if (IssueTypeCode.isBug(issueType) || IssueTypeCode.isSubTask(issueType)) {
-            /**
+            /*
              * 选择子任务：可关联问题：故事、缺陷（不是其他的子缺陷）、任务
              * 选择缺陷：故事、任务
              */
@@ -4063,7 +4062,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, isBatch = true)
     public void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers) {
-
+        // TODO document why this method is empty
     }
 
     @Override
@@ -4086,7 +4085,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private List<String> getLinkContents(IssueCopyLinkContents linkContents) {
-        Class clazz = linkContents.getClass();
+        Class<?> clazz = linkContents.getClass();
         List<String> result = new ArrayList<>();
         IssueCopyLinkContents.ISSUE_COPY_LINK_CONTENTS.forEach(content -> {
             try {
@@ -4110,7 +4109,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         Set<Long> issueIds = new HashSet<>();
         issueIds.add(issueId);
-        if (subTask) {
+        if (Boolean.TRUE.equals(subTask)) {
             if (Objects.equals(SchemeApplyType.AGILE, issueDTO.getApplyType())) {
                 // 敏捷工作项：查询子任务和自身
                 issueIds.addAll(issueMapper.selectSubTaskIds(projectId, issueId));
