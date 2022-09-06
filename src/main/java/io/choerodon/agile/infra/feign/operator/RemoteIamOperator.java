@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import io.choerodon.agile.api.vo.*;
@@ -28,6 +30,39 @@ public class RemoteIamOperator {
 
     public RemoteIamOperator(IamFeignClient iamFeignClient) {
         this.iamFeignClient = iamFeignClient;
+    }
+
+    /**
+     * 分页查询租户信息
+     * @param tenantName 模糊查询条件--租户名称
+     * @param tenantNum 模糊查询条件--租户编码
+     * @return 查询结果
+     */
+    public Page<TenantVO> pagingTenants(String tenantName, String tenantNum, int page, int size) {
+        return ResponseUtils.getResponse(
+                this.iamFeignClient.pagingTenants(tenantName, tenantNum, page, size),
+                new TypeReference<Page<TenantVO>>() {}
+        );
+    }
+
+    /**
+     * 根据租户编码查询租户信息<br/>
+     * <span style="color:red">注意, 这个是通过模糊查询接口获取的结果, 当租户编码区分度太低时也许会出问题, 慎用</span>
+     * @param tenantNum 租户名称
+     * @return 查询结果
+     */
+    public TenantVO findTenantByNumber(String tenantNum) {
+        if(StringUtils.isBlank(tenantNum)) {
+            return null;
+        }
+        final Page<TenantVO> page = ResponseUtils.getResponse(
+                this.iamFeignClient.pagingTenants(null, tenantNum, 0, 1000),
+                new TypeReference<Page<TenantVO>>() {}
+        );
+        if(CollectionUtils.isEmpty(page)) {
+            return null;
+        }
+        return page.stream().filter(t -> tenantNum.equals(t.getTenantNum())).findFirst().orElse(null);
     }
 
     public List<ProjectVO> queryProjectByIds(Set<Long> ids) {

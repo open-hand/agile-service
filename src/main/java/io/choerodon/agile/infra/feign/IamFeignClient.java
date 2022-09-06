@@ -25,6 +25,22 @@ import io.choerodon.agile.infra.feign.fallback.BaseFallbackFactory;
 public interface IamFeignClient {
 
     /**
+     * 分页查询租户信息
+     * @param tenantName 模糊查询条件--租户名称
+     * @param tenantNum 模糊查询条件--租户名称
+     * @param page 分页数
+     * @param size 页面大小
+     * @return Page<TenantVO>
+     */
+    @GetMapping({"/v1/tenants"})
+    ResponseEntity<String> pagingTenants(
+            @RequestParam String tenantName,
+            @RequestParam String tenantNum,
+            @RequestParam int page,
+            @RequestParam int size
+    );
+
+    /**
      * 查询用户信息
      *
      * @param organizationId organizationId
