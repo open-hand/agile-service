@@ -8,7 +8,7 @@ import { RequiredFieldDs } from '@/components/required-field/useRequiredFieldDat
 import styles from './SubTaskRequired.less';
 
 export interface ISubTaskRequiredItem {
-  issueId: string, issueTypeVO: IIssueType, issueNum: string, summary: string, requiredFields: IField[],
+  issueId: string, issueTypeId?: string, issueTypeVO: IIssueType, issueNum: string, summary: string, requiredFields: IField[],
 }
 
 interface Props {
@@ -26,7 +26,7 @@ const SubTaskRequired: React.FC<Props> = ({ item, requiredFieldDsArr }) => {
         <TypeTag
           data={issueTypeVO}
         />
-        <span style={{ margin: '0 8px' }}>{issueNum}</span>
+        <span style={{ marginLeft: '2px', marginRight: '8px' }}>{issueNum}</span>
         <span>{summary}</span>
       </div>
       <div>

@@ -3,7 +3,7 @@ import { Tooltip } from 'choerodon-ui/pro';
 import classNames from 'classnames';
 import styles from './index.less';
 
-export interface HeadTagProps extends React.HTMLAttributes<HTMLDivElement>{
+export interface HeadTagProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string
   name?: React.ReactNode
   avatarStyle?: React.CSSProperties

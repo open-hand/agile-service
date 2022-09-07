@@ -16,9 +16,9 @@ import { AGILE_TYPE_CODES } from '@/constants/TYPE_CODE';
 export interface CreateIssueSelectProjectProps {
   showSelectProject?: boolean,
   /** 限定查询层级为 `outside` */
-  queryLevelOutside?:boolean
+  queryLevelOutside?: boolean
 }
-export type CreateIssueBase0Props =CreateIssueBaseProps& CreateIssueSelectProjectProps;
+export type CreateIssueBase0Props = CreateIssueBaseProps & CreateIssueSelectProjectProps;
 export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'> {
   onCreate: (issue: Issue) => void,
   /** 创建来源 */
@@ -28,7 +28,6 @@ export interface CreateIssueProps extends Omit<CreateIssueBase0Props, 'onSubmit'
   request?: (data: any, applyType?: 'agile' | 'program' | 'waterfall' | 'risk') => Promise<any>
   onCancel?: () => void,
 }
-
 export const CreateContent = (props: CreateIssueBase0Props) => {
   const {
     showSelectProject = false, projectId, modal, queryLevelOutside,

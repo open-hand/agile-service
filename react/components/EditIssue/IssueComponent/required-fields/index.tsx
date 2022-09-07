@@ -1,20 +1,13 @@
-import React, {
-  useEffect, useCallback, useMemo, useState, useRef,
-} from 'react';
-import {
-  Modal, Form, DataSet, Select,
-} from 'choerodon-ui/pro';
-import {
-  includes, find,
-} from 'lodash';
-import { observer } from 'mobx-react-lite';
-import { usePersistFn } from 'ahooks';
+import React, {useCallback, useEffect, useMemo, useRef, useState,} from 'react';
+import {DataSet, Form, Modal, Select,} from 'choerodon-ui/pro';
+import {find, includes,} from 'lodash';
+import {observer} from 'mobx-react-lite';
+import {usePersistFn} from 'ahooks';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
-import useIsInProgram from '@/hooks/useIsInProgram';
-import { IField, IModalProps } from '@/common/types';
+import {IField, IModalProps} from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import { OldLoading as Loading } from '@/components/Loading';
-import { issueApi } from '@/api';
+import {OldLoading as Loading} from '@/components/Loading';
+import {defaultIssueType, issueApi} from '@/api';
 import useProjectIssueTypes from '@/hooks/data/useProjectIssueTypes';
 import RequiredField from '@/components/required-field';
 import useRequiredFieldDataSet from '@/components/required-field/useRequiredFieldDataSet';
@@ -89,6 +82,9 @@ const ChangeTypeModal: React.FC<ChangeTypeModalProps> = (props) => {
     issueId: issueVO.issueId,
     issueTypeId: issueTypeIdDataSet.current?.get('issueTypeId'),
     requiredFields: requiredFields || [],
+    issueTypeVO: defaultIssueType,
+    issueNum: '',
+    summary: issueVO.summary,
   }], projectId);
 
   const removeField = useCallback((name: string) => {

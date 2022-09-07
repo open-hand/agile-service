@@ -7,7 +7,7 @@ import { IIssueType } from '@/common/types';
 import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
 import TypeTag from '@/components/TypeTag';
 
-interface Props extends Partial<SelectProps> {
+export interface SelectIssueTypeProps extends Partial<SelectProps> {
   valueField?: string
   flat?: boolean
   projectId?: string
@@ -16,7 +16,7 @@ interface Props extends Partial<SelectProps> {
   showIcon?: boolean
 }
 
-const SelectIssueType: React.FC<Props> = forwardRef(({
+const SelectIssueType: React.FC<SelectIssueTypeProps> = forwardRef(({
   valueField, flat, projectId, config, queryOptions, showIcon = false,
   ...otherProps
 }, ref: React.Ref<Select>) => {

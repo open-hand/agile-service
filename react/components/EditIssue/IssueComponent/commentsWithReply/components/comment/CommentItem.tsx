@@ -1,5 +1,5 @@
 import React, {
-  useCallback, useEffect, useState, useImperativeHandle,
+  useCallback, useEffect, useImperativeHandle, useState,
 } from 'react';
 import { Icon } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
@@ -8,7 +8,7 @@ import WYSIWYGEditor from '@/components/CKEditor';
 import WYSIWYGViewer from '@/components/CKEditorViewer';
 import './Comment.less';
 import { IComment } from '@/common/types';
-import { issueCommentApi, UComment, IReplyCreate } from '@/api/IssueComment';
+import { IReplyCreate, issueCommentApi, UComment } from '@/api/IssueComment';
 import UserTag from '@/components/tag/user-tag';
 import openDeleteModal from '../deleteComment';
 
@@ -110,12 +110,16 @@ const CommentItem: React.FC<Props> = ({
   }, [isSelf, onUpdate, projectId]);
 
   const handleUpdate = useCallback(async (delta: string) => {
-    const commentText = value;
-    updateComment({
-      commentId: comment.commentId,
-      objectVersionNumber: comment.objectVersionNumber,
-      commentText,
-    });
+    if (value && verifyComment(value)) {
+      const commentText = value;
+      updateComment({
+        commentId: comment.commentId,
+        objectVersionNumber: comment.objectVersionNumber,
+        commentText,
+      });
+    } else {
+      setValue(comment.commentText);
+    }
     setEditing(false);
   }, [comment.commentId, comment.objectVersionNumber, updateComment, value]);
 
@@ -253,9 +257,11 @@ const CommentItem: React.FC<Props> = ({
                 style={{ minHeight: 300, width: '100%' }}
                 onCancel={() => {
                   setEditing(false);
+                  setValue(comment.commentText);
                 }}
                 onOk={handleUpdate}
                 projectId={projectId}
+                placeholder="请输入评论"
               />
             </div>
           ) : (
@@ -281,6 +287,7 @@ const CommentItem: React.FC<Props> = ({
               onOk={handleReply}
               okText="回复"
               projectId={projectId}
+              placeholder={`回复 ${comment.userRealName}:`}
             />
           </div>
         )

@@ -1,20 +1,20 @@
-import React, { Component } from 'react';
-import {
-  Input, Menu, Dropdown, Icon, Tooltip,
-} from 'choerodon-ui';
-import { Choerodon } from '@choerodon/boot';
-import { isEmpty } from 'lodash';
-import { getProjectId } from '@/utils/common';
-import { checkCanQuickCreate } from '@/utils/quickCreate';
-import { issueApi, fieldApi } from '@/api';
-import { TypeTag } from '@/components';
-import { fields2Map } from '@/utils/defaultValue';
-import { useStoryMapContext } from '@/routes/StoryMap/StoryMapHome';
+import React, {Component} from 'react';
+import {Dropdown, Icon, Menu, Tooltip,} from 'choerodon-ui';
+import {TextArea} from 'choerodon-ui/pro';
+import {Choerodon} from '@choerodon/boot';
+import {isEmpty} from 'lodash';
+import {getProjectId} from '@/utils/common';
+import {checkCanQuickCreate} from '@/utils/quickCreate';
+import {fieldApi, issueApi} from '@/api';
+import {TypeTag} from '@/components';
+import {fields2Map} from '@/utils/defaultValue';
+import {useStoryMapContext} from '@/routes/StoryMap/StoryMapHome';
 import openCreateIssue from '@/components/create-issue';
 import Card from '../Card';
 import './CreateStory.less';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../../components/CommonComponent/ClickOutSide';
+import {MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
 
 class CreateStory extends Component {
   // 防止重复创建
@@ -245,8 +245,6 @@ class CreateStory extends Component {
           boxShadow: adding ? '0 0 4px -2px rgba(0,0,0,0.50), 0 2px 4px 0 rgba(0,0,0,0.13)' : '',
           borderRadius: 2,
           padding: 7,
-
-          justifyContent: 'center',
         }}
         className="c7nagile-StoryMap-CreateStory"
       >
@@ -273,14 +271,20 @@ class CreateStory extends Component {
                     />
                   </div>
                 </Dropdown>
-                <Input border={false} autoFocus onPressEnter={this.handleCreateIssue} placeholder="作为什么角色，我想要什么样的结果，以便于怎样的目的" value={value} onChange={this.handleChange} maxLength={44} />
+                <TextArea
+                  border={false}
+                  autoFocus onEnterDown={this.handleCreateIssue} placeholder="作为什么角色，我想要什么样的结果，以便于怎样的目的" value={value}
+                  rows={1} resize={'vertical'}
+                  onInput={this.handleChange} maxLength={MAX_LENGTH_SUMMARY} showLengthInfo={true}
+                  style={{paddingLeft: '1em'}}
+                />
               </div>
             )
             : (
               <div className="c7nagile-StoryMap-CreateStory-btn">
-                {issueTypes.length > 0 ? <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleAddStoryClick}>新建工作项</span>
+                {issueTypes.length > 0 ? <span role="none" className="primary" style={{ cursor: 'pointer', }} onClick={this.handleAddStoryClick}>新建工作项</span>
                   : <Tooltip title="工作项类型中所有故事类型被禁用，无法新建工作项"><span role="none" style={{ color: 'rgba(0, 0, 0, 0.26)' }}>新建工作项</span></Tooltip>}
-                或
+                <br/>
                 <span role="none" className="primary" style={{ cursor: 'pointer' }} onClick={this.handleSourceClick}>从未规划列表引入</span>
               </div>
             )

@@ -31,6 +31,8 @@ public class CopyConditionVO {
     private String epicName;
     @ApiModelProperty("复制问题必填字段集合")
     private List<CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOS;
+    @ApiModelProperty("关联内容")
+    private List<String> linkContents;
 
     public String getEpicName() {
         return epicName;
@@ -91,5 +93,13 @@ public class CopyConditionVO {
 
     public void setCopyIssueRequiredFieldVOS(List<CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOS) {
         this.copyIssueRequiredFieldVOS = copyIssueRequiredFieldVOS;
+    }
+
+    public List<String> getLinkContents() {
+        return linkContents;
+    }
+
+    public void setLinkContents(List<String> linkContents) {
+        this.linkContents = linkContents;
     }
 }

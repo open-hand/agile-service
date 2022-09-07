@@ -350,7 +350,7 @@ public class BoardTemplateServiceImpl implements BoardTemplateService {
         } else {
             Long stateMachineId = queryDefaultStatusMachineId(organizationId, projectId);
             List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectId, stateMachineId);
-            boardService.initBoard(projectId, "默认看板", statusPayloads);
+            boardService.initBoard(projectId, "默认看板", statusPayloads, applyType);
         }
     }
 

@@ -73,4 +73,19 @@ public class DevopsClientOperator {
         }
     }
 
+    public boolean checkExistIssueBranchRel(Long projectId, Long issueId) {
+        try {
+            return devopsFeignClient.checkIssueBranchRelExist(projectId, issueId).getBody();
+        } catch (ServiceUnavailableException e) {
+            return false;
+        }
+    }
+
+    public void copyIssueRelatedBranches(Long projectId, Long oldIssueId, Long newIssueId) {
+        try{
+            devopsFeignClient.copyIssueBranchRel(projectId, oldIssueId, newIssueId).getBody();
+        } catch (ServiceUnavailableException e) {
+            return;
+        }
+    }
 }

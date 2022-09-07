@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { Choerodon } from '@choerodon/boot';
-import { observer, inject } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { some } from 'lodash';
-import { featureApi, issueApi } from '@/api';
+import { featureApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import SelectEpic from '@/components/select/select-epic';
 import SelectFeature from '@/components/select/select-feature';
+import SelectEpic from '@/components/select/select-epic';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import { SHOW_FEATURE_TYPE_CODES } from '@/constants/SHOW_FEATURE_TYPE_CODE';
 import styles from './FieldEpic.less';

@@ -193,14 +193,6 @@ public interface BaseFeignClient {
     ResponseEntity<List<ProjectVO>> queryOrgProjects(@PathVariable("organization_id") Long organizationId,
                                                       @PathVariable("user_id") Long userId);
 
-    @GetMapping("/choerodon/v1/organizations/{organization_id}/users/{user_id}/projects/paging")
-    ResponseEntity<Page<ProjectVO>> pagingProjectsByUserId(@PathVariable("organization_id") Long organizationId,
-                                                           @PathVariable("user_id") Long userId,
-                                                           @RequestParam int page,
-                                                           @RequestParam int size,
-                                                           @RequestParam(required = false) Boolean enabled,
-                                                           @RequestParam(required = false) String category);
-
     @PostMapping(value = "/choerodon/v1/projects/ids")
     ResponseEntity<List<ProjectVO>> queryByIds(@RequestBody Set<Long> ids);
 

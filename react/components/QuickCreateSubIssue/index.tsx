@@ -1,30 +1,23 @@
 /* eslint-disable react/require-default-props */
 
-import React, {
-  useCallback, useEffect, useRef, useState,
-} from 'react';
-import { Choerodon } from '@choerodon/boot';
-import {
-  Input, Icon, Dropdown, Menu,
-} from 'choerodon-ui';
-import { Button, Spin } from 'choerodon-ui/pro';
-import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/interface';
-import {
-  useClickAway, useLockFn, useUpdateEffect,
-} from 'ahooks';
-import {
-  castArray, find, isBoolean, isString, pick,
-} from 'lodash';
-import useProjectIssueTypes, { ProjectIssueTypesConfig } from '@/hooks/data/useProjectIssueTypes';
-import { IIssueType, Issue, User } from '@/common/types';
-import { checkCanQuickCreate, getQuickCreateDefaultObj, IQuickCreateDefaultValueParams } from '@/utils/quickCreate';
-import { fieldApi, issueApi } from '@/api';
-import { fields2Map } from '@/utils/defaultValue';
+import React, {useCallback, useEffect, useRef, useState,} from 'react';
+import {Choerodon} from '@choerodon/boot';
+import {Dropdown, Icon, Menu,} from 'choerodon-ui';
+import {Button, Spin, TextField} from 'choerodon-ui/pro';
+import {ButtonColor, FuncType} from 'choerodon-ui/pro/lib/button/interface';
+import {useClickAway, useLockFn, useUpdateEffect,} from 'ahooks';
+import {castArray, find, isBoolean, isString, pick,} from 'lodash';
+import useProjectIssueTypes, {ProjectIssueTypesConfig} from '@/hooks/data/useProjectIssueTypes';
+import {IIssueType, Issue, User} from '@/common/types';
+import {checkCanQuickCreate, getQuickCreateDefaultObj, IQuickCreateDefaultValueParams} from '@/utils/quickCreate';
+import {fieldApi, issueApi} from '@/api';
+import {fields2Map} from '@/utils/defaultValue';
 import localCacheStore from '@/stores/common/LocalCacheStore';
 import TypeTag from '../TypeTag';
-import UserDropdown, { IUserDropDownProps } from '../UserDropdown';
+import UserDropdown, {IUserDropDownProps} from '../UserDropdown';
 import useDefaultPriority from '@/hooks/data/useDefaultPriority';
-import { WATERFALL_TYPE_CODES } from '@/constants/TYPE_CODE';
+import {WATERFALL_TYPE_CODES} from '@/constants/TYPE_CODE';
+import {MAX_LENGTH_SUMMARY} from "@/constants/MAX_LENGTH";
 
 type QuickCreateStatus = 'init' | 'success' | 'failed'
 type FilterCacheThumbnailKey = 'agile.issue.type.sub.selected' | 'agile.issue.type.common.selected';
@@ -39,6 +32,7 @@ interface QuickCreateSubIssueProps extends Pick<IUserDropDownProps, 'assigneeSel
   mountCreate?: boolean
   onCreate?: (issue: Issue) => void
   onUserChange?: IUserDropDownProps['onChange']
+  onIssueTypeChange?: (issueType?: IIssueType) => void,
   onAwayClick?: (createFn: () => Promise<any>, currentData: { createStatus: QuickCreateStatus, [key: string]: any }, event: MouseEvent | TouchEvent) => void
   /**
    *什么创建状态触发鼠标离开点击事件
@@ -63,10 +57,33 @@ interface QuickCreateSubIssueProps extends Pick<IUserDropDownProps, 'assigneeSel
   saveFilterToCache?: ((issueType: IIssueType) => FilterCacheThumbnailKey) | FilterCacheThumbnailKey
 
 }
+/**
+ * 过滤一些dom 鼠标响应
+ * @param dom
+ * @returns
+ */
+function filterSelfDom(dom?: HTMLElement) {
+  if (!dom) {
+    return false;
+  }
+  // 点击自身
+  if (dom.classList?.contains('c7n-subTask-quickCreate')) {
+    return true;
+  }
+  // 过滤issueType下拉框
+  if (dom.id === 'quickCreateSubIssue-issueType-overlay' || dom.classList?.contains('c7n-agile-userDropdown-overlay-tooltip') || dom.classList?.contains('c7n-agile-type_tag_popup-tip')) {
+    return true;
+  }
+  // 过滤用户下拉框
+  if (dom.id === 'agile-userDropdown-overlay' || dom.id === 'c7n-agile-user-tag' || dom.classList?.contains('c7n-agile-userDropdown-overlay-tooltip')) {
+    return true;
+  }
+  return false;
+}
 const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   priorityId, parentIssueId, sprintId, onCreate, defaultAssignee, defaultValues, projectId, cantCreateEvent, isCanQuickCreate, typeCode, summaryChange,
   typeIdChange, setDefaultSprint, assigneeChange, mountCreate, onAwayClick, beforeClick, applyType, saveFilterToCache, createStatusTriggerAwayClick = 'success', onUserChange,
-  assigneeSelected,
+  assigneeSelected, onIssueTypeChange,
 }) => {
   const { data: issueTypes, isLoading } = useProjectIssueTypes({
     typeCode: typeCode || 'sub_task', projectId, onlyEnabled: true, applyType,
@@ -85,6 +102,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
   useEffect(() => {
     userDropDownRef.current?.changeSelect(assigneeSelected);
   }, [assigneeSelected]);
+  useEffect(() => {
+    onIssueTypeChange && onIssueTypeChange(currentType);
+  }, [currentType]);
   useEffect(() => {
     if (issueTypes && issueTypes.length > 0) {
       const typeCodes = castArray(typeCode || 'sub_task');
@@ -224,7 +244,9 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
     setExpand(false);
   }, []);
   useClickAway((e) => {
-    if (e && (e as MouseEvent).composedPath().some((dom) => (dom as HTMLElement)?.id === 'quickCreateSubIssue-issueType-overlay' || (dom as HTMLElement)?.classList?.contains('c7n-subTask-quickCreate') || (dom as HTMLElement)?.id === 'agile-userDropdown-overlay')) {
+    if (e && ((e as MouseEvent).composedPath() as HTMLElement[]).some(filterSelfDom)) {
+      e.stopPropagation();
+      e.preventDefault();
       return;
     }
     if (!isLoading && onAwayClick) {
@@ -295,18 +317,22 @@ const QuickCreateSubIssue: React.FC<QuickCreateSubIssueProps> = ({
                 )}
                 <UserDropdown userDropDownRef={userDropDownRef} defaultAssignee={defaultAssignee} key={defaultAssignee?.id} projectId={projectId} onChange={onUserChange} />
 
-                <Input
+                <TextField
                   className="hidden-label"
                   autoFocus
                   autoComplete="on"
-                  onPressEnter={handleCreate}
-                  onChange={(e) => {
-                    setSummary(e.target.value);
+                  onEnterDown={handleCreate}
+                  onInput={(e) =>{
+                    if(e && e.target) {
+                      setSummary((e.target as any).value);
+                    }
                   }}
                   disabled={loading}
                   value={summary}
-                  maxLength={44}
+                  maxLength={MAX_LENGTH_SUMMARY}
+                  showLengthInfo={true}
                   placeholder="请输入工作项概要"
+                  style={{width: '100%'}}
                 />
                 <Button
                   color={'primary' as ButtonColor}

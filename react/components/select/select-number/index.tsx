@@ -9,11 +9,11 @@ import { refsBindRef } from '../utils';
 
 const { Option } = Select;
 
-interface Props extends Partial<SelectProps> {
+export interface SelectNumberProps extends Partial<SelectProps> {
   selectNumbers?: string[],
 }
 
-const SelectNumber: React.FC<Props> = forwardRef(({
+const SelectNumber: React.FC<SelectNumberProps> = forwardRef(({
   selectNumbers = ['0.5', '1', '2', '3', '4', '5', '8', '13'],
   onChange,
   onBlur,

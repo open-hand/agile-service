@@ -1,11 +1,7 @@
-import {
-  useCallback, useMemo, useRef,
-} from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
-import {
-  assign,
-} from 'lodash';
+import { assign } from 'lodash';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
@@ -13,6 +9,7 @@ import { IField } from '@/common/types';
 import { formatFields, systemFields } from './util';
 import { IFieldsValueVo } from './RequiredField';
 import { epicConfigApi } from '@/api';
+import { ISubTaskRequiredItem } from '@/components/CopyIssue/copy-required/SubTaskRequired';
 
 interface Props {
   issueId: string
@@ -26,7 +23,7 @@ export interface RequiredFieldDs {
   getData: () => IFieldsValueVo,
 }
 
-const useRequiredFieldDataSet = (issuesFieldRequired: Props[], projectId?: string): RequiredFieldDs[] => {
+const useRequiredFieldDataSet = (issuesFieldRequired: ISubTaskRequiredItem[], projectId?: string): RequiredFieldDs[] => {
   const { isInProgram } = useIsInProgram({ projectId });
   const dataSetMapRef = useRef<Map<string, DataSet>>();
   const dataSetMap = useMemo(() => new Map(), []);
@@ -117,7 +114,7 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[], projectId?: strin
     textField: 'name',
   }]), [isInProgram, projectId]);
 
-  const getRequiredFieldDataSet = useCallback((issue: Props) => {
+  const getRequiredFieldDataSet = useCallback((issue: ISubTaskRequiredItem) => {
     const newDataSet = new DataSet({
       autoCreate: true,
       fields: [
@@ -167,6 +164,12 @@ const useRequiredFieldDataSet = (issuesFieldRequired: Props[], projectId?: strin
               textField: 'name',
             });
           }
+          console.log({
+            ...dsField,
+            name: item.fieldCode === 'epic' && isInProgram ? 'featureId' : item.fieldCode,
+            label: item.fieldCode === 'epic' && isInProgram ? '特性' : item.fieldName,
+            required: true,
+          })
           return ({
             ...dsField,
             name: item.fieldCode === 'epic' && isInProgram ? 'featureId' : item.fieldCode,

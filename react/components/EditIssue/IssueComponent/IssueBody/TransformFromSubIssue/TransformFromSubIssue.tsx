@@ -1,20 +1,17 @@
-import React, {
-  useMemo, useCallback, useEffect, useState, useRef,
-} from 'react';
-import { observer } from 'mobx-react-lite';
-import { Choerodon } from '@choerodon/boot';
-import {
-  DataSet, Form, Modal, TextField,
-} from 'choerodon-ui/pro';
-import { map } from 'lodash';
-import { IModalProps, Issue, IIssueType } from '@/common/types';
-import { issueApi } from '@/api';
+import React, {useCallback, useEffect, useMemo, useRef, useState,} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Choerodon} from '@choerodon/boot';
+import {DataSet, Form, Modal, TextField,} from 'choerodon-ui/pro';
+import {map} from 'lodash';
+import {IIssueType, IModalProps, Issue} from '@/common/types';
+import {issueApi} from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import SelectIssueType from '@/components/select/select-issue-type';
 import EditIssueStore from '@/components/EditIssue/stores/EditIssueStore';
 import openRequiredFieldsModal from '../../required-fields';
 import styles from './TransformFromSubIssue.less';
+import {MAX_LENGTH_EPIC_NAME} from '@/constants/MAX_LENGTH';
 
 interface Props {
   modal?: IModalProps
@@ -40,7 +37,7 @@ const TransformFromSubIssue: React.FC<Props> = ({
     }, {
       name: 'epicName',
       label: '史诗名称',
-      maxLength: 44,
+      maxLength: MAX_LENGTH_EPIC_NAME,
       dynamicProps: {
         required: ({ record }) => {
           const epicTypes = (issueTypesRef.current || []).filter((item) => item.typeCode === 'issue_epic');

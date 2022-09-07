@@ -48,4 +48,20 @@ public class TestServiceClientOperator {
             return new ArrayList<>();
         }
     }
+
+    public Boolean checkExistTestCaseLink(Long projectId, Long issueId) {
+        try {
+            return testFeignClient.checkTestCaseLinkExist(projectId, issueId).getBody();
+        } catch (ServiceUnavailableException e) {
+            return false;
+        }
+    }
+
+    public void copyIssueRelatedTestCases(Long projectId, Long issueId, Long newIssueId) {
+        try{
+            testFeignClient.copyIssueRelatedTestCases(projectId, issueId, newIssueId).getBody();
+        } catch (ServiceUnavailableException e) {
+            return;
+        }
+    }
 }

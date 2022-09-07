@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -86,6 +87,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
@@ -155,13 +158,156 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
 
     @Override
     public void checkCreateCustomFieldWithoutRuleNotice(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList) {
-        if (!fieldValues.isEmpty()) {
-            fieldValueMapper.batchInsert(projectId, id, schemeCode, fieldValues);
+        //处理数字类型自定义字段默认值和状态联动更新属性自定义字段add操作结果不正确的问题
+        List<FieldValueDTO> fieldValueList = calcNumberByDefaultValue(projectId, id, schemeCode, fieldValues);
+        if (!fieldValueList.isEmpty()) {
+            fieldValueMapper.batchInsert(projectId, id, schemeCode, fieldValueList);
         }
         //创建问题通知自定义字段人员
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, id);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, new HashMap<>(), new HashMap<>(), new HashMap<>());
         sendMsgUtil.sendMsgToCustomFieldUsersByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
+    }
+
+    private List<FieldValueDTO> calcNumberByDefaultValue(Long projectId,
+                                                         Long instanceId,
+                                                         String schemeCode,
+                                                         List<FieldValueDTO> fieldValues) {
+        Long issueTypeId = null;
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        if (ObjectSchemeCode.BACKLOG.equals(schemeCode) && !ObjectUtils.isEmpty(backlogExpandService)) {
+            IssueTypeDTO dto = new IssueTypeDTO();
+            dto.setOrganizationId(organizationId);
+            dto.setTypeCode(IssueTypeCode.BACKLOG.value());
+            IssueTypeDTO backlogType = issueTypeMapper.selectOne(dto);
+            if (!ObjectUtils.isEmpty(backlogType)) {
+                issueTypeId = backlogType.getId();
+            }
+        } else {
+            IssueDTO issue = issueMapper.selectByPrimaryKey(instanceId);
+            if (ObjectUtils.isEmpty(issue)) {
+                throw new CommonException("error.issue.type.not.existed");
+            }
+            issueTypeId = issue.getIssueTypeId();
+        }
+        //数字类型字段，没有权限，需要在后台设置默认值，保证有权限人员看到的值是正确的
+        addNoPermissionNumberFields(projectId, issueTypeId, fieldValues);
+        List<FieldValueDTO> result = new ArrayList<>();
+        List<FieldValueDTO> numberFields = new ArrayList<>();
+        Set<Long> fieldIds = new HashSet<>();
+        for (FieldValueDTO fieldValue : fieldValues) {
+            String numberValue = fieldValue.getNumberValue();
+            Long fieldId = fieldValue.getFieldId();
+            if (!ObjectUtils.isEmpty(numberValue)) {
+                numberFields.add(fieldValue);
+                fieldIds.add(fieldId);
+            } else {
+                result.add(fieldValue);
+            }
+        }
+        if (!fieldIds.isEmpty()) {
+            Map<Long, ObjectSchemeFieldDTO> fieldMap =
+                    objectSchemeFieldMapper.selectByIds(StringUtils.join(fieldIds, ","))
+                            .stream()
+                            .collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
+            if (!ObjectUtils.isEmpty(issueTypeId)) {
+                Map<Long, String> defaultValueMap =
+                        queryFieldDefaultMap(Arrays.asList(issueTypeId), organizationId, fieldIds, projectId);
+                for (FieldValueDTO dto : numberFields) {
+                    Long fieldId = dto.getFieldId();
+                    String defaultValue = defaultValueMap.get(fieldId);
+                    if (ObjectUtils.isEmpty(defaultValue)) {
+                        //创建时暂无默认值，插入
+                        result.add(dto);
+                    } else {
+                        //计算状态联动增加值和默认值的逻辑
+                        BigDecimal defaultNumberValue = new BigDecimal(defaultValue);
+                        FieldValueDTO fieldValue = new FieldValueDTO();
+                        fieldValue.setInstanceId(instanceId);
+                        fieldValue.setFieldId(fieldId);
+                        fieldValue.setProjectId(projectId);
+                        fieldValue.setSchemeCode(schemeCode);
+                        FieldValueDTO statusLinkedValue = fieldValueMapper.selectOne(fieldValue);
+                        if (!ObjectUtils.isEmpty(statusLinkedValue)) {
+                            String oldValue = statusLinkedValue.getNumberValue();
+                            BigDecimal old = new BigDecimal(oldValue);
+                            BigDecimal resultValue = old.add(defaultNumberValue);
+                            ObjectSchemeFieldDTO field = fieldMap.get(fieldId);
+                            PageFieldViewUpdateVO pageFieldViewUpdateVO = new PageFieldViewUpdateVO();
+                            pageFieldViewUpdateVO.setFieldType(field.getFieldType());
+                            pageFieldViewUpdateVO.setFieldId(fieldId);
+                            pageFieldViewUpdateVO.setFieldCode(field.getCode());
+                            pageFieldViewUpdateVO.setValue(resultValue.toString());
+                            updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, pageFieldViewUpdateVO);
+                        } else {
+                            //有默认值，但没有执行状态联动逻辑，插入
+                            result.add(dto);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private void addNoPermissionNumberFields(Long projectId,
+                                             Long issueTypeId,
+                                             List<FieldValueDTO> fieldValues) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<PageFieldDTO> pageFields =
+                pageFieldService.queryPageField(organizationId, projectId, PageCode.AGILE_ISSUE_CREATE, issueTypeId);
+        Set<Long> fieldIds = fieldValues.stream().map(FieldValueDTO::getFieldId).collect(Collectors.toSet());
+        for (PageFieldDTO field : pageFields) {
+            Long fieldId = field.getFieldId();
+            String fieldType = field.getFieldType();
+            boolean isNumber = FieldType.NUMBER.equals(fieldType);
+            boolean isSkipped = fieldIds.contains(fieldId)
+                    || !Boolean.TRUE.equals(field.getDisplay())
+                    || Boolean.TRUE.equals(field.getSystem())
+                    || !isNumber;
+            if (isSkipped) {
+                continue;
+            }
+            List<FieldValueDTO> values = new ArrayList<>();
+            FieldValueUtil.handleDefaultValue2DTO(values, field);
+            for (FieldValueDTO fieldValue : values) {
+                fieldValue.setFieldId(fieldId);
+            }
+            fieldValues.addAll(values);
+        }
+    }
+
+    private Map<Long, String> queryFieldDefaultMap(List<Long> issueTypeIds,
+                                                   Long organizationId,
+                                                   Set<Long> fieldIds,
+                                                   Long projectId) {
+        Map<Long, String> map = new HashMap<>();
+        List<ObjectSchemeFieldExtendDTO> fieldExtendList =
+                objectSchemeFieldExtendMapper.selectExtendFieldsByOptions(issueTypeIds, organizationId, fieldIds, null);
+        Map<Long, List<ObjectSchemeFieldExtendDTO>> fieldMap =
+                fieldExtendList.stream().collect(Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getFieldId));
+        for (Long fieldId : fieldIds) {
+            List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtends = fieldMap.get(fieldId);
+            Map<Long, String> projectFieldMap = new HashMap<>();
+            if (!ObjectUtils.isEmpty(objectSchemeFieldExtends)) {
+                for (ObjectSchemeFieldExtendDTO dto : objectSchemeFieldExtends) {
+                    Long thisProjectId = dto.getProjectId();
+                    if (ObjectUtils.isEmpty(thisProjectId)) {
+                        thisProjectId = 0L;
+                    }
+                    projectFieldMap.put(thisProjectId, dto.getDefaultValue());
+                }
+            }
+            if (ObjectUtils.isEmpty(projectId)) {
+                projectId = 0L;
+            }
+            String defaultValue = projectFieldMap.get(projectId);
+            if (ObjectUtils.isEmpty(defaultValue)) {
+                defaultValue = projectFieldMap.get(0L);
+            }
+            map.put(fieldId, defaultValue);
+        }
+        return map;
     }
 
     @Override

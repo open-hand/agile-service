@@ -10,7 +10,9 @@ import type { IReactFCGanttProvideProjects } from '@/routes/gantt';
 import { warpGanttProvideProjects } from '@/routes/gantt';
 import IntlProviderAsync from '../../components/intl-provider-async';
 
-const WorkbenchProjectGantt: IReactFCGanttProvideProjects = ({ projects, currentProjectId, setCurrentProjectId }) => {
+const WorkbenchProjectGantt: IReactFCGanttProvideProjects = ({
+  projects, currentProjectId, setCurrentProjectId, newItem, setCurrentItem,
+}) => {
   const { isInProgram, loading: programLoading } = useIsInProgram({ projectId: currentProjectId });
 
   const { data: myFilter, isLoading } = useDefaultMyFilter({ projectId: currentProjectId, menuType: 'project' });
@@ -29,6 +31,8 @@ const WorkbenchProjectGantt: IReactFCGanttProvideProjects = ({ projects, current
           projectId={currentProjectId}
           projects={projects}
           setCurrentProject={setCurrentProjectId}
+          newItem={newItem}
+          setCurrentItem={setCurrentItem}
         />
       )}
     </TableCache>

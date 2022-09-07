@@ -1,12 +1,12 @@
-import React, { Component, createRef } from 'react';
+import React, {Component, createRef} from 'react';
 import moment from 'moment';
-import { observer } from 'mobx-react';
-import { DatePicker, Form } from 'choerodon-ui';
+import {observer} from 'mobx-react';
+import {DatePicker, Form} from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
-import { getProjectId } from '@/utils/common';
-import { IsInProgram } from '@/hooks/useIsInProgram';
+import {getProjectId} from '@/utils/common';
+import {IsInProgram} from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-import { sprintApi } from '@/api';
+import {sprintApi} from '@/api';
 import Portal from '@/components/Portal';
 
 const { Text, Edit } = TextEditToggle;
@@ -75,7 +75,6 @@ const FormItem = Form.Item;
                 onSubmit={() => {
                   form.validateFields((err, values) => {
                     if (!err) {
-                      // console.log('v', values);
                       this.handleUpdateDate({
                         startDate: values.startDate.format('YYYY-MM-DD HH:mm:ss'),
                         endDate: values.endDate.format('YYYY-MM-DD HH:mm:ss'),

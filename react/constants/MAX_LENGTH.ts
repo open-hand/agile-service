@@ -1,3 +1,5 @@
+export const MAX_LENGTH_SUMMARY = 100;
+export const MAX_LENGTH_EPIC_NAME = 20;
 export const MAX_LENGTH_SPRINT = 50;
 export const MAX_LENGTH_STATUS = 10;
 export const MAX_LENGTH_VERSION = 15;

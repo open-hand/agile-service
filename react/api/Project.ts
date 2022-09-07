@@ -1,4 +1,5 @@
 import { axios } from '@choerodon/boot';
+import { isArray } from 'lodash';
 import { getOrganizationId, getProjectId } from '@/utils/common';
 import Api from './Api';
 
@@ -33,16 +34,20 @@ class ProjectApi extends Api<ProjectApi> {
    */
   loadProjectByUser({
     userId, filter, page, size, category,
-  }: any) {
+  }: {
+    userId: number | string;
+    filter?: string;
+    page?: number;
+    size?: number;
+    category?: string | string[]
+  }) {
     return this.request({
-      method: 'get',
-      url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging`,
-      params: {
-        page,
-        size,
-        onlySucceed: true,
+      method: 'post',
+      url: `iam/choerodon/v1/organizations/${this.orgId}/users/${userId}/projects/paging?onlySucceed=true&page=1&size=0`,
+      data: {
         name: filter || '',
-        category,
+        // eslint-disable-next-line no-nested-ternary
+        categoryCodes: category ? (isArray(category) ? category : [category]) : undefined,
       },
     });
   }

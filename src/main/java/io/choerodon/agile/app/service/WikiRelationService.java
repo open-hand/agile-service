@@ -18,4 +18,6 @@ public interface WikiRelationService {
     void deleteById(Long projectId, Long id);
 
     void deleteByWorkSpaceId(Long projectId, Long workSpaceId);
+
+    void copyIssueKnowledgeRelations(Long projectId, Long issueId, Long newIssueId);
 }

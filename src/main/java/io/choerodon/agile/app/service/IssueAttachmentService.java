@@ -54,4 +54,6 @@ public interface IssueAttachmentService {
      * @return 上传的文件
      */
     IssueAttachmentVO attachmentCombineUpload(Long projectId, IssueAttachmentCombineVO issueAttachmentCombineVO);
+
+    void copyIssueAttachments(Long projectId, Long issueId, Long newIssueId);
 }

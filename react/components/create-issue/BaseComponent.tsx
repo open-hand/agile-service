@@ -41,6 +41,7 @@ import { SHOW_ISSUE_LINK_TYPE_CODES, WATERFALL_TYPE_CODES } from '@/constants/TY
 import { DELIVERABLE, DEPENDENCY } from '@/constants/WATERFALL_INJECT';
 import useIsWaterfall from '@/hooks/useIsWaterfall';
 import { RISK_SELECT_LINK } from '@/constants/AGILEPRO_INJECT';
+import { MAX_LENGTH_EPIC_NAME, MAX_LENGTH_SUMMARY } from '@/constants/MAX_LENGTH';
 
 const { AppState } = stores;
 interface CreateIssueBaseCallbackData {
@@ -64,7 +65,7 @@ export interface CreateIssueBaseProps {
   menuType?: 'project' | 'org',
   /**
    * 默认选中的问题类型code
-   * @default 'story'
+   * @default false
    *
    * 当为 `false` 时则默认选择第一个问题类型
    */
@@ -106,7 +107,7 @@ const defaultDataSet = new DataSet({
 });
 const presets = new Map([
   ['component', {
-    type: 'string',
+    type: 'object',
     valueField: 'componentId',
   }],
   ['label', {
@@ -308,7 +309,7 @@ const CreateIssueBase = observer(({
   projectId,
   onSubmit,
   onAfterSubmitError,
-  defaultTypeCode = 'story',
+  defaultTypeCode = false,
   defaultTypeId,
   defaultAssignee,
   defaultFeature,
@@ -616,7 +617,7 @@ const CreateIssueBase = observer(({
     });
     // TODO: 将各种默认值的获取和设置逻辑合并
     // 设置描述默认值  和上一个模板相同 或默认值
-    if (currentTemplateDescription.current === newValue.description) {
+    if (currentTemplateDescription.current === newValue.description && !defaultValues?.description) {
       newValue.description = templateData?.template;
     }
     currentTemplateDescription.current = templateData?.template;
@@ -710,7 +711,7 @@ const CreateIssueBase = observer(({
         projectId: projectId ?? getProjectId(),
         featureId: (issueType as IIssueType)?.typeCode === 'bug' && data.parentIssueId?.issueId ? undefined : data.feature,
         issueLinkCreateVOList: enableIssueLinks ? getIssueLinks() : undefined,
-        componentIssueRelVOList: values.componentIssueRelVOList ? values.componentIssueRelVOList.map((item: string) => ({ componentId: item })) : [],
+        componentIssueRelVOList: values.componentIssueRelVOList ? values.componentIssueRelVOList.map((item: any) => ({ componentId: typeof item === 'string' ? item : item.componentId })) : [],
         // @ts-ignore
         deliverableData: deliverableRef.current?.getDeliverableData && deliverableRef.current?.getDeliverableData() ? deliverableRef.current?.getDeliverableData() : undefined,
         // @ts-ignore
@@ -860,7 +861,14 @@ const CreateIssueBase = observer(({
       }
       case 'summary': {
         return {
-          maxLength: 44,
+          maxLength: MAX_LENGTH_SUMMARY,
+          showLengthInfo: true,
+        };
+      }
+      case 'epicName': {
+        return {
+          maxLength: MAX_LENGTH_EPIC_NAME,
+          showLengthInfo: true,
         };
       }
       case 'riskInfluence':

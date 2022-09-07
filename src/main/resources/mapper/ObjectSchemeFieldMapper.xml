@@ -65,6 +65,16 @@
                 fd_object_scheme_field_extend osfe
                 WHERE
                 osfe.field_id = osf.id
+                AND
+                (
+                osfe.project_id is null
+                <if test="projectIds != null and projectIds.size > 0">
+                    or osfe.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
+                </if>
+                )
                 <choose>
                     <when test="issueTypes != null and issueTypes.size > 0">
                         and osfe.issue_type in
@@ -656,6 +666,7 @@
                 SELECT osfe.field_id
                 FROM fd_object_scheme_field_extend osfe
                 WHERE osfe.field_id = osf.id
+                and (osfe.project_id = #{projectId} or osfe.project_id is null)
                 <if test='issueTypeList == "agileIssueType"'>
                     AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
                 </if>

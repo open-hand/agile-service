@@ -70,7 +70,10 @@ public class WorkBenchController {
     public ResponseEntity<Page<IssueListFieldKVVO>> queryBackLogIssuesByPersonal(@ApiParam(value = "组织id", required = true)
                                                                                  @PathVariable(name = "organization_id") Long organizationId,
                                                                                  @RequestParam(required = false) Long projectId,
-                                                                                 PageRequest pageRequest,
+                                                                                 @ApiIgnore
+                                                                                 @ApiParam(value = "分页信息", required = true)
+                                                                                 @SortDefault(value = "creationDate", direction = Sort.Direction.DESC)
+                                                                                         PageRequest pageRequest,
                                                                                  @ApiParam(value = "工作台搜索条件", required = true)
                                                                                  @RequestBody WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         return Optional.ofNullable(issueService.queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO))
@@ -85,7 +88,10 @@ public class WorkBenchController {
                                                                          @PathVariable(name = "organization_id") Long organizationId,
                                                                          @ApiParam(value = "项目id")
                                                                          @RequestParam(required = false) Long projectId,
-                                                                         PageRequest pageRequest,
+                                                                         @ApiIgnore
+                                                                         @ApiParam(value = "分页信息", required = true)
+                                                                         @SortDefault(value = "creationDate", direction = Sort.Direction.DESC)
+                                                                                 PageRequest pageRequest,
                                                                          @ApiParam(value = "工作台搜索条件", required = true)
                                                                          @RequestBody WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         return ResponseEntity.ok(issueService.pagedQueryMyReported(organizationId, projectId, pageRequest, workBenchIssueSearchVO));
@@ -98,7 +104,10 @@ public class WorkBenchController {
                                                                          @PathVariable(name = "organization_id") Long organizationId,
                                                                          @ApiParam(value = "项目id")
                                                                          @RequestParam(required = false) Long projectId,
-                                                                         PageRequest pageRequest,
+                                                                         @ApiIgnore
+                                                                         @ApiParam(value = "分页信息", required = true)
+                                                                         @SortDefault(value = "creationDate", direction = Sort.Direction.DESC)
+                                                                                 PageRequest pageRequest,
                                                                          @ApiParam(value = "工作台搜索条件", required = true)
                                                                          @RequestBody WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         return ResponseEntity.ok(issueService.pagedQueryMyAssigned(organizationId, projectId, pageRequest, workBenchIssueSearchVO));

@@ -1,5 +1,6 @@
 import { stores, axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
 const { AppState } = stores;
 interface IComponent {
@@ -11,9 +12,9 @@ interface IComponent {
   componentId?: string,
   objectVersionNumber?: number,
 }
-class ComponentApi {
+class ComponentApi extends Api<ComponentApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   loadComponents(pagination: any, filters: object, componentId: number) {
@@ -35,7 +36,7 @@ class ComponentApi {
 
   loadAllComponents(filter?: string, projectId?: string, page: number = 1, size: number = 999, selectIds?: string[]) {
     return axios.post(
-      `/agile/v1/projects/${projectId || getProjectId()}/component/query_all?size=${size}&page=${page}`, {
+      `/agile/v1/projects/${projectId || this.projectId}/component/query_all?size=${size}&page=${page}`, {
         advancedSearchArgs: {},
         searchArgs: {},
         otherArgs: { component: selectIds },

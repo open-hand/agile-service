@@ -25,7 +25,7 @@ public interface BoardService {
 
     JSONObject queryAllData(Long projectId, Long boardId, Long organizationId, SearchVO searchVO);
 
-    void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads);
+    void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads, String applyType);
 
     IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo);
 

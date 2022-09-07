@@ -37,4 +37,12 @@
 			value_code = #{valueCode}
 	</select>
 
+    <select id="selectByValueCodes" resultType="io.choerodon.agile.infra.dto.LookupValueDTO">
+		select * from lookup_value
+		where value_code in
+		<foreach collection="valueCodes" item="valueCode" index="index" open="(" separator="," close=")">
+			#{valueCode}
+		</foreach>
+	</select>
+
 </mapper>

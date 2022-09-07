@@ -65,7 +65,7 @@ const SelectTimeWithUnit: React.FC<SelectTimeWithUnitProps> = observer(({
     </Row>
   );
 });
-const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = ({
+const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = observer(({
   modal, projectId, issueId, onOk, defaultStartTime, onCancel,
 }) => {
   const [uploading, setUploading] = useState(false);
@@ -155,7 +155,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
     <Form dataSet={dataSet} className={styles.form}>
       {
         !issueId && (
-          <SelectIssuesDailyLog name="issueId" />
+          <SelectIssuesDailyLog name="issueId" issueId={dataSet.current?.get('issueId')} />
         )
       }
       <SelectTimeWithUnit timeName="spendTime" unitName="timeUnit" />
@@ -201,7 +201,7 @@ const RecordWorkLog: React.FC<{ modal?: IModalProps } & RecordWorkModalProps> = 
       />
     </Form>
   );
-};
+});
 function openRecordWorkLogModal(props: RecordWorkModalProps) {
   Modal.open({
     key: Modal.key(),
