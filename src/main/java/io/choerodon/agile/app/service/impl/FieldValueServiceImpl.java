@@ -174,6 +174,25 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                                                          Long instanceId,
                                                          String schemeCode,
                                                          List<FieldValueDTO> fieldValues) {
+        Long issueTypeId = null;
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        if (ObjectSchemeCode.BACKLOG.equals(schemeCode) && !ObjectUtils.isEmpty(backlogExpandService)) {
+            IssueTypeDTO dto = new IssueTypeDTO();
+            dto.setOrganizationId(organizationId);
+            dto.setTypeCode(IssueTypeCode.BACKLOG.value());
+            IssueTypeDTO backlogType = issueTypeMapper.selectOne(dto);
+            if (!ObjectUtils.isEmpty(backlogType)) {
+                issueTypeId = backlogType.getId();
+            }
+        } else {
+            IssueDTO issue = issueMapper.selectByPrimaryKey(instanceId);
+            if (ObjectUtils.isEmpty(issue)) {
+                throw new CommonException("error.issue.type.not.existed");
+            }
+            issueTypeId = issue.getIssueTypeId();
+        }
+        //数字类型字段，没有权限，需要在后台设置默认值，保证有权限人员看到的值是正确的
+        addNoPermissionNumberFields(projectId, issueTypeId, fieldValues);
         List<FieldValueDTO> result = new ArrayList<>();
         List<FieldValueDTO> numberFields = new ArrayList<>();
         Set<Long> fieldIds = new HashSet<>();
@@ -188,27 +207,10 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             }
         }
         if (!fieldIds.isEmpty()) {
-            Long issueTypeId = null;
-            Long organizationId = ConvertUtil.getOrganizationId(projectId);
             Map<Long, ObjectSchemeFieldDTO> fieldMap =
                     objectSchemeFieldMapper.selectByIds(StringUtils.join(fieldIds, ","))
                             .stream()
                             .collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
-            if (ObjectSchemeCode.BACKLOG.equals(schemeCode) && !ObjectUtils.isEmpty(backlogExpandService)) {
-                IssueTypeDTO dto = new IssueTypeDTO();
-                dto.setOrganizationId(organizationId);
-                dto.setTypeCode(IssueTypeCode.BACKLOG.value());
-                IssueTypeDTO backlogType = issueTypeMapper.selectOne(dto);
-                if (!ObjectUtils.isEmpty(backlogType)) {
-                    issueTypeId = backlogType.getId();
-                }
-            } else {
-                IssueDTO issue = issueMapper.selectByPrimaryKey(instanceId);
-                if (ObjectUtils.isEmpty(issue)) {
-                    throw new CommonException("error.issue.type.not.existed");
-                }
-                issueTypeId = issue.getIssueTypeId();
-            }
             if (!ObjectUtils.isEmpty(issueTypeId)) {
                 Map<Long, String> defaultValueMap =
                         queryFieldDefaultMap(Arrays.asList(issueTypeId), organizationId, fieldIds, projectId);
@@ -247,6 +249,33 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             }
         }
         return result;
+    }
+
+    private void addNoPermissionNumberFields(Long projectId,
+                                             Long issueTypeId,
+                                             List<FieldValueDTO> fieldValues) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<PageFieldDTO> pageFields =
+                pageFieldService.queryPageField(organizationId, projectId, PageCode.AGILE_ISSUE_CREATE, issueTypeId);
+        Set<Long> fieldIds = fieldValues.stream().map(FieldValueDTO::getFieldId).collect(Collectors.toSet());
+        for (PageFieldDTO field : pageFields) {
+            Long fieldId = field.getFieldId();
+            String fieldType = field.getFieldType();
+            boolean isNumber = FieldType.NUMBER.equals(fieldType);
+            boolean isSkipped = fieldIds.contains(fieldId)
+                    || !Boolean.TRUE.equals(field.getDisplay())
+                    || Boolean.TRUE.equals(field.getSystem())
+                    || !isNumber;
+            if (isSkipped) {
+                continue;
+            }
+            List<FieldValueDTO> values = new ArrayList<>();
+            FieldValueUtil.handleDefaultValue2DTO(values, field);
+            for (FieldValueDTO fieldValue : values) {
+                fieldValue.setFieldId(fieldId);
+            }
+            fieldValues.addAll(values);
+        }
     }
 
     private Map<Long, String> queryFieldDefaultMap(List<Long> issueTypeIds,
