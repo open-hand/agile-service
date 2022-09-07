@@ -3,22 +3,21 @@ package io.choerodon.agile.infra.upgrade;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.infra.dto.PersonalFilterDTO;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.PersonalFilterMapper;
-
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 升级数据修复专用Service
@@ -30,6 +29,7 @@ public class UpgradeDataFixService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
+    @Qualifier("remoteIamOperator")
     private RemoteIamOperator iamOperator;
     @Autowired
     private PersonalFilterMapper personalFilterMapper;
