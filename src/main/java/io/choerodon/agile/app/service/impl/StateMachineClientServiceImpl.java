@@ -4,7 +4,9 @@ import java.util.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.enums.InstanceType;
+import io.choerodon.agile.infra.utils.*;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +49,6 @@ import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineConfigDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineTransformDTO;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
-import io.choerodon.agile.infra.utils.BaseFieldUtil;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.EnumUtil;
-import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
@@ -353,12 +351,49 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         // 查询要转换的状态是否有流转条件
         Long currentStatusId = issue.getStatusId();
         //执行状态转换
-        ExecuteResult executeResult = instanceService.executeTransform(organizationId, AGILE_SERVICE, stateMachineId, currentStatusId, transformId, inputDTO);
+        boolean onlyUpdateRank = isOnlyUpdateRank(organizationId, currentStatusId, transformId, inputDTO.getInvokeCode());
+        ExecuteResult executeResult;
+        if (onlyUpdateRank) {
+            updateIssueRank(projectId, objectVersionNumber, inputDTO, issue);
+            executeResult = new ExecuteResult(true, currentStatusId, null);
+        } else {
+            executeResult = instanceService.executeTransform(organizationId, AGILE_SERVICE, stateMachineId, currentStatusId, transformId, inputDTO);
+        }
         if (Boolean.FALSE.equals(executeResult.getSuccess())) {
             throw new CommonException("error.stateMachine.executeTransform", executeResult.getException());
         }
-        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
+        if (!onlyUpdateRank) {
+            statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
+        }
+        executeResult.setOnlyUpdateRank(onlyUpdateRank);
         return executeResult;
+    }
+
+    private void updateIssueRank(Long projectId,
+                                 Long objectVersionNumber,
+                                 InputDTO inputDTO,
+                                 IssueDTO issue) {
+        JSONObject jsonObject = JSON.parseObject(inputDTO.getInput(), JSONObject.class);
+        IssueUpdateVO issueUpdateVO = modelMapper.map(issue, IssueUpdateVO.class);
+        String rank = jsonObject.getString(RANK);
+        issueUpdateVO.setRank(rank);
+        issueUpdateVO.setObjectVersionNumber(objectVersionNumber);
+        issueService.handleUpdateIssueWithoutRuleNotice(issueUpdateVO, Arrays.asList(RANK), projectId);
+    }
+
+    private boolean isOnlyUpdateRank(Long organizationId,
+                                     Long currentStatusId,
+                                     Long transformId,
+                                     String invokeCode) {
+        if (UPDATE_STATUS_MOVE.equals(invokeCode)) {
+            //看板拖动的code
+            StatusMachineTransformDTO statusMachineTransform = transformService.queryDeployTransformForAgile(organizationId, transformId);
+            AssertUtilsForCommonException.notNull(statusMachineTransform, "error.executeTransform.not.existed");
+            Long endStatusId = statusMachineTransform.getEndStatusId();
+            AssertUtilsForCommonException.notNull(statusMachineTransform, "error.executeTransform.endStatusId.not.existed");
+            return currentStatusId.equals(endStatusId);
+        }
+        return false;
     }
 
     /**

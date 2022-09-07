@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
@@ -3782,11 +3783,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                                         TriggerCarrierVO triggerCarrierVO, Boolean isDemo,
                                                         Long transformId, InputDTO inputDTO){
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        ExecuteResult executeResult;
         if (Boolean.TRUE.equals(isDemo)) {
-            stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issue.getObjectVersionNumber(),
+            executeResult = stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issue.getObjectVersionNumber(),
                     applyType, inputDTO);
         } else {
-            stateMachineClientService.executeTransform(projectId, issueId, transformId, issue.getObjectVersionNumber(),
+            executeResult = stateMachineClientService.executeTransform(projectId, issueId, transformId, issue.getObjectVersionNumber(),
                     applyType, inputDTO);
         }
         if (SchemeApplyType.AGILE.equals(applyType)) {
@@ -3796,7 +3798,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
             issueAccessDataService.updateSelective(issueConvertDTO);
         }
-        return doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, triggerCarrierVO);
+        Boolean onlyUpdateRank = executeResult.getOnlyUpdateRank();
+        if (Boolean.TRUE.equals(onlyUpdateRank)) {
+            return modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueVO.class);
+        } else {
+            return doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, triggerCarrierVO);
+        }
     }
 
     @Override
