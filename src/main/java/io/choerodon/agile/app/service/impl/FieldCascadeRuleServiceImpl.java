@@ -1,10 +1,17 @@
 package io.choerodon.agile.app.service.impl;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Resource;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueVO;
@@ -26,12 +33,6 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.apache.commons.collections4.CollectionUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -353,7 +354,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         Set<Long> componentIds = new HashSet<>();
         Set<Long> programVersionIds = new HashSet<>();
 
-        IssueDetailDTO issueDetailDTO = getIssueDetail(projectId, instanceId, componentIds, influenceVersionIds, fixVersionIds, programVersionIds);
+        IssueDetailDTO issueDetailDTO = getIssueDetail(organizationId, projectId, instanceId, componentIds, influenceVersionIds, fixVersionIds, programVersionIds);
         Map<Long, PageFieldViewVO> pageFieldViewMap = pageFieldViews
                 .stream()
                 .filter(pageFieldViewVO -> !Boolean.TRUE.equals(pageFieldViewVO.getSystem())
@@ -511,7 +512,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
     }
 
-    private IssueDetailDTO getIssueDetail(Long projectId, Long instanceId, Set<Long> componentIds, Set<Long> influenceVersionIds, Set<Long> fixVersionIds, Set<Long> programVersionIds) {
+    private IssueDetailDTO getIssueDetail(Long organizationId, Long projectId, Long instanceId, Set<Long> componentIds, Set<Long> influenceVersionIds, Set<Long> fixVersionIds, Set<Long> programVersionIds) {
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, instanceId);
         Optional.ofNullable(issueDetailDTO.getComponentIssueRelDTOList())
                 .ifPresent(componentList -> componentList.forEach(component -> componentIds.add(component.getId())));
@@ -526,7 +527,7 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         if (agilePluginService != null) {
             agilePluginService.setBusinessAttributes(issueDetailDTO);
             IssueVO issueVO = modelMapper.map(issueDetailDTO, IssueVO.class);
-            agilePluginService.businessIssueDetailDTOToVO(issueVO, issueDetailDTO, new HashMap<>(), new HashMap<>(), new HashMap<>());
+            agilePluginService.businessIssueDetailDTOToVO(organizationId, issueVO, issueDetailDTO, new HashMap<>(), new HashMap<>(), new HashMap<>());
             Optional.ofNullable(issueVO.getProgramVersionFeatureRelVOS())
                     .ifPresent(programVersionList -> programVersionList.forEach(
                             programVersion -> programVersionIds.add(programVersion.getProgramVersionId())));
