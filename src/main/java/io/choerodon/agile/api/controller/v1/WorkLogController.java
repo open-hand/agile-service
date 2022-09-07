@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.IssueWorkTimeCountVO;
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.app.service.WorkLogService;
 
@@ -90,5 +91,15 @@ public class WorkLogController {
                 .orElseThrow(() -> new CommonException("error.workLogList.get"));
     }
 
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("统计工时日志数量")
+    @GetMapping(value = "/issue/{issueId}/count_work_time")
+    public ResponseEntity<IssueWorkTimeCountVO> countWorkTime(@ApiParam(value = "项目id", required = true)
+                                                              @PathVariable(name = "project_id") Long projectId,
+                                                              @ApiParam(value = "issueId", required = true)
+                                                              @PathVariable @Encrypt Long issueId) {
+        return  ResponseEntity.ok(workLogService.countWorkTime(projectId, issueId));
+    }
 
 }

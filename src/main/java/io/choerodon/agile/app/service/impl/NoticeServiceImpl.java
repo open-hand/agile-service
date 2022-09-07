@@ -1,26 +1,26 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import io.choerodon.agile.api.vo.MessageVO;
+import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.infra.enums.StatusNoticeUserType;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
-import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.NoticeMessageAssembler;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.MessageDTO;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
+import io.choerodon.agile.infra.enums.StatusNoticeUserType;
+import io.choerodon.agile.infra.feign.operator.NotifyClientOperator;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/9.
@@ -46,7 +46,7 @@ public class NoticeServiceImpl implements NoticeService {
     private NoticeMessageAssembler noticeMessageAssembler;
 
     @Autowired
-    private NotifyFeignClient notifyFeignClient;
+    private NotifyClientOperator notifyClientOperator;
 
     @Autowired
     private StarBeaconMapper starBeaconMapper;
@@ -146,9 +146,9 @@ public class NoticeServiceImpl implements NoticeService {
     private void addUsersByProjectOwner(Long projectId, List<String> res, List<Long> result) {
         if (res.contains("projectOwner")) {
             List<UserVO> userDTOS = userService.listProjectAdminUsersByProjectId(projectId);
-            if(!CollectionUtils.isEmpty(userDTOS)){
-                for (UserVO userVO:userDTOS) {
-                    if(!result.contains(userVO.getId())){
+            if (!CollectionUtils.isEmpty(userDTOS)) {
+                for (UserVO userVO : userDTOS) {
+                    if (!result.contains(userVO.getId())) {
                         result.add(userVO.getId());
                     }
                 }
@@ -156,7 +156,7 @@ public class NoticeServiceImpl implements NoticeService {
         }
     }
 
-    private void addUsersByUsers (List<String> res, List<Long> result, Set<Long> users) {
+    private void addUsersByUsers(List<String> res, List<Long> result, Set<Long> users) {
         if (res.contains(USERS) && !CollectionUtils.isEmpty(users)) {
             for (Long userId : users) {
                 if (!result.contains(userId)) {
@@ -165,7 +165,7 @@ public class NoticeServiceImpl implements NoticeService {
             }
         }
     }
-    
+
     private void addUsersByStarUsers(Long projectId, List<String> res, String code, List<Long> result, IssueVO issueVO) {
         if (!Objects.equals(ISSUE_CREATE, code) && res.contains(STAR_USER)) {
             List<Long> userIds = starBeaconMapper.selectUsersByInstanceId(projectId, issueVO.getIssueId());
@@ -199,9 +199,8 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<Long> queryUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
-        ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
-        MessageSettingVO messageVo = messageSetting.getBody();
-        if(ObjectUtils.isEmpty(messageVo)){
+        MessageSettingVO messageVo = notifyClientOperator.getMessageSetting(projectId, "agile", code, null, null);
+        if (ObjectUtils.isEmpty(messageVo)) {
             throw new CommonException("error.message.setting.is.null");
         }
         Set<String> type = new HashSet<>();
@@ -252,7 +251,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     public List<MessageDetailDTO> migrateMessageDetail() {
         List<MessageDetailDTO> messageDetailDTOS = noticeDetailMapper.selectAll();
-        if(CollectionUtils.isEmpty(messageDetailDTOS)){
+        if (CollectionUtils.isEmpty(messageDetailDTOS)) {
             return new ArrayList<>();
         }
         return messageDetailDTOS;
@@ -260,9 +259,8 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<Long> queryCustomFieldUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
-        ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
-        MessageSettingVO messageVO = messageSetting.getBody();
-        if(ObjectUtils.isEmpty(messageVO)){
+        MessageSettingVO messageVO = notifyClientOperator.getMessageSetting(projectId, "agile", code, null, null);
+        if (ObjectUtils.isEmpty(messageVO)) {
             throw new CommonException("error.message.setting.is.null");
         }
 

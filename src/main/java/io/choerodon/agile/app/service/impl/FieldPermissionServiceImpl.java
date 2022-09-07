@@ -1,5 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.FieldPermissionService;
 import io.choerodon.agile.app.service.UserService;
@@ -7,7 +11,7 @@ import io.choerodon.agile.infra.dto.FieldPermissionDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldPermissionScope;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.FieldPermissionMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.exception.CommonException;
@@ -18,10 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -78,7 +78,7 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
     @Autowired
     private UserService userService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
 
     @Override
     public void create(Long projectId, Long organizationId, FieldPermissionVO fieldPermissionVO) {
@@ -171,8 +171,7 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
                 }
                 if (!roleIds.isEmpty()) {
                     roleMap.putAll(
-                            baseFeignClient.listRolesByIds(organizationId, new ArrayList<>(roleIds))
-                                    .getBody()
+                            remoteIamOperator.listRolesByIds(organizationId, new ArrayList<>(roleIds))
                                     .stream()
                                     .collect(Collectors.toMap(RoleVO::getId, Function.identity())));
 
@@ -222,7 +221,7 @@ public class FieldPermissionServiceImpl implements FieldPermissionService {
         if (!fieldIds.isEmpty()) {
             CustomUserDetails userDetails = DetailsHelper.getUserDetails();
             Long userId = userDetails.getUserId();
-            List<RoleVO> roles = baseFeignClient.getUserWithProjLevelRolesByUserId(projectId, userId).getBody();
+            List<RoleVO> roles = remoteIamOperator.getUserWithProjLevelRolesByUserId(projectId, userId);
             Set<Long> userIds = new HashSet<>(Arrays.asList(userId));
             Set<Long> roleIds = new HashSet<>();
             if (!ObjectUtils.isEmpty(roles)) {

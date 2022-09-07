@@ -1,15 +1,15 @@
 package io.choerodon.agile.app.eventhandler;
 
+import static io.choerodon.agile.infra.utils.SagaTopic.Organization.ORG_CREATE;
+import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CREATE;
+import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.event.*;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
-import io.choerodon.asgard.saga.annotation.SagaTask;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.slf4j.Logger;
@@ -19,13 +19,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static io.choerodon.agile.infra.utils.SagaTopic.Organization.ORG_CREATE;
-import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CREATE;
-import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
+import io.choerodon.agile.infra.utils.RedisUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.asgard.saga.annotation.SagaTask;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/22.
@@ -72,6 +73,8 @@ public class AgileEventHandler {
     private AgilePluginService agilePluginService;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -149,6 +152,11 @@ public class AgileEventHandler {
                     agileWaterfallService.initProject(projectEvent, codes);
                 }
             }
+
+            if (backlogExpandService != null && codes.contains(ProjectCategory.MODULE_BACKLOG)) {
+                // 选择需求管理后默认开启需求池
+                backlogExpandService.startBacklog(projectEvent.getProjectId());
+            }
         }
     }
 
@@ -169,7 +177,7 @@ public class AgileEventHandler {
      *
      * @param message message
      */
-    @SagaTask(code = TASK_PROJECT_UPDATE, sagaCode = PROJECT_UPDATE,seq = 2,
+    @SagaTask(code = TASK_PROJECT_UPDATE, sagaCode = PROJECT_UPDATE, seq = 2,
             description = "agile消费更新项目事件初始化项目数据")
     public String handleProjectUpdateByConsumeSagaTask(String message) {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
@@ -199,5 +207,4 @@ public class AgileEventHandler {
         }
         return message;
     }
-
 }

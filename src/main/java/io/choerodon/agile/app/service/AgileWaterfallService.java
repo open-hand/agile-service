@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
@@ -94,9 +91,13 @@ public interface AgileWaterfallService {
 
     Map<String, Set<Long>> queryPredecessorIssues(Long projectId, Long issueId, Set<String> predecessorTypes);
 
-    void setProgress(Long projectId, List<IssueListFieldKVVO> issueListFieldKVVOS);
+    Map<Long, Integer> getIssueProgressMap(List<Long> projectIds, List<Long> issueIds);
 
     void getWaterfallFieldCodes(List<String> fieldCodes, Long issueTypeId);
 
     void handleMilestoneProgressByStatusId(Long projectId, Long issueId, Long statusId, String typeCode);
+
+    List<Long> selectDescendants(Long projectId, Long issueId);
+
+    void deleteByWorkSpaceId(Long projectId, Long workSpaceId);
 }

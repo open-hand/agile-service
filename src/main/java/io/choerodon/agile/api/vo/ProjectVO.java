@@ -1,14 +1,14 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
-import io.choerodon.agile.infra.utils.StringUtil;
-
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import io.choerodon.agile.infra.feign.vo.HealthStateVO;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -55,6 +55,18 @@ public class ProjectVO {
     private Set<Long> topProjectIds;
     @ApiModelProperty(value = "模糊搜索参数")
     private String param;
+    @ApiModelProperty(value = "项目状态颜色")
+    private String color;
+    @ApiModelProperty("健康状态")
+    private HealthStateVO healthStateVO;
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public String getParam() {
         return param;
@@ -195,5 +207,13 @@ public class ProjectVO {
 
     public void setTypes(List<String> types) {
         this.types = types;
+    }
+
+    public HealthStateVO getHealthStateVO() {
+        return healthStateVO;
+    }
+
+    public void setHealthStateVO(HealthStateVO healthStateVO) {
+        this.healthStateVO = healthStateVO;
     }
 }

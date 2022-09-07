@@ -1,11 +1,14 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import io.choerodon.agile.api.vo.ProjectInfoFixVO;
+import io.choerodon.agile.api.vo.ProjectInfoVO;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.ProjectInfoService;
-import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
@@ -15,9 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author dinghuang123@gmail.com
@@ -29,8 +29,6 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
 
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
-    @Autowired
-    private BaseFeignClient baseFeignClient;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired(required = false)

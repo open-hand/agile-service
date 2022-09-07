@@ -17,9 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -73,6 +71,14 @@ public class LookupValueServiceImpl implements LookupValueService {
         lookupValueDTO.setTypeCode(typeCode);
         List<LookupValueDTO> lookupValueDTOList = lookupValueMapper.select(lookupValueDTO);
         return lookupValueDTOList.stream().collect(Collectors.toMap(LookupValueDTO::getValueCode, LookupValueDTO::getName));
+    }
+
+    @Override
+    public List<LookupValueDTO> queryByValueCodes(Set<String> valueCodes) {
+        if (ObjectUtils.isEmpty(valueCodes)) {
+            return Collections.emptyList();
+        }
+        return lookupValueMapper.selectByValueCodes(valueCodes);
     }
 
     protected List<LookupValueDTO> filterProjectType(Long projectId, LookupTypeWithValuesDTO typeWithValues) {

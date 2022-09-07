@@ -34,7 +34,6 @@ import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.mapper.RankMapper;
@@ -87,8 +86,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private StateMachineClient stateMachineClient;
-    @Autowired
-    private BaseFeignClient baseFeignClient;
     @Autowired
     private RankMapper rankMapper;
     @Autowired

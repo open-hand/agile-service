@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import java.util.Map;
 @Component
 public class ProjectUtil {
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
 
     protected static final Map<Long, ProjectVO> map = new HashMap<>();
 
@@ -38,7 +38,7 @@ public class ProjectUtil {
         if (projectVO != null) {
             return projectVO;
         } else {
-            projectVO = baseFeignClient.queryProject(projectId).getBody();
+            projectVO = remoteIamOperator.queryProject(projectId);
             if (projectVO != null) {
                 map.put(projectId, projectVO);
                 return projectVO;

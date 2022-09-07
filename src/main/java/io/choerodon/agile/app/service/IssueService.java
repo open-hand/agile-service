@@ -11,6 +11,7 @@ import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.core.domain.Page;
@@ -190,9 +191,12 @@ public interface IssueService {
      * @param projectId        projectId
      * @param issueId          issueId
      * @param copyConditionVO copyConditionVO
-     * @return IssueVO
      */
-    IssueVO cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType);
+    void cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType, String asyncTraceId);
+
+    List<String> handlerCopyRequirePredefinedField(Object object, JSONObject predefinedFields);
+
+    void handleCopyPredefinedFields(Long origanizationId, IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames);
 
     /**
      * 根据issueId转换为子任务
@@ -501,4 +505,16 @@ public interface IssueService {
     void deleteIssueOnRequiresNew(Long projectId, Long issueId, BatchUpdateFieldStatusVO batchUpdateFieldStatusVO);
 
     void handleUpdateIssueProductRel(List<Long> productIds, Long projectId, Long issueId);
+
+    List<String> listLinkContents(Long projectId, Long issueId);
+
+    List<IssueRequiredFields> listAllRequiredField(Long projectId, Long organizationId, Long issueId, Boolean subTask);
+
+    void copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId);
+
+    String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId);
+
+    void setProgress(List<IssueListFieldKVVO> waterfallIssues,
+                     List<IssueListFieldKVVO> agileIssues,
+                     Set<Long> projectIds);
 }

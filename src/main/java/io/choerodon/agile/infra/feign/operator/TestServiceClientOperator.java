@@ -1,17 +1,16 @@
 package io.choerodon.agile.infra.feign.operator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.choerodon.agile.api.vo.ExecutionCaseStatusChangeSettingVO;
 import io.choerodon.agile.api.vo.ProjectInfoVO;
 import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.core.exception.ServiceUnavailableException;
-import io.choerodon.core.utils.FeignClientUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.BooleanUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author zhaotianxin
@@ -19,33 +18,35 @@ import java.util.List;
  */
 @Component
 public class TestServiceClientOperator {
-    @Autowired
-    private TestFeignClient testFeignClient;
 
-    public void deleteTestRel(Long projectId, Long defectId){
-        try {
-             FeignClientUtils.doRequest(() -> testFeignClient.deleteTestRel(projectId, defectId), Void.class);
-        } catch (ServiceUnavailableException e) {
-            return;
-        }
+    private final TestFeignClient testFeignClient;
+
+    public TestServiceClientOperator(TestFeignClient testFeignClient) {
+        this.testFeignClient = testFeignClient;
+    }
+
+    public void deleteTestRel(Long projectId, Long defectId) {
+        testFeignClient.deleteTestRel(projectId, defectId);
     }
 
     public ProjectInfoVO queryProjectInfo(Long projectId) {
-        try {
-            return FeignClientUtils.doRequest(() -> testFeignClient.queryProjectInfo(projectId), ProjectInfoVO.class);
-        } catch (ServiceUnavailableException e) {
-            return null;
-        }
+        return ResponseUtils.getResponse(testFeignClient.queryProjectInfo(projectId), ProjectInfoVO.class);
     }
 
     public List<ExecutionCaseStatusChangeSettingVO> list(Long projectId, Long organizationId, Long issueTypeId, List<Long> statusIds) {
         if (Boolean.FALSE.equals(ConvertUtil.hasModule(projectId, "N_TEST"))) {
             return new ArrayList<>();
         }
-        try {
-            return FeignClientUtils.doRequest(() -> testFeignClient.list(projectId, organizationId, issueTypeId, statusIds), new TypeReference<List<ExecutionCaseStatusChangeSettingVO>>() {});
-        } catch (ServiceUnavailableException e) {
-            return new ArrayList<>();
-        }
+        return ResponseUtils.getResponse(testFeignClient.list(projectId, organizationId, issueTypeId, statusIds), new TypeReference<List<ExecutionCaseStatusChangeSettingVO>>() {
+        });
+    }
+
+    public Boolean checkExistTestCaseLink(Long projectId, Long issueId) {
+        Boolean response = ResponseUtils.getResponse(testFeignClient.checkTestCaseLinkExist(projectId, issueId), Boolean.class);
+        return BooleanUtils.isTrue(response);
+    }
+
+    public void copyIssueRelatedTestCases(Long projectId, Long issueId, Long newIssueId) {
+        testFeignClient.copyIssueRelatedTestCases(projectId, issueId, newIssueId);
     }
 }

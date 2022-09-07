@@ -56,6 +56,18 @@ public class RedisUtil {
     /**
      * 字符串添加信息
      *
+     * @param key     key
+     * @param obj     可以是单个的值，也可以是任意类型的对象
+     * @param timeout 过期时间
+     * @param timeUnit 时间单位
+     */
+    public void set(String key, Object obj, Long timeout, TimeUnit timeUnit) {
+        redisTemplate.opsForValue().set(key, obj, timeout, timeUnit);
+    }
+
+    /**
+     * 字符串添加信息
+     *
      * @param key key
      * @param obj 可以是单个的值，也可以是任意类型的对象
      */

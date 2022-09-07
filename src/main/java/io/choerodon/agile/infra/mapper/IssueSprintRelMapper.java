@@ -34,8 +34,7 @@ public interface IssueSprintRelMapper extends BaseMapper<IssueSprintRelDTO> {
     int deleteByIds(@Param("issueSprintRelIds") List<Long> issueSprintRelIds);
 
     List<IssueSprintDTO> selectIssueSprintByIds(@Param("projectIds") Set<Long> projectIds,
-                                                @Param("issueIds") Set<Long> issueIds,
-                                                @Param("statusCodes") List<String> statusCodes);
+                                                @Param("issueIds") Set<Long> issueIds);
 
     List<IssueSprintVO> listByIssueIds(@Param("projectIds") Set<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 }
