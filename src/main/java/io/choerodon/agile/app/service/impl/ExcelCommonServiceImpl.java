@@ -12,19 +12,7 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.multipart.MultipartFile;
-
+import com.google.common.collect.Lists;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
@@ -42,8 +30,19 @@ import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author huaxin.deng@hand-china.com
@@ -601,19 +600,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
             throw new CommonException("error.sheet.empty");
         }
-        List<String> titles = new ArrayList<>();
-        for (int i = 0; ; i++) {
-            Cell cell = headerRow.getCell(i);
-            if (isCellEmpty(cell)) {
-                break;
-            }
-            titles.add(cell.toString());
-        }
-        return titles;
-    }
-
-    private boolean isCellEmpty(Cell cell) {
-        return cell == null || cell.toString().equals("") || cell.getCellTypeEnum() == CellType.BLANK;
+        return Lists.newArrayList(SheetUtils.getHeaderColumnNames(dataSheet).values());
     }
 
     @Override
@@ -753,7 +740,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             errorRowColMap.put(rowNum, Arrays.asList(parentColIndex));
             Row row = dataSheet.getRow(rowNum);
             Cell cell = row.getCell(parentColIndex);
-            if (isCellEmpty(cell)) {
+            if (SheetUtils.isCellEmpty(cell)) {
                 cell = row.createCell(parentColIndex);
             }
             String value = cell.toString();
@@ -822,7 +809,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             Row row = sheet.createRow(startRow);
             for (int i = 0; i < colNum; i++) {
                 Cell originCell = originRow.getCell(i);
-                if (!isCellEmpty(originCell)) {
+                if (!SheetUtils.isCellEmpty(originCell)) {
                     ExcelColumnVO excelColumnVO = headerMap.get(i);
                     Cell cell = row.createCell(i);
                     CellStyle cellStyle = workbook.createCellStyle();
@@ -1070,7 +1057,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         SimpleDateFormat formats = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat formatTimeOnly = new SimpleDateFormat("HH:mm:ss");
         SimpleDateFormat formatYearOnly = new SimpleDateFormat("yyyy");
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             boolean multiValue = excelColumn.isMultiValue();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -1209,7 +1196,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                      Map<Integer, List<Integer>> errorRowColMap) {
         Boolean checkRequireField = true;
         Cell cell = row.getCell(col);
-        if (isCellEmpty(cell)) {
+        if (SheetUtils.isCellEmpty(cell)) {
             List<String> list = requireFieldMap.get(issueCreateVO.getIssueTypeId());
             if (!CollectionUtils.isEmpty(list) && list.contains(excelColum.getFieldCode())) {
                 cell = row.createCell(col);
@@ -1366,7 +1353,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Map<Integer, List<Integer>> errorRowColMap,
                                         IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<String> values = excelColumn.getPredefinedValues();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -1385,7 +1372,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Map<Integer, List<Integer>> errorRowColMap,
                                         IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<String> values = excelColumn.getPredefinedValues();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -1405,7 +1392,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
         String value = "";
-        if (isCellEmpty(cell)) {
+        if (SheetUtils.isCellEmpty(cell)) {
             row.createCell(col).setCellValue(buildWithErrorMsg(value, "优先级不能为空"));
             addErrorColumn(row.getRowNum(), col, errorRowColMap);
         } else {
@@ -1429,7 +1416,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                              IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
         Integer rowNum = row.getRowNum();
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString().trim();
             validateBigDecimal(col, errorRowColMap, cell, rowNum, value);
             List<Integer> errorCol = errorRowColMap.get(rowNum);
@@ -1487,7 +1474,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                           Map<Integer, List<Integer>> errorRowColMap,
                                           IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<String> values = excelColumn.getPredefinedValues();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -1514,7 +1501,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (!Objects.equals("bug", issueCreateVO.getTypeCode())) {
             return;
         }
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<String> values = excelColumn.getPredefinedValues();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -1543,7 +1530,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (IssueTypeCode.isStory(issueTypeCode)) {
             Cell cell = row.getCell(col);
             Integer rowNum = row.getRowNum();
-            if (!isCellEmpty(cell)) {
+            if (!SheetUtils.isCellEmpty(cell)) {
                 String value = cell.toString().trim();
                 validateBigDecimal(col, errorRowColMap, cell, rowNum, value);
                 List<Integer> errorCol = errorRowColMap.get(rowNum);
@@ -1565,7 +1552,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             int rowNum = row.getRowNum();
             Cell cell = row.getCell(col);
             String value = "";
-            if (isCellEmpty(cell)) {
+            if (SheetUtils.isCellEmpty(cell)) {
                 row.createCell(col).setCellValue(buildWithErrorMsg(value, "史诗名称不能为空"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
@@ -1613,7 +1600,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                        String issueType) {
         if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode) && !SUB_BUG_CN.equals(issueType)) {
             Cell cell = row.getCell(col);
-            if (!isCellEmpty(cell)) {
+            if (!SheetUtils.isCellEmpty(cell)) {
                 int rowNum = row.getRowNum();
                 String value = cell.toString();
                 List<String> values = excelColumn.getPredefinedValues();
@@ -1649,7 +1636,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 issueCreateVO.setEpicId(parentIssue.getEpicId());
             } else {
                 Cell cell = row.getCell(col);
-                if (!isCellEmpty(cell)) {
+                if (!SheetUtils.isCellEmpty(cell)) {
                     int rowNum = row.getRowNum();
                     String value = cell.toString();
                     List<String> values = excelColumn.getPredefinedValues();
@@ -1673,7 +1660,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         String value = "";
-        if (isCellEmpty(cell)) {
+        if (SheetUtils.isCellEmpty(cell)) {
             row.createCell(col).setCellValue(buildWithErrorMsg(value, "概要不能为空"));
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
@@ -1696,7 +1683,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                            String issueTypeCode) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (isCellEmpty(cell)) {
+        if (SheetUtils.isCellEmpty(cell)) {
             cell = row.createCell(col);
         }
         String value = cell.toString();
@@ -1718,7 +1705,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                 Integer col,
                                 IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             issueCreateVO.setDescription("<p>" + value + "</p>");
         }
@@ -1741,7 +1728,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         } else {
             Cell cell = row.getCell(col);
             int rowNum = row.getRowNum();
-            if (!isCellEmpty(cell)) {
+            if (!SheetUtils.isCellEmpty(cell)) {
                 String value = cell.toString();
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -1774,7 +1761,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         } else if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
             Cell cell = row.getCell(col);
             int rowNum = row.getRowNum();
-            if (!isCellEmpty(cell)) {
+            if (!SheetUtils.isCellEmpty(cell)) {
                 String value = cell.toString();
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -1795,7 +1782,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                      Map<Integer, List<Integer>> errorRowColMap,
                                      Long projectId) {
         Cell cell = row.getCell(col);
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             if (value.length() > 20) {
                 cell.setCellValue(buildWithErrorMsg(value, "标签名称过长"));
@@ -1817,7 +1804,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                              Map<Integer, ExcelColumnVO> headerMap) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             if (!cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
                 cell.setCellValue(buildWithErrorMsg("", DATE_CHECK_MSG));
                 addErrorColumn(rowNum, col, errorRowColMap);
@@ -1873,7 +1860,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return false;
         }
         Cell anotherEsTimeCell = row.getCell(anotherDateCol);
-        if (!isCellEmpty(anotherEsTimeCell)
+        if (!SheetUtils.isCellEmpty(anotherEsTimeCell)
                 && anotherEsTimeCell.getCellTypeEnum().equals(CellType.NUMERIC)
                 && DateUtil.isCellDateFormatted(anotherEsTimeCell)) {
             Date anotherDate = anotherEsTimeCell.getDateCellValue();
@@ -1901,7 +1888,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         String projectCode = projectInfoMapper.selectProjectCodeByProjectId(projectId);
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             String regex = "(([0-9]+(，|,))|((!|！)[0-9]+(，|,)))*(([0-9]+)|((!|！)[0-9]+))";
             if (Pattern.matches(regex, value)) {
@@ -1952,7 +1939,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                                String issueTypeCode) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (IssueTypeCode.AGILE_ISSUE_TYPE_CODE_NO_EPIC.contains(issueTypeCode) && !isCellEmpty(cell)) {
+        if (IssueTypeCode.AGILE_ISSUE_TYPE_CODE_NO_EPIC.contains(issueTypeCode) && !SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<String> values = excelColumnVO.getPredefinedValues();
             Map<String, Long> map = excelColumnVO.getValueIdMap();
@@ -1973,7 +1960,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                            String issueTypeCode) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell) && IssueTypeCode.isBug(issueTypeCode)) {
+        if (!SheetUtils.isCellEmpty(cell) && IssueTypeCode.isBug(issueTypeCode)) {
             String value = cell.toString();
             List<String> values = excelColumnVO.getPredefinedValues();
             if (!values.contains(value)) {
@@ -1995,7 +1982,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             StatusVO statusVO = issueStatusMap.get(issueType + "-" + value);
             if (statusVO == null) {
@@ -2015,7 +2002,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                           Map<Integer, ExcelColumnVO> headerMap) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             if (!cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
                 cell.setCellValue(buildWithErrorMsg("", DATE_CHECK_MSG));
                 addErrorColumn(rowNum, col, errorRowColMap);
@@ -2048,7 +2035,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                            Map<Integer, List<Integer>> errorRowColMap,
                                            IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<Long> participantIds = new ArrayList<>();
             List<String> list = splitByRegex(value);
@@ -2073,7 +2060,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                             IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
         Integer rowNum = row.getRowNum();
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString().trim();
             validateBigDecimal(col, errorRowColMap, cell, rowNum, value);
             List<Integer> errorCol = errorRowColMap.get(rowNum);
@@ -2089,7 +2076,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                        Map<Integer, List<Integer>> errorRowColMap,
                                        IssueCreateVO issueCreateVO) {
         Cell cell = row.getCell(col);
-        if (!isCellEmpty(cell)) {
+        if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<Long> productIds = new ArrayList<>();
             List<String> list = splitByRegex(value);

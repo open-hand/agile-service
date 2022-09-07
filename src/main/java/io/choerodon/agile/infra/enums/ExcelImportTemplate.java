@@ -1,12 +1,12 @@
 package io.choerodon.agile.infra.enums;
 
-import io.choerodon.core.exception.CommonException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author superlee
@@ -180,8 +180,8 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", true, null));
             HEADERS.add(new Header(FieldCode.EPIC_NAME, "史诗名称(仅" + IssueConstant.ISSUE_TYPE_CN + "为史诗时生效)", false, 8000));
             HEADERS.add(new Header(FieldCode.LABEL, "标签", false, null));
-            HEADERS.add(new Header(FieldCode.ESTIMATED_START_TIME, "预估开始时间", false, null));
-            HEADERS.add(new Header(FieldCode.ESTIMATED_END_TIME, "预估结束时间", false, null));
+            HEADERS.add(new Header(FieldCode.ESTIMATED_START_TIME, "预计开始时间", false, null));
+            HEADERS.add(new Header(FieldCode.ESTIMATED_END_TIME, "预计结束时间", false, null));
             HEADERS.add(new Header(FieldCode.MAIN_RESPONSIBLE, "主要负责人", false, null));
             HEADERS.add(new Header(FieldCode.ENVIRONMENT, "环境", false, null));
             HEADERS.add(new Header(RELATE_ISSUE, "关联" + IssueConstant.ISSUE_CN, false, null));

@@ -1,13 +1,13 @@
 package io.choerodon.agile.infra.dto.business;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.infra.dto.IssueComponentBriefDTO;
@@ -29,6 +29,7 @@ public class IssueDTO extends AuditDomain {
     public static final String FIELD_SUMMARY = "summary";
     public static final String FIELD_TYPE_CODE = "typeCode";
     public static final String FIELD_STATUS_ID = "statusId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     /***/
     @Id
