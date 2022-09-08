@@ -215,15 +215,6 @@ public class ProjectVO {
     public void setTypes(List<String> types) {
         this.types = types;
     }
-
-    public HealthStateVO getHealthStateVO() {
-        return healthStateVO;
-    }
-
-    public void setHealthStateVO(HealthStateVO healthStateVO) {
-        this.healthStateVO = healthStateVO;
-    }
-
     /**
      * @return 项目群ART信息
      */
@@ -233,5 +224,13 @@ public class ProjectVO {
 
     public void setArtInfo(ArtVO artInfo) {
         this.artInfo = artInfo;
+    }
+
+    public HealthStateVO getHealthStateVO() {
+        return healthStateVO;
+    }
+
+    public void setHealthStateVO(HealthStateVO healthStateVO) {
+        this.healthStateVO = healthStateVO;
     }
 }
