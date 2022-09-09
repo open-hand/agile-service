@@ -25,7 +25,7 @@ public class AsyncConfig extends AsyncConfigurerSupport {
      *
      * @return
      */
-    @Bean(name = "issueImportExecutor")
+    @Bean
     public Executor issueImportExecutor() {
         return new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(15));
     }
