@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
@@ -16,6 +17,16 @@ public class AsyncConfig extends AsyncConfigurerSupport {
 
     @Override
     public Executor getAsyncExecutor() {
+        return new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(15));
+    }
+
+    /**
+     * 工作列表导入线程池
+     *
+     * @return
+     */
+    @Bean(name = "issueImportExecutor")
+    public Executor issueImportExecutor() {
         return new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(15));
     }
 }

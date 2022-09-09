@@ -592,7 +592,7 @@ public class ExcelServiceImpl implements ExcelService {
         return cell == null || cell.toString().equals("") || cell.getCellTypeEnum() == CellType.BLANK;
     }
 
-    @Async
+    @Async("issueImportExecutor")
     @Override
     public void batchImport(Long projectId,
                             Long organizationId,
