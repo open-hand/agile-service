@@ -1,12 +1,14 @@
 package io.choerodon.agile.api.vo;
 
 
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.io.Serializable;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * 敏捷开发Issue标签关联
@@ -14,6 +16,7 @@ import java.io.Serializable;
  * @author dinghuang123@gmail.com
  * @since 2018-05-14 21:31:22
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LabelIssueRelVO implements Serializable {
 
     @ApiModelProperty(value = "问题主键id")

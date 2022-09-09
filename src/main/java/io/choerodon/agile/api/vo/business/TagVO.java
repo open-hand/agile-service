@@ -1,16 +1,19 @@
 package io.choerodon.agile.api.vo.business;
 
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
+import java.util.Objects;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author superlee
  * @since 2021-03-25
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TagVO {
 
     @NotEmpty(message = "error.tag.app.service.code")
