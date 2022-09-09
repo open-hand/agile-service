@@ -1,19 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.core.utils.PageUtils;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -21,18 +13,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.agile.infra.utils.RankUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageUtils;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 
 /**
- * @author shinan.chen
- * @Date 2018/8/8
+ * @author shinan.chen 2018/8/8
  */
 @Service
 @RefreshScope
@@ -165,17 +171,17 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     static {
         TYPE_CODE_CATEGORY_MAP = new HashMap<>();
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BUG.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.FEATURE.value(), Arrays.asList(ProjectCategory.MODULE_PROGRAM));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ISSUE_EPIC.value(), Arrays.asList(ProjectCategory.MODULE_PROGRAM, ProjectCategory.MODULE_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STORY.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.SUB_TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.TASK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BACKLOG.value(), Arrays.asList(ProjectCategory.MODULE_BACKLOG));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STAGE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.MILESTONE.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ACTIVITY.value(), Arrays.asList(ProjectCategory.MODULE_WATERFALL));
-        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.RISK.value(), Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_PROGRAM, ProjectCategory.MODULE_WATERFALL));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BUG.value(), Collections.unmodifiableList(Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE)));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.FEATURE.value(), Collections.singletonList(ProjectCategory.MODULE_PROGRAM));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ISSUE_EPIC.value(), Collections.unmodifiableList(Arrays.asList(ProjectCategory.MODULE_PROGRAM, ProjectCategory.MODULE_AGILE)));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STORY.value(), Collections.unmodifiableList(Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE)));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.SUB_TASK.value(), Collections.unmodifiableList(Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE)));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.TASK.value(), Collections.unmodifiableList(Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_WATERFALL_AGILE)));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.BACKLOG.value(), Collections.singletonList(ProjectCategory.MODULE_BACKLOG));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.STAGE.value(), Collections.singletonList(ProjectCategory.MODULE_WATERFALL));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.MILESTONE.value(), Collections.singletonList(ProjectCategory.MODULE_WATERFALL));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.ACTIVITY.value(), Collections.singletonList(ProjectCategory.MODULE_WATERFALL));
+        TYPE_CODE_CATEGORY_MAP.put(IssueTypeCode.RISK.value(), Collections.unmodifiableList(Arrays.asList(ProjectCategory.MODULE_AGILE, ProjectCategory.MODULE_PROGRAM, ProjectCategory.MODULE_WATERFALL)));
     }
 
 
@@ -244,7 +250,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             String rank = RankUtil.mid();
             for (PageConfigFieldVO field : fields) {
                 ObjectSchemeFieldExtendDTO extendDTO = new ObjectSchemeFieldExtendDTO();
-                if (objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Arrays.asList(result.getId()), organizationId, field.getFieldId(), projectId).isEmpty()) {
+                if (objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Collections.singletonList(result.getId()), organizationId, field.getFieldId(), projectId).isEmpty()) {
                     extendDTO.setIssueTypeId(result.getId());
                     extendDTO.setIssueType(result.getTypeCode());
                     extendDTO.setOrganizationId(organizationId);
@@ -289,7 +295,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         List<ObjectSchemeFieldDTO> fields;
         Long issueTypeId = result.getId();
         if (!Objects.isNull(result.getReferenceId())) {
-            fields = objectSchemeFieldMapper.selectByOptions(organizationId, null, null, null, result.getReferenceId(),Arrays.asList(typeCode));
+            fields = objectSchemeFieldMapper.selectByOptions(organizationId, null, null, null, result.getReferenceId(), Collections.singletonList(typeCode));
         } else {
             fields =
                 objectSchemeFieldMapper.select(field)
@@ -306,7 +312,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                         return false;
                     }).collect(Collectors.toList());
         }
-        Map<Long, ObjectSchemeFieldExtendDTO> referencedSystemFieldExtendMap = objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Arrays.asList(result.getReferenceId()), organizationId, null, null)
+        Map<Long, ObjectSchemeFieldExtendDTO> referencedSystemFieldExtendMap = objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Collections.singletonList(result.getReferenceId()), organizationId, null, null)
                         .stream().collect(Collectors.toMap(ObjectSchemeFieldExtendDTO::getFieldId, Function.identity()));
         fields.forEach(x -> {
             Boolean required = x.getRequired();
@@ -325,7 +331,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             }
             Long fieldId = x.getId();
             ObjectSchemeFieldExtendDTO extendDTO = new ObjectSchemeFieldExtendDTO();
-            if (objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Arrays.asList(issueTypeId), organizationId, fieldId, projectId).isEmpty()) {
+            if (objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Collections.singletonList(issueTypeId), organizationId, fieldId, projectId).isEmpty()) {
                 extendDTO.setIssueTypeId(issueTypeId);
                 extendDTO.setIssueType(typeCode);
                 extendDTO.setOrganizationId(organizationId);
@@ -348,7 +354,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private IssueTypeDTO querySystemIssueTypeByCode(Long organizationId, String typeCode){
         // 查询系统问题类型的状态机id
-        List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(new HashSet<>(Arrays.asList(organizationId)));
+        List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(new HashSet<>(Collections.singletonList(organizationId)));
         IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Objects.equals(typeCode, v.getTypeCode())).findAny().orElse(null);
         if(ObjectUtils.isEmpty(issueTypeDTO)){
             throw new CommonException("error.system.issueType.not.found");
@@ -428,24 +434,23 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private void handlerStatus(Long organizationId, Long projectId, Long statusMachineId, String applyType) {
         List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, statusMachineId, false);
-        if (!CollectionUtils.isEmpty(statusMachineNodeVOS)) {
-            List<Long> statusIds = statusMachineNodeVOS.stream().map(StatusMachineNodeVO::getStatusId).collect(Collectors.toList());
-            IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
-            issueStatusDTO.setProjectId(projectId);
-            List<IssueStatusVO> issueStatusVOS = issueStatusService.queryIssueStatusList(projectId);
-            List<Long> projectStatusIds = new ArrayList<>();
-            if (!CollectionUtils.isEmpty(issueStatusVOS)) {
-                projectStatusIds.addAll(issueStatusVOS.stream().map(IssueStatusVO::getStatusId).collect(Collectors.toList()));
+        if (CollectionUtils.isEmpty(statusMachineNodeVOS)) {
+            return;
+        }
+        List<Long> statusIds = statusMachineNodeVOS.stream().map(StatusMachineNodeVO::getStatusId).collect(Collectors.toList());
+        List<IssueStatusVO> issueStatusVOS = issueStatusService.queryIssueStatusList(projectId);
+        List<Long> projectStatusIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(issueStatusVOS)) {
+            projectStatusIds.addAll(issueStatusVOS.stream().map(IssueStatusVO::getStatusId).collect(Collectors.toList()));
+        }
+        List<Long> needAddIds = new ArrayList<>();
+        for (Long statusId : statusIds) {
+            if (!projectStatusIds.contains(statusId)) {
+                needAddIds.add(statusId);
             }
-            List<Long> needAddIds = new ArrayList<>();
-            statusIds.forEach(v -> {
-                if (!projectStatusIds.contains(v)) {
-                    needAddIds.add(v);
-                }
-            });
-            if (!CollectionUtils.isEmpty(needAddIds)) {
-                createIssueStatus(needAddIds, projectId, organizationId);
-            }
+        }
+        if (CollectionUtils.isNotEmpty(needAddIds)) {
+            createIssueStatus(needAddIds, projectId, organizationId);
         }
     }
 
@@ -529,7 +534,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         issueTypeDTO.setName(name);
         issueTypeDTO.setIcon(issueTypeVO.getIcon());
         issueTypeDTO.setReferenced(issueTypeVO.getReferenced());
-        if (issueTypeMapper.updateOptional(issueTypeDTO, fieldList.toArray(new String[fieldList.size()])) != 1) {
+        if (issueTypeMapper.updateOptional(issueTypeDTO, fieldList.toArray(new String[0])) != 1) {
             throw new CommonException("error.issue.type.update");
         }
         return modelMapper.map(issueTypeMapper.selectWithAlias(issueTypeId, projectId), IssueTypeVO.class);
@@ -544,7 +549,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             return;
         }
         IssueTypeVO vo = modelMapper.map(result, IssueTypeVO.class);
-        setDeletedAndReference(Arrays.asList(vo), organizationId, projectId);
+        setDeletedAndReference(Collections.singletonList(vo), organizationId, projectId);
         if (Boolean.FALSE.equals(vo.getDeleted())) {
             throw new CommonException("error.issue.type.not.deleted");
         }
@@ -634,8 +639,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                             Long projectId,
                                             Long issueTypeId) {
         objectSchemeFieldExtendMapper
-                .selectExtendFieldByOptions(Arrays.asList(issueTypeId), organizationId, null, projectId)
-                .forEach(x -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(x.getId()));
+                .selectExtendFieldByOptions(Collections.singletonList(issueTypeId), organizationId, null, projectId)
+                .stream()
+                .map(ObjectSchemeFieldExtendDTO::getId)
+                .forEach(this.objectSchemeFieldExtendMapper::deleteByPrimaryKey);
     }
 
     private void deleteIssueTypeExtend(Long organizationId, Long projectId, Long issueTypeId) {
@@ -691,8 +698,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                                                     Long projectId) {
         Set<Long> referenceIds =
                 result.stream()
-                        .filter(x -> x.getReferenceId() != null)
                         .map(IssueTypeVO::getReferenceId)
+                        .filter(Objects::nonNull)
                         .collect(Collectors.toSet());
         Set<Long> issueTypeIds = setSystemIssueTypeDeletedFalse(result);
         if (!issueTypeIds.isEmpty()) {
@@ -771,9 +778,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             ProjectSearchVO projectSearchVO = new ProjectSearchVO();
             projectSearchVO.setEnable(true);
             projectSearchVO.setCategoryCodes(categories);
-            Page<ProjectVO> page =
-                    baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, pageRequest.getPage(), pageRequest.getSize())
-                            .getBody();
+            Page<ProjectVO> page = Optional.ofNullable(
+                    baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, pageRequest.getPage(), pageRequest.getSize()).getBody()
+            ).orElse(new Page<>());
             List<ProjectVO> projects = page.getContent();
             Set<Long> ids = projects.stream().map(ProjectVO::getId).collect(Collectors.toSet());
             if (ids.isEmpty()) {
@@ -790,7 +797,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             return PageUtils.copyPropertiesAndResetContent(page, result);
         } else {
             Set<Long> issueTypeIds =
-                    issueTypeMapper.selectByReferenceId(new HashSet<>(Arrays.asList(issueTypeId)), organizationId)
+                    issueTypeMapper.selectByReferenceId(new HashSet<>(Collections.singletonList(issueTypeId)), organizationId)
                             .stream().map(IssueTypeDTO::getId).collect(Collectors.toSet());
             Page<IssueTypeExtendDTO> page =
                     PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, null, organizationId));
@@ -803,7 +810,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                             .collect(Collectors.toMap(IssueTypeExtendDTO::getProjectId, IssueTypeExtendDTO::getEnabled));
             Set<Long> projectIds =
                     list.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
-            List<ProjectVO> projects = baseFeignClient.queryByIds(projectIds).getBody();
+            List<ProjectVO> projects = Optional.ofNullable(baseFeignClient.queryByIds(projectIds).getBody()).orElse(Collections.emptyList());
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
         }
@@ -966,7 +973,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         ProjectSearchVO projectSearchVO = new ProjectSearchVO();
         projectSearchVO.setEnable(true);
         Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 1, 0).getBody();
-        List<ProjectVO> projects = page.getContent();
+        List<ProjectVO> projects = Optional.ofNullable(page).map(Page::getContent).orElse(Collections.emptyList());
         Map<String, Set<Long>> map = new HashMap<>();
         projects.forEach(p -> {
             Long projectId = p.getId();
@@ -1215,25 +1222,24 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     public Page<IssueTypeVO> pagingProjectIssueTypes(PageRequest pageRequest, Long organizationId, IssueTypeSearchVO issueTypeSearchVO) {
         List<Long> projectIds = issueTypeSearchVO.getProjectIds();
         if (CollectionUtils.isEmpty(projectIds)) {
-            projectIds = new ArrayList<>();
             Long userId = DetailsHelper.getUserDetails().getUserId();
             List<ProjectVO> list = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  null, true).getBody();
             if (CollectionUtils.isEmpty(list)) {
                 return new Page<>();
             }
-            projectIds.addAll(list.stream().map(ProjectVO::getId).collect(Collectors.toList()));
+            projectIds = list.stream().map(ProjectVO::getId).collect(Collectors.toList());
         }
         List<Long> finalProjectIds = projectIds;
         Page<IssueTypeVO> page = PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectProjectIssueTypeByOptions(organizationId, finalProjectIds, issueTypeSearchVO));
         List<IssueTypeVO> list = new ArrayList<>();
         List<Long> filterIssueTypeIds = issueTypeSearchVO.getFilterIssueTypeIds();
-        if (!CollectionUtils.isEmpty(filterIssueTypeIds)) {
-            String ids = filterIssueTypeIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-            List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectByIds(ids);
-            list.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>() {
-            }.getType()));
+        if (CollectionUtils.isNotEmpty(filterIssueTypeIds)) {
+            List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectByCondition(Condition.builder(IssueTypeDTO.class).andWhere(Sqls.custom()
+                    .andIn(IssueTypeDTO.FIELD_ID, filterIssueTypeIds)
+            ).build());
+            list.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>() {}.getType()));
         }
-        if (!CollectionUtils.isEmpty(page.getContent())) {
+        if (CollectionUtils.isNotEmpty(page.getContent())) {
             list.addAll(page.getContent());
         }
         return PageUtil.buildPageInfoWithPageInfoList(page, list);
@@ -1277,8 +1283,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         List<String> typeCodes =
                 objectSchemeFieldService.issueTypes(organizationId, projectId)
                         .stream()
-                        .filter(x -> !IGNORED_ISSUE_TYPES.contains(x.getTypeCode()))
                         .map(IssueTypeVO::getTypeCode)
+                        .filter(typeCode -> !IGNORED_ISSUE_TYPES.contains(typeCode))
                         .collect(Collectors.toList());
         IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
         issueTypeSearchVO.setOrganizationId(organizationId);
