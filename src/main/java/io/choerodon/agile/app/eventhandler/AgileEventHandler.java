@@ -1,15 +1,22 @@
 package io.choerodon.agile.app.eventhandler;
 
-import static io.choerodon.agile.infra.utils.SagaTopic.Organization.ORG_CREATE;
-import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CREATE;
-import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
-import io.choerodon.agile.api.vo.event.*;
+import io.choerodon.agile.api.vo.event.DevopsMergeRequestPayload;
+import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.event.ProjectEventCategory;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
+import io.choerodon.agile.infra.utils.RedisUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.asgard.saga.annotation.SagaTask;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.slf4j.Logger;
@@ -19,14 +26,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
-import io.choerodon.asgard.saga.annotation.SagaTask;
+import static io.choerodon.agile.infra.utils.SagaTopic.Organization.ORG_CREATE;
+import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CREATE;
+import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/22.
@@ -80,10 +82,15 @@ public class AgileEventHandler {
             description = "创建组织事件",
             sagaCode = ORG_CREATE,
             seq = 1)
-    public String handleOrgaizationCreateByConsumeSagaTask(String data) {
+    public String handleOrganizationCreateByConsumeSagaTask(String data) {
         LOGGER.info("消费创建组织消息{}", data);
         OrganizationCreateEventPayload organizationEventPayload = JSON.parseObject(data, OrganizationCreateEventPayload.class);
         Long organizationId = organizationEventPayload.getId();
+        actualInitOrganization(organizationId);
+        return data;
+    }
+
+    public void actualInitOrganization(Long organizationId) {
         //注册组织初始化问题类型
         issueTypeService.initIssueTypeIfNotExisted(organizationId);
         //注册组织初始化优先级
@@ -97,7 +104,6 @@ public class AgileEventHandler {
         initService.initDefaultStateMachine(organizationId);
         //初始化页面配置数据
         objectSchemeFieldService.createSystemFieldIfNotExisted(organizationId);
-        return data;
     }
 
     /**
@@ -119,7 +125,7 @@ public class AgileEventHandler {
         return message;
     }
 
-    private void initIfAgileProject(ProjectEvent projectEvent, List<ProjectEventCategory> projectEventCategories) {
+    public void initIfAgileProject(ProjectEvent projectEvent, List<ProjectEventCategory> projectEventCategories) {
         Set<String> codes =
                 projectEventCategories
                         .stream()
