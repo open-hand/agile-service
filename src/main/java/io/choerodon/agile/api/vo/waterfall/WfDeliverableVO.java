@@ -1,8 +1,8 @@
 package io.choerodon.agile.api.vo.waterfall;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
-import javax.validation.constraints.NotNull;
 
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -18,6 +18,8 @@ public class WfDeliverableVO {
     @ApiModelProperty(value = "交付物类型")
     @NotNull
     private String type;
+    @ApiModelProperty(value = "type=url,url的地址")
+    private String url;
     @Encrypt
     @ApiModelProperty(value = "里程碑id")
     private Long milestoneId;
@@ -147,5 +149,13 @@ public class WfDeliverableVO {
 
     public void setUserIds(List<Long> userIds) {
         this.userIds = userIds;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
