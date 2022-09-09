@@ -1,24 +1,28 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.api.vo.business.ProductVO;
-import io.choerodon.agile.api.vo.business.TagVO;
-import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
-import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
-import io.choerodon.agile.infra.dto.IssueSprintDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.api.vo.business.ProductVO;
+import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
+import io.choerodon.agile.api.vo.waterfall.WaterfallIssueVO;
+import io.choerodon.agile.infra.dto.IssueSprintDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * @author superlee
  * @since 2020-11-25
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GanttChartVO {
 
     public static final String FIELD_ISSUE_ID ="issueId";

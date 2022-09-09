@@ -1,14 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.event.*;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.ChangeSchemeStatus;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -19,8 +13,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.annotation.ChangeSchemeStatus;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.SchemeType;
+import io.choerodon.agile.infra.enums.StateMachineSchemeDeployStatus;
+import io.choerodon.agile.infra.enums.StateMachineSchemeStatus;
+import io.choerodon.agile.infra.enums.StateMachineStatus;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * @author shinan.chen
@@ -259,9 +263,9 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     /**
      * 根据方案id获取到项目的新状态和旧状态
      *
-     * @param organizationId
-     * @param schemeId
-     * @return
+     * @param organizationId organizationId
+     * @param schemeId schemeId
+     * @return result
      */
     private Map<String, List<Long>> queryStatusIdsBySchemeId(Long organizationId, Long schemeId) {
         Map<String, List<Long>> changeMap = new HashMap<>(2);

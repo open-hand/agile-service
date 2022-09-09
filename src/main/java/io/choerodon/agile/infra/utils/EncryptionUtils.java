@@ -21,26 +21,28 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.SearchSourceVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.app.service.impl.SprintServiceImpl;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.jackson.config.ObjectMapperPostProcess;
 import org.hzero.starter.keyencrypt.core.*;
 import org.hzero.starter.keyencrypt.json.EncryptedSerializerModifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.ObjectUtils;
 
 /**
- * @author zhaotianxin
- * @date 2020-06-16 20:24
+ * @author zhaotianxin 2020-06-16 20:24
  */
 public class EncryptionUtils {
 
@@ -48,7 +50,7 @@ public class EncryptionUtils {
 
     protected static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static ObjectMapper encryptMapper;
 
@@ -75,11 +77,11 @@ public class EncryptionUtils {
     private static final List<String> DATE_FORMAT_FIELD_LIST = Arrays.asList(FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME, FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME);
 
     /**
-     * 解密serachVO
+     * 解密searchVO
      *
      * @param search SearchVO
      */
-    public static void decryptSearchVO(SearchVO search) {
+    public static <T extends SearchVO> void decryptSearchVO(T search) {
         if (search == null){
             return;
         }
@@ -89,12 +91,12 @@ public class EncryptionUtils {
             filterEmptyCustomField(search);
             return;
         }
-        Optional<Map<String, Object>> adMapOptional = Optional.ofNullable(search).map(SearchVO::getAdvancedSearchArgs);
+        Optional<Map<String, Object>> adMapOptional = Optional.of(search).map(SearchVO::getAdvancedSearchArgs);
         if (adMapOptional.isPresent()) {
             decryptAd(search, adMapOptional);
         }
 
-        Optional<Map<String, Object>> searchArgs = Optional.ofNullable(search).map(SearchVO::getOtherArgs);
+        Optional<Map<String, Object>> searchArgs = Optional.of(search).map(SearchVO::getOtherArgs);
         if (searchArgs.isPresent()) {
             decryptOa(search, searchArgs);
         }
@@ -106,8 +108,8 @@ public class EncryptionUtils {
         if (ObjectUtils.isEmpty(searchArgs)) {
             return;
         }
-        List<String> suffixs = Arrays.asList("ScopeStart", "ScopeEnd", "Form", "To");
-        for (String suffix : suffixs) {
+        List<String> suffixes = Arrays.asList("ScopeStart", "ScopeEnd", "Form", "To");
+        for (String suffix : suffixes) {
             validateTimeAndFormat(searchArgs, suffix);
         }
     }
@@ -120,7 +122,7 @@ public class EncryptionUtils {
             if (ObjectUtils.isEmpty(value)) {
                 continue;
             }
-            Date date = null;
+            Date date;
             try {
                 date = dateFormat.parse(value.toString());
             } catch (ParseException e) {
@@ -130,20 +132,23 @@ public class EncryptionUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void filterEmptyCustomField(SearchVO search) {
         Optional<Map<String, Object>> searchArgs = Optional.ofNullable(search).map(SearchVO::getOtherArgs);
-        if (searchArgs.isPresent()) {
-            Map<String, Object> map = (Map) searchArgs.get().get("customField");
-            if (!ObjectUtils.isEmpty(map) && !map.isEmpty()) {
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    List<Object> options = (List) entry.getValue();
-                    List<Object> filterOptions = new ArrayList<>();
-                    if (!CollectionUtils.isEmpty(options)) {
-                        options.forEach(v -> filterEmptyValue(entry.getKey(), v, filterOptions));
-                    }
-                    map.put(entry.getKey(), filterOptions);
-                }
+        if (!searchArgs.isPresent()) {
+            return;
+        }
+        Map<String, Object> map = (Map<String, Object>) searchArgs.get().get("customField");
+        if (ObjectUtils.isEmpty(map) || map.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            List<Object> options = (List<Object>) entry.getValue();
+            List<Object> filterOptions = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(options)) {
+                options.forEach(v -> filterEmptyValue(entry.getKey(), v, filterOptions));
             }
+            map.put(entry.getKey(), filterOptions);
         }
     }
 
@@ -166,7 +171,7 @@ public class EncryptionUtils {
     }
 
     /**
-     * 解密serachVO
+     * 解密searchVO
      *
      * @param search SearchVO
      */
@@ -180,16 +185,15 @@ public class EncryptionUtils {
             return;
         }
         for (Map.Entry<String, Object> entry : adMapOptional.get().entrySet()) {
-            if (Objects.equals(entry.getValue(), "true") || Objects.equals(entry.getValue(), "false")) {
-                continue;
-            }
-            else if (entry.getValue() instanceof String){
-                ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
-                        .put(entry.getKey(), decrypt((String)entry.getValue(), BLANK_KEY));
-            }
-            else if (entry.getValue() instanceof Collection){
-                ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
-                        .put(entry.getKey(), decryptList((List<String>) entry.getValue(), BLANK_KEY, new String[]{"0"}));
+            if (!Objects.equals(entry.getValue(), "true") && !Objects.equals(entry.getValue(), "false")) {
+                if (entry.getValue() instanceof String){
+                    ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
+                            .put(entry.getKey(), decrypt((String)entry.getValue(), BLANK_KEY));
+                }
+                else if (entry.getValue() instanceof Collection){
+                    ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
+                            .put(entry.getKey(), decryptList((List<String>) entry.getValue(), BLANK_KEY, new String[]{"0"}));
+                }
             }
 
         }
@@ -199,9 +203,9 @@ public class EncryptionUtils {
     /**
      * 对单个主键进行解密
      *
-     * @param crypt
-     * @param tableName
-     * @return
+     * @param crypt crypt
+     * @param tableName tableName
+     * @return return
      */
     public static Long decrypt(String crypt, String tableName) {
         if (StringUtils.isNumeric(crypt)) {
@@ -218,8 +222,8 @@ public class EncryptionUtils {
         return encryptionService.decrypt(crypt, BLANK_KEY);
     }
 
-    public static String decrypt(String crypt, String[] ingoreValues) {
-        if (Arrays.stream(ingoreValues).anyMatch(v -> StringUtils.equals(crypt, v))) {
+    public static String decrypt(String crypt, String[] ignoreValues) {
+        if (Arrays.stream(ignoreValues).anyMatch(v -> StringUtils.equals(crypt, v))) {
             return crypt;
         }
         return encryptionService.decrypt(crypt, BLANK_KEY);
@@ -228,9 +232,9 @@ public class EncryptionUtils {
     /**
      * 解密List<String>形式的主键
      *
-     * @param crypts
-     * @param tableName
-     * @return
+     * @param crypts crypts
+     * @param tableName tableName
+     * @return result
      */
     public static List<Long> decryptList(List<String> crypts, String tableName, String[] ignoreValue) {
         List<Long> cryptsLong = new ArrayList<>();
@@ -252,21 +256,21 @@ public class EncryptionUtils {
 
     /***
      * 处理List 对象
-     * @param object
-     * @param clazz
-     * @return
+     * @param object object
+     * @param clazz clazz
+     * @return result
      */
-    public static List jsonToList(Object object, Class clazz) {
-        List list = new ArrayList();
+    public static <T> List<T> jsonToList(Object object, Class<? extends T> clazz) {
+        List<T> list = new ArrayList<>();
         try {
             JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(object));
             if (jsonNode.isArray()) {
                 Iterator<JsonNode> elements = jsonNode.elements();
                 while (elements.hasNext()) {
                     JsonNode next = elements.next();
-                    Object obj;
+                    T obj;
                     if (next.isObject()) {
-                        obj = clazz.newInstance();
+                        obj = clazz.getConstructor().newInstance();
                         handlerObject(next.toString(), obj, clazz);
                     } else {
                         obj = objectMapper.readValue(next.toString(), clazz);
@@ -275,7 +279,8 @@ public class EncryptionUtils {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("string to json node error: {}", e);
+            LOGGER.error("string to json node error:");
+            LOGGER.error(e.getMessage(), e);
         }
 
         return list;
@@ -284,18 +289,18 @@ public class EncryptionUtils {
     /**
      * 处理Object 对象
      *
-     * @param object
-     * @param object
-     * @param clazz
+     * @param jsonString jsonString
+     * @param object object
+     * @param clazz clazz
      */
-    public static void handlerObject(String jsonString, Object object, Class clazz) {
+    public static  <T> void handlerObject(String jsonString, T object, Class<? extends T> clazz) {
         try {
             JsonNode jsonNode = objectMapper.readTree(jsonString);
             Iterator<String> fieldNames = jsonNode.fieldNames();
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode valueNode = jsonNode.get(fieldName);
-                Field field = null;
+                Field field;
                 try {
                     field = clazz.getDeclaredField(fieldName);
                     field.setAccessible(true);
@@ -322,8 +327,8 @@ public class EncryptionUtils {
                     } else if (field.getType() == List.class) {
                         String className = field.getGenericType().getTypeName().substring(15, field.getGenericType().getTypeName().length() - 1);
                         Class<?> aClass = Class.forName(className);
-                        List list;
-                        if (aClass.isPrimitive() || EncryptionUtils.isWrapClass(aClass) || aClass.newInstance() instanceof String) {
+                        List<?> list;
+                        if (aClass.isPrimitive() || EncryptionUtils.isWrapClass(aClass) || aClass.getConstructor().newInstance() instanceof String) {
                             Encrypt encrypt = field.getDeclaredAnnotation(Encrypt.class);
                             if (aClass == Long.class && encrypt != null) {
                                 String[] ignoreValue = encrypt.ignoreValue();
@@ -347,17 +352,19 @@ public class EncryptionUtils {
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.error("reflect error: {}", e);
+                    LOGGER.error("reflect error:");
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("string to json node error: {}", e);
+            LOGGER.error("string to json node error:");
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
-    public static boolean isWrapClass(Class clz) {
+    public static boolean isWrapClass(Class<?> clz) {
         try {
-            return ((Class) clz.getField("TYPE").get(null)).isPrimitive();
+            return ((Class<?>) clz.getField("TYPE").get(null)).isPrimitive();
         } catch (Exception e) {
             return false;
         }
@@ -642,17 +649,18 @@ public class EncryptionUtils {
     }
 
     public static void handlerPrimaryKey(String tempStr, String key, Map<String, Object> map) {
-        JsonNode jsonNode = null;
+        JsonNode jsonNode;
         try {
             jsonNode = objectMapper.readTree(tempStr);
             if (jsonNode.isArray()) {
-                List list = objectMapper.readValue(tempStr, List.class);
+                List<String> list = objectMapper.readValue(tempStr, new TypeReference<List<String>>() {});
                 map.put(key, decryptList(list, BLANK_KEY, IGNORE_VALUES));
             } else {
                 map.put(key, encryptionService.decrypt(tempStr, BLANK_KEY));
             }
         } catch (Exception e) {
-            LOGGER.error("string to json node error: {}", e);
+            LOGGER.error("string to json node error:");
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -682,9 +690,7 @@ public class EncryptionUtils {
     public static Map<String, List<String>> encryptMap(Map<Long, List<Long>> parentWithSubs) {
         Map<String, List<String>> map = new HashMap<>();
         if (!parentWithSubs.isEmpty()) {
-            Iterator<Map.Entry<Long, List<Long>>> iterator = parentWithSubs.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<Long, List<Long>> next = iterator.next();
+            for (Map.Entry<Long, List<Long>> next : parentWithSubs.entrySet()) {
                 map.put(encryptionService.encrypt(next.getKey().toString(), BLANK_KEY), encryptList(next.getValue()));
             }
         }
@@ -731,14 +737,14 @@ public class EncryptionUtils {
                 });
                 objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(adMapOptional, encrypt))));
             } else {
-                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
+                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(new HashMap<>())));
             }
             if (!ObjectUtils.isEmpty(jsonNode.get("otherArgs")) && !jsonNode.get("otherArgs").isNull()) {
                 Map<String, Object> oAMap = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("otherArgs")),new TypeReference<Map<String,Object>>(){});
                 objectNode.set("otherArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(oAMap, encrypt))));
             }
             else {
-                objectNode.set("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
+                objectNode.set("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap<>())));
             }
             if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds")) && !jsonNode.get("quickFilterIds").isNull()){
                List<String> list =  objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("quickFilterIds")),new TypeReference<List<String>>() {});
@@ -756,7 +762,8 @@ public class EncryptionUtils {
             objectNode.set("searchArgs",jsonNode.get("searchArgs"));
             return objectMapper.writeValueAsString(objectNode);
         } catch (Exception e) {
-            LOGGER.error("jackson io error: {}", e);
+            LOGGER.error("jackson io error:");
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
@@ -765,23 +772,22 @@ public class EncryptionUtils {
         List<String> list = Arrays.asList(FILTER_FIELD);
         List<String> singleList = Arrays.asList(FILTER_SINGLE_FIELD);
         Map<String, Object> map1 = new HashMap<>();
-        Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> next = iterator.next();
+        for (Map.Entry<String, Object> next : map.entrySet()) {
             Object object;
             if (list.contains(next.getKey())) {
                 List<String> value = null;
                 try {
-                    value = objectMapper.readValue(objectMapper.writeValueAsString(next.getValue()),new TypeReference<List<String>>() { });
+                    value = objectMapper.readValue(objectMapper.writeValueAsString(next.getValue()), new TypeReference<List<String>>() {
+                    });
                 } catch (IOException e) {
-                    LOGGER.error("string to object error: {}", e);
+                    LOGGER.error("string to object error:");
+                    LOGGER.error(e.getMessage(), e);
                 }
                 if (!ObjectUtils.isEmpty(next.getValue()) && !CollectionUtils.isEmpty(value)) {
                     object = value.stream().map(v -> encryptOrDecrypt(v, encrypt)).collect(Collectors.toList());
 
-                }
-                else {
-                  object = next.getValue();
+                } else {
+                    object = next.getValue();
                 }
             } else if (singleList.contains(next.getKey()) && next.getValue() != null) {
                 object = encryptOrDecrypt(next.getValue().toString(), encrypt);
@@ -818,9 +824,9 @@ public class EncryptionUtils {
                     if ("option".equals(next.getKey())) {
                         List<String> list = new ArrayList<>();
                         if (value1.isArray()) {
-                            value1.forEach(v -> {
-                                list.add(v.isNumber() || Arrays.asList(IGNORE_VALUES).contains(v.textValue())  ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY)));
-                            });
+                            for (JsonNode v : value1) {
+                                list.add(v.isNumber() || Arrays.asList(IGNORE_VALUES).contains(v.textValue()) ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY)));
+                            }
                         }
                         if (CollectionUtils.isEmpty(list)) {
                             continue;
@@ -831,8 +837,8 @@ public class EncryptionUtils {
                             continue;
                         }
                         try {
-                            String startTime = null;
-                            String endTime = null;
+                            String startTime;
+                            String endTime;
                             if (encrypt) {
                                 String startDate = node.get("startDate").asText();
                                 String endDate = node.get("endDate").asText();
@@ -859,7 +865,8 @@ public class EncryptionUtils {
             }
             return map;
         } catch (IOException e) {
-            LOGGER.error("jackson io error: {}", e);
+            LOGGER.error("jackson io error:");
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
@@ -892,8 +899,8 @@ public class EncryptionUtils {
                             nodeObjValue.put("endDate", isNull(node.get("endDate")) ? null : node.get("endDate").textValue());
                         } else {
                             try {
-                                String startTime = null;
-                                String endTime = null;
+                                String startTime;
+                                String endTime;
                                 if (encrypt) {
                                     String startDate = node.get("startDate").asText();
                                     String endDate = node.get("endDate").asText();
@@ -918,7 +925,8 @@ public class EncryptionUtils {
             }
             return map;
         } catch (IOException e) {
-            LOGGER.error("jackson io error: {}", e);
+            LOGGER.error("jackson io error:");
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
@@ -927,15 +935,15 @@ public class EncryptionUtils {
         return ObjectUtils.isEmpty(jsonNode) || jsonNode.isNull();
     }
 
-    public static <T> Map<String, Map<String, List>> encryptMapValueMap(Map<Long, Map<Long, List<T>>> map) {
-        Map<String, Map<String, List>> mapHashMap = new HashMap<>();
+    public static <T> Map<String, Map<String, List<T>>> encryptMapValueMap(Map<Long, Map<Long, List<T>>> map) {
+        Map<String, Map<String, List<T>>> mapHashMap = new HashMap<>();
         if(!ObjectUtils.isEmpty(map)){
             for (Map.Entry<Long,Map<Long,List<T>>> entry : map.entrySet()) {
                 Long key = entry.getKey();
                 Map<Long, List<T>> value = entry.getValue();
-                Map<String,List> stringListMap = new HashMap<>();
+                Map<String, List<T>> stringListMap = new HashMap<>();
                 for(Map.Entry<Long,List<T>> entry1 : value.entrySet()){
-                    stringListMap.put(encryptionService.encrypt(entry1.getKey().toString(),BLANK_KEY),entry1.getValue());
+                    stringListMap.put(encryptionService.encrypt(entry1.getKey().toString(),BLANK_KEY), entry1.getValue());
                 }
                 mapHashMap.put(encryptionService.encrypt(key.toString(),BLANK_KEY),stringListMap);
             }
@@ -943,10 +951,10 @@ public class EncryptionUtils {
         return mapHashMap;
     }
 
-    public static Map<String, Object> encryptMapKey(Map<Long, ? extends Object> map) {
+    public static Map<String, Object> encryptMapKey(Map<Long, ?> map) {
         Map<String, Object> result = new HashMap<>();
         if (!ObjectUtils.isEmpty(map)) {
-            for (Map.Entry<Long, ? extends Object> entry : map.entrySet()) {
+            for (Map.Entry<Long, ?> entry : map.entrySet()) {
                 Long key = entry.getKey();
                 Object value = entry.getValue();
                 String encryptKey = encryptionService.encrypt(key.toString(), BLANK_KEY);
@@ -1005,6 +1013,7 @@ public class EncryptionUtils {
         ObjectMapperPostProcess objectMapperPostProcess = new ObjectMapperPostProcess();
         ObjectMapper objectMapper =
                 (ObjectMapper) objectMapperPostProcess.postProcessAfterInitialization(new ObjectMapper(), "");
+        Assert.notNull(objectMapper, BaseConstants.ErrorCode.NOT_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.registerModule(new SimpleModule() {
             @Override

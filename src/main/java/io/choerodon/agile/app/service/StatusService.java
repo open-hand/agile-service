@@ -1,13 +1,13 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.infra.dto.StatusDTO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -38,7 +38,7 @@ public interface StatusService {
      *
      * @param organizationId 组织id
      * @param statusId       状态机id
-     * @return
+     * @return result
      */
     Boolean delete(Long organizationId, Long statusId);
 
@@ -47,7 +47,7 @@ public interface StatusService {
      *
      * @param organizationId 组织id
      * @param statusId       状态id
-     * @return
+     * @return result
      */
     StatusVO queryStatusById(Long organizationId, Long statusId);
 
@@ -55,7 +55,7 @@ public interface StatusService {
      * 获取所有
      *
      * @param organizationId 组织id
-     * @return
+     * @return result
      */
     List<StatusVO> queryAllStatus(Long organizationId);
 
@@ -68,7 +68,7 @@ public interface StatusService {
      *
      * @param organizationId 组织id
      * @param name           名称
-     * @return
+     * @return result
      */
     StatusCheckVO checkName(Long organizationId, String name);
 
@@ -77,27 +77,27 @@ public interface StatusService {
     /**
      * 敏捷添加状态
      *
-     * @param organizationId
-     * @param statusVO
-     * @return
+     * @param organizationId organizationId
+     * @param statusVO statusVO
+     * @return result
      */
     StatusVO createStatusForAgile(Long organizationId, Long stateMachineId, StatusVO statusVO);
 
     /**
      * 敏捷移除状态
      *
-     * @param organizationId
-     * @param stateMachineId
-     * @param statusId
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
+     * @param statusId statusId
      */
     void removeStatusForAgile(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 查询状态机下的所有状态
      *
-     * @param organizationId
-     * @param stateMachineIds
-     * @return
+     * @param organizationId organizationId
+     * @param stateMachineIds stateMachineIds
+     * @return result
      */
     List<StatusVO> queryByStateMachineIds(Long organizationId, List<Long> stateMachineIds);
 
@@ -117,7 +117,7 @@ public interface StatusService {
      * @param organizationId 组织id
      * @param projectId 项目Id
      * @param name           名称
-     * @return
+     * @return result
      */
     StatusCheckVO projectCheckName(Long projectId , Long organizationId, String name);
 
@@ -126,9 +126,9 @@ public interface StatusService {
     /**
      * 项目层查询状态
      *
-     * @param projectId
-     * @param statusId
-     * @return
+     * @param projectId projectId
+     * @param statusId statusId
+     * @return result
      */
     StatusVO queryProjectStatusById(Long projectId, Long statusId);
 

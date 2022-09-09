@@ -61,9 +61,9 @@ public interface UserService {
     /**
      * 查询是否为项目所有者
      *
-     * @param projectId
-     * @param userId
-     * @return
+     * @param projectId projectId
+     * @param userId userId
+     * @return result
      */
     boolean isProjectOwner(Long projectId, Long userId);
 

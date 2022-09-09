@@ -1,5 +1,16 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.IssueAccessDataService;
@@ -11,16 +22,6 @@ import io.choerodon.agile.infra.mapper.PriorityMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -41,8 +42,6 @@ public class PriorityServiceImpl implements PriorityService {
     private IssueAccessDataService issueAccessDataService;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private PriorityService priorityService;
 
     @Override
     public List<PriorityVO> selectAll(PriorityVO priorityVO, String param) {
@@ -140,7 +139,7 @@ public class PriorityServiceImpl implements PriorityService {
         priority.setOrganizationId(organizationId);
         List<PriorityDTO> priorities = priorityMapper.select(priority);
         if (CollectionUtils.isEmpty(priorities)) {
-           return new HashMap<>();
+            return new HashMap<>();
         }
         Map<Long, PriorityVO> result = new HashMap<>();
         List<PriorityVO> priorityVOS = modelMapper.map(priorities, new TypeToken<List<PriorityVO>>() {
@@ -252,7 +251,7 @@ public class PriorityServiceImpl implements PriorityService {
         if (projectIds == null || projectIds.isEmpty()) {
             count = 0L;
         } else {
-            count = priorityService.checkPriorityDelete(organizationId, id, projectIds);
+            count = checkPriorityDelete(organizationId, id, projectIds);
         }
         return count;
     }
@@ -270,7 +269,7 @@ public class PriorityServiceImpl implements PriorityService {
         if (projectIds == null || projectIds.isEmpty()) {
             count = 0L;
         } else {
-            count = priorityService.checkPriorityDelete(organizationId, priorityId, projectIds);
+            count = checkPriorityDelete(organizationId, priorityId, projectIds);
         }
         //执行优先级转换
         if (!count.equals(0L)) {
@@ -278,7 +277,7 @@ public class PriorityServiceImpl implements PriorityService {
                 throw new CommonException(DELETE_ILLEGAL);
             }
             CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
-            priorityService.batchChangeIssuePriority(organizationId, priorityId, changePriorityId, customUserDetails.getUserId(), projectIds);
+            batchChangeIssuePriority(organizationId, priorityId, changePriorityId, customUserDetails.getUserId(), projectIds);
         }
         int isDelete = priorityMapper.deleteByPrimaryKey(priorityId);
         if (isDelete != 1) {
@@ -293,7 +292,7 @@ public class PriorityServiceImpl implements PriorityService {
     /**
      * 操作的是最后一个有效优先级则无法删除/失效
      *
-     * @param organizationId
+     * @param organizationId organizationId
      */
     private void checkLastPriority(Long organizationId, Long priorityId) {
         PriorityDTO priority = new PriorityDTO();
@@ -308,7 +307,7 @@ public class PriorityServiceImpl implements PriorityService {
     /**
      * 当执行失效/删除时，若当前是默认优先级，则取消当前默认优先级，并设置第一个为默认优先级，要放在方法最后执行
      *
-     * @param organizationId
+     * @param organizationId organizationId
      */
     private synchronized void updateOtherDefault(Long organizationId) {
         priorityMapper.cancelDefaultPriority(organizationId);

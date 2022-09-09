@@ -1,23 +1,27 @@
 package io.choerodon.agile.api.vo.business;
 
+import java.util.Date;
+import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.Date;
-import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.vo.HealthStateVO;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author huaxin.deng@hand-china.com
  * @since 2022/4/25
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductVO {
 
     private static final String CODE_REGULAR_EXPRESSION = "[^\\u4e00-\\u9fa5]*$";

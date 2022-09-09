@@ -67,7 +67,7 @@ class StateMachineControllerSpec extends Specification {
 
     /**
      * 【内部调用】校验是否可以删除状态机的节点
-     * @return
+     * @return result
      */
     def 'checkDeleteNode'() {
         given: '准备工作'
@@ -121,7 +121,7 @@ class StateMachineControllerSpec extends Specification {
 
     /**
      * 【内部调用】查询状态机方案变更后对issue的影响
-     * @return
+     * @return result
      */
     def 'checkStateMachineSchemeChange'() {
         given: '准备工作'

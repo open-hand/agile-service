@@ -1,12 +1,13 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-
 import java.util.Date;
 import java.util.List;
+
+import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
+import io.choerodon.agile.infra.dto.MoveIssueDTO;
+import io.choerodon.agile.infra.dto.VersionIssueRelDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 public interface IssueAccessDataService {
 
@@ -95,10 +96,10 @@ public interface IssueAccessDataService {
     /**
      * 【内部调用】批量更新issue的优先级
      *
-     * @param organizationId
-     * @param priorityId
-     * @param changePriorityId
-     * @param projectIds
+     * @param organizationId organizationId
+     * @param priorityId priorityId
+     * @param changePriorityId changePriorityId
+     * @param projectIds projectIds
      */
     void batchUpdateIssuePriority(Long organizationId, Long priorityId, Long changePriorityId, Long userId, List<Long> projectIds);
 

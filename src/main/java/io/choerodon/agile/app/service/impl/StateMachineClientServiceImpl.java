@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.utils.*;
+import com.google.common.collect.Lists;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,9 +148,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     /**
      * 创建issue，用于敏捷和测试
      *
-     * @param issueCreateVO
-     * @param applyType
-     * @return
+     * @param issueCreateVO issueCreateVO
+     * @param applyType applyType
+     * @return result
      */
     @Override
     public IssueVO createIssue(IssueCreateVO issueCreateVO, String applyType) {
@@ -235,7 +236,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             // 同步工作项到第三方
             agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
             // 第三方实例关联:yqcloud等
-            agilePluginService.createInstanceOpenRel(projectId, issueId, InstanceType.ISSUE, issueCreateVO.getInstanceOpenRelVO());
+            Optional.ofNullable(issueCreateVO.getInstanceOpenRelVO()).ifPresent(instanceOpenRelVO -> {
+                instanceOpenRelVO.setProjectId(projectId);
+                instanceOpenRelVO.setInstanceId(issueId);
+                instanceOpenRelVO.setInstanceType(InstanceType.ISSUE.value());
+                agilePluginService.createInstanceOpenRel(organizationId, Lists.newArrayList(instanceOpenRelVO));
+            });
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId,issueId,issueCreateVO);
@@ -253,8 +259,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     /**
      * 创建subIssue，用于敏捷
      *
-     * @param issueSubCreateVO
-     * @return
+     * @param issueSubCreateVO issueSubCreateVO
+     * @return result
      */
     @Override
     public IssueSubVO createSubIssue(IssueSubCreateVO issueSubCreateVO) {
@@ -396,13 +402,13 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     /**
      * 专用于demo的状态转换，demo创建数据不走状态机
      *
-     * @param projectId
-     * @param issueId
-     * @param transformId
-     * @param objectVersionNumber
-     * @param applyType
-     * @param inputDTO
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param transformId transformId
+     * @param objectVersionNumber objectVersionNumber
+     * @param applyType applyType
+     * @param inputDTO inputDTO
+     * @return result
      */
     @Override
     public ExecuteResult executeTransformForDemo(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO) {

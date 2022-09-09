@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo.business;
 import java.util.Date;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.dto.UserMessageDTO;
@@ -13,6 +14,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * Created by HuangFuqiang@choerodon.io on 2019/3/11.
  * Email: fuqianghuang01@gmail.com
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ArtVO {
 
     public ArtVO() {}

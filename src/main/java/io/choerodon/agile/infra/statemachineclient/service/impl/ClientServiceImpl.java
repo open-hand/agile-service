@@ -1,19 +1,20 @@
 package io.choerodon.agile.infra.statemachineclient.service.impl;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.choerodon.agile.infra.statemachineclient.StateMachineConfigMonitor;
 import io.choerodon.agile.infra.statemachineclient.dto.*;
 import io.choerodon.agile.infra.statemachineclient.enums.StateMachineConfigType;
 import io.choerodon.agile.infra.statemachineclient.enums.TransformConditionStrategy;
 import io.choerodon.agile.infra.statemachineclient.enums.TransformType;
 import io.choerodon.agile.infra.statemachineclient.service.ClientService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author shinan.chen
@@ -36,8 +37,8 @@ public class ClientServiceImpl implements ClientService {
      * 根据条件过滤转换
      *
      * @param instanceId    instanceId
-     * @param transformDTOS
-     * @return
+     * @param transformDTOS transformDTOS
+     * @return result
      */
     @Override
     public List<TransformInfo> conditionFilter(Long instanceId, List<TransformInfo> transformDTOS) {
@@ -65,10 +66,10 @@ public class ClientServiceImpl implements ClientService {
     /**
      * 执行条件
      *
-     * @param targetStatusId
-     * @param conditionStrategy
-     * @param inputDTO
-     * @return
+     * @param targetStatusId targetStatusId
+     * @param conditionStrategy conditionStrategy
+     * @param inputDTO inputDTO
+     * @return result
      */
     @Override
     public ExecuteResult configExecuteCondition(Long targetStatusId, String conditionStrategy, InputDTO inputDTO) {
@@ -104,9 +105,9 @@ public class ClientServiceImpl implements ClientService {
     /**
      * 执行验证
      *
-     * @param targetStatusId
-     * @param inputDTO
-     * @return
+     * @param targetStatusId targetStatusId
+     * @param inputDTO inputDTO
+     * @return result
      */
     @Override
     public ExecuteResult configExecuteValidator(Long targetStatusId, InputDTO inputDTO) {
@@ -130,10 +131,10 @@ public class ClientServiceImpl implements ClientService {
     /**
      * 执行后置动作
      *
-     * @param targetStatusId
-     * @param transformType
-     * @param inputDTO
-     * @return
+     * @param targetStatusId targetStatusId
+     * @param transformType transformType
+     * @param inputDTO inputDTO
+     * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -200,8 +201,8 @@ public class ClientServiceImpl implements ClientService {
     /**
      * 执行转换更新状态方法
      *
-     * @param targetStatusId
-     * @return
+     * @param targetStatusId targetStatusId
+     * @return result
      */
     private Boolean updateStatusInvokeBean(Long targetStatusId, InputDTO inputDTO) {
         Long instanceId = inputDTO.getInstanceId();

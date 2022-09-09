@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.feign.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -8,6 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author zongqi.hao@zknow.com
  * @since 2022/8/1
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class HealthStateVO {
 
     @ApiModelProperty(value = "名称")

@@ -1,7 +1,23 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.*;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import io.choerodon.agile.api.vo.DataLogCreateVO;
+import io.choerodon.agile.api.vo.DataLogFixVO;
+import io.choerodon.agile.api.vo.FieldDataLogVO;
+import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.business.DataLogVO;
+import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
@@ -13,18 +29,6 @@ import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/6/14.
@@ -163,8 +167,8 @@ public class DataLogServiceImpl implements DataLogService {
     /**
      * 填充用户信息
      *
-     * @param projectId
-     * @param dataLogVOS
+     * @param projectId projectId
+     * @param dataLogVOS dataLogVOS
      */
     private void fillUserAndStatus(Long projectId, List<DataLogVO> dataLogVOS,
                                    Map<Long, RuleLogRelVO> ruleLogRelMap) {

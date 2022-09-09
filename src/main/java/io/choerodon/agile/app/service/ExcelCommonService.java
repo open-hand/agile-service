@@ -1,9 +1,11 @@
 package io.choerodon.agile.app.service;
 
+import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ExcelColumnVO;
 import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.domain.entity.ExcelSheetData;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 import io.choerodon.agile.infra.dto.PredefinedDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
@@ -52,10 +54,20 @@ public interface ExcelCommonService {
                                        FileOperationHistoryDTO history,
                                        String websocketKey);
 
+    void addSystemFieldIfDateType(String code,
+                                  int col,
+                                  ExcelColumnVO excelColumnVO);
+
     void addSystemFieldIfDateType(Set<Integer> dateTypeColumns,
                                   String code,
                                   int col,
                                   ExcelColumnVO excelColumnVO);
+
+//    void validateCustomField(Map<Integer, ExcelColumnVO> headerMap,
+//                             Long projectId,
+//                             FileOperationHistoryDTO history,
+//                             String issueTypeList,
+//                             String websocketKey);
 
     void validateCustomField(Map<Integer, ExcelColumnVO> headerMap,
                              Long projectId,
@@ -63,6 +75,16 @@ public interface ExcelCommonService {
                              String issueTypeList,
                              Set<Integer> dateTypeColumns,
                              String websocketKey);
+
+    int processErrorData(Long userId,
+                         FileOperationHistoryDTO history,
+                         JSONObject sheetData,
+                         Integer dataRowCount,
+                         ExcelImportTemplate.Progress progress,
+                         int rowNum,
+                         Set<Integer> sonSet,
+                         int parentColIndex, int lastSendCountNum,
+                         String websocketKey);
 
     int processErrorData(Long userId,
                          FileOperationHistoryDTO history,
@@ -99,6 +121,11 @@ public interface ExcelCommonService {
                                                    ExcelColumnVO excelColumnVO,
                                                    boolean withFeature);
 
+    void validateCustomFieldData(JSONObject rowJson,
+                                 Integer col,
+                                 ExcelColumnVO excelColumn,
+                                 IssueCreateVO issueCreateVO);
+
     void validateCustomFieldData(Row row,
                                  Integer col,
                                  ExcelColumnVO excelColumn,
@@ -111,11 +138,25 @@ public interface ExcelCommonService {
                              Long projectId);
 
     Boolean checkRequireField(Map<Long, List<String>> requireFieldMap,
+                              ExcelColumnVO excelColumn,
+                              IssueCreateVO issueCreateVO,
+                              JSONObject rowJson,
+                              Integer col);
+
+    Boolean checkRequireField(Map<Long, List<String>> requireFieldMap,
                               ExcelColumnVO excelColum,
                               IssueCreateVO issueCreateVO,
                               Row row,
                               Integer col,
                               Map<Integer, List<Integer>> errorRowColMap);
+
+    void validateCommonSystemFieldData(JSONObject rowJson,
+                                       Integer col,
+                                       ExcelColumnVO excelColumn,
+                                       IssueCreateVO issueCreateVO,
+                                       IssueVO parentIssue,
+                                       Long projectId,
+                                       Map<Integer, ExcelColumnVO> headerMap);
 
     void validateCommonSystemFieldData(Row row,
                                        Integer col,
@@ -125,4 +166,20 @@ public interface ExcelCommonService {
                                        IssueVO parentIssue,
                                        Long projectId,
                                        Map<Integer, ExcelColumnVO> headerMap);
+
+    void putErrorMsg(JSONObject rowJson,
+                     JSONObject cellJson,
+                     String errorMsg);
+
+    void setErrorMsgToParentSonRow(int rowNum,
+                                   JSONObject sheetData,
+                                   Set<Integer> sonSet,
+                                   int parentColIndex);
+
+    String generateErrorDataExcelAndUpload(ExcelSheetData excelSheetData,
+                                           Map<Integer, ExcelColumnVO> headerMap,
+                                           List<String> headerNames,
+                                           FileOperationHistoryDTO history,
+                                           Long organizationId,
+                                           String templatePath);
 }

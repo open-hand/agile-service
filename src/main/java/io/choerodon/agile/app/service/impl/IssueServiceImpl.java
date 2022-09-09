@@ -47,29 +47,19 @@ import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.IssuePayload;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
-import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.client.MessageClientC7n;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -1133,14 +1123,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void handleData(Map<String, Object> reuslt,
+    public void handleData(Map<String, Object> result,
                            ProjectVO projectVO,
                            IssueDTO issueDTO,
                            ProjectVO targetProjectVO,
                            Long projectId,
                            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
-        boolean isMove = Boolean.TRUE.equals(reuslt.get("isMove"));
-        JSONObject issueJSONObject = JSON.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
+        boolean isMove = Boolean.TRUE.equals(result.get("isMove"));
+        JSONObject issueJSONObject = JSON.parseObject(JSON.toJSONString(result.get("jsonObj")));
         try {
             if (isMove) {
                 issueProjectMoveService.handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);

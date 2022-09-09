@@ -60,12 +60,12 @@ public class ProjectVO {
     private Set<Long> topProjectIds;
     @ApiModelProperty(value = "模糊搜索参数")
     private String param;
-    @ApiModelProperty("项目群ART信息")
-    private ArtVO artInfo;
     @ApiModelProperty(value = "项目状态颜色")
     private String color;
     @ApiModelProperty("健康状态")
     private HealthStateVO healthStateVO;
+    @ApiModelProperty("项目群ART信息")
+    private ArtVO artInfo;
 
     public String getColor() {
         return color;

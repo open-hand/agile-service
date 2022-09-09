@@ -4,14 +4,18 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.IamFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
+
 import org.hzero.core.util.ResponseUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * Copyright (c) 2022. Hand Enterprise Solution Company. All right reserved.
@@ -26,6 +30,39 @@ public class RemoteIamOperator {
 
     public RemoteIamOperator(IamFeignClient iamFeignClient) {
         this.iamFeignClient = iamFeignClient;
+    }
+
+    /**
+     * 分页查询租户信息
+     * @param tenantName 模糊查询条件--租户名称
+     * @param tenantNum 模糊查询条件--租户编码
+     * @return 查询结果
+     */
+    public Page<TenantVO> pagingTenants(String tenantName, String tenantNum, int page, int size) {
+        return ResponseUtils.getResponse(
+                this.iamFeignClient.pagingTenants(tenantName, tenantNum, page, size),
+                new TypeReference<Page<TenantVO>>() {}
+        );
+    }
+
+    /**
+     * 根据租户编码查询租户信息<br/>
+     * <span style="color:red">注意, 这个是通过模糊查询接口获取的结果, 当租户编码区分度太低时也许会出问题, 慎用</span>
+     * @param tenantNum 租户名称
+     * @return 查询结果
+     */
+    public TenantVO findTenantByNumber(String tenantNum) {
+        if(StringUtils.isBlank(tenantNum)) {
+            return null;
+        }
+        final Page<TenantVO> page = ResponseUtils.getResponse(
+                this.iamFeignClient.pagingTenants(null, tenantNum, 0, 1000),
+                new TypeReference<Page<TenantVO>>() {}
+        );
+        if(CollectionUtils.isEmpty(page)) {
+            return null;
+        }
+        return page.stream().filter(t -> tenantNum.equals(t.getTenantNum())).findFirst().orElse(null);
     }
 
     public List<ProjectVO> queryProjectByIds(Set<Long> ids) {
@@ -118,8 +155,8 @@ public class RemoteIamOperator {
     /**
      * 根据组织id查询所有项目
      *
-     * @param organizationId
-     * @return
+     * @param organizationId organizationId
+     * @return result
      */
     public List<ProjectVO> listProjectsByOrgId(Long organizationId) {
         return ResponseUtils.getResponse(iamFeignClient.listProjectsByOrgId(organizationId),
@@ -268,14 +305,14 @@ public class RemoteIamOperator {
 
     /*
      * 分页查询组织下的项目
-     * @param organizationId
-     * @param size
-     * @param code
-     * @param name
-     * @param page
-     * @param enabled
-     * @param params
-     * @return
+     * @param organizationId organizationId
+     * @param size size
+     * @param code code
+     * @param name name
+     * @param page page
+     * @param enabled enabled
+     * @param params params
+     * @return result
      */
     public Page<ProjectVO> pagedQueryProjects(Long organizationId, int page, int size, String name, String code, Boolean enabled, Boolean withAdditionInfo, String params) {
         return ResponseUtils.getResponse(iamFeignClient.pagedQueryProjects(organizationId, page, size, name, code, enabled, withAdditionInfo, params),

@@ -21,4 +21,13 @@ public class PersonalFilterTypeCode {
      * 风险个人筛选
      */
     public static final String RISK_ISSUE = "risk_issue";
+    /**
+     * 特性个人筛选
+     */
+    public static final String FEATURE_ISSUE = "feature_issue";
+    /**
+     * 瀑布个人筛选
+     */
+    public static final String WATERFALL_ISSUE = "waterfall_issue";
+
 }
