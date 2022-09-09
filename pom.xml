@@ -204,19 +204,9 @@
             <version>2.6</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>3.16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>3.16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml-schemas</artifactId>
-            <version>3.16</version>
+            <groupId>org.hzero.starter</groupId>
+            <artifactId>hzero-starter-excel</artifactId>
+            <version>${hzero.starter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
