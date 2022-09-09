@@ -1,16 +1,19 @@
 package io.choerodon.agile.api.vo;
 
 
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.io.Serializable;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 /**
  * @author dinghuang123@gmail.com
  * @since 2018-05-15 16:21:18
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VersionIssueRelVO implements Serializable {
 
     @ApiModelProperty(value = "版本id")

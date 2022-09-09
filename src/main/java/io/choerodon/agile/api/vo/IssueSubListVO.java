@@ -1,16 +1,20 @@
 package io.choerodon.agile.api.vo;
 
 
-import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.infra.utils.StringUtil;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/5/24
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueSubListVO {
 
     @ApiModelProperty(value = "问题主键id")

@@ -1,9 +1,12 @@
 package io.choerodon.agile.infra.feign.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * @author shinan.chen
  * @since 2019/6/28
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProjectCategoryDTO {
     private Long id;
     private String name;

@@ -4,13 +4,16 @@ import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author scp
  * @since 2022/2/18
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WfDeliverableVO {
     @ApiModelProperty(value = "交付物名称")
     @NotNull
