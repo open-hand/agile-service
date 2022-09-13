@@ -151,7 +151,7 @@ class AgileTestConfiguration {
     void initOrgProData() {
         OrganizationCreateEventPayload organizationEvent = new OrganizationCreateEventPayload()
         organizationEvent.id = 1
-        agileEventHandler.handleOrgaizationCreateByConsumeSagaTask(JSON.toJSONString(organizationEvent))
+        agileEventHandler.handleOrganizationCreateByConsumeSagaTask(JSON.toJSONString(organizationEvent))
         ProjectEvent projectEvent = new ProjectEvent()
         projectEvent.projectId = 1
         projectEvent.projectCode = "test"
@@ -269,7 +269,7 @@ class AgileTestConfiguration {
         OrganizationCreateEventPayload organizationCreateEventPayload = new OrganizationCreateEventPayload()
         organizationCreateEventPayload.setId(1L)
         String message = JSON.toJSONString(organizationCreateEventPayload)
-        agileEventHandler.handleOrgaizationCreateByConsumeSagaTask(message)
+        agileEventHandler.handleOrganizationCreateByConsumeSagaTask(message)
     }
 
     private void initIssues() {
