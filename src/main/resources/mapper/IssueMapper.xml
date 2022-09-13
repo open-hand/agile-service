@@ -522,7 +522,7 @@
                          close=")">
                     #{issueId}
                 </foreach>
-                <if test="childrenIds != null and childrenIds.size > 0">
+                <if test="childrenIds != null and childrenIds.size() > 0">
                     and aii.issue_id in
                     <foreach collection="childrenIds" item="id" open="(" separator=","
                              close=")">
@@ -536,7 +536,7 @@
                          close=")">
                     #{issueId}
                 </foreach>
-                <if test="childrenIds != null and childrenIds.size > 0">
+                <if test="childrenIds != null and childrenIds.size() > 0">
                     and aii.issue_id in
                     <foreach collection="childrenIds" item="id" open="(" separator=","
                              close=")">
@@ -706,7 +706,7 @@
                         AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
                     </if>
                 </if>
-                <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
                     <foreach collection="searchVO.contents" item="content" index="index">
                         AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
                         CONCAT(CONCAT('%',
@@ -796,7 +796,7 @@
                 #{projectId}
             </foreach>
             <choose>
-                <when test="searchVO.applyTypes != null and searchVO.applyTypes.size > 0">
+                <when test="searchVO.applyTypes != null and searchVO.applyTypes.size() > 0">
                     AND ai.apply_type IN
                     <foreach collection="searchVO.applyTypes" item="applyType" open="(" separator="," close=")">
                         #{applyType}
@@ -813,7 +813,7 @@
                     AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
                 </if>
             </if>
-            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
                 <foreach collection="searchVO.contents" item="content" index="index">
                     AND (
                     ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
@@ -860,7 +860,7 @@
                         AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
                     </if>
                 </if>
-                <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
                     <foreach collection="searchVO.contents" item="content" index="index">
                         AND (
                         ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
@@ -945,7 +945,7 @@
                     and ai.issue_num like CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
                 </if>
             </if>
-            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
                 <foreach collection="searchVO.contents" item="content" index="index">
                     and (
                     ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
@@ -1032,7 +1032,7 @@
                 AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
             </if>
         </if>
-        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+        <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
             <foreach collection="searchVO.contents" item="content" index="index">
                 AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
                 OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%'))
@@ -1064,7 +1064,7 @@
             AND ai.type_code in ('story','task')
         ) search
         where 1=1
-        <if test="searchVO != null and searchVO.advancedSearchArgs != null and searchVO.advancedSearchArgs.size > 0">
+        <if test="searchVO != null and searchVO.advancedSearchArgs != null and searchVO.advancedSearchArgs.size() > 0">
             <if test="searchVO.advancedSearchArgs.summary != null">
                 AND (
                 search.summary LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
@@ -1179,28 +1179,45 @@
             <if test="searchVO.advancedSearchArgs.estimateTimeNull != null and searchVO.advancedSearchArgs.estimateTimeNull == true">
                 AND ai.estimate_time IS NULL
             </if>
-            <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size > 0'>
+            <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size() > 0'>
                 AND ai.issue_type_id IN
-                <foreach collection="searchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
-                         close=")">
+                <foreach collection="searchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator="," close=")">
                     #{issueTypeId}
                 </foreach>
             </if>
-            <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+            <!-- 根据工作项类型ID和工作项类型所属项目ID进行精确匹配 -->
+            <if test='searchVO.advancedSearchArgs.issueTypeAndProjectIdList != null and searchVO.advancedSearchArgs.issueTypeAndProjectIdList.size() > 0'>
+                <foreach collection="searchVO.advancedSearchArgs.issueTypeAndProjectIdList" item="issueTypeAndProjectIdVO" open="AND (" separator=" OR " close=")">
+                    (
+                        ai.issue_type_id = #{issueTypeAndProjectIdVO.issueTypeId}
+                        <choose>
+                            <!-- 如果传了项目ID且项目ID != 0, 说明是二开过的工作项类型或项目级的工作项类型, 按项目ID精确匹配 -->
+                            <when test="issueTypeAndProjectIdVO.projectId != null and issueTypeAndProjectIdVO.projectId != 0">
+                                AND ai.project_id = #{issueTypeAndProjectIdVO.projectId}
+                            </when>
+                            <!-- 否则, 说明查询的是系统预制的工作项类型, 此时排除掉二开了工作项类型的项目 -->
+                            <otherwise>
+                                AND ai.project_id NOT IN (SELECT ite.project_id FROM fd_issue_type_extend ite WHERE ite.issue_type_id = #{issueTypeAndProjectIdVO.issueTypeId})
+                            </otherwise>
+                        </choose>
+                    )
+                </foreach>
+            </if>
+            <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size() > 0'>
                 AND ai.type_code IN
                 <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
                          close=")">
                     #{typeCode}
                 </foreach>
             </if>
-            <if test='searchVO.advancedSearchArgs.assigneeIds != null and searchVO.advancedSearchArgs.assigneeIds.size > 0'>
+            <if test='searchVO.advancedSearchArgs.assigneeIds != null and searchVO.advancedSearchArgs.assigneeIds.size() > 0'>
                 AND ai.assignee_id IN
                 <foreach collection="searchVO.advancedSearchArgs.assigneeIds" item="assigneeId" open="(" separator=","
                          close=")">
                     #{assigneeId}
                 </foreach>
             </if>
-            <if test='searchVO.advancedSearchArgs.reporterIds != null and searchVO.advancedSearchArgs.reporterIds.size > 0'>
+            <if test='searchVO.advancedSearchArgs.reporterIds != null and searchVO.advancedSearchArgs.reporterIds.size() > 0'>
                 AND
                 (
                 <if test='searchVO.advancedSearchArgs.reporterIdsNull != null and searchVO.advancedSearchArgs.reporterIdsNull == true'>
@@ -1213,14 +1230,14 @@
                 </foreach>
                 )
             </if>
-            <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
+            <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size() > 0'>
                 AND ai.priority_id IN
                 <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                          close=")">
                     #{priorityId}
                 </foreach>
             </if>
-            <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
+            <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size() > 0'>
                 and ai.status_id in
                 <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
                          close=")">
@@ -1296,7 +1313,7 @@
     </sql>
 
     <sql id="otherArgsSql1">
-        <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
+        <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
                 (ai.assignee_id = 0 or ai.assignee_id is null) OR
@@ -1308,7 +1325,7 @@
             </foreach>
             )
         </if>
-        <if test='searchVO.otherArgs.statusId != null and searchVO.otherArgs.statusId.size > 0'>
+        <if test='searchVO.otherArgs.statusId != null and searchVO.otherArgs.statusId.size() > 0'>
             AND ai.status_id in
             <foreach collection="searchVO.otherArgs.statusId" item="id" open="(" separator=","
                      close=")">
@@ -1329,7 +1346,7 @@
             </choose>
             )
         </if>
-        <if test='searchVO.otherArgs.component != null and searchVO.otherArgs.component.size > 0'>
+        <if test='searchVO.otherArgs.component != null and searchVO.otherArgs.component.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.componentNull != null and searchVO.otherArgs.componentNull == true'>
                 ai.issue_id in (SELECT ai12.issue_id from agile_issue ai12 left join
@@ -1347,7 +1364,7 @@
             ))
         </if>
 
-        <if test='searchVO.otherArgs.participantIds != null and searchVO.otherArgs.participantIds.size > 0'>
+        <if test='searchVO.otherArgs.participantIds != null and searchVO.otherArgs.participantIds.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.participantIdsNull != null and searchVO.otherArgs.participantIdsNull == true'>
                 ai.issue_id in (
@@ -1366,7 +1383,7 @@
             ))
         </if>
 
-        <if test='searchVO.otherArgs.epic != null and searchVO.otherArgs.epic.size > 0'>
+        <if test='searchVO.otherArgs.epic != null and searchVO.otherArgs.epic.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.epicNull != null and searchVO.otherArgs.epicNull == true'>
                 (((ai.epic_id is null or ai.epic_id = 0) and ai.type_code in ('story', 'task', 'bug', 'feature'))
@@ -1390,7 +1407,7 @@
             ) and ai.type_code = 'sub_task'))
             )
         </if>
-        <if test='searchVO.otherArgs.feature != null and searchVO.otherArgs.feature.size > 0'>
+        <if test='searchVO.otherArgs.feature != null and searchVO.otherArgs.feature.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.featureNull != null and searchVO.otherArgs.featureNull == true'>
                 ((ai.feature_id is null or ai.feature_id = 0) and ai.type_code in ('story', 'task', 'bug'))
@@ -1404,7 +1421,7 @@
             and ai.type_code in ('story', 'task', 'bug'))
             )
         </if>
-        <if test='searchVO.otherArgs.version != null and searchVO.otherArgs.version.size > 0'>
+        <if test='searchVO.otherArgs.version != null and searchVO.otherArgs.version.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.versionNull != null and searchVO.otherArgs.versionNull == true'>
                 ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
@@ -1421,7 +1438,7 @@
             )
         </if>
 
-        <if test='searchVO.otherArgs.fixVersion != null and searchVO.otherArgs.fixVersion.size > 0'>
+        <if test='searchVO.otherArgs.fixVersion != null and searchVO.otherArgs.fixVersion.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.fixVersionNull != null and searchVO.otherArgs.fixVersionNull == true'>
                 ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
@@ -1439,7 +1456,7 @@
             )
             )
         </if>
-        <if test='searchVO.otherArgs.influenceVersion != null and searchVO.otherArgs.influenceVersion.size > 0'>
+        <if test='searchVO.otherArgs.influenceVersion != null and searchVO.otherArgs.influenceVersion.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.influenceVersionNull != null and searchVO.otherArgs.influenceVersionNull == true'>
                 ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
@@ -1457,7 +1474,7 @@
              )
             )
         </if>
-        <if test='searchVO.otherArgs.label != null and searchVO.otherArgs.label.size > 0'>
+        <if test='searchVO.otherArgs.label != null and searchVO.otherArgs.label.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.labelNull != null and searchVO.otherArgs.labelNull == true'>
                 ai.issue_id in (SELECT ai13.issue_id from agile_issue ai13 left join
@@ -1472,7 +1489,7 @@
             </foreach>)
             )
         </if>
-        <if test='searchVO.otherArgs.issueIds != null and searchVO.otherArgs.issueIds.size > 0'>
+        <if test='searchVO.otherArgs.issueIds != null and searchVO.otherArgs.issueIds.size() > 0'>
             AND ai.issue_id in
             <foreach collection="searchVO.otherArgs.issueIds" item="issueId" open="(" separator=","
                      close=")">
@@ -1480,7 +1497,7 @@
             </foreach>
         </if>
 
-        <if test="searchVO.otherArgs.mainResponsibleIds != null and searchVO.otherArgs.mainResponsibleIds.size > 0">
+        <if test="searchVO.otherArgs.mainResponsibleIds != null and searchVO.otherArgs.mainResponsibleIds.size() > 0">
             and (
                 <if test='searchVO.otherArgs.mainResponsibleIdsNull != null and searchVO.otherArgs.mainResponsibleIdsNull == true'>
                     (ai.main_responsible_id = 0 or ai.main_responsible_id is null) OR
@@ -1492,14 +1509,14 @@
             )
         </if>
 
-        <if test="searchVO.otherArgs.environment != null and searchVO.otherArgs.environment.size > 0 ">
+        <if test="searchVO.otherArgs.environment != null and searchVO.otherArgs.environment.size() > 0 ">
             and ai.environment in
             <foreach collection="searchVO.otherArgs.environment" item="evm" open="(" close=")" separator=",">
                 #{evm}
             </foreach>
         </if>
 
-        <if test='searchVO.otherArgs.excludeIssueIds != null and searchVO.otherArgs.excludeIssueIds.size > 0'>
+        <if test='searchVO.otherArgs.excludeIssueIds != null and searchVO.otherArgs.excludeIssueIds.size() > 0'>
             AND ai.issue_id not in
             <foreach collection="searchVO.otherArgs.excludeIssueIds" item="issueId" open="(" separator=","
                      close=")">
@@ -1507,7 +1524,7 @@
             </foreach>
         </if>
 
-        <if test='searchVO.otherArgs.excludeTypeCodes != null and searchVO.otherArgs.excludeTypeCodes.size > 0'>
+        <if test='searchVO.otherArgs.excludeTypeCodes != null and searchVO.otherArgs.excludeTypeCodes.size() > 0'>
             AND ai.type_code not in
             <foreach collection="searchVO.otherArgs.excludeTypeCodes" item="excludeTypeCode" open="(" separator=","
                      close=")">
@@ -1515,7 +1532,7 @@
             </foreach>
         </if>
 
-        <if test='searchVO.otherArgs.creatorIds != null and searchVO.otherArgs.creatorIds.size > 0'>
+        <if test='searchVO.otherArgs.creatorIds != null and searchVO.otherArgs.creatorIds.size() > 0'>
             AND ai.created_by in
             <foreach collection="searchVO.otherArgs.creatorIds" item="userId" open="(" separator=","
                      close=")">
@@ -1523,14 +1540,14 @@
             </foreach>
         </if>
 
-        <if test='searchVO.otherArgs.updatorIds != null and searchVO.otherArgs.updatorIds.size > 0'>
+        <if test='searchVO.otherArgs.updatorIds != null and searchVO.otherArgs.updatorIds.size() > 0'>
             AND ai.last_updated_by in
             <foreach collection="searchVO.otherArgs.updatorIds" item="userId" open="(" separator=","
                      close=")">
                 #{userId}
             </foreach>
         </if>
-        <if test='searchVO.otherArgs.tags != null and searchVO.otherArgs.tags.size > 0'>
+        <if test='searchVO.otherArgs.tags != null and searchVO.otherArgs.tags.size() > 0'>
             AND (
             ai.issue_id in (
             SELECT atir.issue_id
@@ -1563,7 +1580,7 @@
             AND (adl.new_value = #{audit.user} OR adl.old_value = #{audit.user})
             ))
         </if>
-        <if test='searchVO.otherArgs.productIds != null and searchVO.otherArgs.productIds.size > 0'>
+        <if test='searchVO.otherArgs.productIds != null and searchVO.otherArgs.productIds.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.productIdsNull != null and searchVO.otherArgs.productIdsNull == true'>
                 ai.issue_id IN (
@@ -1584,7 +1601,7 @@
     </sql>
 
     <sql id="otherArgsSql2">
-        <if test='searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size > 0'>
+        <if test='searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size() > 0'>
             AND (
             <if test='searchVO.otherArgs.sprintNull != null and searchVO.otherArgs.sprintNull == true'>
                 ai.issue_id in (
@@ -1597,7 +1614,7 @@
                   </foreach>
                 and aisr2.sprint_id is null ) OR
             </if>
-            <if test="searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size > 0">
+            <if test="searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size() > 0">
                 <if test='searchVO.otherArgs.sprint.contains(0) or searchVO.otherArgs.sprint.contains("0")'>
                     ai.issue_id not in
                     (
@@ -1623,8 +1640,8 @@
             </if>
             )
         </if>
-        <if test="searchVO.otherArgs.customField != null and searchVO.otherArgs.customField.size > 0">
-            <if test="searchVO.otherArgs.customField.option != null and searchVO.otherArgs.customField.option.size > 0">
+        <if test="searchVO.otherArgs.customField != null and searchVO.otherArgs.customField.size() > 0">
+            <if test="searchVO.otherArgs.customField.option != null and searchVO.otherArgs.customField.option.size() > 0">
                 and
                 <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
                          close=")">
@@ -1666,7 +1683,7 @@
                     )
                 </foreach>
             </if>
-            <if test="searchVO.otherArgs.customField.date != null and searchVO.otherArgs.customField.date.size > 0">
+            <if test="searchVO.otherArgs.customField.date != null and searchVO.otherArgs.customField.date.size() > 0">
                 and
                 <foreach collection="searchVO.otherArgs.customField.date" item="item" open="(" separator="and"
                          close=")">
@@ -1686,7 +1703,7 @@
                     )
                 </foreach>
             </if>
-            <if test="searchVO.otherArgs.customField.date_hms != null and searchVO.otherArgs.customField.date_hms.size > 0">
+            <if test="searchVO.otherArgs.customField.date_hms != null and searchVO.otherArgs.customField.date_hms.size() > 0">
                 and
                 <foreach collection="searchVO.otherArgs.customField.date_hms" item="item" open="(" separator="and"
                          close=")">
@@ -1706,7 +1723,7 @@
                     )
                 </foreach>
             </if>
-            <if test="searchVO.otherArgs.customField.number != null and searchVO.otherArgs.customField.number.size > 0">
+            <if test="searchVO.otherArgs.customField.number != null and searchVO.otherArgs.customField.number.size() > 0">
                 and
                 <foreach collection="searchVO.otherArgs.customField.number" item="item" open="(" separator="and"
                          close=")">
@@ -1726,7 +1743,7 @@
                     )
                 </foreach>
             </if>
-            <if test="searchVO.otherArgs.customField.string != null and searchVO.otherArgs.customField.string.size > 0">
+            <if test="searchVO.otherArgs.customField.string != null and searchVO.otherArgs.customField.string.size() > 0">
                 and
                 <foreach collection="searchVO.otherArgs.customField.string" item="item" open="(" separator="and"
                          close=")">
@@ -1746,7 +1763,7 @@
                     )
                 </foreach>
             </if>
-            <if test="searchVO.otherArgs.customField.text != null and searchVO.otherArgs.customField.text.size > 0">
+            <if test="searchVO.otherArgs.customField.text != null and searchVO.otherArgs.customField.text.size() > 0">
                 and
                 <foreach collection="searchVO.otherArgs.customField.text" item="item" open="(" separator="and"
                          close=")">
@@ -1773,7 +1790,7 @@
         <if test='filterSql != null'>
             AND ai.issue_id IN (${filterSql})
         </if>
-        <if test='assigneeFilterIds != null and assigneeFilterIds.size > 0'>
+        <if test='assigneeFilterIds != null and assigneeFilterIds.size() > 0'>
             AND ai.assignee_id IN
             <foreach collection="assigneeFilterIds" item="assigneeFilterId"
                      open="(" close=")" separator=",">
@@ -2172,21 +2189,21 @@
     <sql id = "workbenchFilterSql">
         <if test="searchVO != null">
             <if test='searchVO.advancedSearchArgs != null'>
-                <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+                <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size() > 0'>
                     AND ai.type_code IN
                     <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
                              close=")">
                         #{typeCode}
                     </foreach>
                 </if>
-                <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
+                <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size() > 0'>
                     AND ai.priority_id IN
                     <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                              close=")">
                         #{priorityId}
                     </foreach>
                 </if>
-                <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
+                <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size() > 0'>
                     and ai.status_id in
                     <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
                              close=")">
@@ -2195,7 +2212,7 @@
                 </if>
             </if>
             <if test='searchVO.otherArgs != null'>
-                <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
+                <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size() > 0'>
                     AND (
                     <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
                         (ai.assignee_id = 0 or ai.assignee_id is null) OR
@@ -2208,7 +2225,7 @@
                     )
                 </if>
             </if>
-            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
             and
                 <foreach collection="searchVO.contents" item="content" index="index">
                     (issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
@@ -2327,21 +2344,21 @@
                 </choose>
                 <if test="searchVO != null">
                     <if test='searchVO.advancedSearchArgs != null'>
-                        <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size > 0'>
+                        <if test='searchVO.advancedSearchArgs.typeCodes != null and searchVO.advancedSearchArgs.typeCodes.size() > 0'>
                             AND ai.type_code IN
                             <foreach collection="searchVO.advancedSearchArgs.typeCodes" item="typeCode" open="(" separator=","
                                      close=")">
                                 #{typeCode}
                             </foreach>
                         </if>
-                        <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
+                        <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size() > 0'>
                             AND ai.priority_id IN
                             <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                                      close=")">
                                 #{priorityId}
                             </foreach>
                         </if>
-                        <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
+                        <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size() > 0'>
                             and ai.status_id in
                             <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
                                      close=")">
@@ -2350,7 +2367,7 @@
                         </if>
                     </if>
                     <if test='searchVO.otherArgs != null'>
-                        <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
+                        <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size() > 0'>
                             AND (
                             <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
                                 (ai.assignee_id = 0 or ai.assignee_id is null) OR
@@ -2367,7 +2384,7 @@
             ) search
             <where>
                 <if test="searchVO != null">
-                    <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                    <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
                         <foreach collection="searchVO.contents" item="content" index="index">
                             (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE CONCAT(CONCAT('%',#{content}), '%'))
                         </foreach>
@@ -2415,7 +2432,7 @@
                 AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{issueFilterParamVO.content}), '%') OR ai.summary LIKE CONCAT(CONCAT('%',
                 #{issueFilterParamVO.content}), '%'))
             </if>
-            <if test="issueFilterParamVO.userIds != null and issueFilterParamVO.userIds.size > 0">
+            <if test="issueFilterParamVO.userIds != null and issueFilterParamVO.userIds.size() > 0">
                 AND ai.assignee_id in
                 <foreach collection="issueFilterParamVO.userIds" item="userId" open="(" close=")" separator=",">
                      #{userId}
@@ -2444,7 +2461,7 @@
             <if test="issueNum != null">
                 AND ai.issue_num != #{issueNum}
             </if>
-            <if test='excludeIssueIds != null and excludeIssueIds.size > 0'>
+            <if test='excludeIssueIds != null and excludeIssueIds.size() > 0'>
                 AND ai.issue_id not in
                 <foreach collection="excludeIssueIds" item="issueId" open="(" separator="," close=")">
                     #{issueId}
@@ -2670,7 +2687,7 @@
             <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
                 AND ai.type_code = 'story'
             </if>
-            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0'>
+            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size() > 0'>
                 AND ai.assignee_id IN
                 <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
                          open="(" close=")" separator=",">
@@ -3142,21 +3159,21 @@
             </if>
         </if>
         <if test='advancedSearchArgs != null'>
-            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size > 0'>
+            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size() > 0'>
                 AND ai.issue_type_id IN
                 <foreach collection="advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
                          close=")">
                     #{issueTypeId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size > 0'>
+            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size() > 0'>
                 AND ai.priority_id IN
                 <foreach collection="advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                          close=")">
                     #{priorityId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size > 0'>
+            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size() > 0'>
                 and ai.status_id in
                 <foreach collection="advancedSearchArgs.statusId" item="statusId" open="(" separator="," close=")">
                     #{statusId}
@@ -3164,7 +3181,7 @@
             </if>
         </if>
         <if test='otherArgs != null'>
-            <if test='otherArgs.component != null and otherArgs.component.size > 0'>
+            <if test='otherArgs.component != null and otherArgs.component.size() > 0'>
                 AND ai.issue_id in (
                 SELECT acir.issue_id FROM
                 agile_component_issue_rel acir WHERE acir.component_id
@@ -3175,7 +3192,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.version != null and otherArgs.version.size > 0'>
+            <if test='otherArgs.version != null and otherArgs.version.size() > 0'>
                 AND ai.issue_id in (
                 SELECT avir.issue_id FROM
                 agile_version_issue_rel avir WHERE avir.version_id
@@ -3186,7 +3203,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.sprint != null and otherArgs.sprint.size > 0'>
+            <if test='otherArgs.sprint != null and otherArgs.sprint.size() > 0'>
                 AND ai.issue_id in (
                 SELECT aisr.issue_id FROM
                 agile_issue_sprint_rel aisr where aisr.sprint_id
@@ -3197,7 +3214,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.label != null and otherArgs.label.size > 0'>
+            <if test='otherArgs.label != null and otherArgs.label.size() > 0'>
                 AND ai.issue_id in (
                 SELECT alir.issue_id FROM
                 agile_label_issue_rel alir where alir.label_id
@@ -3208,7 +3225,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size > 0'>
+            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size() > 0'>
                 AND ai.issue_id in
                 <foreach collection="otherArgs.issueIds" item="issueId" open="(" separator=","
                          close=")">
@@ -3222,7 +3239,7 @@
                 AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchArgs.issueNum}) ,'%')
             </if>
         </if>
-        <if test='contents != null and contents.size != 0'>
+        <if test='contents != null and contents.size() != 0'>
             <foreach collection="contents" item="content" index="index">
                 AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
                 CONCAT(CONCAT('%',
@@ -3256,21 +3273,21 @@
             </if>
         </if>
         <if test='advancedSearchArgs != null'>
-            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size > 0'>
+            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size() > 0'>
                 AND ai.issue_type_id IN
                 <foreach collection="advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
                          close=")">
                     #{issueTypeId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size > 0'>
+            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size() > 0'>
                 AND ai.priority_id IN
                 <foreach collection="advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                          close=")">
                     #{priorityId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size > 0'>
+            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size() > 0'>
                 and ai.status_id in
                 <foreach collection="advancedSearchArgs.statusId" item="statusId" open="(" separator="," close=")">
                     #{statusId}
@@ -3278,7 +3295,7 @@
             </if>
         </if>
         <if test='otherArgs != null'>
-            <if test='otherArgs.component != null and otherArgs.component.size > 0'>
+            <if test='otherArgs.component != null and otherArgs.component.size() > 0'>
                 AND ai.issue_id in (
                 SELECT acir.issue_id FROM
                 agile_component_issue_rel acir WHERE acir.component_id
@@ -3289,7 +3306,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.version != null and otherArgs.version.size > 0'>
+            <if test='otherArgs.version != null and otherArgs.version.size() > 0'>
                 AND ai.issue_id in (
                 SELECT avir.issue_id FROM
                 agile_version_issue_rel avir WHERE avir.version_id
@@ -3300,7 +3317,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.sprint != null and otherArgs.sprint.size > 0'>
+            <if test='otherArgs.sprint != null and otherArgs.sprint.size() > 0'>
                 AND ai.issue_id in (
                 SELECT aisr.issue_id FROM
                 agile_issue_sprint_rel aisr where aisr.sprint_id
@@ -3311,7 +3328,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.label != null and otherArgs.label.size > 0'>
+            <if test='otherArgs.label != null and otherArgs.label.size() > 0'>
                 AND ai.issue_id in (
                 SELECT alir.issue_id FROM
                 agile_label_issue_rel alir where alir.label_id
@@ -3322,7 +3339,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size > 0'>
+            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size() > 0'>
                 AND ai.issue_id in
                 <foreach collection="otherArgs.issueIds" item="issueId" open="(" separator=","
                          close=")">
@@ -3336,7 +3353,7 @@
                 AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchArgs.issueNum}) ,'%')
             </if>
         </if>
-        <if test='contents != null and contents.size != 0'>
+        <if test='contents != null and contents.size() != 0'>
             <foreach collection="contents" item="content" index="index">
                 AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
                 CONCAT(CONCAT('%',
@@ -3363,21 +3380,21 @@
             </if>
         </if>
         <if test='advancedSearchArgs != null'>
-            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size > 0'>
+            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size() > 0'>
                 AND ai.issue_type_id IN
                 <foreach collection="advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
                          close=")">
                     #{issueTypeId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size > 0'>
+            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size() > 0'>
                 AND ai.priority_id IN
                 <foreach collection="advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                          close=")">
                     #{priorityId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size > 0'>
+            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size() > 0'>
                 and ai.status_id in
                 <foreach collection="advancedSearchArgs.statusId" item="statusId" open="(" separator="," close=")">
                     #{statusId}
@@ -3385,7 +3402,7 @@
             </if>
         </if>
         <if test='otherArgs != null'>
-            <if test='otherArgs.component != null and otherArgs.component.size > 0'>
+            <if test='otherArgs.component != null and otherArgs.component.size() > 0'>
                 AND ai.issue_id in (
                 SELECT acir.issue_id FROM
                 agile_component_issue_rel acir WHERE acir.component_id
@@ -3396,7 +3413,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.version != null and otherArgs.version.size > 0'>
+            <if test='otherArgs.version != null and otherArgs.version.size() > 0'>
                 AND ai.issue_id in (
                 SELECT avir.issue_id FROM
                 agile_version_issue_rel avir WHERE avir.version_id
@@ -3407,7 +3424,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.sprint != null and otherArgs.sprint.size > 0'>
+            <if test='otherArgs.sprint != null and otherArgs.sprint.size() > 0'>
                 AND ai.issue_id in (
                 SELECT aisr.issue_id FROM
                 agile_issue_sprint_rel aisr where aisr.sprint_id
@@ -3418,7 +3435,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.label != null and otherArgs.label.size > 0'>
+            <if test='otherArgs.label != null and otherArgs.label.size() > 0'>
                 AND ai.issue_id in (
                 SELECT alir.issue_id FROM
                 agile_label_issue_rel alir where alir.label_id
@@ -3429,7 +3446,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size > 0'>
+            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size() > 0'>
                 AND ai.issue_id in
                 <foreach collection="otherArgs.issueIds" item="issueId" open="(" separator=","
                          close=")">
@@ -3443,7 +3460,7 @@
                 AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchArgs.issueNum}) ,'%')
             </if>
         </if>
-        <if test='contents != null and contents.size != 0'>
+        <if test='contents != null and contents.size() != 0'>
             <foreach collection="contents" item="content" index="index">
                 AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
                 CONCAT(CONCAT('%',
@@ -3577,7 +3594,7 @@
         <!--</if>-->
         <!--WHERE-->
         <!--ai.project_id = #{projectId}-->
-        <!--<if test="issueTypes!=null and issueTypes.size > 0">-->
+        <!--<if test="issueTypes!=null and issueTypes.size() > 0">-->
             <!--<foreach collection="issueTypes" item="issueType">-->
                 <!--AND ai.type_code != #{issueType}-->
             <!--</foreach>-->
@@ -3628,27 +3645,27 @@
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         WHERE ai.project_id = #{projectId}
         <if test='advancedSearchArgs != null'>
-            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size > 0'>
+            <if test='advancedSearchArgs.priorityId != null and advancedSearchArgs.priorityId.size() > 0'>
                 AND ai.priority_id IN
                 <foreach collection="advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                          close=")">
                     #{priorityId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size > 0'>
+            <if test='advancedSearchArgs.issueTypeId != null and advancedSearchArgs.issueTypeId.size() > 0'>
                 AND ai.issue_type_id IN
                 <foreach collection="advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
                          close=")">
                     #{issueTypeId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size > 0'>
+            <if test='advancedSearchArgs.statusId != null and advancedSearchArgs.statusId.size() > 0'>
                 and ai.status_id in
                 <foreach collection="advancedSearchArgs.statusId" item="statusId" open="(" separator="," close=")">
                     #{statusId}
                 </foreach>
             </if>
-            <if test='advancedSearchArgs.assigneeIds != null and advancedSearchArgs.assigneeIds.size > 0'>
+            <if test='advancedSearchArgs.assigneeIds != null and advancedSearchArgs.assigneeIds.size() > 0'>
                 AND ai.assignee_id in
                 <foreach collection="advancedSearchArgs.assigneeIds" item="assigneeId" open="(" separator=","
                          close=")">
@@ -3658,7 +3675,7 @@
 
         </if>
         <if test='otherArgs != null'>
-            <if test='otherArgs.version != null and otherArgs.version.size > 0'>
+            <if test='otherArgs.version != null and otherArgs.version.size() > 0'>
                 AND ai.issue_id in (
                 SELECT avir.issue_id FROM
                 agile_version_issue_rel avir WHERE avir.version_id
@@ -3669,7 +3686,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size > 0'>
+            <if test='otherArgs.issueIds != null and otherArgs.issueIds.size() > 0'>
                 AND ai.issue_id in
                 <foreach collection="otherArgs.issueIds" item="issueId" open="(" separator=","
                          close=")">
@@ -3679,7 +3696,7 @@
             <if test='otherArgs.summary != null and otherArgs.summary != ""'>
                 AND ai.summary LIKE CONCAT(CONCAT('%' ,#{otherArgs.summary}) ,'%')
             </if>
-            <if test='otherArgs.sprint != null and otherArgs.sprint.size > 0'>
+            <if test='otherArgs.sprint != null and otherArgs.sprint.size() > 0'>
                 AND ai.issue_id in (
                 SELECT aisr.issue_id FROM
                 agile_issue_sprint_rel aisr where aisr.sprint_id
@@ -3690,7 +3707,7 @@
                 </foreach>
                 )
             </if>
-            <if test='otherArgs.label != null and otherArgs.label.size > 0'>
+            <if test='otherArgs.label != null and otherArgs.label.size() > 0'>
                 AND ai.issue_id in ( SELECT alir2.issue_id FROM
                 agile_label_issue_rel alir2 WHERE alir2.label_id in
                 <foreach collection="otherArgs.label" item="id" open="(" separator=","
@@ -3698,7 +3715,7 @@
                     #{id}
                 </foreach>)
             </if>
-            <if test='otherArgs.componentIds != null and otherArgs.componentIds.size > 0'>
+            <if test='otherArgs.componentIds != null and otherArgs.componentIds.size() > 0'>
                 AND ai.issue_id in(
                 SELECT acir.issue_id FROM agile_component_issue_rel acir
                 WHERE acir.component_id IN
@@ -3722,7 +3739,7 @@
                 AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{otherArgs.issueNum}) ,'%')
             </if>
         </if>
-        <if test='contents != null and contents.size != 0'>
+        <if test='contents != null and contents.size() != 0'>
             <foreach collection="contents" item="content" index="index">
                 AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
                 CONCAT(CONCAT('%',
@@ -4306,7 +4323,7 @@
         JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = #{sprintId} AND ai.issue_id = aisr.issue_id
         JOIN agile_issue_status ais ON ai.status_id = ais.status_id AND ai.project_id = ais.project_id
         WHERE ai.project_id = #{projectId}
-          <if test="statusSet != null and statusSet.size > 0">
+          <if test="statusSet != null and statusSet.size() > 0">
               AND ai.type_code IN
                 <foreach collection="statusSet" item="status" close=")" open="(" separator=",">
                     #{status}
@@ -4677,7 +4694,7 @@
             <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
                 AND ai.type_code = 'story'
             </if>
-            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0'>
+            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size() > 0'>
                 AND ai.assignee_id IN
                 <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
                          open="(" close=")" separator=",">
@@ -4716,7 +4733,7 @@
             <if test='advancedSearchArgs.onlyStory != "" and advancedSearchArgs.onlyStory == "true"'>
                 AND ai.type_code = 'story'
             </if>
-            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size > 0'>
+            <if test='advancedSearchArgs.assigneeFilterIds != null and advancedSearchArgs.assigneeFilterIds.size() > 0'>
                 AND ai.assignee_id IN
                 <foreach collection="advancedSearchArgs.assigneeFilterIds" item="assigneeFilterId"
                          open="(" close=")" separator=",">
@@ -4736,7 +4753,7 @@
             <foreach collection="parentIssueIds" item="parentIssueId" open="(" separator="," close=")">
                 #{parentIssueId}
             </foreach>
-            <if test="statusIds != null and statusIds.size > 0">
+            <if test="statusIds != null and statusIds.size() > 0">
                 AND ai.status_id in
                 <foreach collection="statusIds" item="statusId" open="(" close=")" separator=",">
                         #{statusId}
@@ -4755,7 +4772,7 @@
             <foreach collection="parentIssueIds" item="parentIssueId" open="(" separator="," close=")">
                 #{parentIssueId}
             </foreach>
-            <if test="statusIds != null and statusIds.size > 0">
+            <if test="statusIds != null and statusIds.size() > 0">
                 AND ai.status_id in
                 <foreach collection="statusIds" item="statusId" open="(" close=")" separator=",">
                     #{statusId}
@@ -4791,35 +4808,35 @@
             and ai.type_code = 'story'
         </if>
         <if test='extendSearchVO.advancedSearchArgs != null'>
-            <if test='extendSearchVO.advancedSearchArgs.issueTypeId != null and extendSearchVO.advancedSearchArgs.issueTypeId.size > 0'>
+            <if test='extendSearchVO.advancedSearchArgs.issueTypeId != null and extendSearchVO.advancedSearchArgs.issueTypeId.size() > 0'>
                 AND ai.issue_type_id IN
                 <foreach collection="extendSearchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
                          close=")">
                     #{issueTypeId}
                 </foreach>
             </if>
-            <if test='extendSearchVO.advancedSearchArgs.assigneeIds != null and extendSearchVO.advancedSearchArgs.assigneeIds.size > 0'>
+            <if test='extendSearchVO.advancedSearchArgs.assigneeIds != null and extendSearchVO.advancedSearchArgs.assigneeIds.size() > 0'>
                 AND ai.assignee_id IN
                 <foreach collection="extendSearchVO.advancedSearchArgs.assigneeIds" item="assigneeId" open="(" separator=","
                          close=")">
                     #{assigneeId}
                 </foreach>
             </if>
-            <if test='extendSearchVO.advancedSearchArgs.reporterIds != null and extendSearchVO.advancedSearchArgs.reporterIds.size > 0'>
+            <if test='extendSearchVO.advancedSearchArgs.reporterIds != null and extendSearchVO.advancedSearchArgs.reporterIds.size() > 0'>
                 AND ai.reporter_id IN
                 <foreach collection="extendSearchVO.advancedSearchArgs.reporterIds" item="reporterId" open="(" separator=","
                          close=")">
                     #{reporterId}
                 </foreach>
             </if>
-            <if test='extendSearchVO.advancedSearchArgs.priorityId != null and extendSearchVO.advancedSearchArgs.priorityId.size > 0'>
+            <if test='extendSearchVO.advancedSearchArgs.priorityId != null and extendSearchVO.advancedSearchArgs.priorityId.size() > 0'>
                 AND ai.priority_id IN
                 <foreach collection="extendSearchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
                          close=")">
                     #{priorityId}
                 </foreach>
             </if>
-            <if test='extendSearchVO.advancedSearchArgs.statusId != null and extendSearchVO.advancedSearchArgs.statusId.size > 0'>
+            <if test='extendSearchVO.advancedSearchArgs.statusId != null and extendSearchVO.advancedSearchArgs.statusId.size() > 0'>
                 and ai.status_id in
                 <foreach collection="extendSearchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
                          close=")">
@@ -4879,7 +4896,7 @@
     </sql>
 
     <sql id="extendOtherArgsSql1">
-        <if test='extendSearchVO.otherArgs.assigneeId != null and extendSearchVO.otherArgs.assigneeId.size > 0'>
+        <if test='extendSearchVO.otherArgs.assigneeId != null and extendSearchVO.otherArgs.assigneeId.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.assigneeIdNull != null and extendSearchVO.otherArgs.assigneeIdNull == true'>
                 (ai.assignee_id = 0 or ai.assignee_id is null) OR
@@ -4891,7 +4908,7 @@
             </foreach>
             )
         </if>
-        <if test='extendSearchVO.otherArgs.statusId != null and extendSearchVO.otherArgs.statusId.size > 0'>
+        <if test='extendSearchVO.otherArgs.statusId != null and extendSearchVO.otherArgs.statusId.size() > 0'>
             AND ai.status_id in
             <foreach collection="extendSearchVO.otherArgs.statusId" item="id" open="(" separator=","
                      close=")">
@@ -4912,7 +4929,7 @@
             </choose>
             )
         </if>
-        <if test='extendSearchVO.otherArgs.component != null and extendSearchVO.otherArgs.component.size > 0'>
+        <if test='extendSearchVO.otherArgs.component != null and extendSearchVO.otherArgs.component.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.componentNull != null and extendSearchVO.otherArgs.componentNull == true'>
                 ai.issue_id in (SELECT ai12.issue_id from agile_issue ai12 left join
@@ -4930,7 +4947,7 @@
             ))
         </if>
 
-        <if test='extendSearchVO.otherArgs.epic != null and extendSearchVO.otherArgs.epic.size > 0'>
+        <if test='extendSearchVO.otherArgs.epic != null and extendSearchVO.otherArgs.epic.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.epicNull != null and extendSearchVO.otherArgs.epicNull == true'>
                 (((ai.epic_id is null or ai.epic_id = 0) and ai.type_code in ('story', 'task', 'bug', 'feature'))
@@ -4954,7 +4971,7 @@
             ) and ai.type_code = 'sub_task'))
             )
         </if>
-        <if test='extendSearchVO.otherArgs.feature != null and extendSearchVO.otherArgs.feature.size > 0'>
+        <if test='extendSearchVO.otherArgs.feature != null and extendSearchVO.otherArgs.feature.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.featureNull != null and extendSearchVO.otherArgs.featureNull == true'>
                 ((ai.feature_id is null or ai.feature_id = 0) and ai.type_code in ('story', 'task', 'bug'))
@@ -4968,7 +4985,7 @@
             and ai.type_code in ('story', 'task', 'bug'))
             )
         </if>
-        <if test='extendSearchVO.otherArgs.version != null and extendSearchVO.otherArgs.version.size > 0'>
+        <if test='extendSearchVO.otherArgs.version != null and extendSearchVO.otherArgs.version.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.versionNull != null and extendSearchVO.otherArgs.versionNull == true'>
                 ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
@@ -4985,7 +5002,7 @@
             )
         </if>
 
-        <if test='extendSearchVO.otherArgs.fixVersion != null and extendSearchVO.otherArgs.fixVersion.size > 0'>
+        <if test='extendSearchVO.otherArgs.fixVersion != null and extendSearchVO.otherArgs.fixVersion.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.fixVersionNull != null and extendSearchVO.otherArgs.fixVersionNull == true'>
                 ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
@@ -5003,7 +5020,7 @@
             )
             )
         </if>
-        <if test='extendSearchVO.otherArgs.influenceVersion != null and extendSearchVO.otherArgs.influenceVersion.size > 0'>
+        <if test='extendSearchVO.otherArgs.influenceVersion != null and extendSearchVO.otherArgs.influenceVersion.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.influenceVersionNull != null and extendSearchVO.otherArgs.influenceVersionNull == true'>
                 ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
@@ -5021,7 +5038,7 @@
             )
             )
         </if>
-        <if test='extendSearchVO.otherArgs.label != null and extendSearchVO.otherArgs.label.size > 0'>
+        <if test='extendSearchVO.otherArgs.label != null and extendSearchVO.otherArgs.label.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.labelNull != null and extendSearchVO.otherArgs.labelNull == true'>
                 ai.issue_id in (SELECT ai13.issue_id from agile_issue ai13 left join
@@ -5036,7 +5053,7 @@
             </foreach>)
             )
         </if>
-        <if test='extendSearchVO.otherArgs.issueIds != null and extendSearchVO.otherArgs.issueIds.size > 0'>
+        <if test='extendSearchVO.otherArgs.issueIds != null and extendSearchVO.otherArgs.issueIds.size() > 0'>
             AND ai.issue_id in
             <foreach collection="extendSearchVO.otherArgs.issueIds" item="issueId" open="(" separator=","
                      close=")">
@@ -5044,20 +5061,20 @@
             </foreach>
         </if>
 
-        <if test="extendSearchVO.otherArgs.mainResponsibleIds != null and extendSearchVO.otherArgs.mainResponsibleIds.size > 0">
+        <if test="extendSearchVO.otherArgs.mainResponsibleIds != null and extendSearchVO.otherArgs.mainResponsibleIds.size() > 0">
             and ai.main_responsible_id in
             <foreach collection="extendSearchVO.otherArgs.mainResponsibleIds" item="mainResponsibleId" open="(" close=")" separator=",">
                 #{mainResponsibleId}
             </foreach>
         </if>
 
-        <if test="extendSearchVO.otherArgs.environment != null and extendSearchVO.otherArgs.environment.size > 0 ">
+        <if test="extendSearchVO.otherArgs.environment != null and extendSearchVO.otherArgs.environment.size() > 0 ">
             and ai.environment in
             <foreach collection="extendSearchVO.otherArgs.environment" item="evm" open="(" close=")" separator=",">
                 #{evm}
             </foreach>
         </if>
-        <if test='extendSearchVO.otherArgs.excludeIssueIds != null and extendSearchVO.otherArgs.excludeIssueIds.size > 0'>
+        <if test='extendSearchVO.otherArgs.excludeIssueIds != null and extendSearchVO.otherArgs.excludeIssueIds.size() > 0'>
             AND ai.issue_id not in
             <foreach collection="extendSearchVO.otherArgs.excludeIssueIds" item="issueId" open="(" separator=","
                      close=")">
@@ -5065,7 +5082,7 @@
             </foreach>
         </if>
 
-        <if test='extendSearchVO.otherArgs.creatorIds != null and extendSearchVO.otherArgs.creatorIds.size > 0'>
+        <if test='extendSearchVO.otherArgs.creatorIds != null and extendSearchVO.otherArgs.creatorIds.size() > 0'>
             AND ai.created_by in
             <foreach collection="extendSearchVO.otherArgs.creatorIds" item="userId" open="(" separator=","
                      close=")">
@@ -5073,14 +5090,14 @@
             </foreach>
         </if>
 
-        <if test='extendSearchVO.otherArgs.updatorIds != null and extendSearchVO.otherArgs.updatorIds.size > 0'>
+        <if test='extendSearchVO.otherArgs.updatorIds != null and extendSearchVO.otherArgs.updatorIds.size() > 0'>
             AND ai.last_updated_by in
             <foreach collection="extendSearchVO.otherArgs.updatorIds" item="userId" open="(" separator=","
                      close=")">
                 #{userId}
             </foreach>
         </if>
-        <if test='extendSearchVO.otherArgs.tags != null and extendSearchVO.otherArgs.tags.size > 0'>
+        <if test='extendSearchVO.otherArgs.tags != null and extendSearchVO.otherArgs.tags.size() > 0'>
             AND (
             ai.issue_id in (
             SELECT atir.issue_id
@@ -5107,7 +5124,7 @@
     </sql>
 
     <sql id="extendOtherArgsSql2">
-        <if test='extendSearchVO.otherArgs.sprint != null and extendSearchVO.otherArgs.sprint.size > 0'>
+        <if test='extendSearchVO.otherArgs.sprint != null and extendSearchVO.otherArgs.sprint.size() > 0'>
             AND (
             <if test='extendSearchVO.otherArgs.sprintNull != null and extendSearchVO.otherArgs.sprintNull == true'>
                 ai.issue_id in (SELECT ai10.issue_id from agile_issue ai10 left join
@@ -5138,8 +5155,8 @@
             </foreach>
             )
         </if>
-        <if test="extendSearchVO.otherArgs.customField != null and extendSearchVO.otherArgs.customField.size > 0">
-            <if test="extendSearchVO.otherArgs.customField.option != null and extendSearchVO.otherArgs.customField.option.size > 0">
+        <if test="extendSearchVO.otherArgs.customField != null and extendSearchVO.otherArgs.customField.size() > 0">
+            <if test="extendSearchVO.otherArgs.customField.option != null and extendSearchVO.otherArgs.customField.option.size() > 0">
                 and
                 <foreach collection="extendSearchVO.otherArgs.customField.option" item="item" open="(" separator="and"
                          close=")">
@@ -5163,7 +5180,7 @@
                     )
                 </foreach>
             </if>
-            <if test="extendSearchVO.otherArgs.customField.date != null and extendSearchVO.otherArgs.customField.date.size > 0">
+            <if test="extendSearchVO.otherArgs.customField.date != null and extendSearchVO.otherArgs.customField.date.size() > 0">
                 and
                 <foreach collection="extendSearchVO.otherArgs.customField.date" item="item" open="(" separator="and"
                          close=")">
@@ -5183,7 +5200,7 @@
                     )
                 </foreach>
             </if>
-            <if test="extendSearchVO.otherArgs.customField.date_hms != null and extendSearchVO.otherArgs.customField.date_hms.size > 0">
+            <if test="extendSearchVO.otherArgs.customField.date_hms != null and extendSearchVO.otherArgs.customField.date_hms.size() > 0">
                 and
                 <foreach collection="extendSearchVO.otherArgs.customField.date_hms" item="item" open="(" separator="and"
                          close=")">
@@ -5203,7 +5220,7 @@
                     )
                 </foreach>
             </if>
-            <if test="extendSearchVO.otherArgs.customField.number != null and extendSearchVO.otherArgs.customField.number.size > 0">
+            <if test="extendSearchVO.otherArgs.customField.number != null and extendSearchVO.otherArgs.customField.number.size() > 0">
                 and
                 <foreach collection="extendSearchVO.otherArgs.customField.number" item="item" open="(" separator="and"
                          close=")">
@@ -5223,7 +5240,7 @@
                     )
                 </foreach>
             </if>
-            <if test="extendSearchVO.otherArgs.customField.string != null and extendSearchVO.otherArgs.customField.string.size > 0">
+            <if test="extendSearchVO.otherArgs.customField.string != null and extendSearchVO.otherArgs.customField.string.size() > 0">
                 and
                 <foreach collection="extendSearchVO.otherArgs.customField.string" item="item" open="(" separator="and"
                          close=")">
@@ -5243,7 +5260,7 @@
                     )
                 </foreach>
             </if>
-            <if test="extendSearchVO.otherArgs.customField.text != null and extendSearchVO.otherArgs.customField.text.size > 0">
+            <if test="extendSearchVO.otherArgs.customField.text != null and extendSearchVO.otherArgs.customField.text.size() > 0">
                 and
                 <foreach collection="extendSearchVO.otherArgs.customField.text" item="item" open="(" separator="and"
                          close=")">
@@ -5485,7 +5502,7 @@
                 AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
             </if>
         </if>
-        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+        <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
             <foreach collection="searchVO.contents" item="content" index="index">
                 AND (
                 ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
@@ -5619,7 +5636,7 @@
                     and ai.issue_num like CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
                 </if>
             </if>
-            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
                 <foreach collection="searchVO.contents" item="content" index="index">
                     and (
                     ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
