@@ -77,12 +77,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired
     private IssueTypeFieldMapper issueTypeFieldMapper;
 
-    private static final String ORGANIZATION = "organization";
-
-    private static final String PROJECT = "project";
-
-    private static final String SYSTEM = "system";
-
     private static final String AGILE_AND_PROGRAM = "agileAndProgram";
 
     private static final String RISK = "risk";
@@ -212,7 +206,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         issueTypeVO.setReferenced(ZERO.equals(projectId));
         String source = issueTypeVO.getSource();
         if (!StringUtils.hasText(source)) {
-            source = ZERO.equals(projectId) ? ORGANIZATION : PROJECT;
+            source = ZERO.equals(projectId) ? IssueTypeSource.ORGANIZATION : IssueTypeSource.PROJECT;
         }
         issueTypeVO.setSource(source);
         IssueTypeDTO issueType = modelMapper.map(issueTypeVO, IssueTypeDTO.class);
@@ -418,7 +412,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         String stateMachineName = projectVO.getCode() + "-状态机-" + issueType.getName();
         Long statusMachineId = null;
         if (Boolean.TRUE.equals(copyStatusMachine)) {
-            if (Objects.equals(ORGANIZATION, issueType.getSource()) && !ObjectUtils.isEmpty(issueType.getReferenceId())) {
+            if (Objects.equals(IssueTypeSource.ORGANIZATION, issueType.getSource()) && !ObjectUtils.isEmpty(issueType.getReferenceId())) {
                 Long stateMachineTemplateId = organizationConfigService.queryIssueTypeStatusMachineId(organizationId, issueType.getReferenceId());
                 statusMachineId = !ObjectUtils.isEmpty(stateMachineTemplateId) ? stateMachineTemplateId : defaultHandlerStateMachine(organizationId, typeCode, stateMachineSchemeId);
                 // 处理状态机里面有,而项目没有的状态机
@@ -518,7 +512,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (issueTypeDTO == null) {
             throw new CommonException(ERROR_ISSUE_TYPE_NOT_EXISTED);
         }
-        if (SYSTEM.equals(issueTypeDTO.getSource())
+        if (IssueTypeSource.SYSTEM.equals(issueTypeDTO.getSource())
                 && !ZERO.equals(projectId)) {
             throw new CommonException("error.project.can.not.edit.system.issue.type");
         }
@@ -843,7 +837,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         dto.setOrganizationId(organizationId);
         dto.setProjectId(projectId);
         dto.setReferenceId(referenceId);
-        dto.setSource(ORGANIZATION);
+        dto.setSource(IssueTypeSource.ORGANIZATION);
         dto.setInitialize(false);
         if (issueTypeMapper.select(dto).isEmpty()) {
             String name = issueTypeVO.getName();
@@ -1069,7 +1063,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         dto.setInitialize(true);
         dto.setProjectId(ZERO);
         dto.setReferenced(true);
-        dto.setSource(SYSTEM);
+        dto.setSource(IssueTypeSource.SYSTEM);
         return dto;
     }
 
@@ -1220,29 +1214,46 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public Page<IssueTypeVO> pagingProjectIssueTypes(PageRequest pageRequest, Long organizationId, IssueTypeSearchVO issueTypeSearchVO) {
-        List<Long> projectIds = issueTypeSearchVO.getProjectIds();
+        // 处理项目信息
+        List<ProjectVO> projects;
+        Set<Long> projectIds = CollectionUtils.isEmpty(issueTypeSearchVO.getProjectIds()) ? new HashSet<>() : new HashSet<>(issueTypeSearchVO.getProjectIds());
         if (CollectionUtils.isEmpty(projectIds)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
-            List<ProjectVO> list = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  null, true).getBody();
-            if (CollectionUtils.isEmpty(list)) {
+            projects = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  null, true).getBody();
+            if (CollectionUtils.isEmpty(projects)) {
                 return new Page<>();
             }
-            projectIds = list.stream().map(ProjectVO::getId).collect(Collectors.toList());
+            projectIds = projects.stream().map(ProjectVO::getId).collect(Collectors.toSet());
+        } else {
+            projects = baseFeignClient.queryProjectByIds(projectIds).getBody();
+            if (CollectionUtils.isEmpty(projects)) {
+                return new Page<>();
+            }
         }
-        List<Long> finalProjectIds = projectIds;
-        Page<IssueTypeVO> page = PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectProjectIssueTypeByOptions(organizationId, finalProjectIds, issueTypeSearchVO));
-        List<IssueTypeVO> list = new ArrayList<>();
+        final Map<Long, ProjectVO> projectIdToEntityMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+        // DB查询
+        Set<Long> finalProjectIds = projectIds;
+        Page<IssueTypeVO> resultsInDb = PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectProjectIssueTypeByOptions(organizationId, finalProjectIds, issueTypeSearchVO));
+        // 处理filterIssueTypeIds
+        List<IssueTypeVO> actualResult = new ArrayList<>();
         List<Long> filterIssueTypeIds = issueTypeSearchVO.getFilterIssueTypeIds();
         if (CollectionUtils.isNotEmpty(filterIssueTypeIds)) {
             List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectByCondition(Condition.builder(IssueTypeDTO.class).andWhere(Sqls.custom()
                     .andIn(IssueTypeDTO.FIELD_ID, filterIssueTypeIds)
             ).build());
-            list.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>() {}.getType()));
+            actualResult.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>() {}.getType()));
         }
-        if (CollectionUtils.isNotEmpty(page.getContent())) {
-            list.addAll(page.getContent());
+        if (CollectionUtils.isNotEmpty(resultsInDb.getContent())) {
+            actualResult.addAll(resultsInDb.getContent());
         }
-        return PageUtil.buildPageInfoWithPageInfoList(page, list);
+        for (IssueTypeVO issueType : actualResult) {
+            final Long projectId = issueType.getProjectId();
+            if(projectId != null && !projectId.equals(ZERO)) {
+                issueType.setProjectInfo(projectIdToEntityMap.get(projectId));
+            }
+        }
+        // 返回结果
+        return PageUtil.buildPageInfoWithPageInfoList(resultsInDb, actualResult);
     }
 
     @Override
@@ -1429,7 +1440,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         String icon = issueTypeVO.getIcon();
         String colour = issueTypeVO.getColour();
         //非系统问题类型不可用这个接口重命名
-        if (!SYSTEM.equals(issueTypeDTO.getSource())) {
+        if (!IssueTypeSource.SYSTEM.equals(issueTypeDTO.getSource())) {
             throw new CommonException("error.can.not.edit");
         }
         if (!StringUtils.hasText(name)) {
