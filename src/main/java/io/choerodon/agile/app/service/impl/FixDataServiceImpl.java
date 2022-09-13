@@ -110,13 +110,18 @@ public class FixDataServiceImpl implements FixDataService {
         List<Long> configProjectIds = projectConfigMapper.selectAll().stream().map(ProjectConfigDTO::getProjectId).collect(Collectors.toList());
         List<Long> projectIds = projectInfoMapper.selectAll().stream().map(ProjectInfoDTO::getProjectId).collect(Collectors.toList());
         projectIds.removeAll(configProjectIds);
-        Collections.sort(projectIds, Comparator.reverseOrder());
+        projectIds.sort(Comparator.reverseOrder());
         LOGGER.info("查询出有问题的项目共有{}个，开始修复数据", projectIds.size());
         int count = 0;
         for (Long projectId : projectIds) {
             ProjectVO project = remoteIamOperator.queryProject(projectId);
             LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
-            if (!project.getCode().equals("def-ops-proj") || !project.getCategory().equals(ProjectCategory.GENERAL) || !project.getCreatedBy().equals(0L)) {
+            if (
+                    project == null
+                    || !project.getCode().equals("def-ops-proj")
+                    || !project.getCategory().equals(ProjectCategory.GENERAL)
+                    || !project.getCreatedBy().equals(0L)
+            ) {
                 LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
                 continue;
             }
@@ -142,7 +147,12 @@ public class FixDataServiceImpl implements FixDataService {
         }
         ProjectVO project = remoteIamOperator.queryProject(projectId);
         LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
-        if (!project.getCode().equals("def-ops-proj") || !project.getCategory().equals(ProjectCategory.GENERAL) || !project.getCreatedBy().equals(0L)) {
+        if (
+                project == null
+                || !project.getCode().equals("def-ops-proj")
+                || !project.getCategory().equals(ProjectCategory.GENERAL)
+                || !project.getCreatedBy().equals(0L)
+        ) {
             LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
             return;
         }
@@ -289,7 +299,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("开始插入数据，数据量: {}, 每次插入{}条数据, 需要插入{}次", total, step, totalPage);
         for (int i = 0; i < totalPage; i++) {
             int startLine = i * step;
-            int endLine =  (i + 1) * step > total ? total : (i + 1) * step;
+            int endLine = Math.min((i + 1) * step, total);
             objectSchemeFieldExtendMapper.batchInsert(insertList.subList(startLine, endLine));
             LOGGER.info("第{}次插入成功", i+1);
         }
@@ -458,7 +468,8 @@ public class FixDataServiceImpl implements FixDataService {
                     try {
                         LOGGER.warn("项目【{}】的问题类型【{}】不存在，跳过该条数据: {}", projectId, parentTypeCode, objectMapper.writeValueAsString(x));
                     } catch (JsonProcessingException e) {
-                        LOGGER.error("convert object to json error: {}", e);
+                        LOGGER.error("convert object to json error");
+                        LOGGER.error(e.getMessage(), e);
                     }
                 }
             }
@@ -503,15 +514,12 @@ public class FixDataServiceImpl implements FixDataService {
 
     private void resetRank(List<ObjectSchemeFieldExtendDTO> list) {
         //先按rank升序排列，rank值相同，按fieldId升序排列
-        Collections.sort(list, new Comparator<ObjectSchemeFieldExtendDTO>() {
-            @Override
-            public int compare(ObjectSchemeFieldExtendDTO o1, ObjectSchemeFieldExtendDTO o2) {
-                int result = o1.getRank().compareTo(o2.getRank());
-                if (result == 0) {
-                    return o2.getFieldId().compareTo(o1.getFieldId());
-                }
-                return result;
+        list.sort((o1, o2) -> {
+            int result = o1.getRank().compareTo(o2.getRank());
+            if (result == 0) {
+                return o2.getFieldId().compareTo(o1.getFieldId());
             }
+            return result;
         });
         String mid = RankUtil.mid();
         for (ObjectSchemeFieldExtendDTO dto : list) {
@@ -834,7 +842,7 @@ public class FixDataServiceImpl implements FixDataService {
             List<StatusMachineNodeVO> machineNodeVOS = statusMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
             Map<Long, StatusMachineNodeVO> nodeVOMap = machineNodeVOS.stream().collect(Collectors.toMap(StatusMachineNodeVO::getId, Function.identity()));
             // 将转换到所有转换为多个transform
-            List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper.queryByStateMachineIds(statusMachineDTO.getOrganizationId(), Arrays.asList(statusMachineDTO.getId()));
+            List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper.queryByStateMachineIds(statusMachineDTO.getOrganizationId(), Collections.singletonList(statusMachineDTO.getId()));
             List<StatusMachineTransformDTO> allTransforms = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.ALL)).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(allTransforms)) {
                 // 对tansform_all进行转换
@@ -871,16 +879,16 @@ public class FixDataServiceImpl implements FixDataService {
             List<Long> existTransferOwnerNodeId = statusMachineTransformMapper.existTransferOwner(statusMachineDTO.getId());
             // 获取没有转换自身的节点
             Set<Long> allNodeId = nodeVOMap.keySet();
-            allNodeId.removeAll(existTransferOwnerNodeId);
+            existTransferOwnerNodeId.forEach(allNodeId::remove);
             if (!CollectionUtils.isEmpty(allNodeId)) {
                 // 添加转换
                 List<StatusMachineTransformDTO> transform = new ArrayList<>();
-                allNodeId.forEach(v -> {
-                    StatusMachineNodeVO nodeVO = nodeVOMap.get(v);
+                for (Long nodeId : allNodeId) {
+                    StatusMachineNodeVO nodeVO = nodeVOMap.get(nodeId);
                     StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
                     statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
-                    statusMachineTransformDTO.setStartNodeId(v);
-                    statusMachineTransformDTO.setEndNodeId(v);
+                    statusMachineTransformDTO.setStartNodeId(nodeId);
+                    statusMachineTransformDTO.setEndNodeId(nodeId);
                     statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + nodeVO.getStatusVO().getName());
                     statusMachineTransformDTO.setStateMachineId(statusMachineDTO.getId());
                     statusMachineTransformDTO.setType(TransformType.CUSTOM);
@@ -888,7 +896,7 @@ public class FixDataServiceImpl implements FixDataService {
                     statusMachineTransformDTO.setLastUpdatedBy(0L);
                     statusMachineTransformDTO.setConditionStrategy("condition_all");
                     transform.add(statusMachineTransformDTO);
-                });
+                }
                 statusMachineTransformMapper.batchInsert(transform);
             }
             LOGGER.info("修复状态机:Id:{},名称:{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
@@ -912,8 +920,8 @@ public class FixDataServiceImpl implements FixDataService {
         int totalPage = (int) Math.ceil(projectIds.size() / (size * 1.0));
         int totalSize = 0;
         for (int page = 0; page < totalPage; page++) {
-            List<Long> list = projectIds.subList(page * size > total ? total : page * size, (page + 1) * size > total ? total : (page + 1) * size);
-            List<ProjectVO> projectVOS = remoteIamOperator.queryProjectByIds(new HashSet<>(list));
+            List<Long> list = projectIds.subList(Math.min(page * size, total), Math.min((page + 1) * size, total));
+            List<ProjectVO> projectVOS = Optional.ofNullable(remoteIamOperator.queryProjectByIds(new HashSet<>(list))).orElse(Collections.emptyList());
             for (ProjectVO projectVO : projectVOS) {
                 LOGGER.info("开始修复{}-{}项目所有问题类型的状态机",projectVO.getId(),projectVO.getName());
                 String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
