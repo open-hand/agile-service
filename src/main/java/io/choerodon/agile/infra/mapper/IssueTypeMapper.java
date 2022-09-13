@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -102,12 +103,17 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
     /**
      * 根据项目ids查询问题类型
-     * @param organizationId
-     * @param projectIds
-     * @return
+     * @param organizationId 租户ID, 必传
+     * @param projectIds 项目ID, 必传,
+     * @param issueTypeSchemeIds 状态机方案ID, 非必传
+     * @param issueTypeSearchVO 其他查询条件, 非必传
+     * @return 查询结果
      */
-    List<IssueTypeVO> selectProjectIssueTypeByOptions(@Param("organizationId") Long organizationId,
-                                                      @Param("projectIds") Collection<Long> projectIds,
-                                                      @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
+    List<IssueTypeVO> selectProjectIssueTypeByOptions(
+            @Param("organizationId") Long organizationId,
+            @Param("projectIds") Set<Long> projectIds,
+            @Param("issueTypeSchemeIds") Collection<Long> issueTypeSchemeIds,
+            @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO
+    );
 
 }

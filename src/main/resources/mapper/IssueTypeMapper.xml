@@ -397,11 +397,13 @@
     </select>
 
     <select id="selectProjectIssueTypeByOptions" resultType="io.choerodon.agile.api.vo.IssueTypeVO">
-        select temp.* from (
+        SELECT temp.* FROM (
             SELECT
                 it.id,
                 IFNULL( ite.name, it.name ) AS name,
-                ite.project_id
+                ite.project_id,
+                ite.enabled,
+		        ite.rank
             FROM fd_issue_type_extend ite
             JOIN fd_issue_type it ON it.id = ite.issue_type_id
             WHERE ite.organization_id = #{organizationId, jdbcType=DECIMAL}
@@ -415,24 +417,27 @@
             SELECT
                 it.id,
                 it.NAME,
-                it.project_id
+                it.project_id,
+                1 AS enabled,
+                null AS `rank`
             FROM fd_issue_type it
             WHERE it.organization_id = #{organizationId, jdbcType=DECIMAL}
             AND it.source = '${@io.choerodon.agile.infra.enums.IssueTypeSource@SYSTEM}'
             AND it.project_id = ${@io.choerodon.agile.app.service.impl.IssueTypeServiceImpl@ZERO}
-            AND NOT EXISTS (
-                SELECT 1
-                FROM fd_issue_type_extend ite
-                WHERE ite.issue_type_id = it.id
-                AND ite.project_id IN
-                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
-                    #{projectId, jdbcType=DECIMAL}
-                </foreach>
-            )
+            <!-- 如果当前预制类型被所有给定项目都二开过, 则不显示, 否则但凡有一个给定项目没有二开过, 都显示出来 -->
+            AND (SELECT COUNT(*) FROM fd_issue_type_extend ite WHERE ite.issue_type_id = it.id AND ite.project_id IN
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId, jdbcType=DECIMAL}
+                    </foreach>
+                    <!-- 仅查询有效值时 -->
+                    <if test="issueTypeSearchVO != null and @java.lang.Boolean@TRUE.equals(issueTypeSearchVO.enabled)">
+                        AND ite.enabled = ${@org.hzero.core.base.BaseConstants$Flag@YES}
+                    </if>
+                ) &lt; ${projectIds.size()}
         ) temp
         <where>
             <if test="issueTypeSearchVO != null">
-                <if test="issueTypeSearchVO.filterIssueTypeIds != null and issueTypeSearchVO.filterIssueTypeIds.size > 0 ">
+                <if test="issueTypeSearchVO.filterIssueTypeIds != null and issueTypeSearchVO.filterIssueTypeIds.size() > 0 ">
                     AND temp.id NOT IN
                     <foreach collection="issueTypeSearchVO.filterIssueTypeIds" item="filterIssueTypeId" open="(" close=")" separator=",">
                         #{filterIssueTypeId}
@@ -441,8 +446,21 @@
                 <if test="issueTypeSearchVO.param != null and issueTypeSearchVO.param != ''">
                     <bind name="paramLike" value="'%' + issueTypeSearchVO.param + '%'" />
                     AND temp.name LIKE #{paramLike}
-               </if>
+                </if>
+                <!-- 仅查询有效值时 -->
+                <if test="@java.lang.Boolean@TRUE.equals(issueTypeSearchVO.enabled)">
+                    AND temp.enabled = ${@org.hzero.core.base.BaseConstants$Flag@YES}
+                </if>
+            </if>
+            <if test="issueTypeSchemeIds != null and issueTypeSchemeIds.size() != 0">
+                AND EXISTS (
+					SELECT 1 FROM fd_issue_type_scheme_config tsc WHERE tsc.issue_type_id = temp.id AND tsc.scheme_id IN
+					<foreach collection="issueTypeSchemeIds" item="issueTypeSchemeIds" open="(" close=")" separator=",">
+                        #{issueTypeSchemeIds}
+                    </foreach>
+				)
             </if>
         </where>
+        ORDER BY temp.rank DESC, temp.id DESC
     </select>
 </mapper>

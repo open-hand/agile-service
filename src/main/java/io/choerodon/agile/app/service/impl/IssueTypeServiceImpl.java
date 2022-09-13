@@ -1233,7 +1233,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         final Map<Long, ProjectVO> projectIdToEntityMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         // DB查询
         Set<Long> finalProjectIds = projectIds;
-        Page<IssueTypeVO> resultsInDb = PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectProjectIssueTypeByOptions(organizationId, finalProjectIds, issueTypeSearchVO));
+        Page<IssueTypeVO> resultsInDb = PageHelper.doPage(pageRequest, () -> issueTypeMapper.selectProjectIssueTypeByOptions(organizationId, finalProjectIds, null, issueTypeSearchVO));
         // 处理filterIssueTypeIds
         List<IssueTypeVO> actualResult = new ArrayList<>();
         List<Long> filterIssueTypeIds = issueTypeSearchVO.getFilterIssueTypeIds();
@@ -1246,6 +1246,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         if (CollectionUtils.isNotEmpty(resultsInDb.getContent())) {
             actualResult.addAll(resultsInDb.getContent());
         }
+        // 填充项目信息
         for (IssueTypeVO issueType : actualResult) {
             final Long projectId = issueType.getProjectId();
             if(projectId != null && !projectId.equals(ZERO)) {
