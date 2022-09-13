@@ -1,10 +1,12 @@
 package io.choerodon.agile.api.vo;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.validation.constraints.NotNull;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -45,6 +47,7 @@ public class IssueTypeVO {
     private Long stateMachineId;
     @ApiModelProperty(value = "项目id")
     private Long projectId;
+
     @ApiModelProperty(value = "是否启用")
     private Boolean enabled;
     @ApiModelProperty(value = "是否可以被引用")
@@ -67,6 +70,8 @@ public class IssueTypeVO {
     private Boolean copyCustomField;
     @ApiModelProperty(value = "排序值")
     private String rank;
+    @ApiModelProperty(value = "项目信息")
+    private ProjectVO projectInfo;
 
     public String getRank() {
         return rank;
@@ -244,25 +249,44 @@ public class IssueTypeVO {
         this.copyCustomField = copyCustomField;
     }
 
+    /**
+     * @return 项目信息
+     */
+    public ProjectVO getProjectInfo() {
+        return projectInfo;
+    }
+
+    public IssueTypeVO setProjectInfo(ProjectVO projectInfo) {
+        this.projectInfo = projectInfo;
+        return this;
+    }
+
     @Override
     public String toString() {
-        return "IssueTypeVO{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", icon='" + icon + '\'' +
-                ", description='" + description + '\'' +
-                ", organizationId=" + organizationId +
-                ", colour='" + colour + '\'' +
-                ", typeCode='" + typeCode + '\'' +
-                ", initialize=" + initialize +
-                ", objectVersionNumber=" + objectVersionNumber +
-                ", stateMachineName='" + stateMachineName + '\'' +
-                ", stateMachineId=" + stateMachineId +
-                ", projectId=" + projectId +
-                ", enabled=" + enabled +
-                ", referenced=" + referenced +
-                ", usageCount=" + usageCount +
-                ", source='" + source + '\'' +
-                '}';
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("name", name)
+                .append("icon", icon)
+                .append("description", description)
+                .append("organizationId", organizationId)
+                .append("colour", colour)
+                .append("typeCode", typeCode)
+                .append("initialize", initialize)
+                .append("objectVersionNumber", objectVersionNumber)
+                .append("referenceIssueType", referenceIssueType)
+                .append("stateMachineName", stateMachineName)
+                .append("stateMachineId", stateMachineId)
+                .append("projectId", projectId)
+                .append("enabled", enabled)
+                .append("referenced", referenced)
+                .append("usageCount", usageCount)
+                .append("source", source)
+                .append("deleted", deleted)
+                .append("referenceId", referenceId)
+                .append("copyStatusMachine", copyStatusMachine)
+                .append("copyCustomField", copyCustomField)
+                .append("rank", rank)
+                .append("projectInfo", projectInfo)
+                .toString();
     }
 }

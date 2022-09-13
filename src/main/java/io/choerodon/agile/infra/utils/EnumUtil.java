@@ -13,15 +13,17 @@ public class EnumUtil {
 
     private static final  Logger LOGGER = LoggerFactory.getLogger(EnumUtil.class);
 
-    private EnumUtil(){
+    private EnumUtil() {
+        throw new UnsupportedOperationException();
     }
+
     /**
      * 枚举类通用校验
-     * @param cls cls
-     * @param statusType statusType
-     * @return result
+     * @param cls 枚举Class
+     * @param statusType 待检测的枚举值
+     * @return 枚举值是否合法
      */
-    public static Boolean contain(Class cls,String statusType){
+    public static boolean contain(Class<?> cls,String statusType){
         Field[] fields = cls.getDeclaredFields();
         for(Field field:fields){
             try {

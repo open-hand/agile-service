@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
     List<IssueTypeDTO> queryByApplyTypes(@Param("organizationId") Long organizationId,
                                          @Param("projectId") Long projectId,
-                                         @Param("applyTypes") List<String> applyTypes,
+                                         @Param("applyTypes") Collection<String> applyTypes,
                                          @Param("onlyEnabled") boolean onlyEnabled,
                                          @Param("schemeType") String schemeType);
 
@@ -36,7 +37,7 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @param organizationIds organizationIds
      * @return result
      */
-    List<IssueTypeDTO> selectSystemIssueTypeByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
+    List<IssueTypeDTO> selectSystemIssueTypeByOrganizationIds(@Param("organizationIds") Collection<Long> organizationIds);
 
     /**
      * 根据条件查询issueType
@@ -57,7 +58,7 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @param organizationId organizationId
      * @return result
      */
-    List<IssueTypeDTO> selectByReferenceId(@Param("ids") Set<Long> ids,
+    List<IssueTypeDTO> selectByReferenceId(@Param("ids") Collection<Long> ids,
                                            @Param("organizationId") Long organizationId);
 
     /**
@@ -87,8 +88,8 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @param projectIds projectIds
      * @return result
      */
-    List<IssueTypeDTO> selectWithAliasByIds(@Param("issueTypeIds") Set<Long> issueTypeIds,
-                                            @Param("projectIds") Set<Long> projectIds,
+    List<IssueTypeDTO> selectWithAliasByIds(@Param("issueTypeIds") Collection<Long> issueTypeIds,
+                                            @Param("projectIds") Collection<Long> projectIds,
                                             @Param("organizationId") Long organizationId);
 
     /**
@@ -98,16 +99,21 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
      * @return result
      */
     List<IssueTypeVO> selectByProjectIds(@Param("organizationId") Long organizationId,
-                                         @Param("projectIds") List<Long> projectIds);
+                                         @Param("projectIds") Collection<Long> projectIds);
 
     /**
      * 根据项目ids查询问题类型
-     * @param organizationId organizationId
-     * @param projectIds projectIds
-     * @return result
+     * @param organizationId 租户ID, 必传
+     * @param projectIds 项目ID, 必传,
+     * @param issueTypeSchemeIds 状态机方案ID, 非必传
+     * @param issueTypeSearchVO 其他查询条件, 非必传
+     * @return 查询结果
      */
-    List<IssueTypeVO> selectProjectIssueTypeByOptions(@Param("organizationId") Long organizationId,
-                                                      @Param("projectIds") List<Long> projectIds,
-                                                      @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
+    List<IssueTypeVO> selectProjectIssueTypeByOptions(
+            @Param("organizationId") Long organizationId,
+            @Param("projectIds") Set<Long> projectIds,
+            @Param("issueTypeSchemeIds") Collection<Long> issueTypeSchemeIds,
+            @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO
+    );
 
 }
