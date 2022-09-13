@@ -1,12 +1,12 @@
 package io.choerodon.agile.infra.dto;
 
+import java.math.BigDecimal;
+import java.util.List;
+import javax.persistence.*;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author shinan.chen
@@ -16,6 +16,9 @@ import java.util.List;
 @ModifyAudit
 @VersionAudit
 public class IssueTypeDTO extends AuditDomain {
+
+    public static final String FIELD_ID = "id";
+
     @Id
     @GeneratedValue
     private Long id;
