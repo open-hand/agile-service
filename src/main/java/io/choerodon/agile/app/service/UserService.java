@@ -1,15 +1,15 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.core.domain.Page;
+import java.util.List;
+import java.util.Map;
+
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
 import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-
-import java.util.List;
-import java.util.Map;
+import io.choerodon.core.domain.Page;
 
 /**
  * @author dinghuang123@gmail.com
@@ -58,14 +58,12 @@ public interface UserService {
 
     List<UserDTO> listUsersByIds(Long[] ids);
 
-    ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId);
-
     /**
      * 查询是否为项目所有者
      *
-     * @param projectId
-     * @param userId
-     * @return
+     * @param projectId projectId
+     * @param userId userId
+     * @return result
      */
     boolean isProjectOwner(Long projectId, Long userId);
 

@@ -1,15 +1,18 @@
 package io.choerodon.agile.api.vo;
 
 
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
  * @date 2018/10/24
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatusVO {
     @ApiModelProperty(value = "状态id")
     @Encrypt

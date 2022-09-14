@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.enums;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,6 +14,6 @@ public class InstanceOpenRelSource {
 
     public static final String YQ_CLOUD = "yqcloud";
 
-    public static final List<String> SOURCE_LIST = Arrays.asList(YQ_CLOUD);
+    public static final List<String> SOURCE_LIST = Collections.singletonList(YQ_CLOUD);
 
 }

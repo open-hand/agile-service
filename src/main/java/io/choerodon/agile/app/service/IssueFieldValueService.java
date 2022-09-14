@@ -1,7 +1,8 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
 
 /**
  * @author zhaotianxin
@@ -11,9 +12,9 @@ public interface IssueFieldValueService {
     /**
      * 批量修改issue的预定义字段和自定义字段的值
      *
-     * @param projectId
-     * @param schemeCode
-     * @param batchUpdateFieldsValueVo
+     * @param projectId projectId
+     * @param schemeCode schemeCode
+     * @param batchUpdateFieldsValueVo batchUpdateFieldsValueVo
      */
     void asyncUpdateFields(Long projectId,
                            String schemeCode,

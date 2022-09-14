@@ -1,14 +1,18 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.utils.StringUtil;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.choerodon.agile.infra.utils.StringUtil;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/8/20
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueSprintDTO {
 
     private String sprintName;

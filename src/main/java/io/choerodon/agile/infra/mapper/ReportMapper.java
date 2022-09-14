@@ -1,16 +1,15 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.BurnDownSearchVO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.GroupDataChartDTO;
-import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-
-import org.apache.ibatis.annotations.Param;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.ibatis.annotations.Param;
+
+import io.choerodon.agile.api.vo.BurnDownSearchVO;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 
 /**
@@ -53,8 +52,8 @@ public interface ReportMapper {
      * 获取冲刺开启前的issue
      *
      * @param sprintDTO        sprintDTO
-     * @param burnDownSearchVO
-     * @param projectIds
+     * @param burnDownSearchVO burnDownSearchVO
+     * @param projectIds projectIds
      * @return issueIds
      */
     List<Long> queryIssueIdsBeforeSprintStart(@Param("sprintDTO") SprintDTO sprintDTO,
@@ -65,8 +64,8 @@ public interface ReportMapper {
      * 获取冲刺期间加入的issue
      *
      * @param sprintDTO        sprintDTO
-     * @param burnDownSearchVO
-     * @param projectIds
+     * @param burnDownSearchVO burnDownSearchVO
+     * @param projectIds projectIds
      * @return issueIdList
      */
     List<Long> queryAddIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO,
@@ -223,8 +222,8 @@ public interface ReportMapper {
      * 冲刺期间移出的issue
      *
      * @param sprintDTO        sprintDTO
-     * @param projectIds
-     * @param burnDownSearchVO
+     * @param projectIds projectIds
+     * @param burnDownSearchVO burnDownSearchVO
      * @return Long
      */
     List<Long> queryRemoveIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO,

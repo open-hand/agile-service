@@ -1,21 +1,21 @@
 package io.choerodon.agile.infra.utils;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.InstanceService;
 import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusService;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author dinghuang123@gmail.com
@@ -87,7 +87,7 @@ public class ConvertUtil {
                 return projectVO;
             }
         } else {
-            ProjectVO projectVO = SpringBeanUtil.getBean(BaseFeignClient.class).queryProject(projectId).getBody();
+            ProjectVO projectVO = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class).queryProject(projectId);
             if (projectVO != null) {
                 if (projectVO.getId() == null) {
                     throw new CommonException("error.queryProject.notFound");

@@ -1,16 +1,16 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import javax.persistence.GeneratedValue;
-
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.
@@ -20,6 +20,7 @@ import java.util.Date;
 @ModifyAudit
 @VersionAudit
 public class SprintDTO extends AuditDomain {
+
     @Id
     @GeneratedValue
     @Encrypt
@@ -29,6 +30,13 @@ public class SprintDTO extends AuditDomain {
     private Date startDate;
     private Date endDate;
     private Date actualEndDate;
+
+    /**
+     * sprint_planning: 规划中
+     * closed: 已完成
+     * started: 活跃
+     */
+    @ApiModelProperty("冲刺状态")
     private String statusCode;
     @NotNull
     private Long projectId;

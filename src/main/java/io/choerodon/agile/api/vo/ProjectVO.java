@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.business.ArtVO;
+import io.choerodon.agile.infra.feign.vo.HealthStateVO;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 
@@ -59,111 +60,136 @@ public class ProjectVO {
     private Set<Long> topProjectIds;
     @ApiModelProperty(value = "模糊搜索参数")
     private String param;
+    @ApiModelProperty(value = "项目状态颜色")
+    private String color;
+    @ApiModelProperty("健康状态")
+    private HealthStateVO healthStateVO;
     @ApiModelProperty("项目群ART信息")
     private ArtVO artInfo;
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public String getParam() {
         return param;
     }
 
-    public void setParam(String param) {
+    public ProjectVO setParam(String param) {
         this.param = param;
+        return this;
     }
 
     public Set<Long> getTopProjectIds() {
         return topProjectIds;
     }
 
-    public void setTopProjectIds(Set<Long> topProjectIds) {
+    public ProjectVO setTopProjectIds(Set<Long> topProjectIds) {
         this.topProjectIds = topProjectIds;
+        return this;
     }
 
     public String getStatusName() {
         return statusName;
     }
 
-    public void setStatusName(String statusName) {
+    public ProjectVO setStatusName(String statusName) {
         this.statusName = statusName;
+        return this;
     }
 
     public String getProjectStatus() {
         return projectStatus;
     }
 
-    public void setProjectStatus(String projectStatus) {
+    public ProjectVO setProjectStatus(String projectStatus) {
         this.projectStatus = projectStatus;
+        return this;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public ProjectVO setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public ProjectVO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Long organizationId) {
+    public ProjectVO setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+        return this;
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public ProjectVO setCode(String code) {
         this.code = code;
+        return this;
     }
 
     public Boolean getEnabled() {
         return enabled;
     }
 
-    public void setEnabled(Boolean enabled) {
+    public ProjectVO setEnabled(Boolean enabled) {
         this.enabled = enabled;
+        return this;
     }
 
     public List<ProjectCategoryDTO> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<ProjectCategoryDTO> categories) {
+    public ProjectVO setCategories(List<ProjectCategoryDTO> categories) {
         this.categories = categories;
+        return this;
     }
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
     }
 
-    public void setObjectVersionNumber(Long objectVersionNumber) {
+    public ProjectVO setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+        return this;
     }
 
     public String getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public ProjectVO setCategory(String category) {
         this.category = category;
+        return this;
     }
 
     public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Long createdBy) {
+    public ProjectVO setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
+        return this;
     }
 
     @Override
@@ -175,32 +201,36 @@ public class ProjectVO {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public ProjectVO setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+        return this;
     }
 
     public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public ProjectVO setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public ProjectVO setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public List<String> getTypes() {
         return types;
     }
 
-    public void setTypes(List<String> types) {
+    public ProjectVO setTypes(List<String> types) {
         this.types = types;
+        return this;
     }
     /**
      * @return 项目群ART信息
@@ -209,7 +239,16 @@ public class ProjectVO {
         return artInfo;
     }
 
-    public void setArtInfo(ArtVO artInfo) {
+    public ProjectVO setArtInfo(ArtVO artInfo) {
         this.artInfo = artInfo;
+        return this;
+    }
+
+    public HealthStateVO getHealthStateVO() {
+        return healthStateVO;
+    }
+
+    public void setHealthStateVO(HealthStateVO healthStateVO) {
+        this.healthStateVO = healthStateVO;
     }
 }

@@ -4,7 +4,7 @@ import io.choerodon.agile.api.vo.IssueDailyWorkVO;
 import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
@@ -137,7 +137,7 @@ public class IssueDailyWorkSendMessageTask {
     }
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private DelayTaskService delayTaskService;
     @Autowired
@@ -256,7 +256,7 @@ public class IssueDailyWorkSendMessageTask {
     private Map<Long, UserDTO> getUserMap(Set<Long> userIds) {
         Map<Long, UserDTO> userMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(userIds)) {
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(userIds.toArray(new Long[0]), true).getBody();
+            List<UserDTO> userList = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[0]), true);
             if (CollectionUtils.isEmpty(userList)) {
                 return userMap;
             }
@@ -326,7 +326,7 @@ public class IssueDailyWorkSendMessageTask {
                                               Map<Long, IssueDailyWorkVO> issueMap,
                                               Map<Long, ProjectMessageVO> projectMap,
                                               UserDTO user) {
-        OrganizationInfoVO organization = baseFeignClient.query(organizationId).getBody();
+        OrganizationInfoVO organization = remoteIamOperator.query(organizationId);
         Map<String, String> result = new HashMap<>();
         result.put(USER_NAME, user.getRealName());
         result.put(ORGANIZATION_NAME, organization.getTenantName());

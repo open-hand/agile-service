@@ -1,17 +1,18 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.SprintSearchVO;
-import io.choerodon.agile.api.vo.SprintStartMessageVO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
-import io.choerodon.mybatis.common.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.ibatis.annotations.Param;
+
+import io.choerodon.agile.api.vo.SprintSearchVO;
+import io.choerodon.agile.api.vo.SprintStartMessageVO;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/15.
@@ -147,9 +148,9 @@ public interface SprintMapper extends BaseMapper<SprintDTO> {
 
     /**
      * 查询冲刺的故事点完成情况
-     * @param projectId
-     * @param sprintIds
-     * @return
+     * @param projectId projectId
+     * @param sprintIds sprintIds
+     * @return result
      */
     List<SprintSearchVO> queryStoryPointProgress(@Param("projectId")  Long projectId, @Param("sprintIds") List<Long> sprintIds);
 

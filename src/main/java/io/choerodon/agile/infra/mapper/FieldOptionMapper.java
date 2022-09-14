@@ -1,11 +1,11 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.infra.dto.FieldOptionDTO;
-import io.choerodon.mybatis.common.BaseMapper;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import io.choerodon.agile.infra.dto.FieldOptionDTO;
+import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author shinan.chen
@@ -16,27 +16,27 @@ public interface FieldOptionMapper extends BaseMapper<FieldOptionDTO> {
     /**
      * 根据字段id获取字段选项
      *
-     * @param organizationId
-     * @param fieldId
-     * @return
+     * @param organizationId organizationId
+     * @param fieldId fieldId
+     * @return result
      */
     List<FieldOptionDTO> selectByFieldId(@Param("organizationId") Long organizationId, @Param("fieldId") Long fieldId);
 
     /**
      * 根据字段id列表获取字段选项
      *
-     * @param organizationId
-     * @param fieldIds
-     * @return
+     * @param organizationId organizationId
+     * @param fieldIds fieldIds
+     * @return result
      */
     List<FieldOptionDTO> selectByFieldIds(@Param("organizationId") Long organizationId, @Param("fieldIds") List<Long> fieldIds);
 
     /**
      * 根据optionIds查询对象
      *
-     * @param organizationId
-     * @param optionIds
-     * @return
+     * @param organizationId organizationId
+     * @param optionIds optionIds
+     * @return result
      */
     List<FieldOptionDTO> selectByOptionIds(@Param("organizationId") Long organizationId, @Param("optionIds") List<Long> optionIds);
 

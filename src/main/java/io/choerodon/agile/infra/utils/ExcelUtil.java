@@ -1,10 +1,13 @@
 package io.choerodon.agile.infra.utils;
-import io.choerodon.agile.api.vo.business.ExportIssuesVO;
-import io.choerodon.agile.infra.dto.ExcelCursorDTO;
-import io.choerodon.agile.infra.enums.ExcelImportTemplate;
-import io.choerodon.agile.infra.enums.FieldCode;
-import io.choerodon.agile.infra.enums.IssueConstant;
-import io.choerodon.core.exception.CommonException;
+
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import javax.servlet.http.HttpServletResponse;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
@@ -23,15 +26,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
+import io.choerodon.agile.infra.dto.ExcelCursorDTO;
+import io.choerodon.agile.infra.enums.ExcelImportTemplate;
+import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.IssueConstant;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author dinghuang123@gmail.com
@@ -41,6 +41,21 @@ public class ExcelUtil {
 
     private static final Integer CELL_MAX_LENGTH = 32767;
     protected static final List<String> dateFormatterFiled = Arrays.asList(FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME);
+
+    public static void close(Workbook workbook) {
+        if (workbook != null) {
+            try {
+                if (workbook instanceof SXSSFWorkbook) {
+                    //处理在磁盘上支持本工作簿的临时文件
+                    ((SXSSFWorkbook) workbook).dispose();
+                }
+                workbook.close();
+            } catch (IOException e) {
+                throw new CommonException("error.close.workbook", e);
+            }
+        }
+    }
+
     public enum Mode {
         SXSSF("SXSSF"), HSSF("HSSF"), XSSF("XSSF");
         private String value;
@@ -148,7 +163,7 @@ public class ExcelUtil {
         //1、创建工作簿
         SXSSFWorkbook workbook = new SXSSFWorkbook();
         //1.3、列标题样式
-        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT.getCode(), true);
+        CellStyle style2 = createCellStyle(workbook, (short) 13, HorizontalAlignment.LEFT, true);
         //1.4、强制换行
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
@@ -391,15 +406,18 @@ public class ExcelUtil {
      * @param fontSize 字体大小
      * @return 单元格样式
      */
-    protected static CellStyle createCellStyle(Workbook workbook, short fontSize, short aligment, Boolean bold) {
+    protected static CellStyle createCellStyle(Workbook workbook,
+                                               short fontSize,
+                                               HorizontalAlignment horizontalAlignment,
+                                               Boolean bold) {
         CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setAlignment(aligment);
+        cellStyle.setAlignment(horizontalAlignment);
         //垂直居中
-        cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         org.apache.poi.ss.usermodel.Font font = workbook.createFont();
-        if (bold) {
+        if (Boolean.TRUE.equals(bold)) {
             //加粗字体
-            font.setBoldweight(org.apache.poi.ss.usermodel.Font.BOLDWEIGHT_BOLD);
+            font.setBold(true);
         }
         font.setFontHeightInPoints(fontSize);
         cellStyle.setFont(font);
@@ -510,7 +528,7 @@ public class ExcelUtil {
     }
 
     /**
-     * @param wb               HSSFWorkbook对象
+     * @param workbook         HSSFWorkbook对象
      * @param realSheet        需要操作的sheet对象
      * @param datas            下拉的列表数据
      * @param startRow         开始行
@@ -519,45 +537,43 @@ public class ExcelUtil {
      * @param endCol           结束列
      * @param hiddenSheetName  隐藏的sheet名
      * @param hiddenSheetIndex 隐藏的sheet索引
-     * @return
+     * @return result
      * @throws Exception
      */
-    public static XSSFWorkbook dropDownList2007(Workbook wb, Sheet realSheet, List<String> datas, int startRow, int endRow,
+    public static Workbook dropDownList2007(Workbook workbook, Sheet realSheet, List<String> datas, int startRow, int endRow,
                                                 int startCol, int endCol, String hiddenSheetName, int hiddenSheetIndex) {
-
-        XSSFWorkbook workbook = (XSSFWorkbook) wb;
         // 创建一个数据源sheet
-        XSSFSheet hidden = workbook.createSheet(hiddenSheetName);
+        Sheet hidden = workbook.createSheet(hiddenSheetName);
         // 数据源sheet页不显示
         workbook.setSheetHidden(hiddenSheetIndex, true);
         if (datas == null || datas.isEmpty()) {
             return workbook;
         }
         // 将下拉列表的数据放在数据源sheet上
-        XSSFRow row = null;
-        XSSFCell cell = null;
+        Row row = null;
+        Cell cell = null;
         for (int i = 0; i < datas.size(); i++) {
             row = hidden.createRow(i);
             cell = row.createCell(0);
             cell.setCellValue(substring(datas.get(i)));
         }
-        XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper((XSSFSheet) realSheet);
+        DataValidationHelper dvHelper = realSheet.getDataValidationHelper();
         int dateSize = datas.size();
         String columnLetter = CellReference.convertNumToColString(startCol);
         CellRangeAddressList addressList = null;
-        XSSFDataValidation validation = null;
+        DataValidation validation = null;
         // 单元格样式
         CellStyle style = workbook.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         // 循环指定单元格下拉数据
         for (int i = startRow; i <= endRow; i++) {
-            XSSFDataValidationConstraint dvConstraint = buildDataValidationConstraint(columnLetter, hiddenSheetName, i, dateSize, dvHelper);
-            row = (XSSFRow) realSheet.createRow(i);
+            DataValidationConstraint dvConstraint = buildDataValidationConstraint(columnLetter, hiddenSheetName, i, dateSize, dvHelper);
+            row = realSheet.createRow(i);
             cell = row.createCell(startCol);
             cell.setCellStyle(style);
             addressList = new CellRangeAddressList(i, i, startCol, endCol);
-            validation = (XSSFDataValidation) dvHelper.createValidation(dvConstraint, addressList);
+            validation = dvHelper.createValidation(dvConstraint, addressList);
             realSheet.addValidationData(validation);
         }
 
@@ -567,18 +583,18 @@ public class ExcelUtil {
     /**
      * 公式讲解参考
      * @see <a href="https://zhuanlan.zhihu.com/p/38156200">参考</a>
-     * @param columnLetter
-     * @param hiddenSheetName
-     * @param rowNum
-     * @param dateSize
-     * @param dvHelper
-     * @return
+     * @param columnLetter columnLetter
+     * @param hiddenSheetName hiddenSheetName
+     * @param rowNum rowNum
+     * @param dateSize dateSize
+     * @param dvHelper dvHelper
+     * @return result
      */
-    private static XSSFDataValidationConstraint buildDataValidationConstraint(String columnLetter,
-                                                                              String hiddenSheetName,
-                                                                              int rowNum,
-                                                                              int dateSize,
-                                                                              XSSFDataValidationHelper dvHelper) {
+    private static DataValidationConstraint buildDataValidationConstraint(String columnLetter,
+                                                                          String hiddenSheetName,
+                                                                          int rowNum,
+                                                                          int dateSize,
+                                                                          DataValidationHelper dvHelper) {
         int realRow = rowNum + 1;
         StringBuilder formulaBuilder = new StringBuilder();
         formulaBuilder
@@ -601,7 +617,7 @@ public class ExcelUtil {
                 .append(realRow)
                 .append("&\"*\"), 1)");
         String listFormula = formulaBuilder.toString();
-        return (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(listFormula);
+        return dvHelper.createFormulaListConstraint(listFormula);
     }
 
     /**

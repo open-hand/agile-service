@@ -1,9 +1,9 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.PriorityVO;
-
 import java.util.List;
 import java.util.Map;
+
+import io.choerodon.agile.api.vo.PriorityVO;
 
 /**
  * @author shinan.chen
@@ -77,40 +77,40 @@ public interface PriorityService {
     /**
      * 生效/失效优先级
      *
-     * @param organizationId
-     * @param id
-     * @param enable
-     * @return
+     * @param organizationId organizationId
+     * @param id id
+     * @param enable enable
+     * @return result
      */
     PriorityVO enablePriority(Long organizationId, Long id, Boolean enable);
 
     /**
      * 校验删除优先级
      *
-     * @param organizationId
-     * @param id
-     * @return
+     * @param organizationId organizationId
+     * @param id id
+     * @return result
      */
     Long checkDelete(Long organizationId, Long id);
 
     /**
      * 校验优先级能否删除
      *
-     * @param organizationId
-     * @param priorityId
-     * @param projectIds
-     * @return
+     * @param organizationId organizationId
+     * @param priorityId priorityId
+     * @param projectIds projectIds
+     * @return result
      */
     Long checkPriorityDelete(Long organizationId, Long priorityId, List<Long> projectIds);
 
     /**
      * 批量更新issue的优先级
      *
-     * @param organizationId
-     * @param priorityId
-     * @param changePriorityId
-     * @param userId
-     * @param projectIds
+     * @param organizationId organizationId
+     * @param priorityId priorityId
+     * @param changePriorityId changePriorityId
+     * @param userId userId
+     * @param projectIds projectIds
      */
     void batchChangeIssuePriority(Long organizationId, Long priorityId, Long changePriorityId, Long userId, List<Long> projectIds);
 

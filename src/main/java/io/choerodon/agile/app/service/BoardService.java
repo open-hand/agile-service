@@ -1,13 +1,14 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+
 import com.alibaba.fastjson.JSONObject;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.infra.dto.BoardDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import java.util.List;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -55,26 +56,26 @@ public interface BoardService {
     /**
      * 根据快速筛选id返回查询sql
      *
-     * @param quickFilterIds
-     * @return
+     * @param quickFilterIds quickFilterIds
+     * @return result
      */
     String getQuickFilter(List<Long> quickFilterIds);
 
     /**
      * 根据个人查询id获取对象集合
      *
-     * @param personFilterIds
-     * @return
+     * @param personFilterIds personFilterIds
+     * @return result
      */
     List<SearchVO> getSearchVO(List<Long> personFilterIds);
 
     /**
      * 判断issue拖动是否有状态联动
      *
-     * @param projectId
-     * @param issueId
-     * @param statusId
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param statusId statusId
+     * @return result
      */
     Boolean isLinked(Long projectId, Long issueId, Long statusId);
 

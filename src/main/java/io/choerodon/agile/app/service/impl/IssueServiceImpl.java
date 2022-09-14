@@ -47,29 +47,19 @@ import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.IssuePayload;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.client.MessageClientC7n;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
@@ -189,7 +179,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private TestServiceClientOperator testServiceClientOperator;
     @Autowired
-    protected BaseFeignClient baseFeignClient;
+    protected RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectUtil projectUtil;
     @Autowired
@@ -1133,14 +1123,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void handleData(Map<String, Object> reuslt,
+    public void handleData(Map<String, Object> result,
                            ProjectVO projectVO,
                            IssueDTO issueDTO,
                            ProjectVO targetProjectVO,
                            Long projectId,
                            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
-        boolean isMove = Boolean.TRUE.equals(reuslt.get("isMove"));
-        JSONObject issueJSONObject = JSON.parseObject(JSON.toJSONString(reuslt.get("jsonObj")));
+        boolean isMove = Boolean.TRUE.equals(result.get("isMove"));
+        JSONObject issueJSONObject = JSON.parseObject(JSON.toJSONString(result.get("jsonObj")));
         try {
             if (isMove) {
                 issueProjectMoveService.handlerIssueValue(projectVO, issueDTO.getIssueId(), targetProjectVO, issueJSONObject);
@@ -1228,13 +1218,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private boolean belongToProgram(Long organizationId, Long projectId) {
-        boolean belongToProgram;
         if (agilePluginService == null) {
-            belongToProgram = false;
-        } else {
-            belongToProgram = baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId).getBody() != null;
+            return false;
         }
-        return belongToProgram;
+        return !ObjectUtils.isEmpty(agilePluginService.getProgram(organizationId, projectId));
     }
 
     private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
@@ -3628,14 +3615,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectUserIdsByProjectIds(Arrays.asList(projectId));
         AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        return remoteIamOperator.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
     }
 
     @Override
     public Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param, Set<Long> ignoredUserIds) {
         Set<Long> userIds = issueMapper.selectReporterIdsByProjectId(projectId);
         AgileUserVO agileUserVO = new AgileUserVO(userIds, null,  param, null, ignoredUserIds);
-        return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        return remoteIamOperator.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
     }
 
     @Override
@@ -3901,13 +3888,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
-            List<ProjectVO> projectVOS = baseFeignClient.listProjectsByUserIdForSimple(organizationId,userId, null, true).getBody();
+            List<ProjectVO> projectVOS = remoteIamOperator.listProjectsByUserIdForSimple(organizationId,userId, null, true);
             if (!CollectionUtils.isEmpty(projectVOS)) {
                 projectIds.addAll(projectVOS.stream().map(ProjectVO::getId).collect(Collectors.toList()));
                 projects.addAll(projectVOS);
             }
         } else {
-            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
             if (!organizationId.equals(projectVO.getOrganizationId())) {
                 throw new CommonException("error.organization.illegal");
             }
@@ -3927,11 +3914,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         agileUserVO.setProjectIds(new HashSet<>(projectIds));
         agileUserVO.setOrganizationId(organizationId);
-        Page<UserDTO> page = baseFeignClient.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO).getBody();
+        Page<UserDTO> page = remoteIamOperator.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
         Set<Long> ignoredUserIds = agileUserVO.getIgnoredUserIds();
         List<UserDTO> result = new ArrayList<>();
         if (!CollectionUtils.isEmpty(ignoredUserIds)) {
-            result.addAll(baseFeignClient.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false).getBody());
+            result.addAll(remoteIamOperator.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false));
         }
         if (!CollectionUtils.isEmpty(page.getContent())) {
             result.addAll(page.getContent());

@@ -1,9 +1,27 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
@@ -19,35 +37,20 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.core.base.AopProxy;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import org.hzero.core.base.AopProxy;
+import org.hzero.core.base.BaseConstants;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
- * @author zhaotianxin
- * @date 2021-01-05 13:38
+ * @author zhaotianxin 2021-01-05 13:38
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -77,7 +80,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     private static final String ERROR_TRANSFER_PROJECT_ILLEGAL = "error.transfer.project.illegal";
     private static final String ISSUE_PROJECT_BATCH_MOVE = "agile-issue-project-batch-move";
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private IssueMapper issueMapper;
     @Autowired
@@ -99,17 +102,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     @Autowired
     private RankMapper rankMapper;
     @Autowired
-    private IssueLinkMapper issueLinkMapper;
-    @Autowired(required = false)
-    private BacklogExpandService backlogExpandService;
-    @Autowired
     private TestServiceClientOperator testServiceClientOperator;
-    @Autowired(required = false)
-    private AgileTriggerService agileTriggerService;
-    @Autowired(required = false)
-    private AgilePluginService agilePluginService;
-    @Autowired
-    private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private IssueAccessDataService issueAccessDataService;
     @Autowired
@@ -147,18 +140,25 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     @Autowired
     private ProjectInfoService projectInfoService;
     @Autowired(required = false)
+    private AgileTriggerService agileTriggerService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
+    @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
     @Override
     public void issueProjectMove(Long projectId, Long issueId, Long targetProjectId, JSONObject jsonObject) {
-        if (ObjectUtils.isEmpty(targetProjectId)) {
-            throw new CommonException("error.transfer.project.is.null");
-        }
+        Assert.notNull(targetProjectId, "error.transfer.project.is.null");
         // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
+        Assert.notNull(projectVO, BaseConstants.ErrorCode.NOT_NULL);
         ProjectVO targetProjectVO = ConvertUtil.queryProject(targetProjectId);
-        if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
-            throw new CommonException("error.transfer.across.organizations");
-        }
+        Assert.notNull(targetProjectVO, BaseConstants.ErrorCode.NOT_NULL);
+        final Long originOrganizationId = projectVO.getOrganizationId();
+        final Long targetOrganizationId = targetProjectVO.getOrganizationId();
+        Assert.isTrue(Objects.equals(originOrganizationId, targetOrganizationId), "error.transfer.across.organizations");
+
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (ObjectUtils.isEmpty(issueDTO)) {
             throw new CommonException(ISSUE_NULL);
@@ -174,6 +174,10 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         // 清除原项目和目标项目的缓存
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(targetProjectVO.getId());
+        // 触发商业版逻辑
+        if(this.agilePluginService != null) {
+            this.agilePluginService.afterIssueMoveProject(targetOrganizationId, Collections.singletonList(issueId));
+        }
     }
 
     private void checkProject(String typeCode, ProjectVO targetProjectVO) {
@@ -195,7 +199,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     public List<ProjectVO> listMoveProject(Long projectId, String typeCode) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         ProjectVO projectVO = ConvertUtil.queryProject(projectId);
-        List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(projectVO.getOrganizationId(), userId).getBody();
+        List<ProjectVO> projectVOS = remoteIamOperator.queryOrgProjects(projectVO.getOrganizationId(), userId);
         if (!CollectionUtils.isEmpty(projectVOS)) {
             return projectVOS.stream()
                     .filter(v -> Boolean.TRUE.equals(v.getEnabled()) && !Objects.equals(v.getId(), projectId))
@@ -217,7 +221,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         EncryptContext.setEncryptType(encryptType);
         RequestContextHolder.setRequestAttributes(requestAttributes);
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String messageCode = ISSUE_PROJECT_BATCH_MOVE + "-" + projectId;
+        final String messageCode = ISSUE_PROJECT_BATCH_MOVE + "-" + projectId;
         List<Long> issueIds = parsingIssueIdList(jsonObject);
         // 检验传入的issueIds
         issueIds = validateIssueIds(projectId, issueIds);
@@ -248,19 +252,21 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             // 两个是否是在同一个组织下,并且项目群项目、普通项目、运维项目不能相互转换
             ProjectVO projectVO = ConvertUtil.queryProject(projectId);
             ProjectVO targetProjectVO = ConvertUtil.queryProject(targetProjectId);
-            if (!Objects.equals(projectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
+            final Long originOrganizationId = projectVO.getOrganizationId();
+            final Long targetOrganizationId = targetProjectVO.getOrganizationId();
+            if (!Objects.equals(originOrganizationId, targetOrganizationId)) {
                 throw new CommonException("error.transfer.across.organizations");
             }
             List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds, null);
             int currentProgress = 1;
             double lastProcess = 0.0;
             List<Long> transferBug = new ArrayList<>();
-            List<IssueTypeVO> targetProjectIssueType = issueTypeService.queryByOrgId(projectVO.getOrganizationId(), targetProjectVO.getId());
+            List<IssueTypeVO> targetProjectIssueType = issueTypeService.queryByOrgId(originOrganizationId, targetProjectVO.getId());
             Map<Long, String> issueTypeCodeMap = targetProjectIssueType.stream().collect(Collectors.toMap(IssueTypeVO::getId, IssueTypeVO::getTypeCode));
             for (IssueDTO issueDTO : issueDTOS) {
-                Map<String, Object> reuslt = new HashMap<>();
-                buildJSONObject(reuslt, issueDTO, issueTypeStatusMap, jsonObject, transferBug, issueTypeCodeMap);
-                issueService.handleData(reuslt, projectVO, issueDTO, targetProjectVO, projectId, batchUpdateFieldStatusVO);
+                Map<String, Object> result = new HashMap<>();
+                buildJSONObject(result, issueDTO, issueTypeStatusMap, jsonObject, transferBug, issueTypeCodeMap);
+                issueService.handleData(result, projectVO, issueDTO, targetProjectVO, projectId, batchUpdateFieldStatusVO);
                 double progress = currentProgress * 1.0 / issueDTOS.size();
                 if (progress - lastProcess >= 0.1) {
                     batchUpdateFieldStatusVO.setProcess(progress);
@@ -272,9 +278,16 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             // 清除原项目和目标项目的缓存
             dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
             dataLogRedisUtil.handleDeleteRedisByDeleteIssue(targetProjectVO.getId());
-            //发送websocket
+            // 发送websocket
             batchUpdateFieldStatusVO.setStatus("success");
             batchUpdateFieldStatusVO.setProcess(1.0);
+            // 触发商业版逻辑
+            if(this.agilePluginService != null) {
+                this.agilePluginService.afterIssueMoveProject(
+                        targetOrganizationId,
+                        issueDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet())
+                );
+            }
         } catch (Exception e) {
             batchUpdateFieldStatusVO.setStatus("failed");
             batchUpdateFieldStatusVO.setError(e.getMessage());
@@ -285,8 +298,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     }
 
     private List<Long> validateIssueIds(Long projectId, List<Long> issueIds) {
-        Set<Long> allIssueIds = new HashSet<>();
-        allIssueIds.addAll(issueIds);
+        Set<Long> allIssueIds = new HashSet<>(issueIds);
         // 传入的父级issue移动时需要把所有子级带上，issueIds中没有的需要补充上
         Set<Long> childIssues = issueMapper.queryChildrenIds(projectId, null, issueIds, null);
         if (!CollectionUtils.isEmpty(childIssues)) {
@@ -336,11 +348,11 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         Long issueTypeId = issueDTO.getIssueTypeId();
         Map<Long, Map<Long, Long>> newIssueTypeMap = issueTypeStatusMap.get(issueTypeId);
         if (!ObjectUtils.isEmpty(newIssueTypeMap)) {
-            List<Long> issueType = newIssueTypeMap.keySet().stream().collect(Collectors.toList());
+            List<Long> issueType = new ArrayList<>(newIssueTypeMap.keySet());
             issueTypeId = issueType.get(0);
         }
         // 父级移动时问题类型改成了bug，需要将它下面的子缺陷解除关联关系，不移动。
-        Boolean isSubIssue = "sub_task".equals(issueDTO.getTypeCode()) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
+        boolean isSubIssue = "sub_task".equals(issueDTO.getTypeCode()) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
         if (!isSubIssue && "bug".equals(issueTypeCodeMap.get(issueTypeId))) {
             transferBug.add(issueDTO.getIssueId());
         }
@@ -430,7 +442,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             // 将issue原有的自定义字段值和新项目指定问题类型的字段比较，相同的留下，不同的删除
             List<Long> fieldIds = fields.stream().map(PageConfigFieldVO::getFieldId).collect(Collectors.toList());
             Set<Long> olderFieldIds = fieldValueDTOS.stream().map(FieldValueDTO::getFieldId).collect(Collectors.toSet());
-            olderFieldIds.removeAll(fieldIds);
+            fieldIds.forEach(olderFieldIds::remove);
             if (!CollectionUtils.isEmpty(olderFieldIds)) {
                 List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByIds(olderFieldIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
                 return modelMapper.map(objectSchemeFieldDTOS, new TypeToken<List<ObjectSchemeFieldVO>>() {
@@ -526,7 +538,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         }
         issueConvertDTO.setIssueTypeId(issueTypeVO.getId());
         issueConvertDTO.setTypeCode(issueTypeVO.getTypeCode());
-        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
+        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[0]));
     }
 
     private void calculationRank(Long projectId, IssueConvertDTO issueConvertDTO) {
@@ -534,7 +546,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         if (Boolean.TRUE.equals(hasIssue)) {
             String rank = sprintMapper.queryMaxRank(projectId, issueConvertDTO.getSprintId());
             //处理rank值为null的脏数据
-            if (StringUtils.isEmpty(rank)) {
+            if (StringUtils.isBlank(rank)) {
                 issueConvertDTO.setRank(RankUtil.mid());
             } else {
                 issueConvertDTO.setRank(RankUtil.genNext(rank));
