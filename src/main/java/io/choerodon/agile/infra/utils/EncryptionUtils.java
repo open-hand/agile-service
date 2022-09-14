@@ -70,6 +70,7 @@ public class EncryptionUtils {
                     "probabilityIds",
                     "proximityIds",
                     "relatedPartyIds",
+                    "reporterList",
             };
     public static final String[] FILTER_SINGLE_FIELD = {"userId"};
     public static final String[] IGNORE_VALUES = {"0","none"};
