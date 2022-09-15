@@ -796,20 +796,18 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void addErrorMsgIfNotExisted(int rowNum,
                                          JSONObject sheetData,
                                          int parentColIndex) {
-        JSONObject rowJson = (JSONObject)sheetData.get(rowNum);
+        JSONObject rowJson = (JSONObject) sheetData.get(rowNum);
         if (ObjectUtils.isEmpty(rowJson)) {
             return;
         }
-        if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-            JSONObject parentCellJson = (JSONObject)rowJson.get(parentColIndex);
-            parentCellJson = createCellJsonIfNotExisted(rowJson, parentColIndex, parentCellJson);
-            String value = parentCellJson.getString(ExcelSheetData.STRING_CELL);
-            if (value == null) {
-                value = "";
-            }
-            String errorMsg = buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误");
-            putErrorMsg(rowJson, parentCellJson, errorMsg);
+        JSONObject parentCellJson = (JSONObject) rowJson.get(parentColIndex);
+        parentCellJson = createCellJsonIfNotExisted(rowJson, parentColIndex, parentCellJson);
+        String value = parentCellJson.getString(ExcelSheetData.STRING_CELL);
+        if (value == null) {
+            value = "";
         }
+        String errorMsg = buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误");
+        putErrorMsg(rowJson, parentCellJson, errorMsg);
     }
 
     @Override
@@ -1239,28 +1237,32 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 valueList.addAll(splitByRegex(stringValue));
             }
             List<String> values = excelColumn.getPredefinedValues();
-            if (multiValue) {
-                boolean ok = true;
-                List<String> ids = new ArrayList<>();
-                for (String str : valueList) {
-                    if (!values.contains(str)) {
-                        ok = false;
-                        break;
-                    } else {
-                        ids.add(String.valueOf(valueIdMap.get(str)));
-                    }
-                }
-                if (!ok) {
-                    String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
-                    putErrorMsg(rowJson, cellJson, errorMsg);
-                }
-                customFieldValue = ids;
+            if (values == null) {
+                customFieldValue = stringValue;
             } else {
-                if (!values.contains(stringValue)) {
-                    String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
-                    putErrorMsg(rowJson, cellJson, errorMsg);
+                if (multiValue) {
+                    boolean ok = true;
+                    List<String> ids = new ArrayList<>();
+                    for (String str : valueList) {
+                        if (!values.contains(str)) {
+                            ok = false;
+                            break;
+                        } else {
+                            ids.add(String.valueOf(valueIdMap.get(str)));
+                        }
+                    }
+                    if (!ok) {
+                        String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
+                        putErrorMsg(rowJson, cellJson, errorMsg);
+                    }
+                    customFieldValue = ids;
                 } else {
-                    customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                    if (!values.contains(stringValue)) {
+                        String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
+                        putErrorMsg(rowJson, cellJson, errorMsg);
+                    } else {
+                        customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                    }
                 }
             }
         }
