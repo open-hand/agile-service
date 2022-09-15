@@ -813,23 +813,22 @@ public class ExcelServiceImpl implements ExcelService {
         return lastSendCountNum;
     }
 
-    
 
     private ExcelSheetData readDate(Sheet sheet) {
         JSONObject sheetData = new JSONObject();
         Iterator<Row> sheetIterator = sheet.rowIterator();
         int rowNum = 0;
         int colNum = 0;
-        while(sheetIterator.hasNext()) {
+        while (sheetIterator.hasNext()) {
             Row row = sheetIterator.next();
             if (rowNum == 0) {
                 //header行
-                for (int i=0;; i++) {
+                for (int i = 0; ; i++) {
                     Cell cell = row.getCell(i);
                     if (isCellEmpty(cell)) {
                         break;
                     }
-                    colNum = i;
+                    colNum++;
                     putValueToSheetData(sheetData, rowNum, i, cell);
                 }
                 if (ObjectUtils.isEmpty(sheetData.get(String.valueOf(rowNum)))) {
@@ -837,7 +836,7 @@ public class ExcelServiceImpl implements ExcelService {
                     break;
                 }
             } else {
-                for (int i=0; i<=colNum ; i++) {
+                for (int i = 0; i < colNum; i++) {
                     Cell cell = row.getCell(i);
                     if (isCellEmpty(cell)) {
                         continue;
