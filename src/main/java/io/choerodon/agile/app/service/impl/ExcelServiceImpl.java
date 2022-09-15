@@ -958,8 +958,11 @@ public class ExcelServiceImpl implements ExcelService {
                     }
 
                     JSONObject relatedRowJson = (JSONObject)sheetData.get(relatedRow);
-                    if (!ObjectUtils.isEmpty(relatedRowJson)
-                            && !ObjectUtils.isEmpty(relatedRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID))) {
+                    Long relatedIssueId = null;
+                    if (!ObjectUtils.isEmpty(relatedRowJson)) {
+                        relatedIssueId = relatedRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID);
+                    }
+                    if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
                         String errorMsg = buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行" + IssueConstant.ISSUE_CN + "不存在");
                         excelCommonService.putErrorMsg(rowJson, cellJson, errorMsg);
@@ -982,7 +985,7 @@ public class ExcelServiceImpl implements ExcelService {
                         }
                         break;
                     } else {
-                        relatedIssueIds.add(relatedRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID));
+                        relatedIssueIds.add(relatedIssueId);
                     }
                 }
                 if (ok) {

@@ -1239,28 +1239,32 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 valueList.addAll(splitByRegex(stringValue));
             }
             List<String> values = excelColumn.getPredefinedValues();
-            if (multiValue) {
-                boolean ok = true;
-                List<String> ids = new ArrayList<>();
-                for (String str : valueList) {
-                    if (!values.contains(str)) {
-                        ok = false;
-                        break;
-                    } else {
-                        ids.add(String.valueOf(valueIdMap.get(str)));
-                    }
-                }
-                if (!ok) {
-                    String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
-                    putErrorMsg(rowJson, cellJson, errorMsg);
-                }
-                customFieldValue = ids;
+            if (values == null) {
+                customFieldValue = stringValue;
             } else {
-                if (!values.contains(stringValue)) {
-                    String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
-                    putErrorMsg(rowJson, cellJson, errorMsg);
+                if (multiValue) {
+                    boolean ok = true;
+                    List<String> ids = new ArrayList<>();
+                    for (String str : valueList) {
+                        if (!values.contains(str)) {
+                            ok = false;
+                            break;
+                        } else {
+                            ids.add(String.valueOf(valueIdMap.get(str)));
+                        }
+                    }
+                    if (!ok) {
+                        String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
+                        putErrorMsg(rowJson, cellJson, errorMsg);
+                    }
+                    customFieldValue = ids;
                 } else {
-                    customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                    if (!values.contains(stringValue)) {
+                        String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
+                        putErrorMsg(rowJson, cellJson, errorMsg);
+                    } else {
+                        customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                    }
                 }
             }
         }
