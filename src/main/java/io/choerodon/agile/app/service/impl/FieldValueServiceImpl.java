@@ -160,7 +160,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     @Override
     public void checkCreateCustomFieldWithoutRuleNotice(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList) {
         //处理数字类型自定义字段默认值和状态联动更新属性自定义字段add操作结果不正确的问题
-        List<FieldValueDTO> fieldValueList = calcNumberByDefaultValue(projectId, id, schemeCode, fieldValues);
+        List<FieldValueDTO> fieldValueList = calcNumberByDefaultValue(projectId, id, schemeCode, fieldValues, fieldList);
         if (!fieldValueList.isEmpty()) {
             fieldValueMapper.batchInsert(projectId, id, schemeCode, fieldValueList);
         }
@@ -173,7 +173,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private List<FieldValueDTO> calcNumberByDefaultValue(Long projectId,
                                                          Long instanceId,
                                                          String schemeCode,
-                                                         List<FieldValueDTO> fieldValues) {
+                                                         List<FieldValueDTO> fieldValues,
+                                                         List<String> inputFieldCodes) {
         Long issueTypeId = null;
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         if (ObjectSchemeCode.BACKLOG.equals(schemeCode) && !ObjectUtils.isEmpty(backlogExpandService)) {
@@ -192,7 +193,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             issueTypeId = issue.getIssueTypeId();
         }
         //数字类型字段，没有权限，需要在后台设置默认值，保证有权限人员看到的值是正确的
-        addNoPermissionNumberFields(projectId, issueTypeId, fieldValues);
+        addNoPermissionNumberFields(projectId, issueTypeId, fieldValues, inputFieldCodes);
         List<FieldValueDTO> result = new ArrayList<>();
         List<FieldValueDTO> numberFields = new ArrayList<>();
         Set<Long> fieldIds = new HashSet<>();
@@ -253,19 +254,33 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
 
     private void addNoPermissionNumberFields(Long projectId,
                                              Long issueTypeId,
-                                             List<FieldValueDTO> fieldValues) {
+                                             List<FieldValueDTO> fieldValues,
+                                             List<String> inputFieldCodes) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<PageFieldDTO> pageFields =
                 pageFieldService.queryPageField(organizationId, projectId, PageCode.AGILE_ISSUE_CREATE, issueTypeId);
-        Set<Long> fieldIds = fieldValues.stream().map(FieldValueDTO::getFieldId).collect(Collectors.toSet());
+        Set<Long> fieldIds = new HashSet<>();
+        Set<String> fieldCodes = new HashSet<>();
+        for (FieldValueDTO dto : fieldValues) {
+            fieldIds.add(dto.getFieldId());
+            fieldCodes.add(dto.getFieldCode());
+        }
+        Set<String> nullValueFieldCodes = new HashSet<>();
+        for (String inputFieldCode : inputFieldCodes) {
+            if (!fieldCodes.contains(inputFieldCode)) {
+                nullValueFieldCodes.add(inputFieldCode);
+            }
+        }
         for (PageFieldDTO field : pageFields) {
             Long fieldId = field.getFieldId();
+            String fieldCode = field.getFieldCode();
             String fieldType = field.getFieldType();
             boolean isNumber = FieldType.NUMBER.equals(fieldType);
             boolean isSkipped = fieldIds.contains(fieldId)
                     || !Boolean.TRUE.equals(field.getDisplay())
                     || Boolean.TRUE.equals(field.getSystem())
-                    || !isNumber;
+                    || !isNumber
+                    || nullValueFieldCodes.contains(fieldCode);
             if (isSkipped) {
                 continue;
             }
