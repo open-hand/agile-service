@@ -796,20 +796,18 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void addErrorMsgIfNotExisted(int rowNum,
                                          JSONObject sheetData,
                                          int parentColIndex) {
-        JSONObject rowJson = (JSONObject)sheetData.get(rowNum);
+        JSONObject rowJson = (JSONObject) sheetData.get(rowNum);
         if (ObjectUtils.isEmpty(rowJson)) {
             return;
         }
-        if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-            JSONObject parentCellJson = (JSONObject)rowJson.get(parentColIndex);
-            parentCellJson = createCellJsonIfNotExisted(rowJson, parentColIndex, parentCellJson);
-            String value = parentCellJson.getString(ExcelSheetData.STRING_CELL);
-            if (value == null) {
-                value = "";
-            }
-            String errorMsg = buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误");
-            putErrorMsg(rowJson, parentCellJson, errorMsg);
+        JSONObject parentCellJson = (JSONObject) rowJson.get(parentColIndex);
+        parentCellJson = createCellJsonIfNotExisted(rowJson, parentColIndex, parentCellJson);
+        String value = parentCellJson.getString(ExcelSheetData.STRING_CELL);
+        if (value == null) {
+            value = "";
         }
+        String errorMsg = buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误");
+        putErrorMsg(rowJson, parentCellJson, errorMsg);
     }
 
     @Override
