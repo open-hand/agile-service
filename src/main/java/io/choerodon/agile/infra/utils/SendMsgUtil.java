@@ -112,7 +112,7 @@ public class SendMsgUtil {
             if (CollectionUtils.isNotEmpty(result.getParticipants())) {
                 List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, result);
                 List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
-                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName, participantIds);
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, participantIds);
             }
         }
     }
@@ -166,7 +166,7 @@ public class SendMsgUtil {
             }
             if (CollectionUtils.isNotEmpty(result.getParticipantIds())) {
                 List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, issueVO);
-                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName, result.getParticipantIds());
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, result.getParticipantIds());
             }
         }
     }
@@ -554,7 +554,7 @@ public class SendMsgUtil {
                 url.append(getIssueUrl(result, projectVO, result.getIssueId()));
             }
             List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
-            siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, reporterName, participantIds);
+            siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, participantIds);
         }
     }
 
