@@ -1,10 +1,11 @@
 package io.choerodon.agile.api.vo;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.util.List;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/11/29.
@@ -28,9 +29,17 @@ public class IssueTypeSearchVO {
     @JsonIgnore
     private List<Long> issueTypeIds;
 
+    @ApiModelProperty(value = "组织ID")
+    private Long organizationId;
+
+    @ApiModelProperty(value = "项目ID")
+    private Long projectId;
+
     @Encrypt
     @ApiModelProperty(value = "过滤的问题类型id")
     private List<Long> filterIssueTypeIds;
+    @ApiModelProperty(value = "排除的问题类型Code")
+    private List<String> excludeTypeCodes;
     @ApiModelProperty(value = "项目id集合")
     private List<Long> projectIds;
 
@@ -38,80 +47,86 @@ public class IssueTypeSearchVO {
         return issueTypeIds;
     }
 
-    public void setIssueTypeIds(List<Long> issueTypeIds) {
+    public IssueTypeSearchVO setIssueTypeIds(List<Long> issueTypeIds) {
         this.issueTypeIds = issueTypeIds;
+        return this;
     }
 
     public List<String> getTypeCodes() {
         return typeCodes;
     }
 
-    public void setTypeCodes(List<String> typeCodes) {
+    public IssueTypeSearchVO setTypeCodes(List<String> typeCodes) {
         this.typeCodes = typeCodes;
+        return this;
     }
 
     public Boolean getEnabled() {
         return enabled;
     }
 
-    public void setEnabled(Boolean enabled) {
+    public IssueTypeSearchVO setEnabled(Boolean enabled) {
         this.enabled = enabled;
+        return this;
     }
 
     public Boolean getReferenced() {
         return referenced;
     }
 
-    public void setReferenced(Boolean referenced) {
+    public IssueTypeSearchVO setReferenced(Boolean referenced) {
         this.referenced = referenced;
+        return this;
     }
 
     public String getSource() {
         return source;
     }
 
-    public void setSource(String source) {
+    public IssueTypeSearchVO setSource(String source) {
         this.source = source;
+        return this;
     }
-
-    private Long organizationId;
-
-    private Long projectId;
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Long organizationId) {
+    public IssueTypeSearchVO setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+        return this;
     }
 
     public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueTypeSearchVO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public IssueTypeSearchVO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public IssueTypeSearchVO setDescription(String description) {
         this.description = description;
+        return this;
     }
 
-    public void setParam(String param) {
+    public IssueTypeSearchVO setParam(String param) {
         this.param = param;
+        return this;
     }
 
     public String getParam() {
@@ -122,15 +137,29 @@ public class IssueTypeSearchVO {
         return filterIssueTypeIds;
     }
 
-    public void setFilterIssueTypeIds(List<Long> filterIssueTypeIds) {
+    public IssueTypeSearchVO setFilterIssueTypeIds(List<Long> filterIssueTypeIds) {
         this.filterIssueTypeIds = filterIssueTypeIds;
+        return this;
+    }
+
+    /**
+     * @return 排除的问题类型Code
+     */
+    public List<String> getExcludeTypeCodes() {
+        return excludeTypeCodes;
+    }
+
+    public IssueTypeSearchVO setExcludeTypeCodes(List<String> excludeTypeCodes) {
+        this.excludeTypeCodes = excludeTypeCodes;
+        return this;
     }
 
     public List<Long> getProjectIds() {
         return projectIds;
     }
 
-    public void setProjectIds(List<Long> projectIds) {
+    public IssueTypeSearchVO setProjectIds(List<Long> projectIds) {
         this.projectIds = projectIds;
+        return this;
     }
 }
