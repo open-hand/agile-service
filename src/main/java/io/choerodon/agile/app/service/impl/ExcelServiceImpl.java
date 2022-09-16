@@ -415,7 +415,7 @@ public class ExcelServiceImpl implements ExcelService {
                             Long userId,
                             Double process,
                             String websocketKey) {
-        fileOperationHistoryDTO.setProcess(process);
+        fileOperationHistoryDTO.setProcess(process * 100);
         String message = null;
         try {
             message = objectMapper.writeValueAsString(fileOperationHistoryDTO);
