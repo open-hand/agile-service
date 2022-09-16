@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service;
 
-import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -107,11 +106,5 @@ public interface AgileWaterfallService {
     List<Long> selectDescendants(Long projectId, Long issueId);
 
     void deleteByWorkSpaceId(Long projectId, Long workSpaceId);
-
-    void batchImportProjectPlan(Long projectId, InputStream inputStream);
-
-    void createIssueSprintRel(Long projectId, Long issueId, List<Long> sprintIds);
-
-    void createDeliverable(WfDeliverableVO wfDeliverableVO);
 
 }
