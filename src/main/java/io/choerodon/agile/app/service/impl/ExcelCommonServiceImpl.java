@@ -588,6 +588,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                              Long userId,
                              Double process,
                              String websocketKey) {
+        if (process != null && process < 1) {
+            process = process * 100;
+        }
         fileOperationHistoryDTO.setProcess(process);
         String message = null;
         try {
@@ -821,6 +824,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
 
     private String buildWithErrorMsg(String value, String msg) {
+        if(value == null) {
+            value = "";
+        }
         return new StringBuilder(value).append("(").append(msg).append(")").toString();
     }
 
