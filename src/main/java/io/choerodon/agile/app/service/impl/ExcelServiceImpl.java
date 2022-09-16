@@ -415,7 +415,7 @@ public class ExcelServiceImpl implements ExcelService {
                             Long userId,
                             Double process,
                             String websocketKey) {
-        if (process != null) {
+        if (process != null && process < 1) {
             process = process * 100;
         }
         fileOperationHistoryDTO.setProcess(process);
@@ -726,7 +726,7 @@ public class ExcelServiceImpl implements ExcelService {
                     progress.addProcessNum(sonSet.size() + 1);
                     currentRowNum = Collections.max(sonSet);
                 } catch (Exception e) {
-                    LOGGER.error("insert data error when import excel, exception: {0}", e);
+                    LOGGER.error("insert data error when import excel, exception: {}", e);
                     lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
                     currentRowNum = Collections.max(sonSet);
                     issueService.batchDeleteIssuesAgile(projectId, insertIds);
