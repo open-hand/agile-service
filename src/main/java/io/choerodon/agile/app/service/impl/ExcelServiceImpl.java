@@ -813,23 +813,22 @@ public class ExcelServiceImpl implements ExcelService {
         return lastSendCountNum;
     }
 
-    
 
     private ExcelSheetData readDate(Sheet sheet) {
         JSONObject sheetData = new JSONObject();
         Iterator<Row> sheetIterator = sheet.rowIterator();
         int rowNum = 0;
         int colNum = 0;
-        while(sheetIterator.hasNext()) {
+        while (sheetIterator.hasNext()) {
             Row row = sheetIterator.next();
             if (rowNum == 0) {
                 //header行
-                for (int i=0;; i++) {
+                for (int i = 0; ; i++) {
                     Cell cell = row.getCell(i);
                     if (isCellEmpty(cell)) {
                         break;
                     }
-                    colNum = i;
+                    colNum++;
                     putValueToSheetData(sheetData, rowNum, i, cell);
                 }
                 if (ObjectUtils.isEmpty(sheetData.get(String.valueOf(rowNum)))) {
@@ -837,7 +836,7 @@ public class ExcelServiceImpl implements ExcelService {
                     break;
                 }
             } else {
-                for (int i=0; i<=colNum ; i++) {
+                for (int i = 0; i < colNum; i++) {
                     Cell cell = row.getCell(i);
                     if (isCellEmpty(cell)) {
                         continue;
@@ -958,8 +957,11 @@ public class ExcelServiceImpl implements ExcelService {
                     }
 
                     JSONObject relatedRowJson = (JSONObject)sheetData.get(relatedRow);
-                    if (!ObjectUtils.isEmpty(relatedRowJson)
-                            && !ObjectUtils.isEmpty(relatedRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID))) {
+                    Long relatedIssueId = null;
+                    if (!ObjectUtils.isEmpty(relatedRowJson)) {
+                        relatedIssueId = relatedRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID);
+                    }
+                    if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
                         String errorMsg = buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行" + IssueConstant.ISSUE_CN + "不存在");
                         excelCommonService.putErrorMsg(rowJson, cellJson, errorMsg);
@@ -982,7 +984,7 @@ public class ExcelServiceImpl implements ExcelService {
                         }
                         break;
                     } else {
-                        relatedIssueIds.add(relatedRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID));
+                        relatedIssueIds.add(relatedIssueId);
                     }
                 }
                 if (ok) {

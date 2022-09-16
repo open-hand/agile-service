@@ -796,20 +796,18 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void addErrorMsgIfNotExisted(int rowNum,
                                          JSONObject sheetData,
                                          int parentColIndex) {
-        JSONObject rowJson = (JSONObject)sheetData.get(rowNum);
+        JSONObject rowJson = (JSONObject) sheetData.get(rowNum);
         if (ObjectUtils.isEmpty(rowJson)) {
             return;
         }
-        if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-            JSONObject parentCellJson = (JSONObject)rowJson.get(parentColIndex);
-            parentCellJson = createCellJsonIfNotExisted(rowJson, parentColIndex, parentCellJson);
-            String value = parentCellJson.getString(ExcelSheetData.STRING_CELL);
-            if (value == null) {
-                value = "";
-            }
-            String errorMsg = buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误");
-            putErrorMsg(rowJson, parentCellJson, errorMsg);
+        JSONObject parentCellJson = (JSONObject) rowJson.get(parentColIndex);
+        parentCellJson = createCellJsonIfNotExisted(rowJson, parentColIndex, parentCellJson);
+        String value = parentCellJson.getString(ExcelSheetData.STRING_CELL);
+        if (value == null) {
+            value = "";
         }
+        String errorMsg = buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误");
+        putErrorMsg(rowJson, parentCellJson, errorMsg);
     }
 
     @Override
@@ -953,29 +951,37 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                 int colNum,
                                 Sheet sheet) {
         Workbook workbook = sheet.getWorkbook();
-        CellStyle fontStyle = workbook.createCellStyle();
+        CellStyle errorCellStyle = workbook.createCellStyle();
         Font font = workbook.createFont();
         font.setColor(Font.COLOR_RED);
-        fontStyle.setFont(font);
+        errorCellStyle.setFont(font);
         int startRow = 1;
         for (JSONObject errorRowJson : errorRowJsonList) {
             Row row = sheet.createRow(startRow);
             for (int col = 0; col < colNum; col++) {
-                JSONObject cellJson = (JSONObject)errorRowJson.get(col);
+                JSONObject cellJson = (JSONObject) errorRowJson.get(col);
                 if (ObjectUtils.isEmpty(cellJson)) {
                     continue;
                 }
                 Cell cell = row.createCell(col);
                 boolean isCellError = Boolean.TRUE.equals(cellJson.get(ExcelSheetData.JSON_KEY_IS_ERROR));
-                if (isCellError) {
-                    cell.setCellStyle(fontStyle);
-                }
                 String value = cellJson.getString(ExcelSheetData.STRING_CELL);
                 Date date = cellJson.getDate(ExcelSheetData.DATE_CELL);
                 if (!ObjectUtils.isEmpty(value)) {
                     cell.setCellValue(ExcelUtil.substring(value));
+                    if (isCellError) {
+                        cell.setCellStyle(errorCellStyle);
+                    }
                 } else if (!ObjectUtils.isEmpty(date)) {
                     cell.setCellValue(date);
+                    CreationHelper createHelper = workbook.getCreationHelper();
+                    CellStyle dateCellStyle = workbook.createCellStyle();
+                    if (isCellError) {
+                        dateCellStyle.setFont(font);
+                    }
+                    short fmt = createHelper.createDataFormat().getFormat("m/d/yy h:mm");
+                    dateCellStyle.setDataFormat(fmt);
+                    cell.setCellStyle(dateCellStyle);
                 }
             }
             startRow++;
@@ -1239,28 +1245,32 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 valueList.addAll(splitByRegex(stringValue));
             }
             List<String> values = excelColumn.getPredefinedValues();
-            if (multiValue) {
-                boolean ok = true;
-                List<String> ids = new ArrayList<>();
-                for (String str : valueList) {
-                    if (!values.contains(str)) {
-                        ok = false;
-                        break;
-                    } else {
-                        ids.add(String.valueOf(valueIdMap.get(str)));
-                    }
-                }
-                if (!ok) {
-                    String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
-                    putErrorMsg(rowJson, cellJson, errorMsg);
-                }
-                customFieldValue = ids;
+            if (values == null) {
+                customFieldValue = stringValue;
             } else {
-                if (!values.contains(stringValue)) {
-                    String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
-                    putErrorMsg(rowJson, cellJson, errorMsg);
+                if (multiValue) {
+                    boolean ok = true;
+                    List<String> ids = new ArrayList<>();
+                    for (String str : valueList) {
+                        if (!values.contains(str)) {
+                            ok = false;
+                            break;
+                        } else {
+                            ids.add(String.valueOf(valueIdMap.get(str)));
+                        }
+                    }
+                    if (!ok) {
+                        String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
+                        putErrorMsg(rowJson, cellJson, errorMsg);
+                    }
+                    customFieldValue = ids;
                 } else {
-                    customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                    if (!values.contains(stringValue)) {
+                        String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
+                        putErrorMsg(rowJson, cellJson, errorMsg);
+                    } else {
+                        customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                    }
                 }
             }
         }
@@ -1435,12 +1445,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                      JSONObject rowJson,
                                      Integer col) {
         Boolean checkRequireField = true;
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
-        if (ObjectUtils.isEmpty(cellJson)
-                || ObjectUtils.isEmpty(cellJson.getString(ExcelSheetData.STRING_CELL))) {
-            cellJson = createCellJsonIfNotExisted(rowJson, col, cellJson);
-            List<String> list = requireFieldMap.get(issueCreateVO.getIssueTypeId());
-            if (!CollectionUtils.isEmpty(list) && list.contains(excelColumn.getFieldCode())) {
+        List<String> requiredFields = requireFieldMap.get(issueCreateVO.getIssueTypeId());
+        String fieldCode = excelColumn.getFieldCode();
+        if (!ObjectUtils.isEmpty(requiredFields)
+                && requiredFields.contains(fieldCode)) {
+            JSONObject cellJson = (JSONObject) rowJson.get(col);
+            if (ObjectUtils.isEmpty(cellJson)) {
+                cellJson = createCellJsonIfNotExisted(rowJson, col, cellJson);
                 String errorMsg = buildWithErrorMsg("", "必填字段不能为空");
                 putErrorMsg(rowJson, cellJson, errorMsg);
                 checkRequireField = false;

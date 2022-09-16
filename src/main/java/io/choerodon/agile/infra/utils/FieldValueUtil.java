@@ -338,6 +338,7 @@ public class FieldValueUtil {
         String defaultValue = create.getDefaultValue();
         String fieldType = create.getFieldType();
         FieldValueDTO fieldValue = new FieldValueDTO();
+        fieldValue.setFieldCode(create.getFieldCode());
         //处理默认当前时间
         if (fieldType.equals(FieldType.DATETIME) || fieldType.equals(FieldType.TIME)) {
             if (create.getExtraConfig() != null && create.getExtraConfig()) {

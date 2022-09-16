@@ -19,4 +19,5 @@ public interface IssueRepository {
      */
     List<IssueDTO> selectByIds(Set<Long> ids);
 
+    IssueDTO queryIssueBySummary(Long projectId, String summary);
 }
