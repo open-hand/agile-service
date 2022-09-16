@@ -89,12 +89,14 @@ public class SiteMsgUtil {
         }
     }
 
-    private void setLoginNameAndRealName(Long operatorId, Map<String, String> map) {
-        UserDTO operator = queryUserById(operatorId);
+    private UserMessageDTO setLoginNameAndRealName(Long operatorId, Map<String, String> map) {
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(Arrays.asList(operatorId), true);
+        UserMessageDTO operator = userMap.get(operatorId);
         if (operator != null) {
             map.put(LOGIN_NAME, operator.getLoginName());
             map.put(USER_NAME, operator.getRealName());
         }
+        return operator;
     }
 
     private UserDTO queryUserById(Long operatorId) {
@@ -403,13 +405,15 @@ public class SiteMsgUtil {
         });
     }
 
-    public void issueParticipant(String summary, String url, Long projectId, Long operatorId, List<Long> sendUserIds, String operatorName, List<Long> participantIds) {
+    public void issueParticipant(String summary, String url, Long projectId, Long operatorId, List<Long> sendUserIds, List<Long> participantIds) {
         Map<String,String> map = new HashMap<>();
         map.put(SUMMARY, summary);
-        map.put(OPERATOR_NAME, operatorName);
         map.put(URL, url);
         map.put(LINK, domainUrl + "/" + url);
-        setLoginNameAndRealName(operatorId, map);
+        UserMessageDTO operator = setLoginNameAndRealName(operatorId, map);
+        if (operator != null) {
+            map.put(OPERATOR_NAME, operator.getName());
+        }
         setParticipantName(map, participantIds);
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
