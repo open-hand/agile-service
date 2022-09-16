@@ -38,6 +38,8 @@ public class IssueTypeSearchVO {
     @Encrypt
     @ApiModelProperty(value = "过滤的问题类型id")
     private List<Long> filterIssueTypeIds;
+    @ApiModelProperty(value = "排除的问题类型Code")
+    private List<String> excludeTypeCodes;
     @ApiModelProperty(value = "项目id集合")
     private List<Long> projectIds;
 
@@ -137,6 +139,18 @@ public class IssueTypeSearchVO {
 
     public IssueTypeSearchVO setFilterIssueTypeIds(List<Long> filterIssueTypeIds) {
         this.filterIssueTypeIds = filterIssueTypeIds;
+        return this;
+    }
+
+    /**
+     * @return 排除的问题类型Code
+     */
+    public List<String> getExcludeTypeCodes() {
+        return excludeTypeCodes;
+    }
+
+    public IssueTypeSearchVO setExcludeTypeCodes(List<String> excludeTypeCodes) {
+        this.excludeTypeCodes = excludeTypeCodes;
         return this;
     }
 

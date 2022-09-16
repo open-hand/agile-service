@@ -400,6 +400,7 @@
         SELECT temp.* FROM (
             SELECT
                 it.id,
+                it.type_code,
                 IFNULL( ite.name, it.name ) AS name,
                 ite.project_id,
                 ite.enabled,
@@ -416,6 +417,7 @@
 
             SELECT
                 it.id,
+                it.type_code,
                 it.NAME,
                 it.project_id,
                 1 AS enabled,
@@ -441,6 +443,12 @@
                     AND temp.id NOT IN
                     <foreach collection="issueTypeSearchVO.filterIssueTypeIds" item="filterIssueTypeId" open="(" close=")" separator=",">
                         #{filterIssueTypeId}
+                    </foreach>
+                </if>
+                <if test="issueTypeSearchVO.excludeTypeCodes != null and issueTypeSearchVO.excludeTypeCodes.size() > 0 ">
+                    AND temp.type_code NOT IN
+                    <foreach collection="issueTypeSearchVO.excludeTypeCodes" item="excludeTypeCode" open="(" close=")" separator=",">
+                        #{excludeTypeCode}
                     </foreach>
                 </if>
                 <if test="issueTypeSearchVO.param != null and issueTypeSearchVO.param != ''">
