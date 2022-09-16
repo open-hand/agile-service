@@ -408,6 +408,9 @@
             FROM fd_issue_type_extend ite
             JOIN fd_issue_type it ON it.id = ite.issue_type_id
             WHERE ite.organization_id = #{organizationId, jdbcType=DECIMAL}
+            <!-- 产品要求, 只有修改过名称/图标/颜色的项目客制化工作项才记入“客制化工作项” -->
+            <!-- see https://choerodon.com.cn/#/agile/work-list/issue?type=project&id=261445508798373888&name=%E6%95%8F%E6%8D%B7%E5%8D%8F%E4%BD%9C%E7%BB%84&category=AGILE&organizationId=1128&paramIssueId=358361939208716288&paramName=yq-pm-3598 -->
+            AND (it.source != '${@io.choerodon.agile.infra.enums.IssueTypeSource@SYSTEM}' OR (ite.name IS NOT NULL OR ite.icon IS NOT NULL OR ite.colour IS NOT NULL))
             AND ite.project_id IN
             <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
                 #{projectId, jdbcType=DECIMAL}
@@ -427,7 +430,12 @@
             AND it.source = '${@io.choerodon.agile.infra.enums.IssueTypeSource@SYSTEM}'
             AND it.project_id = ${@io.choerodon.agile.app.service.impl.IssueTypeServiceImpl@ZERO}
             <!-- 如果当前预制类型被所有给定项目都二开过, 则不显示, 否则但凡有一个给定项目没有二开过, 都显示出来 -->
-            AND (SELECT COUNT(*) FROM fd_issue_type_extend ite WHERE ite.issue_type_id = it.id AND ite.project_id IN
+            AND (
+                SELECT COUNT(*)
+                FROM fd_issue_type_extend ite
+                WHERE ite.issue_type_id = it.id
+                AND (ite.name IS NOT NULL OR ite.icon IS NOT NULL OR ite.colour IS NOT NULL)
+                AND ite.project_id IN
                     <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
                         #{projectId, jdbcType=DECIMAL}
                     </foreach>
