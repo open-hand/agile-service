@@ -686,6 +686,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
                 excelColumn.setFieldCode(fieldCode);
                 String fieldType = detail.getFieldType();
+                excelColumn.setFieldType(fieldType);
                 excelColumn.setMultiValue(multiValueFieldType.contains(fieldType));
                 if (fieldTypes.contains(fieldType)) {
                     List<FieldOptionVO> fieldOptions = detail.getFieldOptions();
@@ -1244,6 +1245,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 String errorMsg = buildWithErrorMsg(dateStr, "自定义字段类型错误");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             }
+            String fieldType = excelColumn.getFieldType();
+            validateIfNumber(fieldType, stringValue, rowJson, cellJson);
             boolean multiValue = excelColumn.isMultiValue();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
             List<String> valueList = new ArrayList<>();
@@ -1281,6 +1284,21 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             }
         }
         buildCustomFields(excelColumn, issueCreateVO, customFieldValue);
+    }
+
+    private void validateIfNumber(String fieldType,
+                                  String value,
+                                  JSONObject rowJson,
+                                  JSONObject cellJson) {
+        if (FieldType.NUMBER.equals(fieldType)) {
+            //数字类型，校验数字格式
+            try {
+                Long.valueOf(value);
+            } catch (Exception e) {
+                String errorMsg = buildWithErrorMsg(value, "自定义字段数字类型格式错误，请输入数字");
+                putErrorMsg(rowJson, cellJson, errorMsg);
+            }
+        }
     }
 
     @Override

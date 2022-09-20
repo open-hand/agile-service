@@ -37,6 +37,9 @@ public class ExcelColumnVO {
     @ApiModelProperty("字段code")
     private String fieldCode;
 
+    @ApiModelProperty("字段类型")
+    private String fieldType;
+
     /**
      * 合法的预选值，用于excel校验
      */
@@ -60,6 +63,14 @@ public class ExcelColumnVO {
     private Map<String, String> envNameCodeMap;
     @ApiModelProperty("自定义字段")
     private PageFieldViewUpdateVO customFieldDetail;
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
+    }
 
     public boolean isDateType() {
         return dateType;
