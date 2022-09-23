@@ -21,22 +21,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.SearchSourceVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.app.service.impl.SprintServiceImpl;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.jackson.config.ObjectMapperPostProcess;
 import org.hzero.starter.keyencrypt.core.*;
 import org.hzero.starter.keyencrypt.json.EncryptedSerializerModifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author zhaotianxin
@@ -410,6 +412,21 @@ public class EncryptionUtils {
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("issueTypeId",
                     temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
+        }
+
+        // issueTypeAndProjectIdList
+        final List<Map<String, Object>> issueTypeAndProjectIdListTemp = adMapOptional.map(ad -> (List<Map<String, Object>>) (ad.get("issueTypeAndProjectIdList"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(issueTypeAndProjectIdListTemp)){
+            for (Map<String, Object> issueTypeAndProjectIdVO : issueTypeAndProjectIdListTemp) {
+                final Object issueTypeId = issueTypeAndProjectIdVO.get("issueTypeId");
+                if(issueTypeId != null) {
+                    String issueTypeIdStr = String.valueOf(issueTypeId);
+                    if(StringUtils.isNotBlank(issueTypeIdStr)) {
+                        issueTypeAndProjectIdVO.put("issueTypeId", encryptionService.decrypt(issueTypeIdStr, BLANK_KEY));
+                    }
+                }
+            }
+            search.getAdvancedSearchArgs().put("issueTypeAndProjectIdList", issueTypeAndProjectIdListTemp);
         }
 
         // statusId
