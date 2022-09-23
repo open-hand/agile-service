@@ -425,6 +425,21 @@ public class EncryptionUtils {
                     temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
 
+        // issueTypeAndProjectIdList
+        final List<Map<String, Object>> issueTypeAndProjectIdListTemp = adMapOptional.map(ad -> (List<Map<String, Object>>) (ad.get("issueTypeAndProjectIdList"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(issueTypeAndProjectIdListTemp)){
+            for (Map<String, Object> issueTypeAndProjectIdVO : issueTypeAndProjectIdListTemp) {
+                final Object issueTypeId = issueTypeAndProjectIdVO.get("issueTypeId");
+                if(issueTypeId != null) {
+                    String issueTypeIdStr = String.valueOf(issueTypeId);
+                    if(StringUtils.isNotBlank(issueTypeIdStr)) {
+                        issueTypeAndProjectIdVO.put("issueTypeId", encryptionService.decrypt(issueTypeIdStr, BLANK_KEY));
+                    }
+                }
+            }
+            search.getAdvancedSearchArgs().put("issueTypeAndProjectIdList", issueTypeAndProjectIdListTemp);
+        }
+
         // statusId
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("statusId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
