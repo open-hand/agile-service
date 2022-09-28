@@ -1,6 +1,22 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 import com.alibaba.fastjson.JSON;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.api.vo.CopyConditionVO;
 import io.choerodon.agile.api.vo.LinkIssueLinkageMessageVO;
@@ -15,20 +31,8 @@ import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
  * @author zhaotianxin
@@ -151,7 +155,17 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                                     ServletRequestAttributes requestAttributes) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
         redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
-        issueOperateService.asyncCloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId, requestAttributes);
+        issueOperateService.asyncCloneIssueByIssueId(
+                projectId,
+                issueId,
+                copyConditionVO,
+                organizationId,
+                applyType,
+                asyncTraceId,
+                requestAttributes,
+                EncryptContext.encryptType() == null ? null : EncryptContext.encryptType().toString(),
+                SecurityContextHolder.getContext()
+        );
     }
 
     @Async
@@ -162,8 +176,14 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                                          Long organizationId,
                                          String applyType,
                                          String asyncTraceId,
-                                         ServletRequestAttributes requestAttributes) {
+                                         ServletRequestAttributes requestAttributes,
+                                         String encryptType,
+                                         SecurityContext context) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
+        if(encryptType != null) {
+            EncryptContext.setEncryptType(encryptType);
+        }
+        SecurityContextHolder.setContext(context);
         issueService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId);
     }
 }

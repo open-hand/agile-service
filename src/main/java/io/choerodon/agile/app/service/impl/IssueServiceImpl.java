@@ -2688,7 +2688,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + asyncTraceId;
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("projectId", projectId);
-        paramsMap.put("userId", userId);
+        paramsMap.put("userId", EncryptionUtils.encrypt(userId));
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 0);
         redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
