@@ -2748,7 +2748,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (agileWaterfallService != null) {
                 agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
             }
-            paramsMap.put("newIssueId", newIssueId);
+            paramsMap.put("newIssueId", EncryptionUtils.encrypt(newIssueId));
             sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
             redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , SUCCEED_STATUS, 24L, TimeUnit.HOURS);
         } else {
