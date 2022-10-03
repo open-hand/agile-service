@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.*;
@@ -20,6 +21,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author dinghuang123@gmail.com
  * @since 2018-05-14 20:30:48
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueVO {
 
     @ApiModelProperty(value = "问题主键id")

@@ -1,18 +1,23 @@
 package io.choerodon.agile.infra.dto.business;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.TagVO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.utils.StringUtil;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.business.TagVO;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.utils.StringUtil;
+
 /**
  * @author dinghuang123@gmail.com
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueDetailDTO {
 
     private Long issueId;
