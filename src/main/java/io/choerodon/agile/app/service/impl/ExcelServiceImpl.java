@@ -18,6 +18,7 @@ import com.monitorjbl.xlsx.StreamingReader;
 import org.apache.commons.collections4.CollectionUtils;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.domain.entity.ExcelSheetData;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -776,6 +777,13 @@ public class ExcelServiceImpl implements ExcelService {
                     //这个方法只能更新基本的字段
                     result = issueService.updateIssue(issueCreateVO.getProjectId(), issueUpdateVO, fieldList);
                     //issue的类型，需要另外调用接口更新
+                    IssueUpdateTypeVO issueUpdateTypeVO = new IssueUpdateTypeVO();
+                    issueUpdateTypeVO.setIssueId(issueCreateVO.getIssueId());
+                    issueUpdateTypeVO.setIssueTypeId(issueCreateVO.getIssueTypeId());
+                    issueUpdateTypeVO.setApplyType(APPLY_TYPE_AGILE);
+                    issueUpdateTypeVO.setTypeCode(issueCreateVO.getTypeCode());
+                    IssueConvertDTO issueConvertDTO = issueValidator.verifyUpdateTypeData(projectId, issueUpdateTypeVO);
+                    issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId, projectId);
                     // TODO: 2022/10/10 处理自定义的字段
                 } else {
                     result = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, APPLY_TYPE_AGILE);
