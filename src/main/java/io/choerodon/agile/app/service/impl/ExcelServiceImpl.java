@@ -13,14 +13,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monitorjbl.xlsx.StreamingReader;
-import io.choerodon.agile.domain.entity.ExcelSheetData;
-import io.choerodon.core.convertor.ApplicationContextHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hzero.excel.config.ExcelConfig;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +26,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -38,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.domain.entity.ExcelSheetData;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
@@ -45,6 +43,7 @@ import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -53,6 +52,8 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 import org.hzero.boot.file.FileClient;
+import org.hzero.core.base.BaseConstants;
+import org.hzero.excel.config.ExcelConfig;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -676,7 +677,7 @@ public class ExcelServiceImpl implements ExcelService {
                     insertIds.add(result.getIssueId());
                     excelCommonService.insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
                     List<Long> customFieldIds = new ArrayList<>();
-                    if (!CollectionUtils.isEmpty(parent.getCustomFields())) {
+                    if (CollectionUtils.isNotEmpty(parent.getCustomFields())) {
                         customFieldIds.addAll(parent.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                     }
                     issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
@@ -712,7 +713,7 @@ public class ExcelServiceImpl implements ExcelService {
                         insertIds.add(returnValue.getIssueId());
                         excelCommonService.insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
                         List<Long> subIssueCustomFieldIds = new ArrayList<>();
-                        if (!CollectionUtils.isEmpty(v.getCustomFields())) {
+                        if (CollectionUtils.isNotEmpty(v.getCustomFields())) {
                             subIssueCustomFieldIds.addAll(v.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                         }
                         issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), triggerCarrierVOS, subIssueCustomFieldIds);
@@ -749,7 +750,7 @@ public class ExcelServiceImpl implements ExcelService {
                 IssueVO result = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, APPLY_TYPE_AGILE);
                 excelCommonService.insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
                 List<Long> customFieldIds = new ArrayList<>();
-                if (!CollectionUtils.isEmpty(issueCreateVO.getCustomFields())) {
+                if (CollectionUtils.isNotEmpty(issueCreateVO.getCustomFields())) {
                     customFieldIds.addAll(issueCreateVO.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                 }
                 issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
@@ -945,7 +946,7 @@ public class ExcelServiceImpl implements ExcelService {
                         progress.failCountIncrease();
                         progress.successCountDecrease();
                         Set<Integer> sonSet = parentSonMap.get(rowNum);
-                        if (!CollectionUtils.isEmpty(sonSet)) {
+                        if (CollectionUtils.isNotEmpty(sonSet)) {
                             sonSet.forEach(v -> {
                                 Long sonIssueId = ((JSONObject)sheetData.get(v)).getLong(ExcelSheetData.JSON_KEY_ISSUE_ID);
                                 if (!ObjectUtils.isEmpty(sonIssueId)) {
@@ -972,7 +973,7 @@ public class ExcelServiceImpl implements ExcelService {
                         progress.failCountIncrease();
                         progress.successCountDecrease();
                         Set<Integer> sonSet = parentSonMap.get(rowNum);
-                        if (!CollectionUtils.isEmpty(sonSet)) {
+                        if (CollectionUtils.isNotEmpty(sonSet)) {
                             sonSet.forEach(v -> {
                                 JSONObject sonRowJson = (JSONObject)sheetData.get(v);
                                 if (!ObjectUtils.isEmpty(sonRowJson)
@@ -1000,7 +1001,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
 
         List<IssueLinkTypeDTO> issueLinkTypeDTOS = issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null);
-        if (!CollectionUtils.isEmpty(issueLinkTypeDTOS)) {
+        if (CollectionUtils.isNotEmpty(issueLinkTypeDTOS)) {
             Long linkTypeId =
                     issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null)
                             .get(0)
@@ -1455,7 +1456,7 @@ public class ExcelServiceImpl implements ExcelService {
                                   ServletRequestAttributes requestAttributes) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String websocketKey = WEBSOCKET_EXPORT_CODE + "-" + projectId;
+        String websocketKey = WEBSOCKET_EXPORT_CODE + BaseConstants.Symbol.MIDDLE_LINE + projectId;
         FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE, websocketKey);
         //处理根据界面筛选结果导出的字段
         Map<String, String[]> fieldMap =
@@ -1470,7 +1471,7 @@ public class ExcelServiceImpl implements ExcelService {
             throw new CommonException(PROJECT_ERROR);
         }
         project.setCode(projectInfoDTO.getProjectCode());
-        Boolean condition = issueService.handleSearchUser(searchVO, projectId);
+        boolean condition = issueService.handleSearchUser(searchVO, projectId);
         boolean isTreeView =
                 !Boolean.FALSE.equals(
                         Optional.ofNullable(searchVO.getSearchArgs())
@@ -1480,7 +1481,7 @@ public class ExcelServiceImpl implements ExcelService {
         String sheetName = project.getName();
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
         ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
-        if (Boolean.TRUE.equals(condition)) {
+        if (condition) {
             String filterSql = null;
             if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
@@ -1492,7 +1493,7 @@ public class ExcelServiceImpl implements ExcelService {
             while (true) {
                 //查询所有父节点问题
                 PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
-                Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, sortMap, isTreeView);
+                Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, new HashSet<>(Collections.singletonList(projectId)), searchVO, searchSql, sortMap, isTreeView);
                 if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
@@ -1500,10 +1501,20 @@ public class ExcelServiceImpl implements ExcelService {
                 List<Long> issueIds = new ArrayList<>();
                 Map<Long, Set<Long>> parentSonMap = new HashMap<>();
                 List<IssueDTO> issues = new ArrayList<>();
-                if (!parentIds.isEmpty()) {
+                if (CollectionUtils.isNotEmpty(parentIds)) {
                     Set<Long> childrenIds = new HashSet<>();
                     if (isTreeView) {
-                        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(Collections.singletonList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                        //支持第三方调用，筛选出父级时同时把所有子级返回
+                        boolean withSubIssues =
+                                !Boolean.FALSE.equals(
+                                        Optional.ofNullable(searchVO.getSearchArgs())
+                                                .map(x -> x.get("withSubIssues"))
+                                                .orElse(false));
+                        // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                        if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
+                            childrenIds.add(0L);
+                        }
                         childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                     }
                     cursor.addCollections(childrenIds);
@@ -1541,7 +1552,7 @@ public class ExcelServiceImpl implements ExcelService {
                         if (!ObjectUtils.isEmpty(mainResponsibleId) && !Objects.equals(mainResponsibleId, 0L)) {
                             userIds.add(mainResponsibleId);
                         }
-                        if (!CollectionUtils.isEmpty(i.getParticipantIds())) {
+                        if (CollectionUtils.isNotEmpty(i.getParticipantIds())) {
                             userIds.addAll(i.getParticipantIds());
                         }
                     });
@@ -1549,22 +1560,22 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
                     Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
                     Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
-                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
-                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
-                    Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), issueIds, true);
+                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
+                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
+                    Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Collections.singletonList(projectId), issueIds, true);
                     Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                     Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
                     Map<Long, Set<TagVO>> tagMap = new HashMap<>();
                     Map<Long, List<ProductVO>> productMap = new HashMap<>();
                     if (agilePluginService != null) {
-                        tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Arrays.asList(projectId)), issueIds));
-                        productMap.putAll(agilePluginService.listProductMap(ConvertUtil.getOrganizationId(projectId), Arrays.asList(projectId), issueIds));
+                        tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Collections.singletonList(projectId)), issueIds));
+                        productMap.putAll(agilePluginService.listProductMap(ConvertUtil.getOrganizationId(projectId), Collections.singletonList(projectId), issueIds));
                     }
                     Map<Long, List<IssueLinkDTO>> relatedIssueMap =
-                            issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Arrays.asList(projectId)), false)
+                            issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Collections.singletonList(projectId)), false)
                                     .stream()
                                     .collect(Collectors.groupingBy(IssueLinkDTO::getKeyIssueId));
                     cursor.addCollections(userIds);
@@ -1617,6 +1628,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ExportIssuesVO buildExcelIssueFromIssue(String projectName,
                                                    Map<Long, Set<Long>> parentSonMap,
                                                    Map<Long, ExportIssuesVO> issueMap,
@@ -1685,7 +1697,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private void setParticipant(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, UserMessageDTO> usersMap) {
         List<Long> participantIds = issue.getParticipantIds();
-        if (!CollectionUtils.isEmpty(participantIds)) {
+        if (CollectionUtils.isNotEmpty(participantIds)) {
             List<String> participants = new ArrayList<>();
             for (Long participantId : participantIds) {
                 UserMessageDTO userMessageDTO = usersMap.get(participantId);
@@ -1765,7 +1777,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<WorkLogVO> workLogVOList = workLogVOMap.get(exportIssuesVO.getIssueId());
         BigDecimal spentWorkTime = null;
         BigDecimal allEstimateTime;
-        if (!CollectionUtils.isEmpty(workLogVOList)) {
+        if (CollectionUtils.isNotEmpty(workLogVOList)) {
             spentWorkTime = new BigDecimal(0);
             for (WorkLogVO workLogVO : workLogVOList) {
                 spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());

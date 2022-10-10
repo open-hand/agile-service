@@ -292,7 +292,7 @@ public interface IssueService {
      * @param searchVO searchVO
      * @param projectId projectId
      */
-    Boolean handleSearchUser(SearchVO searchVO, Long projectId);
+    boolean handleSearchUser(SearchVO searchVO, Long projectId);
 
     Boolean checkEpicName(Long projectId, String epicName, Long epicId);
 
