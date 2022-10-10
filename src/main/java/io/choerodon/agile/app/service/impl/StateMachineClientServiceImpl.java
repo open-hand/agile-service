@@ -149,7 +149,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
      * 创建issue，用于敏捷和测试
      *
      * @param issueCreateVO issueCreateVO
-     * @param applyType applyType
+     * @param applyType     applyType
      * @return result
      */
     @Override
@@ -172,6 +172,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     @Override
     public IssueVO createIssueWithoutRuleNotice(IssueCreateVO issueCreateVO, String applyType) {
         Long projectId = issueCreateVO.getProjectId();
+        //处理issue的属性数据，将issue插入或者跟新数据库
         Long issueId = handlerIssue(issueCreateVO, applyType);
         //创建问题执行工作流自定义流转
         Set<Long> influenceIssueIds = new HashSet<>();
@@ -185,6 +186,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         return result;
     }
 
+    /**
+     * 创建issue 或者更新 issue
+     * @param issueCreateVO
+     * @param applyType
+     * @return
+     */
     private Long handlerIssue(IssueCreateVO issueCreateVO, String applyType) {
         issueValidator.checkIssueCreate(issueCreateVO, applyType);
         if (agilePluginService != null) {
@@ -244,7 +251,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             });
         }
         if (agileWaterfallService != null) {
-            agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId,issueId,issueCreateVO);
+            agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId, issueId, issueCreateVO);
         }
         // 创建交付物
         if (agileWaterfallService != null
@@ -402,12 +409,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     /**
      * 专用于demo的状态转换，demo创建数据不走状态机
      *
-     * @param projectId projectId
-     * @param issueId issueId
-     * @param transformId transformId
+     * @param projectId           projectId
+     * @param issueId             issueId
+     * @param transformId         transformId
      * @param objectVersionNumber objectVersionNumber
-     * @param applyType applyType
-     * @param inputDTO inputDTO
+     * @param applyType           applyType
+     * @param inputDTO            inputDTO
      * @return result
      */
     @Override

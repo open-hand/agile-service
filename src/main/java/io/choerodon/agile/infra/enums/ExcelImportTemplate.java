@@ -22,9 +22,9 @@ public class ExcelImportTemplate {
 
         private Integer processNum;
 
-        public Progress () {
+        public Progress() {
             this.failCount = 0L;
-            this.successCount=0L;
+            this.successCount = 0L;
             this.processNum = 0;
         }
 
@@ -36,7 +36,7 @@ public class ExcelImportTemplate {
             this.processNum += count;
         }
 
-        public void failCountIncrease(){
+        public void failCountIncrease() {
             this.failCount++;
         }
 
@@ -82,7 +82,7 @@ public class ExcelImportTemplate {
         //隐藏页sheet从2开始，0为导航页，1为数据页
         private int startSheetNum;
 
-        public Cursor () {
+        public Cursor() {
             this.startSheetNum = 2;
         }
 
@@ -168,6 +168,7 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.ISSUE_TYPE, IssueConstant.ISSUE_TYPE_CN + "*", true, null));
             HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", false, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
+            HEADERS.add(new Header(FieldCode.ISSUE_NUM, "问题编号", false, null));
             HEADERS.add(new Header(FieldCode.FEATURE, "所属特性", false, 8000));
             HEADERS.add(new Header(FieldCode.COMPONENT, "模块", true, null));
             HEADERS.add(new Header(FieldCode.SPRINT, "冲刺", true, null));

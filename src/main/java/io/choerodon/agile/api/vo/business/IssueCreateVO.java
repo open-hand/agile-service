@@ -15,6 +15,9 @@ import java.util.List;
  * @author dinghuang123@gmail.com
  */
 public class IssueCreateVO {
+    @ApiModelProperty(value = "问题主键id")
+    @Encrypt
+    private Long issueId;
 
     @ApiModelProperty(value = "问题类型code")
     private String typeCode;
@@ -164,6 +167,12 @@ public class IssueCreateVO {
 
     @ApiModelProperty(value = "第三方实例关联")
     private InstanceOpenRelVO instanceOpenRelVO;
+
+    @ApiModelProperty("issue的问题编号")
+    private String issueNum;
+    @ApiModelProperty(value = "版本号")
+    private Long objectVersionNumber;
+
 
     public List<TagVO> getTags() {
         return tags;
@@ -561,5 +570,29 @@ public class IssueCreateVO {
 
     public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
         this.instanceOpenRelVO = instanceOpenRelVO;
+    }
+
+    public String getIssueNum() {
+        return issueNum;
+    }
+
+    public void setIssueNum(String issueNum) {
+        this.issueNum = issueNum;
+    }
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }
