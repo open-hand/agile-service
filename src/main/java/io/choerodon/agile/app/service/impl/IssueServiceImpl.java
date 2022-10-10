@@ -709,6 +709,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                                     Optional.ofNullable(searchVO.getSearchArgs())
                                             .map(x -> x.get("withSubIssues"))
                                             .orElse(false));
+                    // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
                     if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
                         childrenIds.add(0L);
                     }
@@ -950,25 +951,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Boolean handleSearchUser(SearchVO searchVO, Long projectId) {
+    public boolean handleSearchUser(SearchVO searchVO, Long projectId) {
         if (searchVO.getSearchArgs() != null && searchVO.getSearchArgs().get(ASSIGNEE) != null) {
             String userName = (String) searchVO.getSearchArgs().get(ASSIGNEE);
-            Boolean result = handlerUserSearch(projectId, userName, searchVO, "assigneeIds");
-            if (!result) {
+            if (!handlerUserSearch(projectId, userName, searchVO, "assigneeIds")) {
                 return false;
             }
         }
         if (searchVO.getSearchArgs() != null && searchVO.getSearchArgs().get(REPORTER) != null) {
             String userName = (String) searchVO.getSearchArgs().get(REPORTER);
-            Boolean result = handlerUserSearch(projectId, userName, searchVO, "reporterIds");
-            if (!result) {
+            if (!handlerUserSearch(projectId, userName, searchVO, "reporterIds")) {
                 return false;
             }
         }
         return true;
     }
 
-    private Boolean handlerUserSearch(Long projectId, String userName, SearchVO searchVO, String key) {
+    private boolean handlerUserSearch(Long projectId, String userName, SearchVO searchVO, String key) {
         if (StringUtils.isNotBlank(userName)) {
             List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
             if (!CollectionUtils.isEmpty(userVOS)) {
