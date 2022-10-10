@@ -122,6 +122,7 @@ public class ExcelServiceImpl implements ExcelService {
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
     private static final String INSERT = "insert";
+    private static final String COMMON_SHEET_NAME = "sheet1";
 
 
     private static final List<String> PROCESS_PREDEFINED_SYSTEM_FIELDS =
@@ -228,7 +229,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     static {
         FIELD_MAP.put(ExportIssuesVO.TYPE_NAME, IssueConstant.ISSUE_TYPE_CN);
-        FIELD_MAP.put(ExportIssuesVO.ISSUE_NUM, IssueConstant.ISSUE_CN + "编号");
+        FIELD_MAP.put(ExportIssuesVO.ISSUE_NUM, "编号");
         FIELD_MAP.put(ExportIssuesVO.SUMMARY, "概要");
         FIELD_MAP.put(ExportIssuesVO.DESCRIPTION, "描述");
         FIELD_MAP.put(ExportIssuesVO.PRIORITY_NAME, "优先级");
@@ -298,7 +299,7 @@ public class ExcelServiceImpl implements ExcelService {
         Workbook wb = new XSSFWorkbook();
         // copy guide sheet
         excelCommonService.copyGuideSheetFromTemplate(wb, "/templates/IssueImportGuideTemplate.xlsx");
-        Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
+        Sheet sheet = wb.createSheet(COMMON_SHEET_NAME);
         CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
         ExcelUtil.generateHeaders(sheet, style, headers);
         try {
@@ -1521,8 +1522,12 @@ public class ExcelServiceImpl implements ExcelService {
                                 .map(x -> x.get("tree"))
                                 .orElse(false));
 
-        String sheetName = project.getName();
+        String sheetName = COMMON_SHEET_NAME;
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
+        // 复制要求sheet并调整sheet1的顺序到最后一个
+        excelCommonService.copyGuideSheetFromTemplate(workbook, "/templates/IssueImportGuideTemplate.xlsx");
+        workbook.setSheetOrder(sheetName, workbook.getNumberOfSheets()-1);
+
         ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
         if (condition) {
             String filterSql = null;
