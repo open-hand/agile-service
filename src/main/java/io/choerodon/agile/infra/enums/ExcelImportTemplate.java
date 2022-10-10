@@ -155,6 +155,7 @@ public class ExcelImportTemplate {
 
         public static final String PARENT = "parent";
         public static final String RELATE_ISSUE = "relate_issue";
+        public static final String ISSUE_NUM = "issueNum";
         private static final int INIT_CAPACITY = 50;
         protected static final List<String> HEADER_CODES = new ArrayList<>(INIT_CAPACITY);
         private static final Map<String, String> CODE_VALUE_MAP = new HashMap(INIT_CAPACITY);
@@ -163,6 +164,7 @@ public class ExcelImportTemplate {
 
         static {
             HEADERS = new ArrayList<>(INIT_CAPACITY);
+            HEADERS.add(new Header(ISSUE_NUM, "编号", false, null));
             HEADERS.add(new Header(FieldCode.ISSUE_TYPE, IssueConstant.ISSUE_TYPE_CN + "*", true, null));
             HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", false, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
