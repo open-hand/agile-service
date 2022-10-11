@@ -717,6 +717,7 @@ public class ExcelServiceImpl implements ExcelService {
                     for (Integer sonRowNum : sonSet) {
                         IssueCreateVO son = new IssueCreateVO();
                         JSONObject sonRowJson = (JSONObject) sheetData.get(sonRowNum);
+                        son.setOrganizationId(organizationId);
                         validateData(projectId, sonRowJson, headerMap, withoutParentRows, son, result, issueTypeCol, parentCol, requireFieldMap);
                         if (Boolean.TRUE.equals(sonRowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
                             //子节点有错误
@@ -2297,7 +2298,7 @@ public class ExcelServiceImpl implements ExcelService {
      * @param issueId
      */
     private void updateCustomFields(Long projectId, Long organizationId, List<PageFieldViewUpdateVO> customFields, Long issueId) {
-        if (!CollectionUtils.isEmpty(customFields)) {
+        if (CollectionUtils.isEmpty(customFields)) {
             return;
         }
         customFields.forEach(customField -> {
