@@ -157,15 +157,6 @@ public class IssueUpdateVO {
     @Encrypt
     private List<Long> productIds;
 
-    @ApiModelProperty(value = "问题类型id")
-    @Encrypt
-    private Long issueTypeId;
-
-    @ApiModelProperty(value = "项目id")
-    private Long projectId;
-
-    @ApiModelProperty(value = "问题类型code")
-    private String typeCode;
 
     public List<TagVO> getTags() {
         return tags;
@@ -507,37 +498,11 @@ public class IssueUpdateVO {
     public void setRiskVO(RiskVO riskVO) {
         this.riskVO = riskVO;
     }
-
-    public Long getIssueTypeId() {
-        return issueTypeId;
-    }
-
-    public void setIssueTypeId(Long issueTypeId) {
-        this.issueTypeId = issueTypeId;
-    }
-
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
     public List<Long> getProductIds() {
         return productIds;
     }
 
     public void setProductIds(List<Long> productIds) {
         this.productIds = productIds;
-    }
-
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
     }
 }

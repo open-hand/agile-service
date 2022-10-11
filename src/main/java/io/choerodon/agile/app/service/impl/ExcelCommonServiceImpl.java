@@ -1369,6 +1369,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         pageFieldViewUpdate.setFieldId(pageFieldViewUpdateVO.getFieldId());
         pageFieldViewUpdate.setFieldType(pageFieldViewUpdateVO.getFieldType());
         pageFieldViewUpdate.setValue(customFieldValue);
+        ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldService.baseQueryById(issueCreateVO.getOrganizationId(),
+                issueCreateVO.getProjectId(), pageFieldViewUpdateVO.getFieldId());
+        pageFieldViewUpdate.setSchemeCode(objectSchemeFieldDTO.getSchemeCode());
+        pageFieldViewUpdate.setFieldCode(objectSchemeFieldDTO.getCode());
         customFields.add(pageFieldViewUpdate);
     }
 

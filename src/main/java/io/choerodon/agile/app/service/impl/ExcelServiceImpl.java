@@ -20,6 +20,7 @@ import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.domain.entity.ExcelSheetData;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.core.convertor.ApplicationContextHelper;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
@@ -212,6 +213,8 @@ public class ExcelServiceImpl implements ExcelService {
     private VerifyUpdateUtil verifyUpdateUtil;
     @Autowired
     private IssueValidator issueValidator;
+    @Autowired
+    private FieldValueService fieldValueService;
 
     private static final String[] FIELDS_NAMES;
 
@@ -689,10 +692,15 @@ public class ExcelServiceImpl implements ExcelService {
                     Long sprintId = parent.getSprintId();
                     Long epicId = parent.getEpicId();
                     Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                    // TODO: 2022/10/10
-                    IssueVO result = stateMachineClientService.createIssueWithoutRuleNotice(parent, APPLY_TYPE_AGILE);
-                    insertIds.add(result.getIssueId());
-                    excelCommonService.insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
+                    IssueVO result = null;
+                    if (!StringUtils.isEmpty(parent.getIssueNum())) {
+                        result = updateIssue(projectId, organizationId, parent);
+                        insertIds.add(result.getIssueId());
+                    } else {
+                        result = stateMachineClientService.createIssueWithoutRuleNotice(parent, APPLY_TYPE_AGILE);
+                        insertIds.add(result.getIssueId());
+                        excelCommonService.insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
+                    }
                     List<Long> customFieldIds = new ArrayList<>();
                     if (CollectionUtils.isNotEmpty(parent.getCustomFields())) {
                         customFieldIds.addAll(parent.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
@@ -726,10 +734,15 @@ public class ExcelServiceImpl implements ExcelService {
                     }
                     sonMap.forEach((k, v) -> {
                         Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                        // TODO: 2022/10/10
-                        IssueVO returnValue = stateMachineClientService.createIssueWithoutRuleNotice(v, APPLY_TYPE_AGILE);
-                        insertIds.add(returnValue.getIssueId());
-                        excelCommonService.insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
+                        IssueVO returnValue = null;
+                        if (!StringUtils.isEmpty(v.getIssueNum())) {
+                            returnValue = updateIssue(projectId, organizationId, v);
+                            insertIds.add(returnValue.getIssueId());
+                        } else {
+                            returnValue = stateMachineClientService.createIssueWithoutRuleNotice(v, APPLY_TYPE_AGILE);
+                            insertIds.add(returnValue.getIssueId());
+                            excelCommonService.insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
+                        }
                         List<Long> subIssueCustomFieldIds = new ArrayList<>();
                         if (CollectionUtils.isNotEmpty(v.getCustomFields())) {
                             subIssueCustomFieldIds.addAll(v.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
@@ -753,6 +766,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
             } else {
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
+                issueCreateVO.setOrganizationId(organizationId);
                 //校验数据为插入对象赋值
                 validateData(projectId, rowJson, headerMap, withoutParentRows, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
                 if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
@@ -770,25 +784,9 @@ public class ExcelServiceImpl implements ExcelService {
                 //如果问题编号存在则更新问题
                 IssueVO result = null;
                 if (!StringUtils.isEmpty(issueCreateVO.getIssueNum())) {
-                    //将issueCreateVO转化为JSONObject，去掉null属性
-                    JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(issueCreateVO));
-                    issueValidator.verifyUpdateData(JSON.parseObject(JSON.toJSONString(issueCreateVO)), projectId);
-                    IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
-                    List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueUpdateVO);
-                    //这个方法只能更新基本的字段
-                    result = issueService.updateIssue(issueCreateVO.getProjectId(), issueUpdateVO, fieldList);
-                    //issue的类型，需要另外调用接口更新
-                    IssueUpdateTypeVO issueUpdateTypeVO = new IssueUpdateTypeVO();
-                    issueUpdateTypeVO.setIssueId(issueCreateVO.getIssueId());
-                    issueUpdateTypeVO.setIssueTypeId(issueCreateVO.getIssueTypeId());
-                    issueUpdateTypeVO.setApplyType(APPLY_TYPE_AGILE);
-                    issueUpdateTypeVO.setTypeCode(issueCreateVO.getTypeCode());
-                    IssueConvertDTO issueConvertDTO = issueValidator.verifyUpdateTypeData(projectId, issueUpdateTypeVO);
-                    issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId, projectId);
-                    // TODO: 2022/10/10 处理自定义的字段
+                    result = updateIssue(projectId, organizationId, issueCreateVO);
                 } else {
-                    result = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, APPLY_TYPE_AGILE);
-                    excelCommonService.insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
+                    result = insertIssue(projectId, issueCreateVO);
                 }
                 List<Long> customFieldIds = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(issueCreateVO.getCustomFields())) {
@@ -2222,5 +2220,97 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, String> order = new HashMap<>(1);
         order.put("issueId", "issue_id");
         return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
+    }
+
+    /**
+     * excel导入更新issue的
+     *
+     * @param projectId
+     * @param organizationId
+     * @param issueCreateVO
+     * @return
+     */
+    private IssueVO updateIssue(Long projectId, Long organizationId, IssueCreateVO issueCreateVO) {
+        IssueVO result;
+        List<PageFieldViewUpdateVO> customFields = issueCreateVO.getCustomFields();
+        //问题类型id
+        Long issueTypeId = issueCreateVO.getIssueTypeId();
+        //问题类型code
+        String typeCode = issueCreateVO.getTypeCode();
+        // 工作项的id
+        Long issueId = issueCreateVO.getIssueId();
+        // 1.跟新issue的基本字段 摘要，描述，报告人，经办人等等
+        result = updateBaseIssue(projectId, issueCreateVO);
+        //2.更新issue的类型
+        updateIssueType(projectId, organizationId, issueTypeId, typeCode, issueId);
+        //3.更新自定义字段的值和其他页面配置的字段
+        updateCustomFields(projectId, organizationId, customFields, issueId);
+        issueCreateVO.setCustomFields(customFields);
+        return result;
+    }
+
+    /**
+     * excel导入更新issue的基本字段
+     *
+     * @param projectId
+     * @param issueCreateVO
+     * @return
+     */
+    private IssueVO updateBaseIssue(Long projectId, IssueCreateVO issueCreateVO) {
+        IssueVO result;
+        issueCreateVO.setCustomFields(null);
+        issueCreateVO.setTypeCode(null);
+        issueCreateVO.setProjectId(null);
+        issueCreateVO.setOrganizationId(null);
+        issueCreateVO.setIssueTypeId(null);
+        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(issueCreateVO));
+        issueValidator.verifyUpdateData(JSON.parseObject(JSON.toJSONString(issueCreateVO)), projectId);
+        IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
+        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueUpdateVO);
+        result = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
+        return result;
+    }
+
+    /**
+     * excel导入更新issue的类型
+     *
+     * @param projectId
+     * @param organizationId
+     * @param issueTypeId
+     * @param typeCode
+     * @param issueId
+     */
+    private void updateIssueType(Long projectId, Long organizationId, Long issueTypeId, String typeCode, Long issueId) {
+        IssueUpdateTypeVO issueUpdateTypeVO = new IssueUpdateTypeVO();
+        issueUpdateTypeVO.setIssueId(issueId);
+        issueUpdateTypeVO.setIssueTypeId(issueTypeId);
+        issueUpdateTypeVO.setApplyType(APPLY_TYPE_AGILE);
+        issueUpdateTypeVO.setTypeCode(typeCode);
+        IssueConvertDTO issueConvertDTO = issueValidator.verifyUpdateTypeData(projectId, issueUpdateTypeVO);
+        issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId, projectId);
+    }
+
+    /**
+     * @param projectId
+     * @param organizationId
+     * @param customFields
+     * @param issueId
+     */
+    private void updateCustomFields(Long projectId, Long organizationId, List<PageFieldViewUpdateVO> customFields, Long issueId) {
+        if (!CollectionUtils.isEmpty(customFields)) {
+            return;
+        }
+        customFields.forEach(customField -> {
+            //调用更新字段的方法跟新自定义的字段
+            fieldValueService.updateFieldValue(organizationId, projectId, issueId,
+                    customField.getFieldId(), customField.getSchemeCode(), customField, customField.getFieldCode());
+        });
+    }
+
+    private IssueVO insertIssue(Long projectId, IssueCreateVO issueCreateVO) {
+        IssueVO result;
+        result = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, APPLY_TYPE_AGILE);
+        excelCommonService.insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
+        return result;
     }
 }

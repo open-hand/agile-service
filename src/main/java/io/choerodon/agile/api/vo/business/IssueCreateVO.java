@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -172,7 +173,8 @@ public class IssueCreateVO {
     private String issueNum;
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "组织Id")
+    private Long organizationId;
 
     public List<TagVO> getTags() {
         return tags;
@@ -594,5 +596,13 @@ public class IssueCreateVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
