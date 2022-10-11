@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.domain.entity.ExcelSheetData;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -825,7 +826,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
 
     private String buildWithErrorMsg(String value, String msg) {
-        if(value == null) {
+        if (value == null) {
             value = "";
         }
         return new StringBuilder(value).append("(").append(msg).append(")").toString();
@@ -1368,6 +1369,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         pageFieldViewUpdate.setFieldId(pageFieldViewUpdateVO.getFieldId());
         pageFieldViewUpdate.setFieldType(pageFieldViewUpdateVO.getFieldType());
         pageFieldViewUpdate.setValue(customFieldValue);
+        ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldService.baseQueryById(issueCreateVO.getOrganizationId(),
+                issueCreateVO.getProjectId(), pageFieldViewUpdateVO.getFieldId());
+        pageFieldViewUpdate.setSchemeCode(objectSchemeFieldDTO.getSchemeCode());
+        pageFieldViewUpdate.setFieldCode(objectSchemeFieldDTO.getCode());
         customFields.add(pageFieldViewUpdate);
     }
 
@@ -1382,11 +1387,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     /**
-     * @param cell cell
-     * @param rowNum rowNum
-     * @param col col
+     * @param cell           cell
+     * @param rowNum         rowNum
+     * @param col            col
      * @param errorRowColMap errorRowColMap
-     * @param format format
+     * @param format         format
      * @param formatTimeOnly formatTimeOnly
      * @param formatYearOnly formatYearOnly
      * @return result
@@ -1515,7 +1520,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                               Map<Integer, ExcelColumnVO> headerMap) {
         String fieldCode = excelColumn.getFieldCode();
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
-        JSONObject cellJson = (JSONObject)rowJson.get(issueTypeCol);
+        JSONObject cellJson = (JSONObject) rowJson.get(issueTypeCol);
         String issueType = cellJson.getString(ExcelSheetData.STRING_CELL);
         String issueTypeCode = getIssueTypeCode(headerMap, issueType);
         switch (fieldCode) {
@@ -1602,6 +1607,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 break;
             case FieldCode.PRODUCT:
                 validateAndSetProduct(rowJson, col, excelColumn, issueCreateVO);
+                break;
+            case FieldCode.ISSUE_NUM:
+                validateAndSetIssueNum(rowJson, col, issueCreateVO);
                 break;
             default:
                 break;
@@ -2194,7 +2202,6 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
 
-
     private void validateRelateIssue(Row row,
                                      Integer col,
                                      IssueCreateVO issueCreateVO,
@@ -2411,7 +2418,6 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
 
-
     private String getIssueTypeCode(Map<Integer, ExcelColumnVO> headerMap,
                                     String issueType) {
         if (!ObjectUtils.isEmpty(headerMap)) {
@@ -2432,7 +2438,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                          Integer col,
                                          ExcelColumnVO excelColumn,
                                          IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
         Map<String, IssueTypeVO> issueTypeMap = excelColumn.getIssueTypeMap();
         List<String> values = excelColumn.getPredefinedValues();
@@ -2450,7 +2456,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2472,7 +2478,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2494,7 +2500,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         String value = "";
         if (ObjectUtils.isEmpty(cellJson)
                 || ObjectUtils.isEmpty(cellJson.getString(ExcelSheetData.STRING_CELL))) {
@@ -2511,7 +2517,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
             Long priorityId = valueIdMap.get(value);
-            issueCreateVO.setPriorityCode("priority" + priorityId);
+            issueCreateVO.setPriorityCode("priority-" + priorityId);
             issueCreateVO.setPriorityId(priorityId);
         }
     }
@@ -2519,7 +2525,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetRemainingTime(JSONObject rowJson,
                                              Integer col,
                                              IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2577,7 +2583,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                           Integer col,
                                           ExcelColumnVO excelColumn,
                                           IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2607,7 +2613,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (!Objects.equals("bug", issueCreateVO.getTypeCode())) {
             return;
         }
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2638,7 +2644,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                           IssueCreateVO issueCreateVO,
                                           String issueTypeCode) {
         if (IssueTypeCode.isStory(issueTypeCode)) {
-            JSONObject cellJson = (JSONObject)rowJson.get(col);
+            JSONObject cellJson = (JSONObject) rowJson.get(col);
             if (ObjectUtils.isEmpty(cellJson)) {
                 return;
             }
@@ -2661,7 +2667,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Long projectId,
                                         Map<Integer, ExcelColumnVO> headerMap) {
         if (IssueTypeCode.isEpic(issueTypeCode)) {
-            JSONObject cellJson = (JSONObject)rowJson.get(col);
+            JSONObject cellJson = (JSONObject) rowJson.get(col);
             String value = "";
             if (ObjectUtils.isEmpty(cellJson)
                     || ObjectUtils.isEmpty(cellJson.getString(ExcelSheetData.STRING_CELL))) {
@@ -2701,7 +2707,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String fieldCode = excelColumn.getFieldCode();
             if (FieldCode.SUMMARY.equals(fieldCode)) {
                 int col = entry.getKey();
-                JSONObject cellJson = (JSONObject)rowJson.get(col);
+                JSONObject cellJson = (JSONObject) rowJson.get(col);
                 cellJson.put(ExcelSheetData.STRING_CELL, value);
             }
         }
@@ -2714,7 +2720,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                        String issueTypeCode,
                                        String issueType) {
         if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode) && !SUB_BUG_CN.equals(issueType)) {
-            JSONObject cellJson = (JSONObject)rowJson.get(col);
+            JSONObject cellJson = (JSONObject) rowJson.get(col);
             if (ObjectUtils.isEmpty(cellJson)) {
                 return;
             }
@@ -2783,7 +2789,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
             return;
         }
-        value= cellJson.getString(ExcelSheetData.STRING_CELL);
+        value = cellJson.getString(ExcelSheetData.STRING_CELL);
         if (value.length() > IssueConstant.SUMMARY_LENGTH) {
             String errorMsg = buildWithErrorMsg(value, "概要过长");
             putErrorMsg(rowJson, cellJson, errorMsg);
@@ -2992,7 +2998,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (anotherDateCol == null) {
             return false;
         }
-        JSONObject anotherEsTimeCellJson = (JSONObject)rowJson.get(anotherDateCol);
+        JSONObject anotherEsTimeCellJson = (JSONObject) rowJson.get(anotherDateCol);
         if (ObjectUtils.isEmpty(anotherEsTimeCellJson)) {
             return false;
         } else {
@@ -3292,5 +3298,35 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         issueCreateVO.setProductIds(productIds);
     }
+
+    private void validateAndSetIssueNum(JSONObject rowJson, Integer col, IssueCreateVO issueCreateVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
+        if (ObjectUtils.isEmpty(cellJson)) {
+            return;
+        }
+        String value = cellJson.getString(ExcelSheetData.STRING_CELL);
+        if (StringUtils.isEmpty(value)) {
+            return;
+        }
+        if (value.lastIndexOf("-") == -1) {
+            reError(rowJson, cellJson, value);
+            return;
+        }
+        IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(issueCreateVO.getProjectId(),
+                value.substring(value.lastIndexOf("-") + 1));
+        if (issueNumDTO == null) {
+            reError(rowJson, cellJson, value);
+            return;
+        }
+        issueCreateVO.setIssueId(issueNumDTO.getIssueId());
+        issueCreateVO.setObjectVersionNumber(issueNumDTO.getObjectVersionNumber());
+        issueCreateVO.setIssueNum(value.substring(value.lastIndexOf("-") + 1));
+    }
+
+    private void reError(JSONObject rowJson, JSONObject cellJson, String value) {
+        String errorMsg = buildWithErrorMsg(value, "编号错误");
+        putErrorMsg(rowJson, cellJson, errorMsg);
+    }
+
 
 }

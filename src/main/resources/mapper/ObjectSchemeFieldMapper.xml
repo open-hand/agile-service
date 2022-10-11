@@ -337,6 +337,7 @@
         <result property="defaultValue" column="default_value"/>
         <result property="description" column="description"/>
         <result property="fieldType" column="field_type"/>
+        <result property="schemeCode" column="scheme_code"/>
         <result property="fieldTypeName" column="field_type_name"/>
         <result property="name" column="name"/>
         <result property="objectVersionNumber" column="object_version_number"/>
@@ -362,6 +363,7 @@
             t4.default_value,
             t4.description,
             t4.is_required,
+            t4.scheme_code,
             t4.field_type,
             flv.name as field_type_name,
             t4.name,

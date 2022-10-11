@@ -157,6 +157,7 @@ public class IssueUpdateVO {
     @Encrypt
     private List<Long> productIds;
 
+
     public List<TagVO> getTags() {
         return tags;
     }
@@ -497,7 +498,6 @@ public class IssueUpdateVO {
     public void setRiskVO(RiskVO riskVO) {
         this.riskVO = riskVO;
     }
-
     public List<Long> getProductIds() {
         return productIds;
     }
