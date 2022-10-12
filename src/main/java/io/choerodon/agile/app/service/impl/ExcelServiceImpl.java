@@ -232,19 +232,19 @@ public class ExcelServiceImpl implements ExcelService {
             ExportIssuesVO.SPRINT_NAME};
 
     static {
-        FIELD_MAP.put(ExportIssuesVO.TYPE_NAME, IssueConstant.ISSUE_TYPE_CN);
+        FIELD_MAP.put(ExportIssuesVO.TYPE_NAME, IssueConstant.ISSUE_TYPE_CN + "*");
         FIELD_MAP.put(ExportIssuesVO.ISSUE_NUM, "编号");
-        FIELD_MAP.put(ExportIssuesVO.SUMMARY, "概要");
+        FIELD_MAP.put(ExportIssuesVO.SUMMARY, "概要*");
         FIELD_MAP.put(ExportIssuesVO.DESCRIPTION, "描述");
-        FIELD_MAP.put(ExportIssuesVO.PRIORITY_NAME, "优先级");
+        FIELD_MAP.put(ExportIssuesVO.PRIORITY_NAME, "优先级*");
         FIELD_MAP.put(ExportIssuesVO.STATUS_NAME, "状态");
         FIELD_MAP.put(ExportIssuesVO.RESOLUTION, "解决状态");
         FIELD_MAP.put(ExportIssuesVO.SPRINT_NAME, "冲刺");
         FIELD_MAP.put(ExportIssuesVO.ASSIGNEE_NAME, "经办人");
         FIELD_MAP.put(ExportIssuesVO.REPORTER_NAME, "报告人");
         FIELD_MAP.put(ExportIssuesVO.STORY_POINTS, "故事点");
-        FIELD_MAP.put(ExportIssuesVO.REMAINING_TIME, "剩余预估时间");
-        FIELD_MAP.put(ExportIssuesVO.ESTIMATE_TIME, "原始预估时间");
+        FIELD_MAP.put(ExportIssuesVO.REMAINING_TIME, "剩余预估时间(小时)");
+        FIELD_MAP.put(ExportIssuesVO.ESTIMATE_TIME, "原始预估时间(小时)");
         FIELD_MAP.put(ExportIssuesVO.VERSION_NAME, "版本");
         FIELD_MAP.put(ExportIssuesVO.FIX_VERSION_NAME, "修复的版本");
         FIELD_MAP.put(ExportIssuesVO.INFLUENCE_VERSION_NAME, "影响的版本");
@@ -265,7 +265,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(ExportIssuesVO.ALL_ESTIMATE_TIME, "当前预估时间");
         FIELD_MAP.put(ExportIssuesVO.TAGS, "Tag");
         FIELD_MAP.put(ExportIssuesVO.RELATED_ISSUE, "关联" + IssueConstant.ISSUE_CN);
-        FIELD_MAP.put(ExportIssuesVO.EPIC_SELF_NAME, "史诗名称");
+        FIELD_MAP.put(ExportIssuesVO.EPIC_SELF_NAME, "史诗名称(仅" + IssueConstant.ISSUE_TYPE_CN + "为史诗时生效)");
         FIELD_MAP.put(ExportIssuesVO.PARTICIPANT, "参与人");
         FIELD_MAP.put(ExportIssuesVO.PRODUCT, "产品");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
