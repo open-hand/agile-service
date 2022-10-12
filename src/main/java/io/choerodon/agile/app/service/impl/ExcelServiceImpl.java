@@ -2044,7 +2044,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<String> result = new ArrayList<>();
         result.add(IssueConstant.ISSUE_TYPE_CN);
         result.add("概要");
-        result.add(IssueConstant.ISSUE_CN + "编号");
+        result.add("编号");
         for (String str : fieldNames) {
             if (result.get(0).equals(str)
                     || result.get(1).equals(str)
