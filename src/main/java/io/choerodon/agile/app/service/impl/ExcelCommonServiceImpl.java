@@ -136,6 +136,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private ProjectConfigService projectConfigService;
+    @Autowired
+    private FieldCascadeRuleService fieldCascadeRuleService;
 
     @Override
     public PredefinedDTO processSystemFieldPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, boolean withFeature, List<String> fieldCodes, String fieldCode) {
@@ -727,6 +729,58 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     @Override
+    public void fieldCascadeValidate(Long projectId,
+                                     IssueCreateVO issueCreateVO,
+                                     Map<Integer, ExcelColumnVO> headerMap,
+                                     JSONObject rowJson) {
+
+        // 查询问题类型的相关的级联配置
+        List<FieldCascadeRuleVO> fieldCascadeRuleVOS = fieldCascadeRuleService.listFieldCascadeRuleByIssueType(projectId, issueCreateVO.getIssueTypeId(), null);
+        if (!CollectionUtils.isEmpty(fieldCascadeRuleVOS)) {
+            // 记录字段的colNum值
+            Map<String, Integer> codeColMap = new HashMap<>();
+            // 记录字段的excel中设置值
+            Map<String, List<Long>> codeValuesMap = new HashMap<>();
+            for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
+                Integer key = entry.getKey();
+                ExcelColumnVO value = entry.getValue();
+                codeColMap.put(value.getFieldCode(), key);
+                codeValuesMap.put(value.getFieldCode(), value.getValues());
+            }
+            // 遍历查询的级联字段配置
+            for (FieldCascadeRuleVO fieldCascadeRuleVO : fieldCascadeRuleVOS) {
+                String fieldCode = fieldCascadeRuleVO.getFieldCode();
+                List<Long> values = codeValuesMap.get(fieldCode);
+                // 如果当前Excel中设置的值不在级联配置里面就跳过
+                if (CollectionUtils.isEmpty(values) || !values.contains(fieldCascadeRuleVO.getFieldOptionId())) {
+                    continue;
+                }
+                String cascadeFieldCode = fieldCascadeRuleVO.getCascadeFieldCode();
+                List<Long> cascadeFieldValues = codeValuesMap.get(cascadeFieldCode);
+                List<FieldCascadeRuleOptionVO> cascadeRuleOptionList = fieldCascadeRuleVO.getFieldCascadeRuleOptionList();
+                // 如果Excel中级联字段为空或者级联设置中的值为空就跳过
+                if (CollectionUtils.isEmpty(cascadeFieldValues) || CollectionUtils.isEmpty(cascadeRuleOptionList)) {
+                    continue;
+                }
+                List<Long> fieldCascadeRuleOptions = cascadeRuleOptionList.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).collect(Collectors.toList());
+                Boolean passValidate = true;
+                // excel中级联字段设置的值不在配置的范围中 就记录报错信息并返回
+                for (Long cascadeFieldValue : cascadeFieldValues) {
+                    if (passValidate) {
+                        passValidate = fieldCascadeRuleOptions.contains(cascadeFieldValue);
+                    }
+                }
+                if (!passValidate) {
+                    Integer col = codeColMap.get(cascadeFieldCode);
+                    JSONObject cellJson = (JSONObject) rowJson.get(col);
+                    String errorMsg = buildWithErrorMsg(null, "不符合字段级联设置");
+                    putErrorMsg(rowJson, cellJson, errorMsg);
+                }
+            }
+        }
+    }
+
+    @Override
     public int processErrorData(Long userId,
                                 FileOperationHistoryDTO history,
                                 JSONObject sheetData,
@@ -1261,6 +1315,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (values == null) {
                 customFieldValue = stringValue;
             } else {
+                List<Long> actualValues = new ArrayList<>();
                 if (multiValue) {
                     boolean ok = true;
                     List<String> ids = new ArrayList<>();
@@ -1276,6 +1331,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
                         putErrorMsg(rowJson, cellJson, errorMsg);
                     }
+                    actualValues.addAll(ids.stream().map(Long::valueOf).collect(Collectors.toList()));
                     customFieldValue = ids;
                 } else {
                     if (!values.contains(stringValue)) {
@@ -1283,8 +1339,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         putErrorMsg(rowJson, cellJson, errorMsg);
                     } else {
                         customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                        actualValues.add(Long.valueOf(String.valueOf(valueIdMap.get(stringValue))));
                     }
                 }
+                excelColumn.setValues(actualValues);
             }
         }
         buildCustomFields(excelColumn, issueCreateVO, customFieldValue);
@@ -2492,6 +2550,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             }
             issueCreateVO.setIssueTypeId(issueTypeVO.getId());
             issueCreateVO.setTypeCode(issueTypeVO.getTypeCode());
+            excelColumn.setValues(Arrays.asList(issueTypeVO.getId()));
         }
     }
 
@@ -2515,6 +2574,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
             issueCreateVO.setAssigneeId(valueIdMap.get(value));
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
@@ -2537,6 +2597,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
             issueCreateVO.setReporterId(valueIdMap.get(value));
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
@@ -2563,6 +2624,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             Long priorityId = valueIdMap.get(value);
             issueCreateVO.setPriorityCode("priority-" + priorityId);
             issueCreateVO.setPriorityId(priorityId);
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
@@ -2647,6 +2709,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
             versionIssueRelList.add(versionIssueRelVO);
             issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
@@ -2680,6 +2743,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
             versionIssueRelList.add(versionIssueRelVO);
             issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
@@ -2816,6 +2880,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     putErrorMsg(rowJson, cellJson, errorMsg);
                 } else {
                     issueCreateVO.setEpicId(valueIdMap.get(value));
+                    excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
                 }
             }
         }
@@ -2923,6 +2988,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 ComponentIssueRelVO componentIssueRelVO = new ComponentIssueRelVO();
                 componentIssueRelVO.setComponentId(valueIdMap.get(value));
                 issueCreateVO.setComponentIssueRelVOList(Arrays.asList(componentIssueRelVO));
+                excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
             }
         }
     }
@@ -2956,6 +3022,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
                 issueCreateVO.setSprintId(valueIdMap.get(value));
+                excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
             }
         }
     }
@@ -3187,6 +3254,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
                 issueCreateVO.setMainResponsibleId(map.get(value));
+                excelColumnVO.setValues(Arrays.asList(map.get(value)));
             }
         }
     }
@@ -3235,17 +3303,20 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String errorMsg = buildWithErrorMsg(value, "状态输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-            IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCreateVO.getIssueId());
-            if (projectConfigService.validateStatusTransform(issueCreateVO.getProjectId(),
-                    issueCreateVO.getIssueId(),
-                    APPLY_TYPE_AGILE,
-                    issueDTO.getIssueTypeId(),
-                    issueDTO.getStatusId(),
-                    statusVO.getId())) {
-                issueCreateVO.setStatusId(statusVO.getId());
+            if (!ObjectUtils.isEmpty(issueCreateVO.getIssueId())) {
+                IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCreateVO.getIssueId());
+                if (!projectConfigService.validateStatusTransform(issueCreateVO.getProjectId(),
+                        issueCreateVO.getIssueId(),
+                        APPLY_TYPE_AGILE,
+                        issueDTO.getIssueTypeId(),
+                        issueDTO.getStatusId(),
+                        statusVO.getId())) {
+                    String errorMsg = buildWithErrorMsg(value, "不能进行修改不符合状态机流转条件设置");
+                    putErrorMsg(rowJson, cellJson, errorMsg);
+                }
             }
-            String errorMsg = buildWithErrorMsg(value, "不能进行修改不符合状态机流转条件设置");
-            putErrorMsg(rowJson, cellJson, errorMsg);
+            issueCreateVO.setStatusId(statusVO.getId());
+            excelColumn.setValues(Arrays.asList(statusVO.getId()));
         }
     }
 
@@ -3305,6 +3376,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 participantIds.add(valueIdMap.get(participant));
             }
         }
+        excelColumn.setValues(participantIds);
         issueCreateVO.setParticipantIds(participantIds);
     }
 
@@ -3350,6 +3422,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 productIds.add(valueIdMap.get(product));
             }
         }
+        excelColumn.setValues(productIds);
         issueCreateVO.setProductIds(productIds);
     }
 

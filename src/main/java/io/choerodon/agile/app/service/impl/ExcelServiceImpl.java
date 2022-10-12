@@ -1027,6 +1027,8 @@ public class ExcelServiceImpl implements ExcelService {
                 break;
             }
         }
+        // 处理级联字段校验
+        excelCommonService.fieldCascadeValidate(projectId, issueCreateVO, headerMap, rowJson);
     }
 
     protected List<String> splitByRegex(String value) {
