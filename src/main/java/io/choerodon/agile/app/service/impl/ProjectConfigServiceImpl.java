@@ -644,6 +644,16 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
+    public Boolean validateStatusTransform(Long projectId, Long issueId, String applyType, Long issueTypeId, Long currentId, Long targetId) {
+        List<TransformVO> transformVOS = queryTransformsByProjectId(projectId, currentId, issueId, issueTypeId, applyType);
+        List<Long> statusIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(transformVOS)) {
+            statusIds.addAll(transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toList()));
+        }
+        return statusIds.contains(targetId);
+    }
+
+    @Override
     public void transformAll(List<StatusMachineNodeVO> statusMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId) {
         if (!CollectionUtils.isEmpty(statusMachineNodeVOS)) {
             StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
