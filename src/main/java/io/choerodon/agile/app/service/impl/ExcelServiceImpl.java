@@ -683,13 +683,7 @@ public class ExcelServiceImpl implements ExcelService {
             boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
             //拿到issueNum 用于判断是否是更新数据
             //是否是跟新数据
-            boolean update = false;
-            if (issueNumJson != null) {
-                String issueNum = issueNumJson.getString(ExcelSheetData.STRING_CELL);
-                if (!StringUtils.isEmpty(issueNum)) {
-                    update = true;
-                }
-            }
+            boolean update = getUpdate(issueNumJson);
             if ((IssueTypeCode.isStory(issueTypeCode)
                     || IssueTypeCode.isTask(issueTypeCode)
                     || IssueTypeCode.isBug(issueTypeCode))
@@ -697,9 +691,11 @@ public class ExcelServiceImpl implements ExcelService {
                 List<Long> insertIds = new ArrayList<>();
                 try {
                     IssueCreateVO parent = generateImportVO(update, organizationId);
-                    validateData(projectId, rowJson, headerMap, withoutParentRows, parent, null, issueTypeCol, parentCol, requireFieldMap);
+                    validateData(projectId, rowJson, headerMap, withoutParentRows, parent, null, issueTypeCol,
+                            parentCol, requireFieldMap);
                     if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
+                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount,
+                                progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
                         currentRowNum = Collections.max(sonSet);
                         continue;
                     }
@@ -715,17 +711,9 @@ public class ExcelServiceImpl implements ExcelService {
                         insertIds.add(result.getIssueId());
                         excelCommonService.insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
                     }
-                    List<Long> customFieldIds = new ArrayList<>();
-                    if (CollectionUtils.isNotEmpty(parent.getCustomFields())) {
-                        customFieldIds.addAll(parent.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
-                    }
+                    List<Long> customFieldIds = fillCustomFields(parent);
                     // 更新时候连同更新触发器
-                    if (update) {
-                        //构造更新触发器
-                        issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), updateTriggerCarrierVOS, customFieldIds);
-                    } else {
-                        issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
-                    }
+                    fillTrigger(projectId, triggerCarrierVOS, updateTriggerCarrierVOS, update, result, customFieldIds);
                     rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
 
                     result.setComponentIssueRelVOList(components);
@@ -754,31 +742,10 @@ public class ExcelServiceImpl implements ExcelService {
                     }
                     boolean finalUpdate = update;
                     sonMap.forEach((k, v) -> {
-                        Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                        IssueVO returnValue = null;
-                        if (!StringUtils.isEmpty(v.getIssueNum())) {
-                            returnValue = updateIssue(projectId, organizationId, v);
-                        } else {
-                            returnValue = stateMachineClientService.createIssueWithoutRuleNotice(v, APPLY_TYPE_AGILE);
-                            insertIds.add(returnValue.getIssueId());
-                            excelCommonService.insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
-                        }
-                        List<Long> subIssueCustomFieldIds = new ArrayList<>();
-                        if (CollectionUtils.isNotEmpty(v.getCustomFields())) {
-                            subIssueCustomFieldIds.addAll(v.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
-                        }
-                        if (finalUpdate) {
-                            // 构造更新的触发器
-                            issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), updateTriggerCarrierVOS, subIssueCustomFieldIds);
-                        } else {
-                            issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), triggerCarrierVOS, subIssueCustomFieldIds);
-                        }
-                        JSONObject currentRowJson = (JSONObject) sheetData.get(k);
-                        currentRowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, returnValue.getIssueId());
+                        handSonMap(projectId, organizationId, sheetData, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, insertIds, finalUpdate, k, v);
                     });
 
                     importedIssueIds.add(result.getIssueId());
-//                    importedIssueIds.addAll(rowIssueIdMap.values());
                     progress.addSuccessCount(sonSet.size() + 1L);
                     progress.addProcessNum(sonSet.size() + 1);
                     currentRowNum = Collections.max(sonSet);
@@ -793,35 +760,11 @@ public class ExcelServiceImpl implements ExcelService {
                 IssueCreateVO issueCreateVO = generateImportVO(update, organizationId);
                 //校验数据为插入对象赋值
                 validateData(projectId, rowJson, headerMap, withoutParentRows, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
-                if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-                    progress.failCountIncrease();
-                    progress.processNumIncrease();
-                    history.setFailCount(progress.getFailCount());
-                    if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
-                        lastSendCountNum = progress.getProcessNum();
-                        sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
-                    }
+                if (!Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
+                    lastSendCountNum = fillErrorProgress(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
                     continue;
                 }
-                Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                //将issue插入数据库
-                //如果问题编号存在则更新问题
-                IssueVO result = null;
-                if (!StringUtils.isEmpty(issueCreateVO.getIssueNum())) {
-                    result = updateIssue(projectId, organizationId, issueCreateVO);
-                } else {
-                    result = insertIssue(projectId, issueCreateVO);
-                }
-                List<Long> customFieldIds = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(issueCreateVO.getCustomFields())) {
-                    customFieldIds.addAll(issueCreateVO.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
-                }
-                issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
-                rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
-
-                importedIssueIds.add(result.getIssueId());
-                progress.successCountIncrease();
-                progress.processNumIncrease();
+                handSingleRow(projectId, organizationId, progress, importedIssueIds, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, rowJson, update, issueCreateVO);
             }
             history.setFailCount(progress.getFailCount());
             history.setSuccessCount(progress.getSuccessCount());
@@ -837,6 +780,19 @@ public class ExcelServiceImpl implements ExcelService {
         String status = excelCommonService.generateErrorDataExcelAndUpload(excelSheetData, headerMap, headerNames, history, organizationId, "/templates/IssueImportGuideTemplate.xlsx");
         excelCommonService.updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status, websocketKey);
     }
+
+
+    private int fillErrorProgress(Long userId, String websocketKey, FileOperationHistoryDTO history, ExcelImportTemplate.Progress progress, int lastSendCountNum, Integer dataRowCount) {
+        progress.failCountIncrease();
+        progress.processNumIncrease();
+        history.setFailCount(progress.getFailCount());
+        if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
+            lastSendCountNum = progress.getProcessNum();
+            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+        }
+        return lastSendCountNum;
+    }
+
 
     private ExcelSheetData readExcelSheetDataFromInputStream(InputStream inputStream,
                                                              String websocketKey,
@@ -871,13 +827,7 @@ public class ExcelServiceImpl implements ExcelService {
                                       ExcelImportTemplate.Progress progress,
                                       int lastSendCountNum,
                                       Integer dataRowCount) {
-        progress.failCountIncrease();
-        progress.processNumIncrease();
-        history.setFailCount(progress.getFailCount());
-        if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
-            lastSendCountNum = progress.getProcessNum();
-            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
-        }
+        lastSendCountNum = fillErrorProgress(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
         return lastSendCountNum;
     }
 
@@ -2377,5 +2327,71 @@ public class ExcelServiceImpl implements ExcelService {
         String errorMsg = buildWithErrorMsg(issueNum, "编号错误");
         excelCommonService.putErrorMsg(rowJson, issueNumJson, errorMsg);
     }
+
+    private boolean getUpdate(JSONObject issueNumJson) {
+        return issueNumJson != null && !StringUtils.isEmpty(issueNumJson.getString(ExcelSheetData.STRING_CELL));
+    }
+
+    private void handSonMap(Long projectId, Long organizationId, JSONObject sheetData, List<RelatedIssueVO> relatedIssueList, List<TriggerCarrierVO> triggerCarrierVOS, List<TriggerCarrierVO> updateTriggerCarrierVOS, List<Long> insertIds, boolean finalUpdate, Integer k, IssueCreateVO v) {
+        Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
+        IssueVO returnValue = null;
+        if (!StringUtils.isEmpty(v.getIssueNum())) {
+            returnValue = updateIssue(projectId, organizationId, v);
+        } else {
+            returnValue = stateMachineClientService.createIssueWithoutRuleNotice(v, APPLY_TYPE_AGILE);
+            insertIds.add(returnValue.getIssueId());
+            excelCommonService.insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
+        }
+        List<Long> subIssueCustomFieldIds = fillCustomFields(v);
+        fillTrigger(projectId, triggerCarrierVOS, updateTriggerCarrierVOS, finalUpdate, returnValue, subIssueCustomFieldIds);
+        JSONObject currentRowJson = (JSONObject) sheetData.get(k);
+        currentRowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, returnValue.getIssueId());
+    }
+
+    private IssueVO createOrUpdateIssue(Long projectId, Long organizationId, IssueCreateVO issueCreateVO) {
+        IssueVO result = null;
+        if (!StringUtils.isEmpty(issueCreateVO.getIssueNum())) {
+            result = updateIssue(projectId, organizationId, issueCreateVO);
+        } else {
+            result = insertIssue(projectId, issueCreateVO);
+        }
+        return result;
+    }
+
+    private List<Long> fillCustomFields(IssueCreateVO issueCreateVO) {
+        List<Long> customFieldIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(issueCreateVO.getCustomFields())) {
+            customFieldIds.addAll(issueCreateVO.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
+        }
+        return customFieldIds;
+    }
+
+    private void fillTrigger(Long projectId, List<TriggerCarrierVO> triggerCarrierVOS,
+                             List<TriggerCarrierVO> updateTriggerCarrierVOS,
+                             boolean update, IssueVO result, List<Long> customFieldIds) {
+        if (update) {
+            issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), updateTriggerCarrierVOS, customFieldIds);
+        } else {
+            issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
+        }
+    }
+
+    private void handSingleRow(Long projectId, Long organizationId, ExcelImportTemplate.Progress progress,
+                               List<Long> importedIssueIds, List<RelatedIssueVO> relatedIssueList,
+                               List<TriggerCarrierVO> triggerCarrierVOS, List<TriggerCarrierVO> updateTriggerCarrierVOS,
+                               JSONObject rowJson, boolean update, IssueCreateVO issueCreateVO) {
+        Optional.ofNullable(issueCreateVO.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
+        //将issue插入数据库 如果问题编号存在则更新问题
+        IssueVO result = createOrUpdateIssue(projectId, organizationId, issueCreateVO);
+        //填充自定义字段
+        List<Long> customFieldIds = fillCustomFields(issueCreateVO);
+        //创建触发器
+        fillTrigger(projectId, triggerCarrierVOS, updateTriggerCarrierVOS, update, result, customFieldIds);
+        rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
+        importedIssueIds.add(result.getIssueId());
+        progress.successCountIncrease();
+        progress.processNumIncrease();
+    }
+
 
 }
