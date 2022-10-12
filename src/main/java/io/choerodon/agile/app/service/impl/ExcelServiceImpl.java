@@ -33,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -640,6 +641,8 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Integer, Integer> sonParentMap = new HashMap<>();
         Set<Integer> withoutParentRows = new HashSet<>();
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
+        // issueNum col
+        int issueNumCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_NUM);
         int parentCol = getColIndexByFieldCode(headerMap, ExcelImportTemplate.IssueHeader.PARENT);
         processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, excelSheetData, issueTypeCol, parentCol, headerMap);
         ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
@@ -648,6 +651,7 @@ public class ExcelServiceImpl implements ExcelService {
         int lastSendCountNum = 0;
         Map<Long, List<String>> requireFieldMap = new HashMap<>();
         List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
+        List<TriggerCarrierVO> updateTriggerCarrierVOS = new ArrayList<>();
         Integer dataRowCount = excelSheetData.getRowNum();
         //开始处理数据行,一次循环处理一行数据
         for (int currentRowNum = 1; currentRowNum <= dataRowCount; currentRowNum++) {
@@ -659,6 +663,8 @@ public class ExcelServiceImpl implements ExcelService {
                 continue;
             }
             JSONObject issueTypeJson = (JSONObject) rowJson.get(issueTypeCol);
+            // 获取该数据行的issue num
+            JSONObject issueNumJson = (JSONObject) rowJson.get(issueNumCol);
             String issueType;
             if (ObjectUtils.isEmpty(issueTypeJson)
                     || ObjectUtils.isEmpty(issueTypeJson.getString(ExcelSheetData.STRING_CELL))) {
@@ -675,13 +681,22 @@ public class ExcelServiceImpl implements ExcelService {
             String issueTypeCode = getIssueTypeCode(headerMap, issueType);
             Set<Integer> sonSet = parentSonMap.get(currentRowNum);
             boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
+            //拿到issueNum 用于判断是否是更新数据
+            //是否是跟新数据
+            boolean update = false;
+            if (issueNumJson != null) {
+                String issueNum = issueNumJson.getString(ExcelSheetData.STRING_CELL);
+                if (!StringUtils.isEmpty(issueNum)) {
+                    update = true;
+                }
+            }
             if ((IssueTypeCode.isStory(issueTypeCode)
                     || IssueTypeCode.isTask(issueTypeCode)
                     || IssueTypeCode.isBug(issueTypeCode))
                     && hasSonNodes) {
                 List<Long> insertIds = new ArrayList<>();
                 try {
-                    IssueCreateVO parent = new IssueCreateVO();
+                    IssueCreateVO parent = generateImportVO(update, organizationId);
                     validateData(projectId, rowJson, headerMap, withoutParentRows, parent, null, issueTypeCol, parentCol, requireFieldMap);
                     if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
                         lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
@@ -695,7 +710,6 @@ public class ExcelServiceImpl implements ExcelService {
                     IssueVO result = null;
                     if (!StringUtils.isEmpty(parent.getIssueNum())) {
                         result = updateIssue(projectId, organizationId, parent);
-                        insertIds.add(result.getIssueId());
                     } else {
                         result = stateMachineClientService.createIssueWithoutRuleNotice(parent, APPLY_TYPE_AGILE);
                         insertIds.add(result.getIssueId());
@@ -705,7 +719,13 @@ public class ExcelServiceImpl implements ExcelService {
                     if (CollectionUtils.isNotEmpty(parent.getCustomFields())) {
                         customFieldIds.addAll(parent.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                     }
-                    issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
+                    // 更新时候连同更新触发器
+                    if (update) {
+                        //构造更新触发器
+                        issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), updateTriggerCarrierVOS, customFieldIds);
+                    } else {
+                        issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
+                    }
                     rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
 
                     result.setComponentIssueRelVOList(components);
@@ -715,9 +735,8 @@ public class ExcelServiceImpl implements ExcelService {
                     boolean sonsOk = true;
                     Map<Integer, IssueCreateVO> sonMap = new HashMap<>();
                     for (Integer sonRowNum : sonSet) {
-                        IssueCreateVO son = new IssueCreateVO();
                         JSONObject sonRowJson = (JSONObject) sheetData.get(sonRowNum);
-                        son.setOrganizationId(organizationId);
+                        IssueCreateVO son = generateImportVO(update, organizationId);
                         validateData(projectId, sonRowJson, headerMap, withoutParentRows, son, result, issueTypeCol, parentCol, requireFieldMap);
                         if (Boolean.TRUE.equals(sonRowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
                             //子节点有错误
@@ -733,12 +752,12 @@ public class ExcelServiceImpl implements ExcelService {
                         issueService.batchDeleteIssuesAgile(projectId, insertIds);
                         continue;
                     }
+                    boolean finalUpdate = update;
                     sonMap.forEach((k, v) -> {
                         Optional.ofNullable(v.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
                         IssueVO returnValue = null;
                         if (!StringUtils.isEmpty(v.getIssueNum())) {
                             returnValue = updateIssue(projectId, organizationId, v);
-                            insertIds.add(returnValue.getIssueId());
                         } else {
                             returnValue = stateMachineClientService.createIssueWithoutRuleNotice(v, APPLY_TYPE_AGILE);
                             insertIds.add(returnValue.getIssueId());
@@ -748,7 +767,12 @@ public class ExcelServiceImpl implements ExcelService {
                         if (CollectionUtils.isNotEmpty(v.getCustomFields())) {
                             subIssueCustomFieldIds.addAll(v.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                         }
-                        issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), triggerCarrierVOS, subIssueCustomFieldIds);
+                        if (finalUpdate) {
+                            // 构造更新的触发器
+                            issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), updateTriggerCarrierVOS, subIssueCustomFieldIds);
+                        } else {
+                            issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), triggerCarrierVOS, subIssueCustomFieldIds);
+                        }
                         JSONObject currentRowJson = (JSONObject) sheetData.get(k);
                         currentRowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, returnValue.getIssueId());
                     });
@@ -766,8 +790,7 @@ public class ExcelServiceImpl implements ExcelService {
                     continue;
                 }
             } else {
-                IssueCreateVO issueCreateVO = new IssueCreateVO();
-                issueCreateVO.setOrganizationId(organizationId);
+                IssueCreateVO issueCreateVO = generateImportVO(update, organizationId);
                 //校验数据为插入对象赋值
                 validateData(projectId, rowJson, headerMap, withoutParentRows, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
                 if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
@@ -809,6 +832,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
         updateRelatedIssue(relatedIssueList, headerMap, sheetData, projectId, progress, parentSonMap, parentCol);
         issueService.batchCreateIssueInvokeTrigger(triggerCarrierVOS);
+        issueService.batchUpdateInvokeTrigger(updateTriggerCarrierVOS);
         //错误数据生成excel
         String status = excelCommonService.generateErrorDataExcelAndUpload(excelSheetData, headerMap, headerNames, history, organizationId, "/templates/IssueImportGuideTemplate.xlsx");
         excelCommonService.updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status, websocketKey);
@@ -1087,44 +1111,70 @@ public class ExcelServiceImpl implements ExcelService {
             excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
             return;
         }
-        value = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
-        if (withoutParentRows.contains(rowNum)) {
-            String errorMsg = buildWithErrorMsg(value, "子任务/子缺陷必须要有父节点");
-            excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
-            return;
-        }
-        String issueTypeCode = getIssueTypeCode(headerMap, value);
-        if (parentIssue == null
-                && (IssueTypeCode.isSubTask(issueTypeCode)
-                || SUB_BUG_CN.equals(value))) {
-            JSONObject parentJson = (JSONObject) rowJson.get(parentCol);
-            String parentCellValue = "";
-            if (ObjectUtils.isEmpty(parentJson)
-                    || ObjectUtils.isEmpty(parentJson.getString(ExcelSheetData.STRING_CELL))) {
-                if (ObjectUtils.isEmpty(parentJson)) {
-                    parentJson = new JSONObject();
-                }
-                String errorMsg = buildWithErrorMsg(parentCellValue, "子任务/子缺陷必须要有父节点");
-                excelCommonService.putErrorMsg(rowJson, parentJson, errorMsg);
+        if (issueCreateVO.getUpdate()) {
+            //1. 更新前先校验issue number
+            int issueNumCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_NUM);
+            JSONObject issueNumJson = (JSONObject) rowJson.get(issueNumCol);
+            String issueNum = issueNumJson.getString(ExcelSheetData.STRING_CELL);
+            if (issueNum == null) {
+                putNumErrorMsg(rowJson, issueNumJson, issueNum);
                 return;
             }
-            parentCellValue = parentJson.getString(ExcelSheetData.STRING_CELL);
-            List<String> values = headerMap.get(parentCol).getPredefinedValues();
-            String issueNum = parentCellValue.split(COLON_CN)[0];
-            if (!values.contains(issueNum)) {
-                String errorMsg = buildWithErrorMsg(parentCellValue, "输入的父级编号有误");
-                excelCommonService.putErrorMsg(rowJson, parentJson, errorMsg);
+            if (issueNum.lastIndexOf("-") == -1) {
+                putNumErrorMsg(rowJson, issueNumJson, issueNum);
                 return;
             }
-            parentIssue = issueMapper.selectByIssueNum(projectId, issueNum);
-            if (parentIssue == null) {
-                String errorMsg = buildWithErrorMsg(parentCellValue, "父节点不存在");
+            IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(projectId,
+                    issueNum.substring(issueNum.lastIndexOf("-") + 1));
+            if (issueNumDTO == null) {
+                putNumErrorMsg(rowJson, issueNumJson, issueNum);
+                return;
+            }
+            issueCreateVO.setIssueId(issueNumDTO.getIssueId());
+            issueCreateVO.setObjectVersionNumber(issueNumDTO.getObjectVersionNumber());
+            issueCreateVO.setIssueNum(issueNum);
+
+        } else {
+            value = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
+            if (withoutParentRows.contains(rowNum)) {
+                String errorMsg = buildWithErrorMsg(value, "子任务/子缺陷必须要有父节点");
                 excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
                 return;
             }
-            IssueDTO issueDTO = issueMapper.queryIssueSprintNotClosed(projectId, parentIssue.getIssueId());
-            parentIssue.setSprintId(issueDTO.getSprintId());
+            String issueTypeCode = getIssueTypeCode(headerMap, value);
+            if (parentIssue == null
+                    && (IssueTypeCode.isSubTask(issueTypeCode)
+                    || SUB_BUG_CN.equals(value))) {
+                JSONObject parentJson = (JSONObject) rowJson.get(parentCol);
+                String parentCellValue = "";
+                if (ObjectUtils.isEmpty(parentJson)
+                        || ObjectUtils.isEmpty(parentJson.getString(ExcelSheetData.STRING_CELL))) {
+                    if (ObjectUtils.isEmpty(parentJson)) {
+                        parentJson = new JSONObject();
+                    }
+                    String errorMsg = buildWithErrorMsg(parentCellValue, "子任务/子缺陷必须要有父节点");
+                    excelCommonService.putErrorMsg(rowJson, parentJson, errorMsg);
+                    return;
+                }
+                parentCellValue = parentJson.getString(ExcelSheetData.STRING_CELL);
+                List<String> values = headerMap.get(parentCol).getPredefinedValues();
+                String issueParentNum = parentCellValue.split(COLON_CN)[0];
+                if (!values.contains(issueParentNum)) {
+                    String errorMsg = buildWithErrorMsg(parentCellValue, "输入的父级编号有误");
+                    excelCommonService.putErrorMsg(rowJson, parentJson, errorMsg);
+                    return;
+                }
+                parentIssue = issueMapper.selectByIssueNum(projectId, issueParentNum);
+                if (parentIssue == null) {
+                    String errorMsg = buildWithErrorMsg(parentCellValue, "父节点不存在");
+                    excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
+                    return;
+                }
+                IssueDTO issueDTO = issueMapper.queryIssueSprintNotClosed(projectId, parentIssue.getIssueId());
+                parentIssue.setSprintId(issueDTO.getSprintId());
+            }
         }
+
         for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
             Integer col = entry.getKey();
             ExcelColumnVO excelColumn = entry.getValue();
@@ -1525,7 +1575,7 @@ public class ExcelServiceImpl implements ExcelService {
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
         // 复制要求sheet并调整sheet1的顺序到最后一个
         excelCommonService.copyGuideSheetFromTemplate(workbook, "/templates/IssueImportGuideTemplate.xlsx");
-        workbook.setSheetOrder(sheetName, workbook.getNumberOfSheets()-1);
+        workbook.setSheetOrder(sheetName, workbook.getNumberOfSheets() - 1);
 
         ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
         if (condition) {
@@ -1559,7 +1609,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                 .map(x -> x.get("withSubIssues"))
                                                 .orElse(false));
                         // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
-                        if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
+                        if (!withSubIssues && CollectionUtils.isEmpty(childIssues)) {
                             childrenIds.add(0L);
                         }
                         childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
@@ -2264,6 +2314,7 @@ public class ExcelServiceImpl implements ExcelService {
         issueCreateVO.setProjectId(null);
         issueCreateVO.setOrganizationId(null);
         issueCreateVO.setIssueTypeId(null);
+        issueCreateVO.setUpdate(null);
         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(issueCreateVO));
         issueValidator.verifyUpdateData(JSON.parseObject(JSON.toJSONString(issueCreateVO)), projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
@@ -2314,4 +2365,17 @@ public class ExcelServiceImpl implements ExcelService {
         excelCommonService.insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
         return result;
     }
+
+    private IssueCreateVO generateImportVO(boolean update, Long organizationId) {
+        IssueCreateVO importVO = new IssueCreateVO();
+        importVO.setUpdate(update);
+        importVO.setOrganizationId(organizationId);
+        return importVO;
+    }
+
+    private void putNumErrorMsg(JSONObject rowJson, JSONObject issueNumJson, String issueNum) {
+        String errorMsg = buildWithErrorMsg(issueNum, "编号错误");
+        excelCommonService.putErrorMsg(rowJson, issueNumJson, errorMsg);
+    }
+
 }

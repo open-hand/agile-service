@@ -2447,10 +2447,51 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
             IssueTypeVO issueTypeVO = issueTypeMap.get(value);
+            if (issueCreateVO.getUpdate()) {
+                IssueVO issueVO = issueService.queryIssue(issueCreateVO.getProjectId(), issueCreateVO.getIssueId(), issueCreateVO.getOrganizationId());
+                if (!StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), issueVO.getTypeCode())) {
+                    //先判断有没有更改类型
+                    InitIssueType initIssueType = InitIssueType.valueOf(issueVO.getTypeCode().toUpperCase());
+                    switch (initIssueType) {
+                        case STORY:
+                            //原来是故事，如果下面有子任务则不能转换子任务
+                            if ((!CollectionUtils.isEmpty(issueVO.getSubIssueVOList()) || !CollectionUtils.isEmpty(issueVO.getSubBugVOList()))
+                                    && StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.SUB_TASK.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            //故事下有子缺陷，不能转换成bug类型。
+                            if (!CollectionUtils.isEmpty(issueVO.getSubBugVOList())
+                                    && StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.BUG.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            break;
+                        case SUB_TASK:
+                            // 子任务只能修改到其他子任务类型。
+                            if (!StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.SUB_TASK.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            break;
+                        case BUG:
+                            // 子缺陷只能修改为其他缺陷类型，不可修改为任务，故事。
+                            // 缺陷可以修改为任务，故事。
+                            boolean subBug = false;
+                            if (issueVO.getRelateIssueId() != null && issueVO.getRelateIssueId() != 0) {
+                                subBug = true;
+                            }
+                            if (subBug && !StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.SUB_TASK.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            break;
+                        default:
+                            putTypeError(rowJson, cellJson, value);
+                    }
+                }
+            }
             issueCreateVO.setIssueTypeId(issueTypeVO.getId());
             issueCreateVO.setTypeCode(issueTypeVO.getTypeCode());
         }
     }
+
 
     private void validateAndSetAssignee(JSONObject rowJson,
                                         Integer col,
@@ -3177,6 +3218,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                            ExcelColumnVO excelColumn,
                                            IssueCreateVO issueCreateVO,
                                            String issueType) {
+        // TODO: 2022/10/12  根据当前状态机的设置校验状态的流转是否符合规范
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
@@ -3309,22 +3351,24 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         if (value.lastIndexOf("-") == -1) {
-            reError(rowJson, cellJson, value);
+            putNumError(rowJson, cellJson, value);
             return;
         }
         IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(issueCreateVO.getProjectId(),
                 value.substring(value.lastIndexOf("-") + 1));
         if (issueNumDTO == null) {
-            reError(rowJson, cellJson, value);
+            putNumError(rowJson, cellJson, value);
             return;
         }
-        issueCreateVO.setIssueId(issueNumDTO.getIssueId());
-        issueCreateVO.setObjectVersionNumber(issueNumDTO.getObjectVersionNumber());
-        issueCreateVO.setIssueNum(value.substring(value.lastIndexOf("-") + 1));
     }
 
-    private void reError(JSONObject rowJson, JSONObject cellJson, String value) {
+    private void putNumError(JSONObject rowJson, JSONObject cellJson, String value) {
         String errorMsg = buildWithErrorMsg(value, "编号错误");
+        putErrorMsg(rowJson, cellJson, errorMsg);
+    }
+
+    private void putTypeError(JSONObject rowJson, JSONObject cellJson, String value) {
+        String errorMsg = buildWithErrorMsg(value, "不符合工作项层级结构");
         putErrorMsg(rowJson, cellJson, errorMsg);
     }
 

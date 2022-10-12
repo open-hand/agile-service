@@ -175,6 +175,9 @@ public class IssueCreateVO {
     private Long objectVersionNumber;
     @ApiModelProperty(value = "组织Id")
     private Long organizationId;
+    @ApiModelProperty("是否是更新")
+    private Boolean update;
+
 
     public List<TagVO> getTags() {
         return tags;
@@ -604,5 +607,13 @@ public class IssueCreateVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Boolean getUpdate() {
+        return update;
+    }
+
+    public void setUpdate(Boolean update) {
+        this.update = update;
     }
 }
