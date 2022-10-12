@@ -37,4 +37,18 @@ databaseChangeLog(logicalFilePath: 'agile_work_log.groovyoovy') {
             column(name: 'creation_date')
         }
     }
+
+    changeSet(id: '2022-10-12-agile-work-log-description-type', author: 'gaokuo.dai@zknow.com') {
+        modifyDataType (tableName: "agile_work_log", columnName: "description", newDataType: "text")
+        //mysql在修改列类型时候会清空非空约束、备注和默认值
+        if (helper.isMysql()) {
+            renameColumn (tableName: "agile_work_log", oldColumnName: "description", newColumnName: "description", columnDataType: "text", remarks: "描述")
+        }
+        //修复changeSet'2019-02-26-modify-data-type'遗留的BUG
+        //mysql在修改列类型时候会清空非空约束、备注和默认值
+        if (helper.isMysql()) {
+            renameColumn (tableName: "agile_work_log", oldColumnName: "work_time", newColumnName: "work_time", columnDataType: "DECIMAL(10,1)", remarks: "工作时间")
+            addNotNullConstraint (tableName: "agile_work_log", columnName: "work_time", columnDataType: "DECIMAL(10,1)")
+        }
+    }
 }
