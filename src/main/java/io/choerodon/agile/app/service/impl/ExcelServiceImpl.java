@@ -1132,7 +1132,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             issueCreateVO.setIssueId(issueNumDTO.getIssueId());
             issueCreateVO.setObjectVersionNumber(issueNumDTO.getObjectVersionNumber());
-            issueCreateVO.setIssueNum(issueNum);
+            issueCreateVO.setIssueNum(issueNum.substring(issueNum.lastIndexOf("-") + 1));
 
         } else {
             value = issueTypeJson.getString(ExcelSheetData.STRING_CELL);

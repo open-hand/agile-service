@@ -70,6 +70,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private static final String IMPORT_TEMPLATE_NAME = "导入模板";
     private static final String DATE_CHECK_MSG = "请输入正确的日期格式";
     private static final String DATE_RANGE_CHECK_MSG = "开始时间不能在结束时间之后";
+    protected static final String APPLY_TYPE_AGILE = "agile";
     private static final String[] SYSTEM_DATE_FIELD_LIST = {FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME};
     private static final List<String> SYSTEM_FIELD_HEADER_NOT_SORT = Arrays.asList(FieldCode.PARENT, FieldCode.ISSUE_TYPE);
     public static final List<String> COMMON_PREDEFINED_SYSTEM_FIELD =
@@ -133,6 +134,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private PageFieldService pageFieldService;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private ProjectConfigService projectConfigService;
 
     @Override
     public PredefinedDTO processSystemFieldPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, boolean withFeature, List<String> fieldCodes, String fieldCode) {
@@ -3218,7 +3221,6 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                            ExcelColumnVO excelColumn,
                                            IssueCreateVO issueCreateVO,
                                            String issueType) {
-        // TODO: 2022/10/12  根据当前状态机的设置校验状态的流转是否符合规范
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
@@ -3233,7 +3235,17 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String errorMsg = buildWithErrorMsg(value, "状态输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-            issueCreateVO.setStatusId(statusVO.getId());
+            IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueCreateVO.getIssueId());
+            if (projectConfigService.validateStatusTransform(issueCreateVO.getProjectId(),
+                    issueCreateVO.getIssueId(),
+                    APPLY_TYPE_AGILE,
+                    issueDTO.getIssueTypeId(),
+                    issueDTO.getStatusId(),
+                    statusVO.getId())) {
+                issueCreateVO.setStatusId(statusVO.getId());
+            }
+            String errorMsg = buildWithErrorMsg(value, "不能进行修改不符合状态机流转条件设置");
+            putErrorMsg(rowJson, cellJson, errorMsg);
         }
     }
 
