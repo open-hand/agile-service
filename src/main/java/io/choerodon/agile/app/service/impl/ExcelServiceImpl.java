@@ -654,125 +654,11 @@ public class ExcelServiceImpl implements ExcelService {
         List<TriggerCarrierVO> updateTriggerCarrierVOS = new ArrayList<>();
         Integer dataRowCount = excelSheetData.getRowNum();
         //开始处理数据行,一次循环处理一行数据
-        for (int currentRowNum = 1; currentRowNum <= dataRowCount; currentRowNum++) {
-            if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
-                return;
-            }
-            JSONObject rowJson = (JSONObject) sheetData.get(currentRowNum);
-            if (ObjectUtils.isEmpty(rowJson)) {
-                continue;
-            }
-            JSONObject issueTypeJson = (JSONObject) rowJson.get(issueTypeCol);
-            // 获取该数据行的issue num
-            JSONObject issueNumJson = (JSONObject) rowJson.get(issueNumCol);
-            String issueType;
-            if (ObjectUtils.isEmpty(issueTypeJson)
-                    || ObjectUtils.isEmpty(issueTypeJson.getString(ExcelSheetData.STRING_CELL))) {
-                if (ObjectUtils.isEmpty(issueTypeJson)) {
-                    issueTypeJson = new JSONObject();
-                }
-                String errorMsg = buildWithErrorMsg("", IssueConstant.ISSUE_TYPE_CN + "为空");
-                excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
-                lastSendCountNum = putErrorMsgAndSendMsg(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
-                continue;
-            }
-
-            issueType = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
-            String issueTypeCode = getIssueTypeCode(headerMap, issueType);
-            Set<Integer> sonSet = parentSonMap.get(currentRowNum);
-            boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
-            //拿到issueNum 用于判断是否是更新数据
-            //是否是跟新数据
-            boolean update = getUpdate(issueNumJson);
-            if ((IssueTypeCode.isStory(issueTypeCode)
-                    || IssueTypeCode.isTask(issueTypeCode)
-                    || IssueTypeCode.isBug(issueTypeCode))
-                    && hasSonNodes) {
-                List<Long> insertIds = new ArrayList<>();
-                try {
-                    IssueCreateVO parent = generateImportVO(update, organizationId);
-                    validateData(projectId, rowJson, headerMap, withoutParentRows, parent, null, issueTypeCol,
-                            parentCol, requireFieldMap);
-                    if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount,
-                                progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
-                        currentRowNum = Collections.max(sonSet);
-                        continue;
-                    }
-                    List<ComponentIssueRelVO> components = parent.getComponentIssueRelVOList();
-                    Long sprintId = parent.getSprintId();
-                    Long epicId = parent.getEpicId();
-                    Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
-                    IssueVO result = null;
-                    if (!StringUtils.isEmpty(parent.getIssueNum())) {
-                        result = updateIssue(projectId, organizationId, parent);
-                    } else {
-                        result = stateMachineClientService.createIssueWithoutRuleNotice(parent, APPLY_TYPE_AGILE);
-                        insertIds.add(result.getIssueId());
-                        excelCommonService.insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
-                    }
-                    List<Long> customFieldIds = fillCustomFields(parent);
-                    // 更新时候连同更新触发器
-                    fillTrigger(projectId, triggerCarrierVOS, updateTriggerCarrierVOS, update, result, customFieldIds);
-                    rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
-
-                    result.setComponentIssueRelVOList(components);
-                    result.setSprintId(sprintId);
-                    result.setEpicId(epicId);
-
-                    boolean sonsOk = true;
-                    Map<Integer, IssueCreateVO> sonMap = new HashMap<>();
-                    for (Integer sonRowNum : sonSet) {
-                        JSONObject sonRowJson = (JSONObject) sheetData.get(sonRowNum);
-                        IssueCreateVO son = generateImportVO(update, organizationId);
-                        validateData(projectId, sonRowJson, headerMap, withoutParentRows, son, result, issueTypeCol, parentCol, requireFieldMap);
-                        if (Boolean.TRUE.equals(sonRowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-                            //子节点有错误
-                            sonsOk = false;
-                            break;
-                        } else {
-                            sonMap.put(sonRowNum, son);
-                        }
-                    }
-                    if (!sonsOk) {
-                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
-                        currentRowNum = Collections.max(sonSet);
-                        issueService.batchDeleteIssuesAgile(projectId, insertIds);
-                        continue;
-                    }
-                    boolean finalUpdate = update;
-                    sonMap.forEach((k, v) -> {
-                        handSonMap(projectId, organizationId, sheetData, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, insertIds, finalUpdate, k, v);
-                    });
-
-                    importedIssueIds.add(result.getIssueId());
-                    progress.addSuccessCount(sonSet.size() + 1L);
-                    progress.addProcessNum(sonSet.size() + 1);
-                    currentRowNum = Collections.max(sonSet);
-                } catch (Exception e) {
-                    LOGGER.error("insert data error when import excel, exception: {}", e);
-                    lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
-                    currentRowNum = Collections.max(sonSet);
-                    issueService.batchDeleteIssuesAgile(projectId, insertIds);
-                    continue;
-                }
-            } else {
-                IssueCreateVO issueCreateVO = generateImportVO(update, organizationId);
-                //校验数据为插入对象赋值
-                validateData(projectId, rowJson, headerMap, withoutParentRows, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
-                if (!Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-                    lastSendCountNum = fillErrorProgress(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
-                    continue;
-                }
-                handSingleRow(projectId, organizationId, progress, importedIssueIds, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, rowJson, update, issueCreateVO);
-            }
-            history.setFailCount(progress.getFailCount());
-            history.setSuccessCount(progress.getSuccessCount());
-            if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
-                lastSendCountNum = progress.getProcessNum();
-                sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
-            }
-        }
+        if (handRows(projectId, organizationId, userId, websocketKey, history,
+                sheetData, headerMap, parentSonMap, withoutParentRows, issueTypeCol, issueNumCol,
+                parentCol, progress, importedIssueIds, relatedIssueList, lastSendCountNum, requireFieldMap,
+                triggerCarrierVOS, updateTriggerCarrierVOS, dataRowCount))
+            return;
         updateRelatedIssue(relatedIssueList, headerMap, sheetData, projectId, progress, parentSonMap, parentCol);
         issueService.batchCreateIssueInvokeTrigger(triggerCarrierVOS);
         issueService.batchUpdateInvokeTrigger(updateTriggerCarrierVOS);
@@ -780,6 +666,7 @@ public class ExcelServiceImpl implements ExcelService {
         String status = excelCommonService.generateErrorDataExcelAndUpload(excelSheetData, headerMap, headerNames, history, organizationId, "/templates/IssueImportGuideTemplate.xlsx");
         excelCommonService.updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status, websocketKey);
     }
+
 
 
     private int fillErrorProgress(Long userId, String websocketKey, FileOperationHistoryDTO history, ExcelImportTemplate.Progress progress, int lastSendCountNum, Integer dataRowCount) {
@@ -2393,5 +2280,141 @@ public class ExcelServiceImpl implements ExcelService {
         progress.processNumIncrease();
     }
 
+    private boolean isSonsOk(Long projectId, Long organizationId, JSONObject sheetData, Map<Integer, ExcelColumnVO> headerMap,
+                             Set<Integer> withoutParentRows, int issueTypeCol, int parentCol, Map<Long, List<String>> requireFieldMap,
+                             Set<Integer> sonSet, boolean update, IssueVO result, boolean sonsOk, Map<Integer, IssueCreateVO> sonMap) {
+        for (Integer sonRowNum : sonSet) {
+            JSONObject sonRowJson = (JSONObject) sheetData.get(sonRowNum);
+            IssueCreateVO son = generateImportVO(update, organizationId);
+            validateData(projectId, sonRowJson, headerMap, withoutParentRows, son, result, issueTypeCol, parentCol, requireFieldMap);
+            if (Boolean.TRUE.equals(sonRowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
+                //子节点有错误
+                sonsOk = false;
+                break;
+            } else {
+                sonMap.put(sonRowNum, son);
+            }
+        }
+        return sonsOk;
+    }
+
+    private IssueVO handIssue(Long projectId, Long organizationId, List<RelatedIssueVO> relatedIssueList, List<TriggerCarrierVO> triggerCarrierVOS, List<TriggerCarrierVO> updateTriggerCarrierVOS, JSONObject rowJson, boolean update, List<Long> insertIds, IssueCreateVO parent) {
+        List<ComponentIssueRelVO> components = parent.getComponentIssueRelVOList();
+        Long sprintId = parent.getSprintId();
+        Long epicId = parent.getEpicId();
+        Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
+        IssueVO result = null;
+        if (!StringUtils.isEmpty(parent.getIssueNum())) {
+            result = updateIssue(projectId, organizationId, parent);
+        } else {
+            result = stateMachineClientService.createIssueWithoutRuleNotice(parent, APPLY_TYPE_AGILE);
+            insertIds.add(result.getIssueId());
+            excelCommonService.insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
+        }
+        List<Long> customFieldIds = fillCustomFields(parent);
+        // 更新时候连同更新触发器
+        fillTrigger(projectId, triggerCarrierVOS, updateTriggerCarrierVOS, update, result, customFieldIds);
+        rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
+
+        result.setComponentIssueRelVOList(components);
+        result.setSprintId(sprintId);
+        result.setEpicId(epicId);
+        return result;
+    }
+
+    private boolean handRows(Long projectId, Long organizationId, Long userId, String websocketKey, FileOperationHistoryDTO history, JSONObject sheetData, Map<Integer, ExcelColumnVO> headerMap, Map<Integer, Set<Integer>> parentSonMap, Set<Integer> withoutParentRows, int issueTypeCol, int issueNumCol, int parentCol, ExcelImportTemplate.Progress progress, List<Long> importedIssueIds, List<RelatedIssueVO> relatedIssueList, int lastSendCountNum, Map<Long, List<String>> requireFieldMap, List<TriggerCarrierVO> triggerCarrierVOS, List<TriggerCarrierVO> updateTriggerCarrierVOS, Integer dataRowCount) {
+        for (int currentRowNum = 1; currentRowNum <= dataRowCount; currentRowNum++) {
+            if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
+                return true;
+            }
+            JSONObject rowJson = (JSONObject) sheetData.get(currentRowNum);
+            if (ObjectUtils.isEmpty(rowJson)) {
+                continue;
+            }
+            JSONObject issueTypeJson = (JSONObject) rowJson.get(issueTypeCol);
+            // 获取该数据行的issue num
+            JSONObject issueNumJson = (JSONObject) rowJson.get(issueNumCol);
+            String issueType;
+            if (ObjectUtils.isEmpty(issueTypeJson)
+                    || ObjectUtils.isEmpty(issueTypeJson.getString(ExcelSheetData.STRING_CELL))) {
+                if (ObjectUtils.isEmpty(issueTypeJson)) {
+                    issueTypeJson = new JSONObject();
+                }
+                String errorMsg = buildWithErrorMsg("", IssueConstant.ISSUE_TYPE_CN + "为空");
+                excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
+                lastSendCountNum = putErrorMsgAndSendMsg(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
+                continue;
+            }
+
+            issueType = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
+            String issueTypeCode = getIssueTypeCode(headerMap, issueType);
+            Set<Integer> sonSet = parentSonMap.get(currentRowNum);
+            boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
+            //拿到issueNum 用于判断是否是更新数据
+            //是否是跟新数据
+            boolean update = getUpdate(issueNumJson);
+            if ((IssueTypeCode.isStory(issueTypeCode)
+                    || IssueTypeCode.isTask(issueTypeCode)
+                    || IssueTypeCode.isBug(issueTypeCode))
+                    && hasSonNodes) {
+                List<Long> insertIds = new ArrayList<>();
+                try {
+                    IssueCreateVO parent = generateImportVO(update, organizationId);
+                    validateData(projectId, rowJson, headerMap, withoutParentRows, parent, null, issueTypeCol,
+                            parentCol, requireFieldMap);
+                    if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
+                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount,
+                                progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
+                        currentRowNum = Collections.max(sonSet);
+                        continue;
+                    }
+                    IssueVO result = handIssue(projectId, organizationId, relatedIssueList, triggerCarrierVOS,
+                            updateTriggerCarrierVOS, rowJson, update, insertIds, parent);
+
+                    boolean sonsOk = true;
+                    Map<Integer, IssueCreateVO> sonMap = new HashMap<>();
+                    sonsOk = isSonsOk(projectId, organizationId, sheetData, headerMap, withoutParentRows,
+                            issueTypeCol, parentCol, requireFieldMap, sonSet, update, result, sonsOk, sonMap);
+                    if (!sonsOk) {
+                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
+                        currentRowNum = Collections.max(sonSet);
+                        issueService.batchDeleteIssuesAgile(projectId, insertIds);
+                        continue;
+                    }
+                    boolean finalUpdate = update;
+                    sonMap.forEach((k, v) -> {
+                        handSonMap(projectId, organizationId, sheetData, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, insertIds, finalUpdate, k, v);
+                    });
+
+                    importedIssueIds.add(result.getIssueId());
+                    progress.addSuccessCount(sonSet.size() + 1L);
+                    progress.addProcessNum(sonSet.size() + 1);
+                    currentRowNum = Collections.max(sonSet);
+                } catch (Exception e) {
+                    LOGGER.error("insert data error when import excel, exception: {}", e);
+                    lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
+                    currentRowNum = Collections.max(sonSet);
+                    issueService.batchDeleteIssuesAgile(projectId, insertIds);
+                    continue;
+                }
+            } else {
+                IssueCreateVO issueCreateVO = generateImportVO(update, organizationId);
+                //校验数据为插入对象赋值
+                validateData(projectId, rowJson, headerMap, withoutParentRows, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
+                if (!Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
+                    lastSendCountNum = fillErrorProgress(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
+                    continue;
+                }
+                handSingleRow(projectId, organizationId, progress, importedIssueIds, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, rowJson, update, issueCreateVO);
+            }
+            history.setFailCount(progress.getFailCount());
+            history.setSuccessCount(progress.getSuccessCount());
+            if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
+                lastSendCountNum = progress.getProcessNum();
+                sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+            }
+        }
+        return false;
+    }
 
 }
