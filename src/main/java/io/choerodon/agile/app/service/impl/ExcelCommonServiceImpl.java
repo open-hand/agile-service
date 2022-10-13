@@ -67,7 +67,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private static final String FILE_NAME = "error.xlsx";
     private static final String ERROR_FILE_OPERATION_HISTORY_UPDATE = "error.FileOperationHistoryDTO.update";
     private static final String SUB_BUG_CN = "子缺陷";
-    private static final String IMPORT_TEMPLATE_NAME = "导入模板";
+    private static final String IMPORT_TEMPLATE_NAME = "sheet1";
     private static final String DATE_CHECK_MSG = "请输入正确的日期格式";
     private static final String DATE_RANGE_CHECK_MSG = "开始时间不能在结束时间之后";
     protected static final String APPLY_TYPE_AGILE = "agile";
