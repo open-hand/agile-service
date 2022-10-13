@@ -168,7 +168,7 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.ISSUE_TYPE, IssueConstant.ISSUE_TYPE_CN + "*", true, null));
             HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", false, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
-            HEADERS.add(new Header(FieldCode.ISSUE_NUM, "问题编号", false, null));
+            HEADERS.add(new Header(FieldCode.ISSUE_NUM, "编号", false, null));
             HEADERS.add(new Header(FieldCode.FEATURE, "所属特性", false, 8000));
             HEADERS.add(new Header(FieldCode.COMPONENT, "模块", true, null));
             HEADERS.add(new Header(FieldCode.SPRINT, "冲刺", true, null));
