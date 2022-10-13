@@ -194,6 +194,8 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.PARTICIPANT, "参与人", false, null));
             HEADERS.add(new Header(FieldCode.ESTIMATE_TIME, "原始预估时间(小时)", false, null));
             HEADERS.add(new Header(FieldCode.PRODUCT, "产品", false, null));
+            HEADERS.add(new Header(FieldCode.CREATION_DATE, "创建时间", false, null));
+            HEADERS.add(new Header(FieldCode.LAST_UPDATE_DATE, "最后更新时间", false, null));
 
             HEADERS.forEach(h -> {
                 String code = h.getCode();
