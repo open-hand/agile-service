@@ -1931,7 +1931,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected String[] sortFieldNames(String[] fieldNames) {
         List<String> result = new ArrayList<>();
-        result.add(IssueConstant.ISSUE_TYPE_CN);
+        result.add(IssueConstant.ISSUE_TYPE_CN + "*");
         result.add("概要*");
         result.add("编号");
         for (String str : fieldNames) {
