@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ExcelColumnVO;
 import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
@@ -182,4 +183,9 @@ public interface ExcelCommonService {
                                            FileOperationHistoryDTO history,
                                            Long organizationId,
                                            String templatePath);
+
+    void fieldCascadeValidate(Long projectId,
+                              IssueCreateVO issueCreateVO,
+                              Map<Integer, ExcelColumnVO> headerMap,
+                              JSONObject rowJson);
 }

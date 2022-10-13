@@ -172,7 +172,7 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.FEATURE, "所属特性", false, 8000));
             HEADERS.add(new Header(FieldCode.COMPONENT, "模块", true, null));
             HEADERS.add(new Header(FieldCode.SPRINT, "冲刺", true, null));
-            HEADERS.add(new Header(FieldCode.SUMMARY, "概述*", true, null));
+            HEADERS.add(new Header(FieldCode.SUMMARY, "概要*", true, null));
             HEADERS.add(new Header(FieldCode.DESCRIPTION, "描述", true, null));
             HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", true, null));
             HEADERS.add(new Header(FieldCode.REPORTER, "报告人", true, null));
