@@ -1,13 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.core.exception.CommonException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author shinan.chen
@@ -16,10 +10,6 @@ import java.util.Map;
  */
 @Component
 public class ProjectUtil {
-    @Autowired
-    private RemoteIamOperator remoteIamOperator;
-
-    protected static final Map<Long, ProjectVO> map = new HashMap<>();
 
     public Long getOrganizationId(Long projectId) {
         return queryProject(projectId).getOrganizationId();
@@ -34,17 +24,6 @@ public class ProjectUtil {
     }
 
     private ProjectVO queryProject(Long projectId) {
-        ProjectVO projectVO = map.get(projectId);
-        if (projectVO != null) {
-            return projectVO;
-        } else {
-            projectVO = remoteIamOperator.queryProject(projectId);
-            if (projectVO != null) {
-                map.put(projectId, projectVO);
-                return projectVO;
-            } else {
-                throw new CommonException("error.queryProject.notFound");
-            }
-        }
+        return ConvertUtil.queryProject(projectId);
     }
 }
