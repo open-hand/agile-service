@@ -326,12 +326,12 @@ public class ExcelServiceImpl implements ExcelService {
                         .map(ExcelImportTemplate.Header::getCode)
                         .collect(Collectors.toList());
         requiredCode.forEach(r -> checkAndThrowException(systemFields, r));
-        if (withFeature) {
-            checkAndThrowException(systemFields, FieldCode.FEATURE);
-        } else {
-            checkAndThrowException(systemFields, FieldCode.EPIC_NAME);
-            checkAndThrowException(systemFields, FieldCode.EPIC);
-        }
+//        if (withFeature) {
+//            checkAndThrowException(systemFields, FieldCode.FEATURE);
+//        } else {
+//            checkAndThrowException(systemFields, FieldCode.EPIC_NAME);
+//            checkAndThrowException(systemFields, FieldCode.EPIC);
+//        }
     }
 
     private void checkAndThrowException(List<String> systemFields, String fieldCode) {

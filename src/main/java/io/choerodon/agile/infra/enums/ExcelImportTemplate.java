@@ -176,10 +176,10 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", false, null));
             HEADERS.add(new Header(FieldCode.REPORTER, "报告人", false, null));
             HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", false, null));
-            HEADERS.add(new Header(FieldCode.REMAINING_TIME, "剩余预估时间(小时)", true, null));
+            HEADERS.add(new Header(FieldCode.REMAINING_TIME, "剩余预估时间(小时)", false, null));
             HEADERS.add(new Header(FieldCode.FIX_VERSION, "修复的版本", false, null));
             HEADERS.add(new Header(FieldCode.INFLUENCE_VERSION, "影响的版本", false, null));
-            HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", true, null));
+            HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", false, null));
             HEADERS.add(new Header(FieldCode.EPIC_NAME, "史诗名称(仅" + IssueConstant.ISSUE_TYPE_CN + "为史诗时生效)", false, 8000));
             HEADERS.add(new Header(FieldCode.LABEL, "标签", false, null));
             HEADERS.add(new Header(FieldCode.ESTIMATED_START_TIME, "预计开始时间", false, null));
