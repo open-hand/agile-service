@@ -116,6 +116,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String TAG_MAP = "tagMap";
     protected static final String RELATED_ISSUE_MAP = "relatedIssueMap";
     protected static final String PRODUCT_MAP = "productMap";
+    protected static final String ISSUEDTO_MAP = "issueDTOMap";
 
     private static final String SUB_BUG_CN = "子缺陷";
 
@@ -268,6 +269,7 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(ExportIssuesVO.EPIC_SELF_NAME, "史诗名称(仅" + IssueConstant.ISSUE_TYPE_CN + "为史诗时生效)");
         FIELD_MAP.put(ExportIssuesVO.PARTICIPANT, "参与人");
         FIELD_MAP.put(ExportIssuesVO.PRODUCT, "产品");
+        FIELD_MAP.put(ExportIssuesVO.PARENT, "父级故事/任务/缺陷");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -1467,8 +1469,10 @@ public class ExcelServiceImpl implements ExcelService {
                         .addCollections(issues);
                 if (!ObjectUtils.isEmpty(issues)) {
                     Set<Long> userIds = new HashSet<>();
+                    Map<Long, IssueDTO> issueDTOMap = new HashMap<>();
                     issues.forEach(i -> {
                         issueIds.add(i.getIssueId());
+                        issueDTOMap.put(i.getIssueId(), i);
                         Long assigneeId = i.getAssigneeId();
                         Long reporterId = i.getReporterId();
                         Long createdUser = i.getCreatedBy();
@@ -1532,6 +1536,7 @@ public class ExcelServiceImpl implements ExcelService {
                     issueValueMap.put(TAG_MAP, tagMap);
                     issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
                     issueValueMap.put(PRODUCT_MAP, productMap);
+                    issueValueMap.put(ISSUEDTO_MAP, issueDTOMap);
                     issueValueMap.forEach((k, v) -> cursor.addCollections(v));
                     issues.forEach(issue ->
                             buildExcelIssueFromIssue(
@@ -1586,6 +1591,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Long, Set<TagVO>> tagMap = (Map<Long, Set<TagVO>>) issueValueMap.get(TAG_MAP);
         Map<Long, List<IssueLinkDTO>> relatedIssueMap = (Map<Long, List<IssueLinkDTO>>) issueValueMap.get(RELATED_ISSUE_MAP);
         Map<Long, List<ProductVO>> productMap = (Map<Long, List<ProductVO>>) issueValueMap.get(PRODUCT_MAP);
+        Map<Long, IssueDTO> issueDTOMap = (Map<Long, IssueDTO>) issueValueMap.get(ISSUEDTO_MAP);
         Long issueId = issue.getIssueId();
         ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
         BeanUtils.copyProperties(issue, exportIssuesVO);
@@ -1620,7 +1626,26 @@ public class ExcelServiceImpl implements ExcelService {
         setRelatedIssue(exportIssuesVO, relatedIssueMap);
         setParticipant(exportIssuesVO, issue, usersMap);
         setProduct(exportIssuesVO, issue, productMap);
+        // 设置父级工作项
+        setParent(exportIssuesVO, issue, issueDTOMap);
         return exportIssuesVO;
+    }
+
+    private void setParent(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, IssueDTO> issueDTOMap) {
+        String typeCode = issue.getTypeCode();
+        IssueDTO parent = null;
+        if ("sub_task".equals(typeCode)) {
+            Long parentIssueId = issue.getParentIssueId();
+            parent = issueDTOMap.getOrDefault(parentIssueId, null);
+        }
+        if ("bug".equals(typeCode) && !ObjectUtils.isEmpty(issue.getRelateIssueId())) {
+            Long relateIssueId = issue.getRelateIssueId();
+            parent = issueDTOMap.getOrDefault(relateIssueId, null);
+        }
+        if (!ObjectUtils.isEmpty(parent)) {
+            String parentStr = parent.getIssueNum() + "：" + parent.getSummary();
+            exportIssuesVO.setParent(parentStr);
+        }
     }
 
     private void setProduct(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, List<ProductVO>> productMap) {
