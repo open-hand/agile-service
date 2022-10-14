@@ -668,7 +668,6 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
 
-
     private int fillErrorProgress(Long userId, String websocketKey, FileOperationHistoryDTO history, ExcelImportTemplate.Progress progress, int lastSendCountNum, Integer dataRowCount) {
         progress.failCountIncrease();
         progress.processNumIncrease();
@@ -1028,7 +1027,9 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         // 处理级联字段校验
-        excelCommonService.fieldCascadeValidate(projectId, issueCreateVO, headerMap, rowJson);
+        if (issueCreateVO.getUpdate()) {
+            excelCommonService.fieldCascadeValidate(projectId, issueCreateVO, headerMap, rowJson);
+        }
     }
 
     protected List<String> splitByRegex(String value) {
@@ -2403,7 +2404,7 @@ public class ExcelServiceImpl implements ExcelService {
                 IssueCreateVO issueCreateVO = generateImportVO(update, organizationId);
                 //校验数据为插入对象赋值
                 validateData(projectId, rowJson, headerMap, withoutParentRows, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
-                if (!Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
+                if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
                     lastSendCountNum = fillErrorProgress(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
                     continue;
                 }
