@@ -1,15 +1,17 @@
 package io.choerodon.agile.infra.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.domain.AuditDomain;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.util.Date;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/5/24
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserMessageDTO extends AuditDomain {
     private String name;
 

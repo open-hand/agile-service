@@ -18,6 +18,8 @@ public class PageFieldViewUpdateVO {
     private Object value;
     @ApiModelProperty(value = "字段类型")
     private String fieldCode;
+    @ApiModelProperty(value = "对象方案编码")
+    private String schemeCode;
 
     public String getFieldCode() {
         return fieldCode;
@@ -49,5 +51,13 @@ public class PageFieldViewUpdateVO {
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
+    }
+
+    public String getSchemeCode() {
+        return schemeCode;
+    }
+
+    public void setSchemeCode(String schemeCode) {
+        this.schemeCode = schemeCode;
     }
 }

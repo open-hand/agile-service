@@ -1,22 +1,23 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.PersonalFilterVO;
-import io.choerodon.agile.app.service.PersonalFilterService;
+import java.util.List;
+import java.util.Optional;
 
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import io.choerodon.agile.api.vo.PersonalFilterVO;
+import io.choerodon.agile.app.service.PersonalFilterService;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
+
+import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -96,17 +97,14 @@ public class PersonalFilterController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("我的筛选重名校验")
     @GetMapping(value = "/check_name")
-    public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)
-                                             @PathVariable(name = "project_id") Long projectId,
-                                             @ApiParam(value = "用户id", required = true)
-                                             @RequestParam @Encrypt Long userId,
-                                             @ApiParam(value = "name", required = true)
-                                             @RequestParam String name,
-                                             @ApiParam(value = "filterTypeCode", required = true)
-                                             @RequestParam String filterTypeCode) {
-        return Optional.ofNullable(personalFilterService.checkName(0L, projectId, userId, name, filterTypeCode))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.checkName.get"));
+    public ResponseEntity<Boolean> checkName(
+            @ApiParam(value = "项目id", required = true)  @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "用户id", required = true) @RequestParam @Encrypt Long userId,
+            @ApiParam(value = "个人筛选名称", required = true) @RequestParam String name,
+            @ApiParam(value = "个人筛选类型", required = true) @RequestParam String filterTypeCode,
+            @ApiParam(value = "个人筛选ID(用于更新检查时排除自身)") @RequestParam(required = false) Long filterId
+    ) {
+        return Results.success(personalFilterService.nameIsExist(0L, projectId, userId, name, filterTypeCode, filterId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

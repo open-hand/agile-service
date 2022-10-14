@@ -1,5 +1,17 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.NodeSortVO;
 import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.StatusMachineTransformVO;
@@ -13,17 +25,6 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -173,8 +174,8 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
     /**
      * 初始节点
      *
-     * @param stateMachineId
-     * @return
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     @Override
     public Long getInitNode(Long organizationId, Long stateMachineId) {
@@ -222,9 +223,9 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
     /**
      * 敏捷添加状态，需要先在草稿中判断有没有存在该节点，并添加草稿全部转换，然后把该节点和该转换带到发布中
      *
-     * @param organizationId
-     * @param stateMachineId
-     * @param statusVO
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
+     * @param statusVO statusVO
      */
     @Override
     public void createNodeAndTransformForAgile(Long organizationId, Long stateMachineId, StatusVO statusVO) {

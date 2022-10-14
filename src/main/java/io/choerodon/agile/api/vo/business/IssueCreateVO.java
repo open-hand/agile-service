@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,9 @@ import java.util.List;
  * @author dinghuang123@gmail.com
  */
 public class IssueCreateVO {
+    @ApiModelProperty(value = "问题主键id")
+    @Encrypt
+    private Long issueId;
 
     @ApiModelProperty(value = "问题类型code")
     private String typeCode;
@@ -164,6 +168,16 @@ public class IssueCreateVO {
 
     @ApiModelProperty(value = "第三方实例关联")
     private InstanceOpenRelVO instanceOpenRelVO;
+
+    @ApiModelProperty("issue的问题编号")
+    private String issueNum;
+    @ApiModelProperty(value = "版本号")
+    private Long objectVersionNumber;
+    @ApiModelProperty(value = "组织Id")
+    private Long organizationId;
+    @ApiModelProperty("是否是更新")
+    private Boolean update;
+
 
     public List<TagVO> getTags() {
         return tags;
@@ -561,5 +575,45 @@ public class IssueCreateVO {
 
     public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
         this.instanceOpenRelVO = instanceOpenRelVO;
+    }
+
+    public String getIssueNum() {
+        return issueNum;
+    }
+
+    public void setIssueNum(String issueNum) {
+        this.issueNum = issueNum;
+    }
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Boolean getUpdate() {
+        return update;
+    }
+
+    public void setUpdate(Boolean update) {
+        this.update = update;
     }
 }

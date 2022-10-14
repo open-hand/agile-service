@@ -1,5 +1,16 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.PersonalFilterVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
 import io.choerodon.agile.infra.dto.PersonalFilterDTO;
@@ -9,15 +20,10 @@ import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import org.hzero.core.base.BaseConstants;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 
 /**
  * @author shinan.chen
@@ -31,13 +37,19 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
 
     public static final String UPDATE_ERROR = "error.personalFilter.update";
     public static final String DELETE_ERROR = "error.personalFilter.deleteById";
-    public static final String NOTFOUND_ERROR = "error.personalFilter.notFound";
+    public static final String NOT_FOUND_ERROR = "error.personalFilter.notFound";
     public static final String NAME_ERROR = "error.personalFilter.nameNotNull";
     public static final String INSERT_ERROR = "error.personalFilter.create";
     public static final String NAME_EXIST = "error.personalFilter.nameExist";
     public static final String TYPE_CODE_ILLEGAL = "error.personalFilter.typeCode.illegal";
     public static final String TYPE_CODE_NOT_NULL = "error.personalFilter.typeCode.notNull";
-    private static final String[] FILTER_TYPE_CODES = {PersonalFilterTypeCode.AGILE_ISSUE, PersonalFilterTypeCode.AGILE_WORK_HOURS, PersonalFilterTypeCode.RISK_ISSUE};
+    private static final String[] FILTER_TYPE_CODES = {
+            PersonalFilterTypeCode.AGILE_ISSUE,
+            PersonalFilterTypeCode.AGILE_WORK_HOURS,
+            PersonalFilterTypeCode.RISK_ISSUE,
+            PersonalFilterTypeCode.FEATURE_ISSUE,
+            PersonalFilterTypeCode.WATERFALL_ISSUE,
+    };
 
     @Autowired
     private ModelMapper modelMapper;
@@ -51,7 +63,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         personalFilter.setProjectId(organizationId);
         PersonalFilterDTO personalFilterDTO = personalFilterMapper.selectByPrimaryKey(personalFilter);
         if (personalFilterDTO == null) {
-            throw new CommonException(NOTFOUND_ERROR);
+            throw new CommonException(NOT_FOUND_ERROR);
         }
         personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterDTO.getFilterJson(),true));
         return modelMapper.map(personalFilterDTO, PersonalFilterVO.class);
@@ -66,9 +78,10 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         }
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         Long userId = customUserDetails.getUserId();
-        if (Boolean.TRUE.equals(checkName(organizationId, projectId, userId, personalFilterVO.getName(), filterTypeCode))) {
-            throw new CommonException(NAME_EXIST);
-        }
+        Assert.isTrue(
+                !this.nameIsExist(organizationId, projectId, userId, personalFilterVO.getName(), filterTypeCode, null),
+                NAME_EXIST
+        );
         if (!ObjectUtils.isEmpty(personalFilterVO.getDefault()) && Boolean.TRUE.equals(personalFilterVO.getDefault())) {
             personalFilterMapper.updateDefault(organizationId, projectId, userId, false, null, filterTypeCode);
         }
@@ -96,7 +109,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public PersonalFilterVO update(Long organizationId, Long projectId, Long filterId, PersonalFilterVO personalFilterVO) {
         PersonalFilterDTO dto = personalFilterMapper.selectByPrimaryKey(filterId);
         if (Objects.isNull(dto)) {
-            throw new CommonException(NOTFOUND_ERROR);
+            throw new CommonException(NOT_FOUND_ERROR);
         }
         Long userId = DetailsHelper.getUserDetails().getUserId();
         if (!Objects.isNull(personalFilterVO.getName())) {
@@ -115,16 +128,10 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     }
 
     private void checkUpdateName(Long organizationId, Long projectId, Long userId, Long filterId, String name, String filterTypeCode) {
-        PersonalFilterDTO personalFilterDTO = new PersonalFilterDTO();
-        personalFilterDTO.setProjectId(projectId);
-        personalFilterDTO.setOrganizationId(organizationId);
-        personalFilterDTO.setUserId(userId);
-        personalFilterDTO.setName(name);
-        personalFilterDTO.setFilterTypeCode(filterTypeCode);
-        List<PersonalFilterDTO> list = personalFilterMapper.select(personalFilterDTO);
-        if (list.size() > 1 || (list.size() == 1 && !list.get(0).getFilterId().equals(filterId))) {
-            throw new CommonException(NAME_EXIST);
-        }
+        Assert.isTrue(
+                this.queryRepeatRecordCount(organizationId, projectId, userId, name, filterTypeCode, filterId) <= 0,
+                NAME_EXIST
+        );
     }
 
     @Override
@@ -145,21 +152,42 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         List<PersonalFilterVO> list = modelMapper.map(
                 personalFilterMapper.queryByProjectIdAndUserId(organizationId, projectId, userId, searchStr, filterTypeCode), new TypeToken<List<PersonalFilterVO>>() {
         }.getType());
-        list.forEach(v -> v.setFilterJson(EncryptionUtils.handlerPersonFilterJson(v.getFilterJson(),true)));
+        for (PersonalFilterVO personalFilterVO : list) {
+            personalFilterVO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterVO.getFilterJson(), true));
+        }
         return list;
     }
 
     @Override
-    public Boolean checkName(Long organizationId, Long projectId, Long userId, String name, String filterTypeCode) {
-        checkFilterTypeCode(filterTypeCode);
-        PersonalFilterDTO personalFilterDTO = new PersonalFilterDTO();
-        personalFilterDTO.setProjectId(projectId);
-        personalFilterDTO.setOrganizationId(organizationId);
-        personalFilterDTO.setUserId(userId);
-        personalFilterDTO.setName(name);
-        personalFilterDTO.setFilterTypeCode(filterTypeCode);
-        List<PersonalFilterDTO> list = personalFilterMapper.select(personalFilterDTO);
-        return list != null && !list.isEmpty();
+    public boolean nameIsExist(Long organizationId, Long projectId, Long userId, String name, String filterTypeCode, Long filterId) {
+        this.checkFilterTypeCode(filterTypeCode);
+        return this.queryRepeatRecordCount(organizationId, projectId, userId, name, filterTypeCode, filterId) > 0;
+    }
+
+    /**
+     * 根据唯一性约束查询数据库中重复的记录数量
+     * @param organizationId 组织ID
+     * @param projectId 项目ID
+     * @param userId 用户ID
+     * @param name 个人筛选名称
+     * @param filterTypeCode 个人筛选类型
+     * @param filterId 个人筛选ID(用于更新检查时排除自身)
+     * @return 重复的记录数量
+     */
+    private int queryRepeatRecordCount(Long organizationId, Long projectId, Long userId, String name, String filterTypeCode, Long filterId) {
+        Assert.notNull(organizationId, BaseConstants.ErrorCode.NOT_NULL);
+        Assert.notNull(projectId, BaseConstants.ErrorCode.NOT_NULL);
+        Assert.notNull(userId, BaseConstants.ErrorCode.NOT_NULL);
+        Assert.hasText(name, BaseConstants.ErrorCode.NOT_NULL);
+        Assert.hasText(filterTypeCode, BaseConstants.ErrorCode.NOT_NULL);
+        return this.personalFilterMapper.selectCountByCondition(Condition.builder(PersonalFilterDTO.class).andWhere(Sqls.custom()
+                .andEqualTo(PersonalFilterDTO.FIELD_ORGANIZATION_ID, organizationId)
+                .andEqualTo(PersonalFilterDTO.FIELD_PROJECT_ID, projectId)
+                .andEqualTo(PersonalFilterDTO.FIELD_USER_ID, userId)
+                .andEqualTo(PersonalFilterDTO.FIELD_NAME, name)
+                .andEqualTo(PersonalFilterDTO.FIELD_FILTER_TYPE_CODE, filterTypeCode)
+                .andNotEqualTo(PersonalFilterDTO.FIELD_FILTER_ID, filterId, true)
+        ).build());
     }
 
     @Override

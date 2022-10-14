@@ -6,6 +6,17 @@ import java.util.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.QuickFilterSearchVO;
 import io.choerodon.agile.api.vo.QuickFilterSequenceVO;
 import io.choerodon.agile.api.vo.QuickFilterVO;
@@ -28,18 +39,9 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/6/13.
@@ -686,9 +688,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     /**
      * 处理快速筛选描述中加解密问题
      *
-     * @param description
-     * @param encrypt
-     * @return
+     * @param description description
+     * @param encrypt encrypt
+     * @return result
      */
     public  String handlerFilterDescription(String description, boolean encrypt) {
         String prefix = description.substring(0, description.lastIndexOf('+') + 1);

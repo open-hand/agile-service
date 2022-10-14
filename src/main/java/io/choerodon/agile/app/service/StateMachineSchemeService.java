@@ -1,11 +1,11 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import java.util.List;
+
 import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
-
-import java.util.List;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author shinan.chen
@@ -47,7 +47,7 @@ public interface StateMachineSchemeService {
      *
      * @param organizationId 组织id
      * @param schemeId       方案id
-     * @return
+     * @return result
      */
     Boolean delete(Long organizationId, Long schemeId);
 
@@ -68,7 +68,7 @@ public interface StateMachineSchemeService {
      *
      * @param organizationId 组织id
      * @param name           名称
-     * @return
+     * @return result
      */
     Boolean checkName(Long organizationId, String name);
 
@@ -84,14 +84,14 @@ public interface StateMachineSchemeService {
     /**
      * 创建项目时，初始化敏捷/测试方案
      *
-     * @param projectEvent
+     * @param projectEvent projectEvent
      */
     void initByConsumeCreateProject(ProjectEvent projectEvent);
 
     /**
      * 若项目关联状态机方案，设置状态机方案、状态机为活跃
      *
-     * @param schemeId
+     * @param schemeId schemeId
      */
     void activeSchemeWithRefProjectConfig(Long schemeId);
 

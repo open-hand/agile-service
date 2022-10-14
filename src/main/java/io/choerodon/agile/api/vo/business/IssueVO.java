@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.*;
@@ -20,6 +21,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author dinghuang123@gmail.com
  * @since 2018-05-14 20:30:48
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueVO {
 
     @ApiModelProperty(value = "问题主键id")
@@ -309,7 +311,7 @@ public class IssueVO {
     private List<Long> productIds;
 
     @ApiModelProperty(value = "第三方实例关联")
-    private InstanceOpenRelVO instanceOpenRelVO;
+    private List<InstanceOpenRelVO> instanceOpenRels;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1079,11 +1081,11 @@ public class IssueVO {
         this.productIds = productIds;
     }
 
-    public InstanceOpenRelVO getInstanceOpenRelVO() {
-        return instanceOpenRelVO;
+    public List<InstanceOpenRelVO> getInstanceOpenRels() {
+        return instanceOpenRels;
     }
 
-    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
-        this.instanceOpenRelVO = instanceOpenRelVO;
+    public void setInstanceOpenRels(List<InstanceOpenRelVO> instanceOpenRels) {
+        this.instanceOpenRels = instanceOpenRels;
     }
 }

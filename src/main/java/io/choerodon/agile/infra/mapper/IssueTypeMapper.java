@@ -34,18 +34,18 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     /**
      * 根据id查询issue type
      *
-     * @param organizationIds
-     * @return
+     * @param organizationIds organizationIds
+     * @return result
      */
     List<IssueTypeDTO> selectSystemIssueTypeByOrganizationIds(@Param("organizationIds") Collection<Long> organizationIds);
 
     /**
      * 根据条件查询issueType
      *
-     * @param organizationId
-     * @param projectId
-     * @param issueTypeSearchVO
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param issueTypeSearchVO issueTypeSearchVO
+     * @return result
      */
     List<IssueTypeVO> selectByOptions(@Param("organizationId") Long organizationId,
                                       @Param("projectId") Long projectId,
@@ -54,9 +54,9 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     /**
      * 根据reference_id查询
      *
-     * @param ids
-     * @param organizationId
-     * @return
+     * @param ids ids
+     * @param organizationId organizationId
+     * @return result
      */
     List<IssueTypeDTO> selectByReferenceId(@Param("ids") Collection<Long> ids,
                                            @Param("organizationId") Long organizationId);
@@ -64,9 +64,9 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     /**
      * 查该项目可以引用的问题类型
      *
-     * @param organizationId
-     * @param projectId
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @return result
      */
     List<IssueTypeVO> selectEnableReference(@Param("organizationId") Long organizationId,
                                             @Param("projectId") Long projectId);
@@ -74,9 +74,9 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     /**
      * 查询问题类型，如果有别名使用别名
      *
-     * @param issueTypeId
-     * @param projectId
-     * @return
+     * @param issueTypeId issueTypeId
+     * @param projectId projectId
+     * @return result
      */
     IssueTypeDTO selectWithAlias(@Param("issueTypeId") Long issueTypeId,
                                  @Param("projectId") Long projectId);
@@ -84,9 +84,9 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     /**
      * 根据问题类型id和项目id查询问题类型
      *
-     * @param issueTypeIds
-     * @param projectIds
-     * @return
+     * @param issueTypeIds issueTypeIds
+     * @param projectIds projectIds
+     * @return result
      */
     List<IssueTypeDTO> selectWithAliasByIds(@Param("issueTypeIds") Collection<Long> issueTypeIds,
                                             @Param("projectIds") Collection<Long> projectIds,
@@ -94,9 +94,9 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
     /**
      * 根据项目ids查询问题类型
-     * @param organizationId
-     * @param projectIds
-     * @return
+     * @param organizationId organizationId
+     * @param projectIds projectIds
+     * @return result
      */
     List<IssueTypeVO> selectByProjectIds(@Param("organizationId") Long organizationId,
                                          @Param("projectIds") Collection<Long> projectIds);

@@ -29,9 +29,9 @@ public interface ProjectConfigMapper extends BaseMapper<ProjectConfigDTO> {
     /**
      * 通过方案ids查询出关联的项目（项目关联的状态机方案）
      *
-     * @param schemeIds
-     * @param schemeType
-     * @return
+     * @param schemeIds schemeIds
+     * @param schemeType schemeType
+     * @return result
      */
     List<ProjectConfigDTO> handleRemoveStatus(@Param("schemeIds") Collection<Long> schemeIds, @Param("schemeType") String schemeType);
 

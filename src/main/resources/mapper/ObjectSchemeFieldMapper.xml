@@ -337,6 +337,7 @@
         <result property="defaultValue" column="default_value"/>
         <result property="description" column="description"/>
         <result property="fieldType" column="field_type"/>
+        <result property="schemeCode" column="scheme_code"/>
         <result property="fieldTypeName" column="field_type_name"/>
         <result property="name" column="name"/>
         <result property="objectVersionNumber" column="object_version_number"/>
@@ -362,6 +363,7 @@
             t4.default_value,
             t4.description,
             t4.is_required,
+            t4.scheme_code,
             t4.field_type,
             flv.name as field_type_name,
             t4.name,
@@ -537,6 +539,8 @@
             t1.is_system,
             t1.extra_config,
             t1.is_required,
+            t1.organization_id,
+            t1.project_id,
             flv.name as field_type_name,
             t1.is_required as required,
             ffo.id as ffo_id,
@@ -547,7 +551,8 @@
         from fd_object_scheme_field t1
         left join lookup_value flv on flv.value_code = t1.field_type and flv.type_code = 'field_type'
         left join fd_field_option ffo on t1.id = ffo.field_id
-        where t1.code in
+        where t1.organization_id = #{organizationId}
+        and t1.code in
         <foreach collection="fieldCodes" item="fieldCode" open="(" close=")" separator=",">
            #{fieldCode}
         </foreach>

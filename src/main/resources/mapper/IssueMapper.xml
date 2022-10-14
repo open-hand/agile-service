@@ -4,37 +4,36 @@
 
     <resultMap type="io.choerodon.agile.infra.dto.business.IssueDetailDTO" id="issueDetail">
         <id column="issue_id" property="issueId"/>
-        <id column="issue_num_splicing" property="issueNum"/>
-        <id column="status_id" property="statusId"/>
-        <id column="type_code" property="typeCode"/>
-        <id column="summary" property="summary"/>
-        <id column="reporter_id" property="reporterId"/>
-        <id column="description" property="description"/>
-        <id column="assignee_id" property="assigneeId"/>
-        <id column="project_id" property="projectId"/>
-        <id column="epic_id" property="epicId"/>
-        <id column="parent_issue_id" property="parentIssueId"/>
-        <id column="story_points" property="storyPoints"/>
-        <id column="estimate_time" property="estimateTime"/>
-        <id column="remaining_time" property="remainingTime"/>
-        <id column="epic_name" property="epicName"/>
-        <id column="issue_epic_name" property="issueEpicName"/>
-        <id column="color_value" property="color"/>
-        <id column="epic_color" property="epicColor"/>
-        <id column="parent_issue_num" property="parentIssueNum"/>
-        <id column="parent_issue_summary" property="parentIssueSummary"/>
-        <id column="parent_issue_description" property="parentIssueDescription"/>
-        <id column="object_version_number" property="objectVersionNumber"/>
-        <id column="priority_id" property="priorityId"/>
-        <id column="issue_type_id" property="issueTypeId"/>
-        <id column="apply_type" property="applyType"/>
-        <id column="relate_issue_id" property="relateIssueId"/>
-        <id column="relate_issue_num" property="relateIssueNum"/>
-        <id column="parent_relate_num" property="parentRelateNum"/>
-        <id column="parent_relate_description" property="parentRelateDescription"/>
-        <id column="main_responsible_id" property="mainResponsibleId"/>
-        <id column="environment" property="environment"/>
-        <id column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="issue_num_splicing" property="issueNum"/>
+        <result column="status_id" property="statusId"/>
+        <result column="type_code" property="typeCode"/>
+        <result column="summary" property="summary"/>
+        <result column="reporter_id" property="reporterId"/>
+        <result column="description" property="description"/>
+        <result column="assignee_id" property="assigneeId"/>
+        <result column="project_id" property="projectId"/>
+        <result column="epic_id" property="epicId"/>
+        <result column="parent_issue_id" property="parentIssueId"/>
+        <result column="story_points" property="storyPoints"/>
+        <result column="estimate_time" property="estimateTime"/>
+        <result column="remaining_time" property="remainingTime"/>
+        <result column="epic_name" property="epicName"/>
+        <result column="issue_epic_name" property="issueEpicName"/>
+        <result column="color_value" property="color"/>
+        <result column="epic_color" property="epicColor"/>
+        <result column="parent_issue_num" property="parentIssueNum"/>
+        <result column="parent_issue_summary" property="parentIssueSummary"/>
+        <result column="parent_issue_description" property="parentIssueDescription"/>
+        <result column="object_version_number" property="objectVersionNumber"/>
+        <result column="priority_id" property="priorityId"/>
+        <result column="issue_type_id" property="issueTypeId"/>
+        <result column="apply_type" property="applyType"/>
+        <result column="relate_issue_id" property="relateIssueId"/>
+        <result column="relate_issue_num" property="relateIssueNum"/>
+        <result column="parent_relate_description" property="parentRelateDescription"/>
+        <result column="main_responsible_id" property="mainResponsibleId"/>
+        <result column="environment" property="environment"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <result property="actualStartTime" column="actual_start_time"/>
@@ -1137,6 +1136,8 @@
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql2"/>
             <!--不包含projectIds-->
             <include refid="io.choerodon.agile.infra.mapper.StarBeaconMapper.filterStarBeaconSql"/>
+            <!--钩子sql，可以在商业版覆盖-->
+            <include refid="io.choerodon.agile.infra.mapper.AgilePluginMapper.yqCloudFilter"/>
         </if>
     </sql>
 
@@ -4230,12 +4231,13 @@
         ai.issue_id, ai.summary,
         ai.project_id, ai.type_code,
         ai.issue_type_id,
+        ai.object_version_number,
         CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         WHERE ai.project_id = #{projectId}
-        AND ai.type_code in ('story', 'task', 'bug', 'sub_task')
-        AND ai.apply_type = 'agile'
+        AND ai.type_code in ('story', 'task', 'bug', 'sub_task', 'stage', 'milestone', 'activity')
+        AND ai.apply_type in ('agile', 'waterfall')
         AND ai.issue_num = #{issueNum}
     </select>
 

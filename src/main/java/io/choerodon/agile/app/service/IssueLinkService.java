@@ -1,13 +1,13 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import java.util.List;
 
 /**
  * @author dinghuang123@gmail.com
@@ -69,11 +69,11 @@ public interface IssueLinkService {
 
     /**
      * 校验关联问题时状态联动是否会出现死循环
-     * @param projectId
-     * @param issueId
-     * @param linkTypeId
-     * @param linkIssueIds
-     * @return
+     * @param projectId projectId
+     * @param issueId issueId
+     * @param linkTypeId linkTypeId
+     * @param linkIssueIds linkIssueIds
+     * @return result
      */
     List<Long> checkLinkIssueCycle(Long projectId, Long issueId,  Long linkTypeId, List<Long> linkIssueIds);
 }

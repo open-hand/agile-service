@@ -1,12 +1,12 @@
 package io.choerodon.agile.infra.enums;
 
-import io.choerodon.core.exception.CommonException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author superlee
@@ -22,9 +22,9 @@ public class ExcelImportTemplate {
 
         private Integer processNum;
 
-        public Progress () {
+        public Progress() {
             this.failCount = 0L;
-            this.successCount=0L;
+            this.successCount = 0L;
             this.processNum = 0;
         }
 
@@ -36,7 +36,7 @@ public class ExcelImportTemplate {
             this.processNum += count;
         }
 
-        public void failCountIncrease(){
+        public void failCountIncrease() {
             this.failCount++;
         }
 
@@ -82,7 +82,7 @@ public class ExcelImportTemplate {
         //隐藏页sheet从2开始，0为导航页，1为数据页
         private int startSheetNum;
 
-        public Cursor () {
+        public Cursor() {
             this.startSheetNum = 2;
         }
 
@@ -155,6 +155,7 @@ public class ExcelImportTemplate {
 
         public static final String PARENT = "parent";
         public static final String RELATE_ISSUE = "relate_issue";
+        public static final String ISSUE_NUM = "issueNum";
         private static final int INIT_CAPACITY = 50;
         protected static final List<String> HEADER_CODES = new ArrayList<>(INIT_CAPACITY);
         private static final Map<String, String> CODE_VALUE_MAP = new HashMap(INIT_CAPACITY);
@@ -163,25 +164,26 @@ public class ExcelImportTemplate {
 
         static {
             HEADERS = new ArrayList<>(INIT_CAPACITY);
+            HEADERS.add(new Header(ISSUE_NUM, "编号", true, null));
             HEADERS.add(new Header(FieldCode.ISSUE_TYPE, IssueConstant.ISSUE_TYPE_CN + "*", true, null));
-            HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", false, 12000));
+            HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", true, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
             HEADERS.add(new Header(FieldCode.FEATURE, "所属特性", false, 8000));
-            HEADERS.add(new Header(FieldCode.COMPONENT, "模块", true, null));
-            HEADERS.add(new Header(FieldCode.SPRINT, "冲刺", true, null));
-            HEADERS.add(new Header(FieldCode.SUMMARY, "概述*", true, null));
-            HEADERS.add(new Header(FieldCode.DESCRIPTION, "描述", true, null));
-            HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", true, null));
-            HEADERS.add(new Header(FieldCode.REPORTER, "报告人", true, null));
-            HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", true, null));
+            HEADERS.add(new Header(FieldCode.COMPONENT, "模块", false, null));
+            HEADERS.add(new Header(FieldCode.SPRINT, "冲刺", false, null));
+            HEADERS.add(new Header(FieldCode.SUMMARY, "概要*", true, null));
+            HEADERS.add(new Header(FieldCode.DESCRIPTION, "描述", false, null));
+            HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", false, null));
+            HEADERS.add(new Header(FieldCode.REPORTER, "报告人", false, null));
+            HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", false, null));
             HEADERS.add(new Header(FieldCode.REMAINING_TIME, "剩余预估时间(小时)", true, null));
             HEADERS.add(new Header(FieldCode.FIX_VERSION, "修复的版本", false, null));
             HEADERS.add(new Header(FieldCode.INFLUENCE_VERSION, "影响的版本", false, null));
             HEADERS.add(new Header(FieldCode.STORY_POINTS, "故事点", true, null));
             HEADERS.add(new Header(FieldCode.EPIC_NAME, "史诗名称(仅" + IssueConstant.ISSUE_TYPE_CN + "为史诗时生效)", false, 8000));
             HEADERS.add(new Header(FieldCode.LABEL, "标签", false, null));
-            HEADERS.add(new Header(FieldCode.ESTIMATED_START_TIME, "预估开始时间", false, null));
-            HEADERS.add(new Header(FieldCode.ESTIMATED_END_TIME, "预估结束时间", false, null));
+            HEADERS.add(new Header(FieldCode.ESTIMATED_START_TIME, "预计开始时间", false, null));
+            HEADERS.add(new Header(FieldCode.ESTIMATED_END_TIME, "预计结束时间", false, null));
             HEADERS.add(new Header(FieldCode.MAIN_RESPONSIBLE, "主要负责人", false, null));
             HEADERS.add(new Header(FieldCode.ENVIRONMENT, "环境", false, null));
             HEADERS.add(new Header(RELATE_ISSUE, "关联" + IssueConstant.ISSUE_CN, false, null));
@@ -191,7 +193,10 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.PARTICIPANT, "参与人", false, null));
             HEADERS.add(new Header(FieldCode.ESTIMATE_TIME, "原始预估时间(小时)", false, null));
             HEADERS.add(new Header(FieldCode.PRODUCT, "产品", false, null));
-
+            HEADERS.add(new Header(FieldCode.CREATION_DATE, "创建时间", false, null));
+            HEADERS.add(new Header(FieldCode.LAST_UPDATE_DATE, "最后更新时间", false, null));
+            HEADERS.add(new Header(FieldCode.CREATOR, "创建人", false, null));
+            HEADERS.add(new Header(FieldCode.UPDATOR, "更新人", false, null));
             HEADERS.forEach(h -> {
                 String code = h.getCode();
                 String value = h.getValue();

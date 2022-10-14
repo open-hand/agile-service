@@ -3,11 +3,12 @@ package io.choerodon.agile.infra.mapper;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.ibatis.annotations.Param;
+
 import io.choerodon.agile.api.vo.IssueLabelVO;
 import io.choerodon.agile.api.vo.LabelIssueRelVO;
+import io.choerodon.agile.infra.dto.IssueLabelDTO;
 import io.choerodon.mybatis.common.BaseMapper;
-import io.choerodon.agile.infra.dto.*;
-import org.apache.ibatis.annotations.Param;
 
 
 /**
@@ -47,23 +48,23 @@ public interface IssueLabelMapper extends BaseMapper<IssueLabelDTO> {
     /**
      * 根据项目id集合查询标签
      *
-     * @param projectIds
-     * @return
+     * @param projectIds projectIds
+     * @return result
      */
     List<IssueLabelDTO> selectByProjectIds(@Param("projectIds") List<Long> projectIds);
 
     /**
      * 根据issueIds 查询标签
-     * @param projectIds
-     * @param issueIds
-     * @return
+     * @param projectIds projectIds
+     * @param issueIds issueIds
+     * @return result
      */
     List<LabelIssueRelVO> listByIssueIds(@Param("projectIds") Set<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 
     /**
      * 查询项目下的标签
-     * @param projectId
-     * @return
+     * @param projectId projectId
+     * @return result
      */
     List<IssueLabelVO> listByProjectId(@Param("projectId") Long projectId);
 }

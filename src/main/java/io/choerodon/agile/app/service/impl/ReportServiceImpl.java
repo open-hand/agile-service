@@ -1,31 +1,43 @@
 package io.choerodon.agile.app.service.impl;
 
+import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.report.CustomChartDataVO;
 import io.choerodon.agile.api.vo.report.CustomChartDimensionVO;
 import io.choerodon.agile.api.vo.report.CustomChartPointVO;
 import io.choerodon.agile.api.vo.report.CustomChartSearchVO;
-import io.choerodon.agile.api.vo.report.CustomChartDataVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
-import io.choerodon.agile.infra.dto.GroupDataChartDTO;
-import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.assembler.ReportAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,19 +50,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
 
 /**
  * @author dinghuang123@gmail.com
@@ -96,7 +95,7 @@ public class ReportServiceImpl implements ReportService {
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private IssueService issueService;
     @Autowired
@@ -1724,7 +1723,7 @@ public class ReportServiceImpl implements ReportService {
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(userIds, true);
         UserMessageDTO nullUser = new UserMessageDTO("无", null, null);
         userMap.put(0L, nullUser);
-        List<ProjectVO> projectList = baseFeignClient.queryByIds(projectIds).getBody();
+        List<ProjectVO> projectList = remoteIamOperator.queryProjectByIds(projectIds);
         if (!CollectionUtils.isEmpty(projectList)) {
             projectList.forEach(projectVO -> {
                 projectMap.put(projectVO.getId(), projectVO);

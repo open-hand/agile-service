@@ -20,7 +20,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
@@ -57,7 +57,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectConfigMapper projectConfigMapper;
     @Autowired
@@ -773,7 +773,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             projectSearchVO.setEnable(true);
             projectSearchVO.setCategoryCodes(categories);
             Page<ProjectVO> page = Optional.ofNullable(
-                    baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, pageRequest.getPage(), pageRequest.getSize()).getBody()
+                    remoteIamOperator.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, pageRequest.getPage(), pageRequest.getSize())
             ).orElse(new Page<>());
             List<ProjectVO> projects = page.getContent();
             Set<Long> ids = projects.stream().map(ProjectVO::getId).collect(Collectors.toSet());
@@ -804,7 +804,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
                             .collect(Collectors.toMap(IssueTypeExtendDTO::getProjectId, IssueTypeExtendDTO::getEnabled));
             Set<Long> projectIds =
                     list.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
-            List<ProjectVO> projects = Optional.ofNullable(baseFeignClient.queryByIds(projectIds).getBody()).orElse(Collections.emptyList());
+            List<ProjectVO> projects = Optional.ofNullable(remoteIamOperator.queryProjectByIds(projectIds)).orElse(Collections.emptyList());
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
         }
@@ -966,7 +966,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private Map<String, Set<Long>> listProjectIdsGroupByCategory(Long organizationId) {
         ProjectSearchVO projectSearchVO = new ProjectSearchVO();
         projectSearchVO.setEnable(true);
-        Page<ProjectVO> page = baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 1, 0).getBody();
+        Page<ProjectVO> page = remoteIamOperator.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, 1, 0);
         List<ProjectVO> projects = Optional.ofNullable(page).map(Page::getContent).orElse(Collections.emptyList());
         Map<String, Set<Long>> map = new HashMap<>();
         projects.forEach(p -> {
@@ -1219,13 +1219,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         Set<Long> projectIds = CollectionUtils.isEmpty(issueTypeSearchVO.getProjectIds()) ? new HashSet<>() : new HashSet<>(issueTypeSearchVO.getProjectIds());
         if (CollectionUtils.isEmpty(projectIds)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
-            projects = baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId,  null, true).getBody();
+            projects = remoteIamOperator.listProjectsByUserIdForSimple(organizationId, userId,  null, true);
             if (CollectionUtils.isEmpty(projects)) {
                 return new Page<>();
             }
             projectIds = projects.stream().map(ProjectVO::getId).collect(Collectors.toSet());
         } else {
-            projects = baseFeignClient.queryProjectByIds(projectIds).getBody();
+            projects = remoteIamOperator.queryProjectByIds(projectIds);
             if (CollectionUtils.isEmpty(projects)) {
                 return new Page<>();
             }

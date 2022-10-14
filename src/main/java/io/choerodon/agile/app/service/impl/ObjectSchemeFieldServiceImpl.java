@@ -4,28 +4,28 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
-import org.springframework.util.ObjectUtils;
+import io.choerodon.core.oauth.DetailsHelper;
+
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 
 /**
@@ -77,7 +77,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private IssueComponentMapper issueComponentMapper;
     @Autowired
@@ -353,8 +353,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         } else {
             Long userId = DetailsHelper.getUserDetails().getUserId();
             Set<Long> projectIds =
-                    baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId, ProjectCategory.MODULE_BACKLOG, null)
-                            .getBody()
+                    remoteIamOperator.listProjectsByUserIdForSimple(organizationId, userId, ProjectCategory.MODULE_BACKLOG, null)
                             .stream()
                             .map(ProjectVO::getId)
                             .collect(Collectors.toSet());
@@ -882,8 +881,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (projectId == null) {
             //组织层判断项目是否使用了该字段，如果使用则不能删除
             List<Long> projectIds =
-                    baseFeignClient.listProjectsByOrgId(organizationId)
-                            .getBody()
+                    remoteIamOperator.listProjectsByOrgId(organizationId)
                             .stream()
                             .map(ProjectVO::getId)
                             .collect(Collectors.toList());
@@ -978,8 +976,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             insertSet.forEach(i -> insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, i, true, true, defaultValue, extraConfig));
         } else {
             List<Long> projectIdList =
-                    baseFeignClient.listProjectsByOrgId(organizationId)
-                            .getBody()
+                    remoteIamOperator.listProjectsByOrgId(organizationId)
                             .stream()
                             .map(ProjectVO::getId)
                             .collect(Collectors.toList());
@@ -1306,7 +1303,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<String> existFieldCodes = list.stream().filter(v -> Boolean.TRUE.equals(v.getSystem())).map(ObjectSchemeFieldDetailVO::getCode).collect(Collectors.toList());
         fieldCodes.removeAll(existFieldCodes);
         if (!CollectionUtils.isEmpty(fieldCodes)) {
-            List<ObjectSchemeFieldDetailVO> addFields = modelMapper.map(objectSchemeFieldMapper.selectFieldsByFieldCodes(fieldCodes),  new TypeToken<List<ObjectSchemeFieldDetailVO>>(){}.getType());
+            List<ObjectSchemeFieldDetailVO> addFields = modelMapper.map(objectSchemeFieldMapper.selectFieldsByFieldCodes(ConvertUtil.getOrganizationId(projectId), fieldCodes),  new TypeToken<List<ObjectSchemeFieldDetailVO>>(){}.getType());
             list.addAll(addFields);
         }
         return filterFieldsByProjectCategories(list, projectId);
@@ -1413,7 +1410,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 if (v.getDefaultValue() != null && !"".equals(v.getDefaultValue())) {
                     Long defaultValue = Long.valueOf(String.valueOf(v.getDefaultValue()));
                     v.setDefaultValue(EncryptionUtils.encrypt(defaultValue));
-                    List<UserDTO> list = baseFeignClient.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false).getBody();
+                    List<UserDTO> list = remoteIamOperator.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false);
                     if (!list.isEmpty()) {
                         v.setDefaultValueObj(list.get(0));
                     }
@@ -1424,7 +1421,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 List<String> defaultIds = Arrays.asList(v.getDefaultValue().split(","));
                 List<String> encryptList = EncryptionUtils.encryptListToStr(defaultIds);
                 v.setDefaultValue(StringUtils.join(encryptList.toArray(), ","));
-                List<UserDTO> list = baseFeignClient.listUsersByIds(defaultIds.stream().map(Long::valueOf).toArray(Long[]::new), false).getBody();
+                List<UserDTO> list = remoteIamOperator.listUsersByIds(defaultIds.stream().map(Long::valueOf).toArray(Long[]::new), false);
                 if (!CollectionUtils.isEmpty(list)) {
                     v.setDefaultValueObj(list);
                 }
@@ -1533,8 +1530,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         } else {
             //获取组织下所有项目
             List<Long> projectIds =
-                    baseFeignClient.listProjectsByOrgId(organizationId)
-                            .getBody()
+                    remoteIamOperator.listProjectsByOrgId(organizationId)
                             .stream()
                             .map(ProjectVO::getId)
                             .collect(Collectors.toList());
@@ -1669,8 +1665,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!editOnProjectLevel && !CollectionUtils.isEmpty(fieldIds)) {
             // 获取组织下所有项目
             List<Long> projectIds =
-                    baseFeignClient.listProjectsByOrgId(organizationId)
-                            .getBody()
+                    remoteIamOperator.listProjectsByOrgId(organizationId)
                             .stream()
                             .map(ProjectVO::getId)
                             .collect(Collectors.toList());
@@ -1951,7 +1946,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     case FieldCode.PROGRAM_VERSION:
                     case FieldCode.PRODUCT:
                         if (agilePluginService != null) {
-                            agilePluginService.setBussinessDefaultValueObjs(pageFieldViews, projectId, organizationId);
+                            agilePluginService.setBusinessDefaultValueObjs(pageFieldViews, projectId, organizationId);
                         }
                         break;
                     case FieldCode.BACKLOG_TYPE:

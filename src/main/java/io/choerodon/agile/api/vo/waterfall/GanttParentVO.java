@@ -1,16 +1,19 @@
 package io.choerodon.agile.api.vo.waterfall;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.util.Objects;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author superlee
  * @since 2022-02-25
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GanttParentVO {
 
     public static final String ISSUE = "issue";

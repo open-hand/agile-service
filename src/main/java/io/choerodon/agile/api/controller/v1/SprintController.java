@@ -1,41 +1,43 @@
 package io.choerodon.agile.api.controller.v1;
 
 
-import io.choerodon.agile.api.vo.business.IssueListVO;
-import io.choerodon.agile.api.vo.business.IssueSearchVO;
-import io.choerodon.agile.api.vo.business.SprintDetailVO;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.SprintService;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.swagger.annotation.CustomPageRequest;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.validation.Valid;
+
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.business.IssueSearchVO;
+import io.choerodon.agile.api.vo.business.SprintDetailVO;
+import io.choerodon.agile.app.service.SprintService;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.CustomPageRequest;
+import io.choerodon.swagger.annotation.Permission;
+
+import org.hzero.core.base.BaseController;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.
  */
 @RestController
 @RequestMapping(value = "/v1/projects/{project_id}/sprint")
-public class SprintController {
+public class SprintController extends BaseController {
 
     @Autowired
     private SprintService sprintService;
@@ -55,7 +57,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> createSprint(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "冲刺创建VO", required = true)
-                                                       @RequestBody SprintCreateVO sprintCreateVO) {
+                                                       @RequestBody @Valid SprintCreateVO sprintCreateVO) {
         return Optional.ofNullable(sprintService.createSprintByDetails(projectId, sprintCreateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(CREATE_ERROR));
@@ -67,7 +69,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> updateSprint(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "冲刺DTO对象", required = true)
-                                                       @RequestBody @Valid  SprintUpdateVO sprintUpdateVO) {
+                                                       @RequestBody @Valid SprintUpdateVO sprintUpdateVO) {
         return Optional.ofNullable(sprintService.updateSprint(projectId, sprintUpdateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(UPDATE_ERROR));
@@ -122,7 +124,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> startSprint(@ApiParam(value = "项目id", required = true)
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "冲刺DTO对象", required = true)
-                                                      @RequestBody @Valid  SprintUpdateVO sprintUpdateVO) {
+                                                      @RequestBody @Valid SprintUpdateVO sprintUpdateVO) {
         return Optional.ofNullable(sprintService.startSprint(projectId, sprintUpdateVO, true))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(OPEN_ERROR));

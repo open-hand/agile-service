@@ -1,11 +1,15 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import io.choerodon.agile.api.vo.ProjectInfoFixVO;
+import io.choerodon.agile.api.vo.ProjectInfoVO;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.ProjectInfoService;
-import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
@@ -15,9 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author dinghuang123@gmail.com
@@ -30,11 +31,11 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
-    private BaseFeignClient baseFeignClient;
-    @Autowired
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public void initializationProjectInfo(ProjectEvent projectEvent) {
@@ -67,10 +68,14 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     @Override
     public ProjectInfoVO updateProjectInfo(ProjectInfoVO projectInfoVO) {
         ProjectInfoDTO projectInfoDTO = modelMapper.map(projectInfoVO, ProjectInfoDTO.class);
-        if (projectInfoMapper.updateByPrimaryKeySelective(projectInfoDTO) != 1) {
-            throw new CommonException("error.projectInfo.update");
+        if (ObjectUtils.isEmpty(agilePluginService)) {
+            if (projectInfoMapper.updateByPrimaryKeySelective(projectInfoDTO) != 1) {
+                throw new CommonException("error.projectInfo.update");
+            }
+            return projectInfoVO;
+        } else {
+            return agilePluginService.updateProjectInfo(projectInfoVO);
         }
-        return projectInfoVO;
     }
 
     @Override

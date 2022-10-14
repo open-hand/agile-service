@@ -1,14 +1,15 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.statemachine.StateContext;
+
 import io.choerodon.agile.api.vo.StateMachineConfigVO;
 import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.event.TransformInfo;
+import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
-import org.springframework.statemachine.StateContext;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author shinan.chen
@@ -19,18 +20,18 @@ public interface InstanceService {
     /**
      * 创建状态机实例，并返回初始状态
      *
-     * @param serviceCode
-     * @param stateMachineId
-     * @return
+     * @param serviceCode serviceCode
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, InputDTO inputDTO);
 
     /**
      * 查询状态机的初始状态id
      *
-     * @param organizationId
-     * @param stateMachineId
-     * @return
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     Long queryInitStatusId(Long organizationId, Long stateMachineId);
 
@@ -41,40 +42,40 @@ public interface InstanceService {
      * @param transformId     转换Id
      * @param currentStatusId 当前状态Id
      * @param serviceCode     请求服务code
-     * @return
+     * @return result
      */
     ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO);
 
     /**
      * 获取当前状态拥有的转换列表，feign调用对应服务的条件验证
      *
-     * @param organizationId
-     * @param statusId
-     * @return
+     * @param organizationId organizationId
+     * @param statusId statusId
+     * @return result
      */
     List<TransformInfo> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId);
 
     /**
      * 调用相应服务，验证转换
      *
-     * @param organizationId
-     * @param serviceCode
-     * @param transformId
-     * @param inputDTO
+     * @param organizationId organizationId
+     * @param serviceCode serviceCode
+     * @param transformId transformId
+     * @param inputDTO inputDTO
      * @param context        状态机上下文，传递参数
-     * @return
+     * @return result
      */
     Boolean validatorGuard(Long organizationId, String serviceCode, Long transformId, InputDTO inputDTO, StateContext<String, String> context);
 
     /**
      * 调用相应服务，执行后置动作
      *
-     * @param organizationId
-     * @param serviceCode
-     * @param transformId
-     * @param inputDTO
+     * @param organizationId organizationId
+     * @param serviceCode serviceCode
+     * @param transformId transformId
+     * @param inputDTO inputDTO
      * @param context        状态机上下文，传递参数
-     * @return
+     * @return result
      */
     Boolean postAction(Long organizationId, String serviceCode, Long transformId, InputDTO inputDTO, StateContext<String, String> context);
 
@@ -82,7 +83,7 @@ public interface InstanceService {
      * 条件
      *
      * @param transformId 转换id
-     * @return
+     * @return result
      */
     List<StateMachineConfigVO> condition(Long organizationId, Long transformId);
 
@@ -90,7 +91,7 @@ public interface InstanceService {
      * 验证器
      *
      * @param transformId 转换id
-     * @return
+     * @return result
      */
     List<StateMachineConfigVO> validator(Long organizationId, Long transformId);
 
@@ -98,7 +99,7 @@ public interface InstanceService {
      * 触发器
      *
      * @param transformId 转换id
-     * @return
+     * @return result
      */
     List<StateMachineConfigVO> trigger(Long organizationId, Long transformId);
 
@@ -106,7 +107,7 @@ public interface InstanceService {
      * 后置功能
      *
      * @param transformId 转换id
-     * @return
+     * @return result
      */
     List<StateMachineConfigVO> action(Long organizationId, Long transformId);
 
@@ -122,9 +123,9 @@ public interface InstanceService {
     /**
      * 创建实例时，获取状态机的初始转换
      *
-     * @param organizationId
-     * @param stateMachineId
-     * @return
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
+     * @return result
      */
     StatusMachineTransformVO queryInitTransform(Long organizationId, Long stateMachineId);
 }
