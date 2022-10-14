@@ -8,7 +8,6 @@ import io.choerodon.agile.infra.dto.IssueLabelDTO;
 import io.choerodon.agile.infra.mapper.IssueLabelMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

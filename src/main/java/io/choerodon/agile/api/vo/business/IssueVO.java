@@ -309,7 +309,7 @@ public class IssueVO {
     private List<Long> productIds;
 
     @ApiModelProperty(value = "第三方实例关联")
-    private InstanceOpenRelVO instanceOpenRelVO;
+    private List<InstanceOpenRelVO> instanceOpenRels;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1079,11 +1079,11 @@ public class IssueVO {
         this.productIds = productIds;
     }
 
-    public InstanceOpenRelVO getInstanceOpenRelVO() {
-        return instanceOpenRelVO;
+    public List<InstanceOpenRelVO> getInstanceOpenRels() {
+        return instanceOpenRels;
     }
 
-    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
-        this.instanceOpenRelVO = instanceOpenRelVO;
+    public void setInstanceOpenRels(List<InstanceOpenRelVO> instanceOpenRels) {
+        this.instanceOpenRels = instanceOpenRels;
     }
 }

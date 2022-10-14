@@ -1,13 +1,17 @@
 package io.choerodon.agile.api.vo.waterfall;
 
-import io.choerodon.agile.api.vo.IssueTypeVO;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.api.vo.IssueTypeVO;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author huaxin.deng@hand-china.com
  * @since 2022/2/17
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueParentVO {
 
     @Encrypt

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.business.ArtVO;
+import io.choerodon.agile.infra.feign.vo.HealthStateVO;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 
@@ -59,8 +60,20 @@ public class ProjectVO {
     private Set<Long> topProjectIds;
     @ApiModelProperty(value = "模糊搜索参数")
     private String param;
+    @ApiModelProperty(value = "项目状态颜色")
+    private String color;
+    @ApiModelProperty("健康状态")
+    private HealthStateVO healthStateVO;
     @ApiModelProperty("项目群ART信息")
     private ArtVO artInfo;
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public String getParam() {
         return param;
@@ -229,5 +242,13 @@ public class ProjectVO {
     public ProjectVO setArtInfo(ArtVO artInfo) {
         this.artInfo = artInfo;
         return this;
+    }
+
+    public HealthStateVO getHealthStateVO() {
+        return healthStateVO;
+    }
+
+    public void setHealthStateVO(HealthStateVO healthStateVO) {
+        this.healthStateVO = healthStateVO;
     }
 }

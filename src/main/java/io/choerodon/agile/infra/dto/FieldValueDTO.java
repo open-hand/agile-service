@@ -38,6 +38,16 @@ public class FieldValueDTO extends AuditDomain {
     private String optionValue;
     @Transient
     private String fieldType;
+    @Transient
+    private String fieldCode;
+
+    public String getFieldCode() {
+        return fieldCode;
+    }
+
+    public void setFieldCode(String fieldCode) {
+        this.fieldCode = fieldCode;
+    }
 
     public String getFieldType() {
         return fieldType;

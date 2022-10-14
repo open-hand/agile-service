@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.enums;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -30,6 +31,8 @@ public enum IssueTypeCode {
     public static List<String> AGILE_ISSUE_TYPE_CODE_NO_EPIC = Arrays.asList(STORY.value, TASK.value, BUG.value, SUB_TASK.value);
 
     public static List<String> AGILE_PARENT_ISSUE_TYPES = Arrays.asList(STORY.value, TASK.value, BUG.value);
+
+    public static List<String> YQY_NOT_ASSOCIATION_TYPES = Arrays.asList(ISSUE_EPIC.value, RISK.value, SUB_TASK.value, ISSUE_TEST.value, ISSUE_AUTO_TEST.value);
 
     private String value;
 
@@ -81,9 +84,18 @@ public enum IssueTypeCode {
         return RISK.value.equals(value);
     }
 
+    /**
+     * 燕千云可查询类型
+     */
+    public static List<String> yqcloudAssociationTypes() {
+        return Arrays.stream(IssueTypeCode.values())
+                .map(IssueTypeCode::value).filter(v -> !YQY_NOT_ASSOCIATION_TYPES.contains(v))
+                .collect(Collectors.toList());
+    }
+
     public static boolean contains(String typeCode) {
         for (IssueTypeCode issueTypeCode : IssueTypeCode.values()) {
-            if(issueTypeCode.value().equals(typeCode)) {
+            if (issueTypeCode.value().equals(typeCode)) {
                 return true;
             }
         }

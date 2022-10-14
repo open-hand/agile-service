@@ -1,15 +1,18 @@
 package io.choerodon.agile.api.vo.business;
 
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author huaxin.deng@hand-china.com
  * @since 2022/5/7
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductStatusVO {
 
     @Encrypt

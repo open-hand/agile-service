@@ -1,19 +1,20 @@
 package io.choerodon.agile.app.service;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSONObject;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
-import io.choerodon.agile.api.vo.report.CustomChartSearchVO;
 import io.choerodon.agile.api.vo.report.CustomChartDataVO;
+import io.choerodon.agile.api.vo.report.CustomChartSearchVO;
 import io.choerodon.agile.infra.dto.GroupDataChartDTO;
 import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
 import io.choerodon.agile.infra.mapper.ReportMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author dinghuang123@gmail.com
@@ -26,7 +27,7 @@ public interface ReportService {
      *
      * @param projectId   projectId
      * @param sprintId    sprintId
-     * @param burnDownSearchVO
+     * @param burnDownSearchVO burnDownSearchVO
      * @return ReportIssueVO
      */
     List<ReportIssueVO> queryBurnDownReport(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO);
@@ -75,7 +76,7 @@ public interface ReportService {
      *
      * @param projectId projectId
      * @param sprintId  sprintId
-     * @param burnDownSearchVO
+     * @param burnDownSearchVO burnDownSearchVO
      * @return Coordinate
      */
     JSONObject queryBurnDownCoordinate(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO);

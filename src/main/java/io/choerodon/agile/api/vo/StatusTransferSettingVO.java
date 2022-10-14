@@ -29,6 +29,26 @@ public class StatusTransferSettingVO {
     private UserDTO user;
     @ApiModelProperty(value = "是否验证订阅完成")
     private Boolean isVerifySubissueCompleted;
+    @ApiModelProperty(value = "角色")
+    private RoleVO role;
+    @ApiModelProperty(value = "字段名称")
+    private String fieldName;
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public RoleVO getRole() {
+        return role;
+    }
+
+    public void setRole(RoleVO role) {
+        this.role = role;
+    }
 
     public Long getId() {
         return id;

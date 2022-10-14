@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.dto.IssueInfoDTO;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 

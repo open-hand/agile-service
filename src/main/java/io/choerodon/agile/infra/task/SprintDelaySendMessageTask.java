@@ -1,30 +1,31 @@
 package io.choerodon.agile.infra.task;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.api.vo.ProjectWithUserVO;
 import io.choerodon.agile.api.vo.SprintDelayCarrierVO;
 import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.SprintMapper;
 import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
 import io.choerodon.asgard.schedule.enums.TriggerTypeEnum;
 import io.choerodon.core.enums.MessageAdditionalType;
-import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -52,9 +53,7 @@ public class SprintDelaySendMessageTask {
     @Autowired
     private SprintMapper sprintMapper;
     @Autowired
-    private MessageClient messageClient;
-    @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private DelayTaskService delayTaskService;
 
@@ -137,8 +136,7 @@ public class SprintDelaySendMessageTask {
             }
         });
         if (!projectIdForProjectOwner.isEmpty()) {
-            List<ProjectWithUserVO> projectWithUserList =
-                    baseFeignClient.listProjectOwnerByIds(projectIdForProjectOwner).getBody();
+            List<ProjectWithUserVO> projectWithUserList = remoteIamOperator.listProjectOwnerByIds(projectIdForProjectOwner);
             projectWithUserList.forEach(x -> {
                 projectOwnerMap.computeIfAbsent(x.getProjectId(), y -> x.getUserIds());
                 userIds.addAll(x.getUserIds());
@@ -146,8 +144,7 @@ public class SprintDelaySendMessageTask {
         }
         if (!userIds.isEmpty()) {
             userMap.putAll(
-                    baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true)
-                            .getBody()
+                    remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true)
                             .stream()
                             .collect(Collectors.toMap(UserDTO::getId, Function.identity()))
             );

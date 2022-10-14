@@ -217,6 +217,16 @@ public class IssueListFieldKVVO {
 
     @ApiModelProperty(value = "敏捷已完成子任务数量")
     private Integer completedSubIssues;
+    @ApiModelProperty(value = "第三方实例关联关系")
+    private List<InstanceOpenRelVO> instanceOpenRelList;
+
+    public List<InstanceOpenRelVO> getInstanceOpenRelList() {
+        return instanceOpenRelList;
+    }
+
+    public void setInstanceOpenRelList(List<InstanceOpenRelVO> instanceOpenRelList) {
+        this.instanceOpenRelList = instanceOpenRelList;
+    }
 
     public Integer getProgress() {
         return progress;

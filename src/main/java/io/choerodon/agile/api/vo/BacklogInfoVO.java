@@ -1,15 +1,15 @@
 package io.choerodon.agile.api.vo;
 
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.util.Date;
 import java.util.List;
+
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class BacklogInfoVO {
     @Encrypt
     @ApiModelProperty("需求id")
-    private Long backlogId;
+    private Long id;
     @ApiModelProperty("组织id")
     private Long organizationId;
     @ApiModelProperty("项目id")
@@ -20,6 +20,10 @@ public class BacklogInfoVO {
     private String backlogNum;
     @ApiModelProperty("概要")
     private String summary;
+    @ApiModelProperty("需求类型")
+    private String backlogTypeName;
+    @ApiModelProperty("需求类型")
+    private String backlogClassificationName;
     @ApiModelProperty("处理人id集合")
     private List<Long> assigneeIds;
     @ApiModelProperty("创建人")
@@ -34,14 +38,14 @@ public class BacklogInfoVO {
     public BacklogInfoVO() {
     }
 
-    public BacklogInfoVO(Long backlogId, Long organizationId, Long projectId) {
-        this.backlogId = backlogId;
+    public BacklogInfoVO(Long id, Long organizationId, Long projectId) {
+        this.id = id;
         this.organizationId = organizationId;
         this.projectId = projectId;
     }
 
-    public BacklogInfoVO(Long backlogId, Long organizationId, Long projectId, Long statusId) {
-        this.backlogId = backlogId;
+    public BacklogInfoVO(Long id, Long organizationId, Long projectId, Long statusId) {
+        this.id = id;
         this.organizationId = organizationId;
         this.projectId = projectId;
         this.statusId = statusId;
@@ -55,12 +59,12 @@ public class BacklogInfoVO {
         this.statusId = statusId;
     }
 
-    public Long getBacklogId() {
-        return backlogId;
+    public Long getId() {
+        return id;
     }
 
-    public void setBacklogId(Long backlogId) {
-        this.backlogId = backlogId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getOrganizationId() {
@@ -133,5 +137,21 @@ public class BacklogInfoVO {
 
     public void setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public String getBacklogTypeName() {
+        return backlogTypeName;
+    }
+
+    public void setBacklogTypeName(String backlogTypeName) {
+        this.backlogTypeName = backlogTypeName;
+    }
+
+    public String getBacklogClassificationName() {
+        return backlogClassificationName;
+    }
+
+    public void setBacklogClassificationName(String backlogClassificationName) {
+        this.backlogClassificationName = backlogClassificationName;
     }
 }

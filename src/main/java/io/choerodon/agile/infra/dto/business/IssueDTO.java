@@ -1,5 +1,14 @@
 package io.choerodon.agile.infra.dto.business;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.infra.dto.IssueComponentBriefDTO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
@@ -10,16 +19,18 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-
 @VersionAudit
 @ModifyAudit
 @Table(name = "agile_issue")
 public class IssueDTO extends AuditDomain {
+
+    public static final String FIELD_ISSUE_ID= "issueId";
+    public static final String FIELD_ISSUE_NUM = "issueNum";
+    public static final String FIELD_SUMMARY = "summary";
+    public static final String FIELD_TYPE_CODE = "typeCode";
+    public static final String FIELD_STATUS_ID = "statusId";
+    public static final String FIELD_PROJECT_ID = "projectId";
+
     /***/
     @Id
     @GeneratedValue

@@ -1,10 +1,30 @@
 package io.choerodon.agile.infra.utils;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.IssueCommentVO;
+import io.choerodon.agile.api.vo.IssueMoveVO;
+import io.choerodon.agile.api.vo.IssueSubVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.NoticeService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.IssueConstant;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.mapper.StarBeaconMapper;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
@@ -17,28 +37,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import io.choerodon.agile.api.vo.IssueCommentVO;
-import io.choerodon.agile.api.vo.IssueMoveVO;
-import io.choerodon.agile.api.vo.IssueSubVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.app.service.NoticeService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.IssueStatusMapper;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.
@@ -83,9 +81,6 @@ public class SendMsgUtil {
     private IssueStatusMapper issueStatusMapper;
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
-
-    @Autowired
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private ModelMapper modelMapper;
@@ -117,7 +112,7 @@ public class SendMsgUtil {
             if (CollectionUtils.isNotEmpty(result.getParticipants())) {
                 List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, result);
                 List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
-                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName, participantIds);
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, participantIds);
             }
         }
     }
@@ -171,7 +166,7 @@ public class SendMsgUtil {
             }
             if (CollectionUtils.isNotEmpty(result.getParticipantIds())) {
                 List<Long> sendUserIds = noticeService.queryUserIdsByProjectId(projectId, ISSUE_SET_PARTICIPANT, issueVO);
-                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, reporterName, result.getParticipantIds());
+                siteMsgUtil.issueParticipant(summary, url, projectId, operatorId, sendUserIds, result.getParticipantIds());
             }
         }
     }
@@ -559,7 +554,7 @@ public class SendMsgUtil {
                 url.append(getIssueUrl(result, projectVO, result.getIssueId()));
             }
             List<Long> participantIds = result.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList());
-            siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, reporterName, participantIds);
+            siteMsgUtil.issueParticipant(summary, url.toString(), projectId, operatorId, userIds, participantIds);
         }
     }
 

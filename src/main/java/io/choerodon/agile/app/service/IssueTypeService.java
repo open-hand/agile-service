@@ -1,15 +1,15 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.IssueTypeRankVO;
-import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
-import io.choerodon.core.domain.Page;
-import io.choerodon.agile.infra.dto.IssueTypeDTO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.agile.api.vo.IssueTypeSearchVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-
 import java.util.List;
 import java.util.Map;
+
+import io.choerodon.agile.api.vo.IssueTypeRankVO;
+import io.choerodon.agile.api.vo.IssueTypeSearchVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
+import io.choerodon.agile.infra.dto.IssueTypeDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author shinan.chen
@@ -50,10 +50,10 @@ public interface IssueTypeService {
     IssueTypeDTO createIssueType(IssueTypeDTO issueType);
 
     /**
-     * @param organizationId
-     * @param projectId
-     * @param issueTypeId
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param issueTypeId issueTypeId
+     * @return result
      */
     IssueTypeVO query(Long organizationId, Long projectId, Long issueTypeId);
 
@@ -62,29 +62,29 @@ public interface IssueTypeService {
     /**
      * 更新启停用字段
      *
-     * @param organizationId
-     * @param projectId
-     * @param issueTypeId
-     * @param enabled
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param issueTypeId issueTypeId
+     * @param enabled enabled
      */
     void updateEnabled(Long organizationId, Long projectId, Long issueTypeId, Boolean enabled);
 
     /**
      * 组织问题类型更新是否可以被引用
      *
-     * @param organizationId
-     * @param issueTypeId
-     * @param referenced
+     * @param organizationId organizationId
+     * @param issueTypeId issueTypeId
+     * @param referenced referenced
      */
     void updateReferenced(Long organizationId, Long issueTypeId, Boolean referenced);
 
     /**
      * 组织问题类型查询使用详情
      *
-     * @param organizationId
-     * @param issueTypeId
-     * @param pageRequest
-     * @return
+     * @param organizationId organizationId
+     * @param issueTypeId issueTypeId
+     * @param pageRequest pageRequest
+     * @return result
      */
     Page<ProjectIssueTypeVO> usageDetail(Long organizationId, Long issueTypeId,
                                          PageRequest pageRequest);
@@ -92,20 +92,20 @@ public interface IssueTypeService {
     /**
      * 查询组织可以引用的问题类型
      *
-     * @param pageRequest
-     * @param organizationId
-     * @param projectId
-     * @return
+     * @param pageRequest pageRequest
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @return result
      */
     Page<IssueTypeVO> pageQueryReference(PageRequest pageRequest, Long organizationId, Long projectId);
 
     /**
      * 将组织层问题类型引用到项目层
      *
-     * @param projectId
-     * @param organizationId
-     * @param referenceId
-     * @param issueTypeVO
+     * @param projectId projectId
+     * @param organizationId organizationId
+     * @param referenceId referenceId
+     * @param issueTypeVO issueTypeVO
      */
     void reference(Long projectId, Long organizationId, Long referenceId, IssueTypeVO issueTypeVO);
 
@@ -114,10 +114,10 @@ public interface IssueTypeService {
     /**
      * 项目层更新系统问题类型
      *
-     * @param organizationId
-     * @param projectId
-     * @param issueTypeId
-     * @param issueTypeVO
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param issueTypeId issueTypeId
+     * @param issueTypeVO issueTypeVO
      */
     void updateSystemIssueType(Long organizationId,
                                Long projectId,
@@ -127,30 +127,30 @@ public interface IssueTypeService {
     /**
      * 判断icon是否重复
      *
-     * @param organizationId
-     * @param projectId
-     * @param icon
-     * @param id
-     * @return
+     * @param organizationId organizationId
+     * @param projectId projectId
+     * @param icon icon
+     * @param id id
+     * @return result
      */
     Boolean checkIcon(Long organizationId, Long projectId, String icon, Long id);
 
     /**
      * 根据projectIds查询问题类型
      *
-     * @param organizationId
-     * @param projectIds
-     * @return
+     * @param organizationId organizationId
+     * @param projectIds projectIds
+     * @return result
      */
     Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds);
 
     /**
      * 更新rank值
      *
-     * @param projectId
-     * @param organizationId
-     * @param issueTypeId
-     * @param issueTypeRankVO
+     * @param projectId projectId
+     * @param organizationId organizationId
+     * @param issueTypeId issueTypeId
+     * @param issueTypeRankVO issueTypeRankVO
      */
     void updateRank(Long projectId, Long organizationId, Long issueTypeId, IssueTypeRankVO issueTypeRankVO);
 

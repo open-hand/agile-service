@@ -12,6 +12,7 @@ import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -20,15 +21,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import io.choerodon.agile.api.vo.IssueTypeSearchVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.StatusMachineNodeVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
@@ -44,7 +42,7 @@ public class FixDataServiceImpl implements FixDataService {
     private static final Logger LOGGER = getLogger(FixDataServiceImpl.class);
 
     @Autowired
-    private BaseFeignClient baseFeignClient;
+    private RemoteIamOperator remoteIamOperator;
     @Autowired
     private ProjectConfigMapper projectConfigMapper;
     @Autowired
@@ -101,6 +99,10 @@ public class FixDataServiceImpl implements FixDataService {
     private AgileTriggerService agileTriggerService;
     @Autowired
     private FixDataMapper fixDataMapper;
+    @Autowired
+    private StatusTransferSettingMapper statusTransferSettingMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public void fixCreateProject() {
@@ -112,7 +114,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("查询出有问题的项目共有{}个，开始修复数据", projectIds.size());
         int count = 0;
         for (Long projectId : projectIds) {
-            ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+            ProjectVO project = remoteIamOperator.queryProject(projectId);
             LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
             if (
                     project == null
@@ -143,7 +145,7 @@ public class FixDataServiceImpl implements FixDataService {
             LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
             return;
         }
-        ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
+        ProjectVO project = remoteIamOperator.queryProject(projectId);
         LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
         if (
                 project == null
@@ -319,6 +321,95 @@ public class FixDataServiceImpl implements FixDataService {
         fixAboardType();
         LOGGER.info("完成修复看板数据");
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 1.2.0 <<<<<<<<=================================");
+    }
+
+    @Override
+    public void fixStatusMachineCustomTransferRoleData() {
+        fixStatusTransferSetting();
+        fixStatusNoticeSetting();
+        migrateWorkGroupData();
+    }
+
+    private void migrateWorkGroupData() {
+        if (!ObjectUtils.isEmpty(agilePluginService)) {
+            agilePluginService.migrateWorkGroupData();
+        }
+    }
+
+    private void fixStatusNoticeSetting() {
+    }
+
+    private void fixStatusTransferSetting() {
+        LOGGER.info("开始修复fd_status_transfer_setting数据");
+        StatusTransferSettingDTO statusTransferSetting = new StatusTransferSettingDTO();
+        statusTransferSetting.setUserType("projectOwner");
+        List<StatusTransferSettingDTO> statusTransferSettingList = statusTransferSettingMapper.select(statusTransferSetting);
+        if (statusTransferSettingList.isEmpty()) {
+            return;
+        }
+        Map<Long, Set<Long>> projectRoleMap = new HashMap<>();
+        Map<Long, Set<Long>> organizationRoleMap = new HashMap<>();
+        String projectAdminCode = "project-admin";
+        statusTransferSettingList.forEach(setting -> {
+            Long projectId = setting.getProjectId();
+            Long organizationId = setting.getOrganizationId();
+            Set<Long> roleIds;
+            boolean isOrganizationLevel = Objects.equals(0L, projectId);
+            if (isOrganizationLevel) {
+                //组织层
+                roleIds = organizationRoleMap.get(organizationId);
+                if (ObjectUtils.isEmpty(roleIds)) {
+                    List<RoleVO> roles =
+                            remoteIamOperator.listOrganizationRoles(0, 0, null, projectAdminCode, null, organizationId, null, null, null).getContent();
+                    if (!ObjectUtils.isEmpty(roles)) {
+                        roleIds = new HashSet<>();
+                        roleIds.addAll(roles.stream().map(RoleVO::getId).collect(Collectors.toList()));
+                        organizationRoleMap.put(organizationId, roleIds);
+                    }
+                }
+            } else {
+                roleIds = projectRoleMap.get(projectId);
+                if (ObjectUtils.isEmpty(roleIds)) {
+                    List<RoleVO> roles =
+                            remoteIamOperator.listProjectRoles(projectId, null, null)
+                                    .stream()
+                                    .filter(x -> projectAdminCode.equalsIgnoreCase(x.getCode()))
+                                    .collect(Collectors.toList());
+                    if (!ObjectUtils.isEmpty(roles)) {
+                        roleIds = new HashSet<>();
+                        roleIds.addAll(roles.stream().map(RoleVO::getId).collect(Collectors.toList()));
+                        projectRoleMap.put(projectId, roleIds);
+                    }
+                }
+            }
+            insertOrUpdateStatusTransferSetting(setting, roleIds);
+            LOGGER.info("修复fd_status_transfer_setting数据结束，总计{}条数据", statusTransferSettingList.size());
+        });
+    }
+
+    private void insertOrUpdateStatusTransferSetting(StatusTransferSettingDTO setting, Set<Long> roleIds) {
+        if (ObjectUtils.isEmpty(roleIds)) {
+            return;
+        }
+        List<Long> roleIdList = new ArrayList<>(roleIds);
+        Long updateId = roleIdList.get(0);
+        List<Long> insertRoleIds = new ArrayList<>();
+        if (roleIdList.size() > 1) {
+            for (int i = 1; i < roleIdList.size(); i++) {
+                insertRoleIds.add(roleIdList.get(i));
+            }
+        }
+        setting.setUserType(StatusTransferType.ROLE);
+        setting.setUserId(updateId);
+        statusTransferSettingMapper.updateByPrimaryKeySelective(setting);
+        insertRoleIds.forEach(insertRoleId -> {
+            StatusTransferSettingDTO dto = new StatusTransferSettingDTO();
+            BeanUtils.copyProperties(setting, dto);
+            dto.setId(null);
+            dto.setUserType(StatusTransferType.ROLE);
+            dto.setUserId(insertRoleId);
+            statusTransferSettingMapper.insert(dto);
+        });
     }
 
     private void fixAboardType() {
@@ -830,7 +921,7 @@ public class FixDataServiceImpl implements FixDataService {
         int totalSize = 0;
         for (int page = 0; page < totalPage; page++) {
             List<Long> list = projectIds.subList(Math.min(page * size, total), Math.min((page + 1) * size, total));
-            List<ProjectVO> projectVOS = Optional.ofNullable(baseFeignClient.queryByIds(new HashSet<>(list)).getBody()).orElse(Collections.emptyList());
+            List<ProjectVO> projectVOS = Optional.ofNullable(remoteIamOperator.queryProjectByIds(new HashSet<>(list))).orElse(Collections.emptyList());
             for (ProjectVO projectVO : projectVOS) {
                 LOGGER.info("开始修复{}-{}项目所有问题类型的状态机",projectVO.getId(),projectVO.getName());
                 String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";

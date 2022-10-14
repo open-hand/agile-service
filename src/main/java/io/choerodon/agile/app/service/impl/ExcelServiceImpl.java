@@ -1,36 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hzero.boot.file.FileClient;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,20 +9,51 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monitorjbl.xlsx.StreamingReader;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
+
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.domain.entity.ExcelSheetData;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+
+import org.hzero.boot.file.FileClient;
+import org.hzero.core.base.BaseConstants;
+import org.hzero.excel.config.ExcelConfig;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -116,8 +116,10 @@ public class ExcelServiceImpl implements ExcelService {
     private static final int PREDEFINED_VALUE_END_ROW = 500;
     private static final String INSERT = "insert";
 
+    
+
     private static final List<String> PROCESS_PREDEFINED_SYSTEM_FIELDS =
-            Arrays.asList (
+            Arrays.asList(
                     FieldCode.PRIORITY,
                     FieldCode.FIX_VERSION,
                     FieldCode.INFLUENCE_VERSION,
@@ -162,7 +164,7 @@ public class ExcelServiceImpl implements ExcelService {
     private ProjectConfigService projectConfigService;
 
     @Autowired
-    protected BaseFeignClient baseFeignClient;
+    protected RemoteIamOperator remoteIamOperator;
 
     @Autowired
     private FileClient fileClient;
@@ -256,9 +258,10 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private boolean withFeature(Long projectId, Long organizationId) {
-        ResponseEntity<ProjectVO> response =
-                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
-        return response.getBody() != null;
+        if (agilePluginService == null) {
+            return false;
+        }
+        return !ObjectUtils.isEmpty(agilePluginService.getProgram(organizationId, projectId));
     }
 
     @Override
@@ -351,8 +354,8 @@ public class ExcelServiceImpl implements ExcelService {
         result.add(processIssueTypePredefined(withFeature, projectId, cursor, systemFields));
         result.add(processParentIssuePredefined(projectId, cursor, systemFields));
         PROCESS_PREDEFINED_SYSTEM_FIELDS.forEach(fieldCode ->
-            Optional.ofNullable(excelCommonService.processSystemFieldPredefined(projectId, cursor, withFeature, systemFields, fieldCode))
-                .ifPresent(result::add)
+                Optional.ofNullable(excelCommonService.processSystemFieldPredefined(projectId, cursor, withFeature, systemFields, fieldCode))
+                        .ifPresent(result::add)
         );
         return result;
     }
@@ -413,6 +416,9 @@ public class ExcelServiceImpl implements ExcelService {
                             Long userId,
                             Double process,
                             String websocketKey) {
+        if (process != null && process < 1) {
+            process = process * 100;
+        }
         fileOperationHistoryDTO.setProcess(process);
         String message = null;
         try {
@@ -555,9 +561,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * @param sheet
+     * @param sheet sheet
      * @param columnNum 数据页总共有多少列数据
-     * @return
+     * @return result
      */
     protected Integer getRealRowCount(Sheet sheet, int columnNum) {
         Integer count = 0;
@@ -590,7 +596,7 @@ public class ExcelServiceImpl implements ExcelService {
         return cell == null || cell.toString().equals("") || cell.getCellTypeEnum() == CellType.BLANK;
     }
 
-    @Async
+    @Async("issueImportExecutor")
     @Override
     public void batchImport(Long projectId,
                             Long organizationId,
@@ -598,73 +604,58 @@ public class ExcelServiceImpl implements ExcelService {
                             InputStream inputStream,
                             ServletRequestAttributes requestAttributes) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
-        Workbook workbook = ExcelUtil.getWorkbookFromInputStream(ExcelUtil.Mode.XSSF, inputStream);
         String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + projectId;
         FileOperationHistoryDTO history = initFileOperationHistory(projectId, userId, DOING, UPLOAD_FILE, websocketKey);
-        excelCommonService.validateWorkbook(workbook, history, websocketKey);
-        List<String> headerNames = excelCommonService.resolveCodeFromHeader(workbook, history, websocketKey);
-        Map<Integer, ExcelColumnVO> headerMap = new LinkedHashMap<>();
+        ExcelSheetData excelSheetData = readExcelSheetDataFromInputStream(inputStream, websocketKey, history);
+        JSONObject sheetData = excelSheetData.getSheetData();
+        if (ObjectUtils.isEmpty(sheetData.get("0"))) {
+            //判断header行是否为空，为空抛异常
+            history.setStatus("empty_data_sheet");
+            updateHistoryAndSendMsg(history, websocketKey, "error.sheet.empty");
+        }
+        List<String> headerNames = excelSheetData.queryHeaderList();
         boolean withFeature = (agilePluginService != null && withFeature(projectId, organizationId));
-        //获取日期类型的列
-        Set<Integer> dateTypeColumns = new HashSet<>();
-        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, dateTypeColumns, websocketKey);
+        Map<Integer, ExcelColumnVO> headerMap = new LinkedHashMap<>();
+        processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, websocketKey);
         validateRequiredSystemField(headerMap, withFeature, history);
-
-        Sheet dataSheet = workbook.getSheetAt(1);
-        int columnNum = headerMap.size();
-        Integer dataRowCount = getRealRowCount(dataSheet, columnNum);
         Map<Integer, Set<Integer>> parentSonMap = new HashMap<>();
         Map<Integer, Integer> sonParentMap = new HashMap<>();
         Set<Integer> withoutParentRows = new HashSet<>();
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
         int parentCol = getColIndexByFieldCode(headerMap, ExcelImportTemplate.IssueHeader.PARENT);
-        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, dataSheet, dataRowCount, columnNum, issueTypeCol, parentCol, headerMap);
+        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, excelSheetData, issueTypeCol, parentCol, headerMap);
         ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
-        //key为错误的行数，value为错误的列
-        Map<Integer, List<Integer>> errorRowColMap = new HashMap<>();
         List<Long> importedIssueIds = new ArrayList<>();
-        Map<Integer, Long> rowIssueIdMap = new HashMap<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
         int lastSendCountNum = 0;
-        Map<Long,List<String>> requireFieldMap = new HashMap<>();
+        Map<Long, List<String>> requireFieldMap = new HashMap<>();
         List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
-        for (int rowNum = 1; rowNum <= dataRowCount; rowNum++) {
+        Integer dataRowCount = excelSheetData.getRowNum();
+        for (int currentRowNum = 1; currentRowNum <= dataRowCount; currentRowNum++) {
             if (Boolean.TRUE.equals(checkCanceled(projectId, history.getId(), importedIssueIds))) {
                 return;
             }
-            Row row = dataSheet.getRow(rowNum);
-            if (isSkip(row, columnNum)) {
+            JSONObject rowJson = (JSONObject) sheetData.get(currentRowNum);
+            if (ObjectUtils.isEmpty(rowJson)) {
                 continue;
             }
-            for (int col = 0; col < columnNum; col++) {
-                Cell cell = row.getCell(col);
-                if (cell != null && !dateTypeColumns.contains(col)) {
-                    row.getCell(col).setCellType(CellType.STRING);
-                }
-            }
-            Cell issueTypeCell = row.getCell(issueTypeCol);
-            if (issueTypeCell == null) {
-                issueTypeCell = row.createCell(issueTypeCol);
-            }
+            JSONObject issueTypeJson = (JSONObject) rowJson.get(issueTypeCol);
             String issueType;
-            if (isCellEmpty(issueTypeCell)) {
-                errorRowColMap.put(rowNum, Arrays.asList(issueTypeCol));
-                issueTypeCell.setCellValue(buildWithErrorMsg("", IssueConstant.ISSUE_TYPE_CN + "为空"));
-                progress.failCountIncrease();
-                progress.processNumIncrease();
-                history.setFailCount(progress.getFailCount());
-                if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
-                    lastSendCountNum = progress.getProcessNum();
-                    sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+            if (ObjectUtils.isEmpty(issueTypeJson)
+                    || ObjectUtils.isEmpty(issueTypeJson.getString(ExcelSheetData.STRING_CELL))) {
+                if (ObjectUtils.isEmpty(issueTypeJson)) {
+                    issueTypeJson = new JSONObject();
                 }
+                String errorMsg = buildWithErrorMsg("", IssueConstant.ISSUE_TYPE_CN + "为空");
+                excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
+                lastSendCountNum = putErrorMsgAndSendMsg(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount);
                 continue;
-            } else {
-                issueType = issueTypeCell.toString();
             }
-            String issueTypeCode = getIssueTypeCode(headerMap, issueType);
-            Set<Integer> sonSet = parentSonMap.get(rowNum);
-            boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
 
+            issueType = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
+            String issueTypeCode = getIssueTypeCode(headerMap, issueType);
+            Set<Integer> sonSet = parentSonMap.get(currentRowNum);
+            boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
             if ((IssueTypeCode.isStory(issueTypeCode)
                     || IssueTypeCode.isTask(issueTypeCode)
                     || IssueTypeCode.isBug(issueTypeCode))
@@ -672,13 +663,13 @@ public class ExcelServiceImpl implements ExcelService {
                 List<Long> insertIds = new ArrayList<>();
                 try {
                     IssueCreateVO parent = new IssueCreateVO();
-                    validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, parent, null, issueTypeCol, parentCol, requireFieldMap);
-                    if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
-                        lastSendCountNum = excelCommonService.processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
-                        rowNum = Collections.max(sonSet);
+                    validateData(projectId, rowJson, headerMap, withoutParentRows, parent, null, issueTypeCol, parentCol, requireFieldMap);
+                    if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
+                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
+                        currentRowNum = Collections.max(sonSet);
                         continue;
                     }
-                    List<ComponentIssueRelVO> components =  parent.getComponentIssueRelVOList();
+                    List<ComponentIssueRelVO> components = parent.getComponentIssueRelVOList();
                     Long sprintId = parent.getSprintId();
                     Long epicId = parent.getEpicId();
                     Optional.ofNullable(parent.getRelatedIssueVO()).ifPresent(relatedIssueList::add);
@@ -686,11 +677,11 @@ public class ExcelServiceImpl implements ExcelService {
                     insertIds.add(result.getIssueId());
                     excelCommonService.insertCustomFields(result.getIssueId(), parent.getCustomFields(), projectId);
                     List<Long> customFieldIds = new ArrayList<>();
-                    if (!CollectionUtils.isEmpty(parent.getCustomFields())) {
+                    if (CollectionUtils.isNotEmpty(parent.getCustomFields())) {
                         customFieldIds.addAll(parent.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                     }
                     issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
-                    rowIssueIdMap.put(rowNum, result.getIssueId());
+                    rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
 
                     result.setComponentIssueRelVOList(components);
                     result.setSprintId(sprintId);
@@ -700,15 +691,10 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Integer, IssueCreateVO> sonMap = new HashMap<>();
                     for (Integer sonRowNum : sonSet) {
                         IssueCreateVO son = new IssueCreateVO();
-                        Row sonRow = dataSheet.getRow(sonRowNum);
-                        for (int col = 0; col < columnNum; col++) {
-                            Cell cell = sonRow.getCell(col);
-                            if (cell != null && !dateTypeColumns.contains(col)) {
-                                sonRow.getCell(col).setCellType(CellType.STRING);
-                            }
-                        }
-                        validateData(projectId, sonRow, headerMap, withoutParentRows, errorRowColMap, son, result, issueTypeCol, parentCol, requireFieldMap);
-                        if (!ObjectUtils.isEmpty(errorRowColMap.get(sonRowNum))) {
+                        JSONObject sonRowJson = (JSONObject) sheetData.get(sonRowNum);
+                        validateData(projectId, sonRowJson, headerMap, withoutParentRows, son, result, issueTypeCol, parentCol, requireFieldMap);
+                        if (Boolean.TRUE.equals(sonRowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
+                            //子节点有错误
                             sonsOk = false;
                             break;
                         } else {
@@ -716,8 +702,8 @@ public class ExcelServiceImpl implements ExcelService {
                         }
                     }
                     if (!sonsOk) {
-                        lastSendCountNum = excelCommonService.processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
-                        rowNum = Collections.max(sonSet);
+                        lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
+                        currentRowNum = Collections.max(sonSet);
                         issueService.batchDeleteIssuesAgile(projectId, insertIds);
                         continue;
                     }
@@ -727,29 +713,30 @@ public class ExcelServiceImpl implements ExcelService {
                         insertIds.add(returnValue.getIssueId());
                         excelCommonService.insertCustomFields(returnValue.getIssueId(), v.getCustomFields(), projectId);
                         List<Long> subIssueCustomFieldIds = new ArrayList<>();
-                        if (!CollectionUtils.isEmpty(v.getCustomFields())) {
+                        if (CollectionUtils.isNotEmpty(v.getCustomFields())) {
                             subIssueCustomFieldIds.addAll(v.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                         }
                         issueService.buildTriggerCarrierVO(projectId, returnValue.getIssueId(), triggerCarrierVOS, subIssueCustomFieldIds);
-                        rowIssueIdMap.put(k, returnValue.getIssueId());
+                        JSONObject currentRowJson = (JSONObject) sheetData.get(k);
+                        currentRowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, returnValue.getIssueId());
                     });
 
                     importedIssueIds.add(result.getIssueId());
-                    importedIssueIds.addAll(rowIssueIdMap.values());
+//                    importedIssueIds.addAll(rowIssueIdMap.values());
                     progress.addSuccessCount(sonSet.size() + 1L);
                     progress.addProcessNum(sonSet.size() + 1);
-                    rowNum = Collections.max(sonSet);
+                    currentRowNum = Collections.max(sonSet);
                 } catch (Exception e) {
-                    LOGGER.error("insert data error when import excel, exception: {0}", e);
-                    lastSendCountNum = excelCommonService.processErrorData(userId, history, dataSheet, dataRowCount, progress, errorRowColMap, rowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
-                    rowNum = Collections.max(sonSet);
+                    LOGGER.error("insert data error when import excel, exception: {}", e);
+                    lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
+                    currentRowNum = Collections.max(sonSet);
                     issueService.batchDeleteIssuesAgile(projectId, insertIds);
                     continue;
                 }
             } else {
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
-                validateData(projectId, row, headerMap, withoutParentRows, errorRowColMap, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
-                if (!ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
+                validateData(projectId, rowJson, headerMap, withoutParentRows, issueCreateVO, null, issueTypeCol, parentCol, requireFieldMap);
+                if (Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
                     progress.failCountIncrease();
                     progress.processNumIncrease();
                     history.setFailCount(progress.getFailCount());
@@ -763,11 +750,11 @@ public class ExcelServiceImpl implements ExcelService {
                 IssueVO result = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, APPLY_TYPE_AGILE);
                 excelCommonService.insertCustomFields(result.getIssueId(), issueCreateVO.getCustomFields(), projectId);
                 List<Long> customFieldIds = new ArrayList<>();
-                if (!CollectionUtils.isEmpty(issueCreateVO.getCustomFields())) {
+                if (CollectionUtils.isNotEmpty(issueCreateVO.getCustomFields())) {
                     customFieldIds.addAll(issueCreateVO.getCustomFields().stream().map(PageFieldViewUpdateVO::getFieldId).collect(Collectors.toList()));
                 }
                 issueService.buildTriggerCarrierVO(projectId, result.getIssueId(), triggerCarrierVOS, customFieldIds);
-                rowIssueIdMap.put(rowNum, result.getIssueId());
+                rowJson.put(ExcelSheetData.JSON_KEY_ISSUE_ID, result.getIssueId());
 
                 importedIssueIds.add(result.getIssueId());
                 progress.successCountIncrease();
@@ -780,17 +767,123 @@ public class ExcelServiceImpl implements ExcelService {
                 sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
             }
         }
-        updateRelatedIssue(relatedIssueList, rowIssueIdMap, errorRowColMap, headerMap, dataSheet, projectId, progress, parentSonMap, parentCol);
+        updateRelatedIssue(relatedIssueList, headerMap, sheetData, projectId, progress, parentSonMap, parentCol);
         issueService.batchCreateIssueInvokeTrigger(triggerCarrierVOS);
         //错误数据生成excel
-        String status;
-        if (ObjectUtils.isEmpty(errorRowColMap)) {
-            status = SUCCESS;
-        } else {
-            excelCommonService.generateErrorDataExcelAndUpload(errorRowColMap, dataSheet, headerMap, headerNames, history, organizationId, "/templates/IssueImportGuideTemplate.xlsx");
-            status = FAILED;
-        }
+        String status = excelCommonService.generateErrorDataExcelAndUpload(excelSheetData, headerMap, headerNames, history, organizationId, "/templates/IssueImportGuideTemplate.xlsx");
         excelCommonService.updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status, websocketKey);
+    }
+
+    private ExcelSheetData readExcelSheetDataFromInputStream(InputStream inputStream,
+                                                             String websocketKey,
+                                                             FileOperationHistoryDTO history) {
+        ExcelConfig excelConfig = ApplicationContextHelper.getContext().getBean(ExcelConfig.class);
+        Workbook workbook = StreamingReader.builder().rowCacheSize(excelConfig.getCacheSize()).bufferSize(excelConfig.getBufferSize()).open(inputStream);
+        excelCommonService.validateWorkbook(workbook, history, websocketKey);
+        //excel转json
+        int sheetNo = 1;
+        Sheet sheet = workbook.getSheetAt(sheetNo);
+        return readDate(sheet);
+    }
+
+//    private void getIssueTypeFromRowJson() {
+//        if (ObjectUtils.isEmpty(issueTypeJson)) {
+//            issueTypeJson = new JSONObject();
+//            String errorMsg = buildWithErrorMsg("", IssueConstant.ISSUE_TYPE_CN + "为空");
+//            lastSendCountNum = excelCommonService.putErrorMsgAndSendMsg(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount, rowJson, issueTypeJson, errorMsg);
+//        } else {
+//            issueType = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
+//            if (StringUtils.isEmpty(issueType)) {
+//                String errorMsg = buildWithErrorMsg("", IssueConstant.ISSUE_TYPE_CN + "为空");
+//                lastSendCountNum = excelCommonService.putErrorMsgAndSendMsg(userId, websocketKey, history, progress, lastSendCountNum, dataRowCount, rowJson, issueTypeJson, errorMsg);
+//            }
+//        }
+//
+//    }
+
+    private int putErrorMsgAndSendMsg(Long userId,
+                                      String websocketKey,
+                                      FileOperationHistoryDTO history,
+                                      ExcelImportTemplate.Progress progress,
+                                      int lastSendCountNum,
+                                      Integer dataRowCount) {
+        progress.failCountIncrease();
+        progress.processNumIncrease();
+        history.setFailCount(progress.getFailCount());
+        if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
+            lastSendCountNum = progress.getProcessNum();
+            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+        }
+        return lastSendCountNum;
+    }
+
+
+    private ExcelSheetData readDate(Sheet sheet) {
+        JSONObject sheetData = new JSONObject();
+        Iterator<Row> sheetIterator = sheet.rowIterator();
+        int rowNum = 0;
+        int colNum = 0;
+        while (sheetIterator.hasNext()) {
+            Row row = sheetIterator.next();
+            if (rowNum == 0) {
+                //header行
+                for (int i = 0; ; i++) {
+                    Cell cell = row.getCell(i);
+                    if (isCellEmpty(cell)) {
+                        break;
+                    }
+                    colNum++;
+                    putValueToSheetData(sheetData, rowNum, i, cell);
+                }
+                if (ObjectUtils.isEmpty(sheetData.get(String.valueOf(rowNum)))) {
+                    //header行为空，跳出
+                    break;
+                }
+            } else {
+                for (int i = 0; i < colNum; i++) {
+                    Cell cell = row.getCell(i);
+                    if (isCellEmpty(cell)) {
+                        continue;
+                    }
+                    putValueToSheetData(sheetData, rowNum, i, cell);
+                }
+            }
+            rowNum++;
+        }
+        return new ExcelSheetData(sheetData.size(), colNum, sheetData);
+    }
+
+    private void putValueToSheetData(JSONObject sheetData,
+                                     int rowNum,
+                                     int columnNum,
+                                     Cell cell) {
+        JSONObject rowJson = (JSONObject) sheetData.get(rowNum);
+        if (ObjectUtils.isEmpty(rowJson)) {
+            rowJson = new JSONObject();
+            sheetData.put(String.valueOf(rowNum), rowJson);
+        }
+        JSONObject cellJson = new JSONObject();
+        if (cell.getCellTypeEnum().equals(CellType.NUMERIC)
+                && DateUtil.isCellDateFormatted(cell)) {
+            //日期格式单元格
+            cellJson.put(ExcelSheetData.DATE_CELL, cell.getDateCellValue());
+        } else {
+            cellJson.put(ExcelSheetData.STRING_CELL, cell.getStringCellValue().trim());
+        }
+        rowJson.put(String.valueOf(columnNum), cellJson);
+        rowJson.put(ExcelSheetData.JSON_KEY_ROW_NUM, rowNum);
+        sheetData.put(String.valueOf(rowNum), rowJson);
+    }
+
+    private void updateHistoryAndSendMsg(FileOperationHistoryDTO history,
+                                         String websocketKey,
+                                         String exceptionMsg) {
+        fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
+        FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
+        sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+        if (!ObjectUtils.isEmpty(exceptionMsg)) {
+            throw new CommonException("error.sheet.empty");
+        }
     }
 
     private void validateRequiredSystemField(Map<Integer, ExcelColumnVO> headerMap,
@@ -815,10 +908,8 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void updateRelatedIssue(List<RelatedIssueVO> relatedIssueList,
-                                    Map<Integer, Long> rowIssueIdMap,
-                                    Map<Integer, List<Integer>> errorRowColMap,
                                     Map<Integer, ExcelColumnVO> headerMap,
-                                    Sheet dataSheet,
+                                    JSONObject sheetData,
                                     Long projectId,
                                     ExcelImportTemplate.Progress progress,
                                     Map<Integer, Set<Integer>> parentSonMap,
@@ -837,54 +928,63 @@ public class ExcelServiceImpl implements ExcelService {
         }
         for (RelatedIssueVO x : relatedIssueList) {
             Integer rowNum = x.getRow();
-            Cell cell = dataSheet.getRow(rowNum).getCell(relateIssueIndex);
-            String value = cell.toString();
-            Long issueId = rowIssueIdMap.get(rowNum);
-            if (issueId != null && ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
+            JSONObject rowJson = (JSONObject)sheetData.get(rowNum);
+            JSONObject cellJson = (JSONObject)rowJson.get(relateIssueIndex);
+            String value = cellJson.getString(ExcelSheetData.STRING_CELL);
+            Long issueId = rowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID);
+            boolean currentRowIsError = Boolean.TRUE.equals(rowJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR));
+            if (issueId != null && !currentRowIsError) {
                 Set<Integer> relatedRows = x.getRelatedRows();
                 Set<Long> relatedIssueIds = x.getRelatedIds();
                 boolean ok = true;
                 for (Integer relatedRow : relatedRows) {
                     if (Objects.equals(rowNum, relatedRow)) {
                         deleteIssueIds.add(issueId);
-                        cell.setCellValue(buildWithErrorMsg(value, "自己不能和自己关联，rowNum: " + (rowNum + 1)));
-                        addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
+                        String errorMsg = buildWithErrorMsg(value, "自己不能和自己关联，rowNum: " + (rowNum + 1));
+                        excelCommonService.putErrorMsg(rowJson, cellJson, errorMsg);
                         ok = false;
                         progress.failCountIncrease();
                         progress.successCountDecrease();
                         Set<Integer> sonSet = parentSonMap.get(rowNum);
-                        if (!CollectionUtils.isEmpty(sonSet)) {
+                        if (CollectionUtils.isNotEmpty(sonSet)) {
                             sonSet.forEach(v -> {
-                                Long sonIssueId = rowIssueIdMap.get(v);
+                                Long sonIssueId = ((JSONObject)sheetData.get(v)).getLong(ExcelSheetData.JSON_KEY_ISSUE_ID);
                                 if (!ObjectUtils.isEmpty(sonIssueId)) {
                                     deleteIssueIds.add(sonIssueId);
                                     progress.failCountIncrease();
                                     progress.successCountDecrease();
                                 }
                             });
-                            setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentCol);
+                            excelCommonService.setErrorMsgToParentSonRow(rowNum, sheetData, sonSet, parentCol);
                         }
                         break;
                     }
-                    Long relatedIssueId = rowIssueIdMap.get(relatedRow);
+
+                    JSONObject relatedRowJson = (JSONObject)sheetData.get(relatedRow);
+                    Long relatedIssueId = null;
+                    if (!ObjectUtils.isEmpty(relatedRowJson)) {
+                        relatedIssueId = relatedRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID);
+                    }
                     if (relatedIssueId == null) {
                         deleteIssueIds.add(issueId);
-                        cell.setCellValue(buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行" + IssueConstant.ISSUE_CN + "不存在"));
-                        addErrorColumn(rowNum, relateIssueIndex, errorRowColMap);
+                        String errorMsg = buildWithErrorMsg(value, "第" + (relatedRow + 1) + "行" + IssueConstant.ISSUE_CN + "不存在");
+                        excelCommonService.putErrorMsg(rowJson, cellJson, errorMsg);
                         ok = false;
                         progress.failCountIncrease();
                         progress.successCountDecrease();
                         Set<Integer> sonSet = parentSonMap.get(rowNum);
-                        if (!CollectionUtils.isEmpty(sonSet)) {
+                        if (CollectionUtils.isNotEmpty(sonSet)) {
                             sonSet.forEach(v -> {
-                                Long sonIssueId = rowIssueIdMap.get(v);
-                                if (!ObjectUtils.isEmpty(sonIssueId)) {
+                                JSONObject sonRowJson = (JSONObject)sheetData.get(v);
+                                if (!ObjectUtils.isEmpty(sonRowJson)
+                                        && !ObjectUtils.isEmpty(sonRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID))) {
+                                    Long sonIssueId = sonRowJson.getLong(ExcelSheetData.JSON_KEY_ISSUE_ID);
                                     deleteIssueIds.add(sonIssueId);
                                     progress.failCountIncrease();
                                     progress.successCountDecrease();
                                 }
                             });
-                            setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentCol);
+                            excelCommonService.setErrorMsgToParentSonRow(rowNum, sheetData, sonSet, parentCol);
                         }
                         break;
                     } else {
@@ -901,7 +1001,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
 
         List<IssueLinkTypeDTO> issueLinkTypeDTOS = issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null);
-        if (!CollectionUtils.isEmpty(issueLinkTypeDTOS)) {
+        if (CollectionUtils.isNotEmpty(issueLinkTypeDTOS)) {
             Long linkTypeId =
                     issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, null, "关联", null)
                             .get(0)
@@ -922,85 +1022,61 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void setErrorMsgToParentSonRow(int rowNum,
-                                           Sheet dataSheet,
-                                           Map<Integer, List<Integer>> errorRowColMap,
-                                           Set<Integer> sonSet,
-                                           int parentColIndex) {
-        addErrorMsgIfNotExisted(rowNum, dataSheet, errorRowColMap, parentColIndex);
-        sonSet.forEach(s -> addErrorMsgIfNotExisted(s, dataSheet, errorRowColMap, parentColIndex));
-    }
-
-    private void addErrorMsgIfNotExisted(int rowNum,
-                                         Sheet dataSheet,
-                                         Map<Integer, List<Integer>> errorRowColMap,
-                                         int parentColIndex) {
-        if (ObjectUtils.isEmpty(errorRowColMap.get(rowNum))) {
-            errorRowColMap.put(rowNum, Arrays.asList(parentColIndex));
-            Row row = dataSheet.getRow(rowNum);
-            Cell cell = row.getCell(parentColIndex);
-            if (isCellEmpty(cell)) {
-                cell = row.createCell(parentColIndex);
-            }
-            String value = cell.toString();
-            cell.setCellValue(buildWithErrorMsg(value, "父子结构中有错误数据或父子结构插入错误"));
-        }
-    }
-
     private void validateData(Long projectId,
-                              Row row,
+                              JSONObject rowJson,
                               Map<Integer, ExcelColumnVO> headerMap,
                               Set<Integer> withoutParentRows,
-                              Map<Integer, List<Integer>> errorRowColMap,
                               IssueCreateVO issueCreateVO,
                               IssueVO parentIssue,
                               int issueTypeCol,
                               int parentCol,
                               Map<Long, List<String>> requireFieldMap) {
+        int rowNum = rowJson.getInteger(ExcelSheetData.JSON_KEY_ROW_NUM);
         issueCreateVO.setProjectId(projectId);
-        int rowNum = row.getRowNum();
-        Cell issueTypeCell = row.getCell(issueTypeCol);
-        if (issueTypeCell == null) {
-            issueTypeCell = row.createCell(issueTypeCol);
-        }
+        JSONObject issueTypeJson = (JSONObject) rowJson.get(issueTypeCol);
         String value = "";
-        if (isCellEmpty(issueTypeCell)) {
-            issueTypeCell.setCellValue(buildWithErrorMsg(value, IssueConstant.ISSUE_TYPE_CN + "为空"));
-            addErrorColumn(rowNum, issueTypeCol, errorRowColMap);
+        if (ObjectUtils.isEmpty(issueTypeJson)
+                || ObjectUtils.isEmpty(issueTypeJson.getString(ExcelSheetData.STRING_CELL))) {
+            if (ObjectUtils.isEmpty(issueTypeJson)) {
+                issueTypeJson = new JSONObject();
+            }
+            String errorMsg = buildWithErrorMsg(value, IssueConstant.ISSUE_TYPE_CN + "为空");
+            excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
             return;
         }
-        value = issueTypeCell.toString();
+        value = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
         if (withoutParentRows.contains(rowNum)) {
-            issueTypeCell.setCellValue(buildWithErrorMsg(value, "子任务/子缺陷必须要有父节点"));
-            addErrorColumn(rowNum, issueTypeCol, errorRowColMap);
+            String errorMsg = buildWithErrorMsg(value, "子任务/子缺陷必须要有父节点");
+            excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
             return;
         }
         String issueTypeCode = getIssueTypeCode(headerMap, value);
         if (parentIssue == null
                 && (IssueTypeCode.isSubTask(issueTypeCode)
                 || SUB_BUG_CN.equals(value))) {
-            Cell parentCell = row.getCell(parentCol);
-            if (parentCell == null) {
-                parentCell = row.createCell(parentCol);
-            }
+            JSONObject parentJson = (JSONObject)rowJson.get(parentCol);
             String parentCellValue = "";
-            if (isCellEmpty(parentCell)) {
-                issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "子任务/子缺陷必须要有父节点"));
-                addErrorColumn(rowNum, parentCol, errorRowColMap);
+            if (ObjectUtils.isEmpty(parentJson)
+                    || ObjectUtils.isEmpty(parentJson.getString(ExcelSheetData.STRING_CELL))) {
+                if (ObjectUtils.isEmpty(parentJson)) {
+                    parentJson = new JSONObject();
+                }
+                String errorMsg = buildWithErrorMsg(parentCellValue, "子任务/子缺陷必须要有父节点");
+                excelCommonService.putErrorMsg(rowJson, parentJson, errorMsg);
                 return;
             }
-            parentCellValue = parentCell.toString();
+            parentCellValue = parentJson.getString(ExcelSheetData.STRING_CELL);
             List<String> values = headerMap.get(parentCol).getPredefinedValues();
             String issueNum = parentCellValue.split(COLON_CN)[0];
             if (!values.contains(issueNum)) {
-                parentCell.setCellValue(buildWithErrorMsg(parentCellValue, "输入的父级编号有误"));
-                addErrorColumn(rowNum, parentCol, errorRowColMap);
+                String errorMsg = buildWithErrorMsg(parentCellValue, "输入的父级编号有误");
+                excelCommonService.putErrorMsg(rowJson, parentJson, errorMsg);
                 return;
             }
             parentIssue = issueMapper.selectByIssueNum(projectId, issueNum);
             if (parentIssue == null) {
-                issueTypeCell.setCellValue(buildWithErrorMsg(parentCellValue, "父节点不存在"));
-                addErrorColumn(rowNum, parentCol, errorRowColMap);
+                String errorMsg = buildWithErrorMsg(parentCellValue, "父节点不存在");
+                excelCommonService.putErrorMsg(rowJson, issueTypeJson, errorMsg);
                 return;
             }
             IssueDTO issueDTO = issueMapper.queryIssueSprintNotClosed(projectId, parentIssue.getIssueId());
@@ -1011,12 +1087,12 @@ public class ExcelServiceImpl implements ExcelService {
             ExcelColumnVO excelColumn = entry.getValue();
             boolean isCustomField = excelColumn.isCustomField();
             if (isCustomField) {
-                excelCommonService.validateCustomFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                excelCommonService.validateCustomFieldData(rowJson, col, excelColumn, issueCreateVO);
             } else {
-                excelCommonService.validateCommonSystemFieldData(row, col, excelColumn, errorRowColMap, issueCreateVO, parentIssue, projectId, headerMap);
+                excelCommonService.validateCommonSystemFieldData(rowJson, col, excelColumn, issueCreateVO, parentIssue, projectId, headerMap);
             }
             excelCommonService.handlerRequireFiled(excelColumn, requireFieldMap, issueCreateVO, projectId);
-            Boolean checkRequireField = excelCommonService.checkRequireField(requireFieldMap, excelColumn, issueCreateVO, row, col, errorRowColMap);
+            Boolean checkRequireField = excelCommonService.checkRequireField(requireFieldMap, excelColumn, issueCreateVO, rowJson, col);
             if (!checkRequireField) {
                 break;
             }
@@ -1071,25 +1147,30 @@ public class ExcelServiceImpl implements ExcelService {
     private void processParentSonRelationship(Map<Integer, Set<Integer>> parentSonMap,
                                               Map<Integer, Integer> sonParentMap,
                                               Set<Integer> withoutParentRows,
-                                              Sheet dataSheet,
-                                              Integer dataRowCount,
-                                              Integer columnNum,
+                                              ExcelSheetData excelSheetData,
                                               int issueTypeCol,
                                               int parentCol,
                                               Map<Integer, ExcelColumnVO> headerMap) {
         Map<Integer, String> rowIssueTypeMap = new LinkedHashMap<>();
         List<IssueTypeLinkDTO> issueTypeLinks = new ArrayList<>();
-        for (int i = 1; i <= dataRowCount; i++) {
+        Integer rowNum = excelSheetData.getRowNum();
+        JSONObject dataSheet = excelSheetData.getSheetData();
+        for (int i = 1; i <= rowNum; i++) {
             int size = issueTypeLinks.size();
             IssueTypeLinkDTO lastIssueTypeLink = null;
             if (size > 0) {
                 lastIssueTypeLink = issueTypeLinks.get(size - 1);
             }
-            Row row = dataSheet.getRow(i);
-            if (isSkip(row, columnNum)) {
+            JSONObject rowJson = (JSONObject)dataSheet.get(String.valueOf(i));
+            //为空则表示为空行
+            if (ObjectUtils.isEmpty(rowJson)) {
                 continue;
             }
-            String issueType = getCellString(row.getCell(issueTypeCol));
+            JSONObject cellJson = (JSONObject)rowJson.get(issueTypeCol);
+            if (ObjectUtils.isEmpty(cellJson)) {
+                continue;
+            }
+            String issueType = cellJson.getString(ExcelSheetData.STRING_CELL);
             if (issueType == null) {
                 continue;
             }
@@ -1104,16 +1185,17 @@ public class ExcelServiceImpl implements ExcelService {
         sonParentMap.putAll(getSonParentMap(parentSonMap));
 
         for (Map.Entry<Integer, String> entry : rowIssueTypeMap.entrySet()) {
-            Integer rowNum = entry.getKey();
+            Integer currentRowNum = entry.getKey();
             String issueType = entry.getValue();
             String issueTypeCode = getIssueTypeCode(headerMap, issueType);
             if (IssueTypeCode.isSubTask(issueTypeCode)
                     || SUB_BUG_CN.equals(issueType)) {
-                Integer parentRow = sonParentMap.get(rowNum);
+                Integer parentRow = sonParentMap.get(currentRowNum);
                 if (parentRow == null) {
-                    Cell parentCell = dataSheet.getRow(rowNum).getCell(parentCol);
-                    if (isCellEmpty(parentCell)) {
-                        withoutParentRows.add(rowNum);
+                    JSONObject rowJson = (JSONObject)dataSheet.get(String.valueOf(currentRowNum));
+                    JSONObject cellJson = (JSONObject)rowJson.get(parentCol);
+                    if (ObjectUtils.isEmpty(cellJson)) {
+                        withoutParentRows.add(currentRowNum);
                     }
                 }
             }
@@ -1133,20 +1215,19 @@ public class ExcelServiceImpl implements ExcelService {
                                   Map<Integer, ExcelColumnVO> headerMap,
                                   boolean withFeature,
                                   FileOperationHistoryDTO history,
-                                  Set<Integer> dateTypeColumns,
                                   String websocketKey) {
         boolean containsCustomFields = false;
         for (int i = 0; i < headerNames.size(); i++) {
             String headerName = headerNames.get(i);
-            String code = ExcelImportTemplate.IssueHeader.getCodeByValue(headerName);
-            boolean isSystemField = !StringUtils.isEmpty(code);
+            String fieldCode = ExcelImportTemplate.IssueHeader.getCodeByValue(headerName);
+            boolean isSystemField = !StringUtils.isEmpty(fieldCode);
             ExcelColumnVO excelColumnVO = new ExcelColumnVO();
             headerMap.put(i, excelColumnVO);
             excelColumnVO.setCustomField(!isSystemField);
             if (isSystemField) {
-                excelCommonService.addSystemFieldIfDateType(dateTypeColumns, code, i, excelColumnVO);
-                excelColumnVO.setFieldCode(code);
-                setSystemFieldPredefinedValueByCode(code, projectId, organizationId, excelColumnVO, withFeature);
+                excelCommonService.addSystemFieldIfDateType(fieldCode, i, excelColumnVO);
+                excelColumnVO.setFieldCode(fieldCode);
+                setSystemFieldPredefinedValueByCode(fieldCode, projectId, organizationId, excelColumnVO, withFeature);
             } else {
                 containsCustomFields = true;
                 excelColumnVO.setFieldCode(headerName);
@@ -1154,7 +1235,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
         if (containsCustomFields) {
             String issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
-            excelCommonService.validateCustomField(headerMap, projectId, history, issueTypeList, dateTypeColumns, websocketKey);
+            excelCommonService.validateCustomField(headerMap, projectId, history, issueTypeList, null, websocketKey);
         }
     }
 
@@ -1279,9 +1360,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void parentRecursive(Map<Integer, Set<Integer>> map,
-                                IssueTypeLinkDTO issueTypeLink,
-                                Integer rowNum,
-                                Map<Integer, ExcelColumnVO> headerMap) {
+                                 IssueTypeLinkDTO issueTypeLink,
+                                 Integer rowNum,
+                                 Map<Integer, ExcelColumnVO> headerMap) {
         if (Boolean.TRUE.equals(issueTypeLink.hasNext())) {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
@@ -1375,7 +1456,7 @@ public class ExcelServiceImpl implements ExcelService {
                                   ServletRequestAttributes requestAttributes) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String websocketKey = WEBSOCKET_EXPORT_CODE + "-" + projectId;
+        String websocketKey = WEBSOCKET_EXPORT_CODE + BaseConstants.Symbol.MIDDLE_LINE + projectId;
         FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE, websocketKey);
         //处理根据界面筛选结果导出的字段
         Map<String, String[]> fieldMap =
@@ -1390,7 +1471,7 @@ public class ExcelServiceImpl implements ExcelService {
             throw new CommonException(PROJECT_ERROR);
         }
         project.setCode(projectInfoDTO.getProjectCode());
-        Boolean condition = issueService.handleSearchUser(searchVO, projectId);
+        boolean condition = issueService.handleSearchUser(searchVO, projectId);
         boolean isTreeView =
                 !Boolean.FALSE.equals(
                         Optional.ofNullable(searchVO.getSearchArgs())
@@ -1400,7 +1481,7 @@ public class ExcelServiceImpl implements ExcelService {
         String sheetName = project.getName();
         Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
         ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
-        if (Boolean.TRUE.equals(condition)) {
+        if (condition) {
             String filterSql = null;
             if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
@@ -1412,7 +1493,7 @@ public class ExcelServiceImpl implements ExcelService {
             while (true) {
                 //查询所有父节点问题
                 PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
-                Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, sortMap, isTreeView);
+                Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, new HashSet<>(Collections.singletonList(projectId)), searchVO, searchSql, sortMap, isTreeView);
                 if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
@@ -1420,10 +1501,20 @@ public class ExcelServiceImpl implements ExcelService {
                 List<Long> issueIds = new ArrayList<>();
                 Map<Long, Set<Long>> parentSonMap = new HashMap<>();
                 List<IssueDTO> issues = new ArrayList<>();
-                if (!parentIds.isEmpty()) {
+                if (CollectionUtils.isNotEmpty(parentIds)) {
                     Set<Long> childrenIds = new HashSet<>();
                     if (isTreeView) {
-                        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                        List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(parentIds, new HashSet<>(Collections.singletonList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                        //支持第三方调用，筛选出父级时同时把所有子级返回
+                        boolean withSubIssues =
+                                !Boolean.FALSE.equals(
+                                        Optional.ofNullable(searchVO.getSearchArgs())
+                                                .map(x -> x.get("withSubIssues"))
+                                                .orElse(false));
+                        // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                        if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
+                            childrenIds.add(0L);
+                        }
                         childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                     }
                     cursor.addCollections(childrenIds);
@@ -1461,7 +1552,7 @@ public class ExcelServiceImpl implements ExcelService {
                         if (!ObjectUtils.isEmpty(mainResponsibleId) && !Objects.equals(mainResponsibleId, 0L)) {
                             userIds.add(mainResponsibleId);
                         }
-                        if (!CollectionUtils.isEmpty(i.getParticipantIds())) {
+                        if (CollectionUtils.isNotEmpty(i.getParticipantIds())) {
                             userIds.addAll(i.getParticipantIds());
                         }
                     });
@@ -1469,22 +1560,22 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
                     Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
                     Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
-                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
-                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
-                    Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), issueIds, true);
+                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
+                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
+                    Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Collections.singletonList(projectId), issueIds, true);
                     Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                     Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
                     Map<Long, Set<TagVO>> tagMap = new HashMap<>();
                     Map<Long, List<ProductVO>> productMap = new HashMap<>();
                     if (agilePluginService != null) {
-                        tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Arrays.asList(projectId)), issueIds));
-                        productMap.putAll(agilePluginService.listProductMap(ConvertUtil.getOrganizationId(projectId), Arrays.asList(projectId), issueIds));
+                        tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Collections.singletonList(projectId)), issueIds));
+                        productMap.putAll(agilePluginService.listProductMap(ConvertUtil.getOrganizationId(projectId), Collections.singletonList(projectId), issueIds));
                     }
                     Map<Long, List<IssueLinkDTO>> relatedIssueMap =
-                            issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Arrays.asList(projectId)), false)
+                            issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Collections.singletonList(projectId)), false)
                                     .stream()
                                     .collect(Collectors.groupingBy(IssueLinkDTO::getKeyIssueId));
                     cursor.addCollections(userIds);
@@ -1537,11 +1628,12 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ExportIssuesVO buildExcelIssueFromIssue(String projectName,
-                                                      Map<Long, Set<Long>> parentSonMap,
-                                                      Map<Long, ExportIssuesVO> issueMap,
-                                                      Map<String, Object> issueValueMap,
-                                                      IssueDTO issue) {
+                                                   Map<Long, Set<Long>> parentSonMap,
+                                                   Map<Long, ExportIssuesVO> issueMap,
+                                                   Map<String, Object> issueValueMap,
+                                                   IssueDTO issue) {
         Map<Long, UserMessageDTO> usersMap = (Map<Long, UserMessageDTO>) issueValueMap.get(USER_MAP);
         Map<Long, IssueTypeVO> issueTypeDTOMap = (Map<Long, IssueTypeVO>) issueValueMap.get(ISSUE_TYPE_MAP);
         Map<Long, StatusVO> statusMapDTOMap = (Map<Long, StatusVO>) issueValueMap.get(STATUS_MAP);
@@ -1581,7 +1673,7 @@ public class ExcelServiceImpl implements ExcelService {
         setLabelName(labelNames, issueId, exportIssuesVO);
         setComponentName(componentMap, issueId, exportIssuesVO);
         exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
-        exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
+        exportIssuesVO.setDescription(RichTextUtil.getDes(exportIssuesVO.getDescription()));
         setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
         issueMap.put(issueId, exportIssuesVO);
         processParentSonRelation(parentSonMap, issue);
@@ -1605,7 +1697,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private void setParticipant(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, UserMessageDTO> usersMap) {
         List<Long> participantIds = issue.getParticipantIds();
-        if (!CollectionUtils.isEmpty(participantIds)) {
+        if (CollectionUtils.isNotEmpty(participantIds)) {
             List<String> participants = new ArrayList<>();
             for (Long participantId : participantIds) {
                 UserMessageDTO userMessageDTO = usersMap.get(participantId);
@@ -1621,7 +1713,7 @@ public class ExcelServiceImpl implements ExcelService {
         Long issueId = exportIssuesVO.getIssueId();
         List<IssueLinkDTO> issueLinkList = relatedIssueMap.get(issueId);
         Map<String, List<String>> relMap = new LinkedHashMap<>();
-        if(!ObjectUtils.isEmpty(issueLinkList)) {
+        if (!ObjectUtils.isEmpty(issueLinkList)) {
             int size = issueLinkList.size();
             exportIssuesVO.setRelatedIssueCount(size);
             Iterator<IssueLinkDTO> iterator = issueLinkList.iterator();
@@ -1678,16 +1770,16 @@ public class ExcelServiceImpl implements ExcelService {
     /**
      * 设置预估时间和耗费时间
      *
-     * @param workLogVOMap
-     * @param exportIssuesVO
+     * @param workLogVOMap workLogVOMap
+     * @param exportIssuesVO exportIssuesVO
      */
     private void setSpentWorkTimeAndAllEstimateTime(Map<Long, List<WorkLogVO>> workLogVOMap, ExportIssuesVO exportIssuesVO) {
         List<WorkLogVO> workLogVOList = workLogVOMap.get(exportIssuesVO.getIssueId());
         BigDecimal spentWorkTime = null;
         BigDecimal allEstimateTime;
-        if (!CollectionUtils.isEmpty(workLogVOList)) {
+        if (CollectionUtils.isNotEmpty(workLogVOList)) {
             spentWorkTime = new BigDecimal(0);
-            for (WorkLogVO workLogVO : workLogVOList){
+            for (WorkLogVO workLogVO : workLogVOList) {
                 spentWorkTime = spentWorkTime.add(workLogVO.getWorkTime());
             }
             allEstimateTime = exportIssuesVO.getRemainingTime() == null ? spentWorkTime : spentWorkTime.add(exportIssuesVO.getRemainingTime());
@@ -1722,21 +1814,21 @@ public class ExcelServiceImpl implements ExcelService {
     /**
      * 上传文件到minio中
      *
-     * @param organizationId
-     * @param workbook
-     * @param fileName
-     * @param fileOperationHistoryDTO
-     * @param userId
+     * @param organizationId organizationId
+     * @param workbook workbook
+     * @param fileName fileName
+     * @param fileOperationHistoryDTO fileOperationHistoryDTO
+     * @param userId userId
      */
     @Override
-    public void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
+    public void downloadWorkBook(Long organizationId, Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
             byte[] content = os.toByteArray();
             MultipartFile file = new MultipartExcel("file", fileName, EXCELCONTENTTYPE, content);
 
             //返回上载结果
-            String path = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(),null, fileName, file);
+            String path = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, file);
             fileOperationHistoryDTO.setStatus(SUCCESS);
             fileOperationHistoryDTO.setFileUrl(path);
         } catch (Exception e) {
@@ -1890,9 +1982,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected String getActiveSprintName(IssueDTO issue) {
-        List<IssueSprintDTO>  issueSprintList = issue.getIssueSprintDTOS();
+        List<IssueSprintDTO> issueSprintList = issue.getIssueSprintDTOS();
         if (!ObjectUtils.isEmpty(issueSprintList)) {
-            for(IssueSprintDTO sprint : issueSprintList) {
+            for (IssueSprintDTO sprint : issueSprintList) {
                 if (!"closed".equals(sprint.getStatusCode())) {
                     return sprint.getSprintName();
                 }
@@ -1976,8 +2068,8 @@ public class ExcelServiceImpl implements ExcelService {
     /**
      * 处理根据界面筛选结果导出的字段
      *
-     * @param exportFieldCodes
-     * @return
+     * @param exportFieldCodes exportFieldCodes
+     * @return result
      */
     protected Map<String, String[]> handleExportFields(List<String> exportFieldCodes,
                                                        Long projectId,
@@ -1988,7 +2080,7 @@ public class ExcelServiceImpl implements ExcelService {
         ObjectMapper m = new ObjectMapper();
 
         Object content = Optional.ofNullable(objectSchemeFieldService
-                .listQuery(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE))
+                        .listQuery(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE))
                 .orElseThrow(() -> new CommonException("error.foundation.listQuery"))
                 .get("content");
 
@@ -1998,11 +2090,11 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     public void processExportField(List<String> exportFieldCodes,
-                                    String[] fieldsName,
-                                    String[] fields,
-                                    Map<String, String[]> fieldMap,
-                                    ObjectMapper m,
-                                    Object content) {
+                                   String[] fieldsName,
+                                   String[] fields,
+                                   Map<String, String[]> fieldMap,
+                                   ObjectMapper m,
+                                   Object content) {
         List<Object> contentList = m.convertValue(content, List.class);
         List<ObjectSchemeFieldDTO> fieldDTOS = new ArrayList<>();
 
@@ -2054,80 +2146,13 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    public String getDes(String str) {
-        if (str == null) {
-            return "";
-        }
-        StringBuilder result = new StringBuilder();
-        try {
-            JSONArray root = JSON.parseArray(str);
-            for (Object o : root) {
-                JSONObject object = (JSONObject) o;
-                if (!(object.get(INSERT) instanceof JSONObject)) {
-                    result.append(StringEscapeUtils.unescapeJava(object.getString(INSERT)));
-                }
-            }
-        } catch (Exception e){
-            Document doc = Jsoup.parse(str);
-            doc.body().children().forEach(element -> {
-                String tagName = element.tag().getName();
-                if(tagName == null){
-                    result.append(element.text()).append("\n");
-                    return;
-                }
-                switch (tagName){
-                    case "figure":
-                        break;
-                    case "ol":
-                    case "ul":
-                        setListElementStr(result, element);
-                        break;
-                    default:
-                        result.append(element.text()).append("\n");
-                        break;
-                }
-            });
-        }
-        return result.toString().trim();
-    }
-
-    private String setListElementStr(StringBuilder result, Element element) {
-        element.children().forEach(childElement -> result.append(getLiText(childElement)).append("\n"));
-        return element.text();
-    }
-
-    private String getLiText(Element element) {
-        StringBuilder result = new StringBuilder();
-        String liAllText = element.text();
-        StringBuilder childListText = new StringBuilder();
-        StringBuilder childRelText = new StringBuilder();
-        element.children().forEach(childElement -> {
-            String tagName = childElement.tag().getName();
-            if("ol".equals(tagName) || "ul".equals(tagName)){
-                childListText.append(" ").append(setListElementStr(childRelText, childElement));
-            }
-        });
-        if (childListText.length() > 0) {
-            int childTextStart = liAllText.indexOf(childListText.toString());
-            if (childTextStart > -1) {
-                result.append(liAllText, 0, childTextStart);
-            } else {
-                result.append(liAllText);
-            }
-            result.append("\n").append(childRelText.toString());
-        } else {
-            result.append(liAllText);
-        }
-        return result.toString().trim();
-    }
-
     protected String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
         StringBuilder sprintName = new StringBuilder();
-        if (!StringUtils.isEmpty(exportIssuesVO.getSprintName())){
+        if (!StringUtils.isEmpty(exportIssuesVO.getSprintName())) {
             sprintName.append("正在使用冲刺:").append(exportIssuesVO.getSprintName());
         }
-        if (!StringUtils.isEmpty(exportIssuesVO.getCloseSprintName())){
-            if (sprintName.length() != 0){
+        if (!StringUtils.isEmpty(exportIssuesVO.getCloseSprintName())) {
+            if (sprintName.length() != 0) {
                 sprintName.append("\r\n");
             }
             sprintName.append("已关闭冲刺:").append(exportIssuesVO.getCloseSprintName());

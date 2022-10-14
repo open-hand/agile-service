@@ -1,11 +1,11 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import java.util.List;
 
 /**
  * @author zhaotianxin
@@ -14,39 +14,39 @@ import java.util.List;
 public interface BoardTemplateService {
     /**
      * 创建迭代计划模板
-     * @param organizationId
-     * @param boardName
+     * @param organizationId organizationId
+     * @param boardName boardName
      */
     void createBoardTemplate(Long organizationId, String boardName);
 
     /**
      * 修改迭代模板
-     * @param organizationId
-     * @param boardId
-     * @param boardVO
-     * @return
+     * @param organizationId organizationId
+     * @param boardId boardId
+     * @param boardVO boardVO
+     * @return result
      */
     BoardVO updateBoardTemplate(Long organizationId, Long boardId, BoardVO boardVO);
 
     /**
      * 删除迭代模板
-     * @param organizationId
-     * @param boardId
+     * @param organizationId organizationId
+     * @param boardId boardId
      */
     void deleteBoardTemplate(Long organizationId, Long boardId);
 
     /**
      * 查询看板详情
-     * @param organizationId
-     * @param boardId
-     * @return
+     * @param organizationId organizationId
+     * @param boardId boardId
+     * @return result
      */
     BoardVO queryBoardTemplateById(Long organizationId, Long boardId);
 
     /**
      * 查询组织创建的看板模板
-     * @param organizationId
-     * @return
+     * @param organizationId organizationId
+     * @return result
      */
     Page<BoardVO> listBoardTemplate(Long organizationId, PageRequest pageRequest);
 
