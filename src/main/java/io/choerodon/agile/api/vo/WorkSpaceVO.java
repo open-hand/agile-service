@@ -21,6 +21,17 @@ public class WorkSpaceVO {
     @ApiModelProperty(value = "知识库名称")
     private String baseName;
 
+    @ApiModelProperty("是否有权限")
+    private Boolean approve;
+
+    public Boolean getApprove() {
+        return approve;
+    }
+
+    public void setApprove(Boolean approve) {
+        this.approve = approve;
+    }
+
     public Long getId() {
         return id;
     }
