@@ -164,7 +164,7 @@ public class ExcelImportTemplate {
 
         static {
             HEADERS = new ArrayList<>(INIT_CAPACITY);
-            HEADERS.add(new Header(ISSUE_NUM, "编号", true, null));
+            HEADERS.add(new Header(ISSUE_NUM, "编号", false, null));
             HEADERS.add(new Header(FieldCode.ISSUE_TYPE, IssueConstant.ISSUE_TYPE_CN + "*", true, null));
             HEADERS.add(new Header(PARENT, "父级故事/任务/缺陷", true, 12000));
             HEADERS.add(new Header(FieldCode.EPIC, "所属史诗", false, 8000));
