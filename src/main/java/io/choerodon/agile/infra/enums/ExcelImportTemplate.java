@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.core.exception.CommonException;
 
 /**
@@ -197,6 +198,9 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.LAST_UPDATE_DATE, "最后更新时间", false, null));
             HEADERS.add(new Header(FieldCode.CREATOR, "创建人", false, null));
             HEADERS.add(new Header(FieldCode.UPDATOR, "更新人", false, null));
+            HEADERS.add(new Header(ExportIssuesVO.ALL_ESTIMATE_TIME, "当前预估时间", false, null));
+            HEADERS.add(new Header(ExportIssuesVO.SPENT_WORK_TIME, "已耗费时间", false, null));
+            HEADERS.add(new Header(ExportIssuesVO.TAGS, "Tag", false, null));
             HEADERS.forEach(h -> {
                 String code = h.getCode();
                 String value = h.getValue();
