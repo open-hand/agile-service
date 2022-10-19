@@ -1917,6 +1917,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public void batchDeleteIssuesAgile(Long projectId, List<Long> issueIds) {
+        if (CollectionUtils.isEmpty(issueIds)) {
+            return;
+        }
         if (issueMapper.queryIssueIdsIsNotTest(projectId, issueIds) != issueIds.size()) {
             throw new CommonException(ERROR_ISSUE_TYPE_NOT_ISSUE_TEST);
         }
