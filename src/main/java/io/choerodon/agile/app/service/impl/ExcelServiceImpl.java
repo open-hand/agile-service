@@ -2111,13 +2111,13 @@ public class ExcelServiceImpl implements ExcelService {
     protected String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
         StringBuilder sprintName = new StringBuilder();
         if (!StringUtils.isEmpty(exportIssuesVO.getSprintName())) {
-            sprintName.append("正在使用冲刺:").append(exportIssuesVO.getSprintName());
+            sprintName.append(exportIssuesVO.getSprintName());
         }
         if (!StringUtils.isEmpty(exportIssuesVO.getCloseSprintName())) {
             if (sprintName.length() != 0) {
                 sprintName.append("\r\n");
             }
-            sprintName.append("已关闭冲刺:").append(exportIssuesVO.getCloseSprintName());
+            sprintName.append(exportIssuesVO.getCloseSprintName());
         }
         return sprintName.toString();
     }
