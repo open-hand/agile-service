@@ -51,4 +51,12 @@ databaseChangeLog(logicalFilePath: 'fd_status_transfer_setting.groovy') {
             column(name: 'is_verify_subissue_completed', type: 'TINYINT UNSIGNED', remarks: '是否校验任务项子级全到已解决状态', defaultValue: "0")
         }
     }
+
+    changeSet(author: 'tianxin.zhao@zknow.com',id: '2022-08-17-fd-status-transfer-setting-fix-data'){
+
+        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
+            "DELETE fsrs FROM fd_status_transfer_setting fsrs WHERE fsrs.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
+        }
+
+    }
 }
