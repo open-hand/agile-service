@@ -73,17 +73,5 @@ databaseChangeLog(logicalFilePath: 'fd_status_linkage.groovy') {
                     "fsl.issue_type_id not in (select fit.id from fd_issue_type fit)\n" +
                     "or fsl.parent_issue_type_id not in (select fit.id from fd_issue_type fit)"
         }
-
-        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
-            "DELETE fsns FROM fd_status_notice_setting fsns WHERE fsns.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
-        }
-
-        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
-            "DELETE fsfs FROM fd_status_field_setting fsfs WHERE fsfs.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
-        }
-
-        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
-            "DELETE fsrs FROM fd_status_transfer_setting fsrs WHERE fsrs.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
-        }
     }
 }
