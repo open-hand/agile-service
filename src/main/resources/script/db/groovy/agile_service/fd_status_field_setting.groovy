@@ -42,4 +42,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_field_setting.groovy') {
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织Id', defaultValue: "0")
         }
     }
+
+    changeSet(author: 'tianxin.zhao@zknow.com',id: '2022-08-17-fd-status-field-setting-fix-data'){
+        sql(stripComments: true, splitStatements: true, endDelimiter: ';'){
+            "DELETE fsfs FROM fd_status_field_setting fsfs WHERE fsfs.issue_type_id NOT IN (SELECT fit.id FROM fd_issue_type fit)"
+        }
+    }
 }
