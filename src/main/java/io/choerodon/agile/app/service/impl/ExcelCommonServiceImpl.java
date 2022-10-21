@@ -2573,11 +2573,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String errorMsg = buildWithErrorMsg(value, "经办人输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-
-            IssueVO issueVO = issueService.queryIssue(issueCreateVO.getProjectId(), issueCreateVO.getIssueId(), issueCreateVO.getOrganizationId());
-            if (issueVO != null && StringUtils.equalsIgnoreCase(issueVO.getAssigneeName(), value)) {
-                // 如果经办人一样则不设置此值
-                return;
+            if (!ObjectUtils.isEmpty(issueCreateVO.getIssueId())) {
+                IssueVO issueVO = issueService.queryIssue(issueCreateVO.getProjectId(), issueCreateVO.getIssueId(), issueCreateVO.getOrganizationId());
+                if (issueVO != null && StringUtils.equalsIgnoreCase(issueVO.getAssigneeName(), value)) {
+                    // 如果经办人一样则不设置此值
+                    return;
+                }
             }
             issueCreateVO.setAssigneeId(valueIdMap.get(value));
             excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
