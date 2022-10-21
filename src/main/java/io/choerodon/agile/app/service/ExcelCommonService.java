@@ -1,22 +1,22 @@
 package io.choerodon.agile.app.service;
 
-import com.alibaba.fastjson.JSON;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.alibaba.fastjson.JSONObject;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
 import io.choerodon.agile.api.vo.ExcelColumnVO;
 import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueExcelImportVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.domain.entity.ExcelSheetData;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 import io.choerodon.agile.infra.dto.PredefinedDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplate;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author huaxin.deng@hand-china.com
@@ -125,28 +125,28 @@ public interface ExcelCommonService {
     void validateCustomFieldData(JSONObject rowJson,
                                  Integer col,
                                  ExcelColumnVO excelColumn,
-                                 IssueCreateVO issueCreateVO);
+                                 IssueExcelImportVO issueExcelImportVO);
 
     void validateCustomFieldData(Row row,
                                  Integer col,
                                  ExcelColumnVO excelColumn,
                                  Map<Integer, List<Integer>> errorRowColMap,
-                                 IssueCreateVO issueCreateVO);
+                                 IssueExcelImportVO issueExcelImportVO);
 
     void handlerRequireFiled(ExcelColumnVO excelColumn,
                              Map<Long, List<String>> requireFieldMap,
-                             IssueCreateVO issueCreateVO,
+                             IssueExcelImportVO issueExcelImportVO,
                              Long projectId);
 
     Boolean checkRequireField(Map<Long, List<String>> requireFieldMap,
                               ExcelColumnVO excelColumn,
-                              IssueCreateVO issueCreateVO,
+                              IssueExcelImportVO issueExcelImportVO,
                               JSONObject rowJson,
                               Integer col);
 
     Boolean checkRequireField(Map<Long, List<String>> requireFieldMap,
                               ExcelColumnVO excelColum,
-                              IssueCreateVO issueCreateVO,
+                              IssueExcelImportVO issueExcelImportVO,
                               Row row,
                               Integer col,
                               Map<Integer, List<Integer>> errorRowColMap);
@@ -154,7 +154,7 @@ public interface ExcelCommonService {
     void validateCommonSystemFieldData(JSONObject rowJson,
                                        Integer col,
                                        ExcelColumnVO excelColumn,
-                                       IssueCreateVO issueCreateVO,
+                                       IssueExcelImportVO issueExcelImportVO,
                                        IssueVO parentIssue,
                                        Long projectId,
                                        Map<Integer, ExcelColumnVO> headerMap);
@@ -163,7 +163,7 @@ public interface ExcelCommonService {
                                        Integer col,
                                        ExcelColumnVO excelColumn,
                                        Map<Integer, List<Integer>> errorRowColMap,
-                                       IssueCreateVO issueCreateVO,
+                                       IssueExcelImportVO issueExcelImportVO,
                                        IssueVO parentIssue,
                                        Long projectId,
                                        Map<Integer, ExcelColumnVO> headerMap);
@@ -185,7 +185,7 @@ public interface ExcelCommonService {
                                            String templatePath);
 
     void fieldCascadeValidate(Long projectId,
-                              IssueCreateVO issueCreateVO,
+                              IssueExcelImportVO issueExcelImportVO,
                               Map<Integer, ExcelColumnVO> headerMap,
                               JSONObject rowJson);
 }
