@@ -1917,6 +1917,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public void batchDeleteIssuesAgile(Long projectId, List<Long> issueIds) {
+        if (CollectionUtils.isEmpty(issueIds)) {
+            return;
+        }
         if (issueMapper.queryIssueIdsIsNotTest(projectId, issueIds) != issueIds.size()) {
             throw new CommonException(ERROR_ISSUE_TYPE_NOT_ISSUE_TEST);
         }
@@ -2687,7 +2690,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + asyncTraceId;
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("projectId", projectId);
-        paramsMap.put("userId", userId);
+        paramsMap.put("userId", EncryptionUtils.encrypt(userId));
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 0);
         redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
@@ -2747,6 +2750,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (agileWaterfallService != null) {
                 agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
             }
+            paramsMap.put("newIssueId", EncryptionUtils.encrypt(newIssueId));
             sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
             redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , SUCCEED_STATUS, 24L, TimeUnit.HOURS);
         } else {

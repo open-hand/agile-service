@@ -1,16 +1,24 @@
 package io.choerodon.agile.api.vo;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Date;
+import javax.validation.constraints.NotBlank;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.validator.constraints.Length;
+
+import io.choerodon.agile.infra.dto.SprintDTO;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/9/27.
  * Email: fuqianghuang01@gmail.com
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SprintCreateVO {
+    @NotBlank
     @ApiModelProperty(value = "冲刺名称")
     private String sprintName;
+    @Length(max = SprintDTO.MAX_SPRINT_GAOL_LENGTH)
     @ApiModelProperty(value = "冲刺目标")
     private String sprintGoal;
     @ApiModelProperty(value = "开始时间")

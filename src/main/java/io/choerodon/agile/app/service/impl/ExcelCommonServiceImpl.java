@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import io.choerodon.agile.domain.entity.ExcelSheetData;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -28,11 +28,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueExcelImportVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.ProductVO;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.domain.entity.ExcelSheetData;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -44,6 +45,7 @@ import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+
 import org.hzero.boot.file.FileClient;
 
 /**
@@ -66,9 +68,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private static final String FILE_NAME = "error.xlsx";
     private static final String ERROR_FILE_OPERATION_HISTORY_UPDATE = "error.FileOperationHistoryDTO.update";
     private static final String SUB_BUG_CN = "子缺陷";
-    private static final String IMPORT_TEMPLATE_NAME = "导入模板";
+    private static final String IMPORT_TEMPLATE_NAME = "sheet1";
     private static final String DATE_CHECK_MSG = "请输入正确的日期格式";
     private static final String DATE_RANGE_CHECK_MSG = "开始时间不能在结束时间之后";
+    protected static final String APPLY_TYPE_AGILE = "agile";
     private static final String[] SYSTEM_DATE_FIELD_LIST = {FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME};
     private static final List<String> SYSTEM_FIELD_HEADER_NOT_SORT = Arrays.asList(FieldCode.PARENT, FieldCode.ISSUE_TYPE);
     public static final List<String> COMMON_PREDEFINED_SYSTEM_FIELD =
@@ -132,6 +135,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private PageFieldService pageFieldService;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private ProjectConfigService projectConfigService;
+    @Autowired
+    private FieldCascadeRuleService fieldCascadeRuleService;
 
     @Override
     public PredefinedDTO processSystemFieldPredefined(Long projectId, ExcelImportTemplate.Cursor cursor, boolean withFeature, List<String> fieldCodes, String fieldCode) {
@@ -723,6 +730,58 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     @Override
+    public void fieldCascadeValidate(Long projectId,
+                                     IssueExcelImportVO issueExcelImportVO,
+                                     Map<Integer, ExcelColumnVO> headerMap,
+                                     JSONObject rowJson) {
+
+        // 查询问题类型的相关的级联配置
+        List<FieldCascadeRuleVO> fieldCascadeRuleVOS = fieldCascadeRuleService.listFieldCascadeRuleByIssueType(projectId, issueExcelImportVO.getIssueTypeId(), null);
+        if (!CollectionUtils.isEmpty(fieldCascadeRuleVOS)) {
+            // 记录字段的colNum值
+            Map<String, Integer> codeColMap = new HashMap<>();
+            // 记录字段的excel中设置值
+            Map<String, List<Long>> codeValuesMap = new HashMap<>();
+            for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
+                Integer key = entry.getKey();
+                ExcelColumnVO value = entry.getValue();
+                codeColMap.put(value.getFieldCode(), key);
+                codeValuesMap.put(value.getFieldCode(), value.getValues());
+            }
+            // 遍历查询的级联字段配置
+            for (FieldCascadeRuleVO fieldCascadeRuleVO : fieldCascadeRuleVOS) {
+                String fieldCode = fieldCascadeRuleVO.getFieldCode();
+                List<Long> values = codeValuesMap.get(fieldCode);
+                // 如果当前Excel中设置的值不在级联配置里面就跳过
+                if (CollectionUtils.isEmpty(values) || !values.contains(fieldCascadeRuleVO.getFieldOptionId())) {
+                    continue;
+                }
+                String cascadeFieldCode = fieldCascadeRuleVO.getCascadeFieldCode();
+                List<Long> cascadeFieldValues = codeValuesMap.get(cascadeFieldCode);
+                List<FieldCascadeRuleOptionVO> cascadeRuleOptionList = fieldCascadeRuleVO.getFieldCascadeRuleOptionList();
+                // 如果Excel中级联字段为空或者级联设置中的值为空就跳过
+                if (CollectionUtils.isEmpty(cascadeFieldValues) || CollectionUtils.isEmpty(cascadeRuleOptionList)) {
+                    continue;
+                }
+                List<Long> fieldCascadeRuleOptions = cascadeRuleOptionList.stream().map(FieldCascadeRuleOptionVO::getCascadeOptionId).collect(Collectors.toList());
+                Boolean passValidate = true;
+                // excel中级联字段设置的值不在配置的范围中 就记录报错信息并返回
+                for (Long cascadeFieldValue : cascadeFieldValues) {
+                    if (passValidate) {
+                        passValidate = fieldCascadeRuleOptions.contains(cascadeFieldValue);
+                    }
+                }
+                if (!passValidate) {
+                    Integer col = codeColMap.get(cascadeFieldCode);
+                    JSONObject cellJson = (JSONObject) rowJson.get(col);
+                    String errorMsg = buildWithErrorMsg(null, "不符合字段级联设置");
+                    putErrorMsg(rowJson, cellJson, errorMsg);
+                }
+            }
+        }
+    }
+
+    @Override
     public int processErrorData(Long userId,
                                 FileOperationHistoryDTO history,
                                 JSONObject sheetData,
@@ -825,7 +884,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
 
     private String buildWithErrorMsg(String value, String msg) {
-        if(value == null) {
+        if (value == null) {
             value = "";
         }
         return new StringBuilder(value).append("(").append(msg).append(")").toString();
@@ -1213,7 +1272,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     public void validateCustomFieldData(JSONObject rowJson,
                                         Integer col,
                                         ExcelColumnVO excelColumn,
-                                        IssueCreateVO issueCreateVO) {
+                                        IssueExcelImportVO issueExcelImportVO) {
         SimpleDateFormat formats = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat formatTimeOnly = new SimpleDateFormat("HH:mm:ss");
         SimpleDateFormat formatYearOnly = new SimpleDateFormat("yyyy");
@@ -1257,6 +1316,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (values == null) {
                 customFieldValue = stringValue;
             } else {
+                List<Long> actualValues = new ArrayList<>();
                 if (multiValue) {
                     boolean ok = true;
                     List<String> ids = new ArrayList<>();
@@ -1272,6 +1332,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         String errorMsg = buildWithErrorMsg(stringValue, "自定义字段值错误");
                         putErrorMsg(rowJson, cellJson, errorMsg);
                     }
+                    actualValues.addAll(ids.stream().map(Long::valueOf).collect(Collectors.toList()));
                     customFieldValue = ids;
                 } else {
                     if (!values.contains(stringValue)) {
@@ -1279,11 +1340,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         putErrorMsg(rowJson, cellJson, errorMsg);
                     } else {
                         customFieldValue = String.valueOf(valueIdMap.get(stringValue));
+                        actualValues.add(Long.valueOf(String.valueOf(valueIdMap.get(stringValue))));
                     }
                 }
+                excelColumn.setValues(actualValues);
             }
         }
-        buildCustomFields(excelColumn, issueCreateVO, customFieldValue);
+        buildCustomFields(excelColumn, issueExcelImportVO, customFieldValue);
     }
 
     private void validateIfNumber(String fieldType,
@@ -1306,7 +1369,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         Map<Integer, List<Integer>> errorRowColMap,
-                                        IssueCreateVO issueCreateVO) {
+                                        IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         SimpleDateFormat formats = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat formatTimeOnly = new SimpleDateFormat("HH:mm:ss");
@@ -1353,21 +1416,25 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     customFieldValue = value;
                 }
             }
-            buildCustomFields(excelColumn, issueCreateVO, customFieldValue);
+            buildCustomFields(excelColumn, issueExcelImportVO, customFieldValue);
         }
     }
 
-    private void buildCustomFields(ExcelColumnVO excelColumn, IssueCreateVO issueCreateVO, Object customFieldValue) {
+    private void buildCustomFields(ExcelColumnVO excelColumn, IssueExcelImportVO issueExcelImportVO, Object customFieldValue) {
         PageFieldViewUpdateVO pageFieldViewUpdateVO = excelColumn.getCustomFieldDetail();
-        List<PageFieldViewUpdateVO> customFields = issueCreateVO.getCustomFields();
+        List<PageFieldViewUpdateVO> customFields = issueExcelImportVO.getCustomFields();
         if (customFields == null) {
             customFields = new ArrayList<>();
-            issueCreateVO.setCustomFields(customFields);
+            issueExcelImportVO.setCustomFields(customFields);
         }
         PageFieldViewUpdateVO pageFieldViewUpdate = new PageFieldViewUpdateVO();
         pageFieldViewUpdate.setFieldId(pageFieldViewUpdateVO.getFieldId());
         pageFieldViewUpdate.setFieldType(pageFieldViewUpdateVO.getFieldType());
         pageFieldViewUpdate.setValue(customFieldValue);
+        ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldService.baseQueryById(issueExcelImportVO.getOrganizationId(),
+                issueExcelImportVO.getProjectId(), pageFieldViewUpdateVO.getFieldId());
+        pageFieldViewUpdate.setSchemeCode(objectSchemeFieldDTO.getSchemeCode());
+        pageFieldViewUpdate.setFieldCode(objectSchemeFieldDTO.getCode());
         customFields.add(pageFieldViewUpdate);
     }
 
@@ -1382,11 +1449,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     /**
-     * @param cell cell
-     * @param rowNum rowNum
-     * @param col col
+     * @param cell           cell
+     * @param rowNum         rowNum
+     * @param col            col
      * @param errorRowColMap errorRowColMap
-     * @param format format
+     * @param format         format
      * @param formatTimeOnly formatTimeOnly
      * @param formatYearOnly formatYearOnly
      * @return result
@@ -1447,17 +1514,17 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     @Override
-    public void handlerRequireFiled(ExcelColumnVO excelColumn, Map<Long, List<String>> requireFieldMap, IssueCreateVO issueCreateVO, Long projectId) {
-        if ("issueType".equals(excelColumn.getFieldCode()) && !ObjectUtils.isEmpty(issueCreateVO.getIssueTypeId())) {
-            List<String> list = requireFieldMap.get(issueCreateVO.getIssueTypeId());
+    public void handlerRequireFiled(ExcelColumnVO excelColumn, Map<Long, List<String>> requireFieldMap, IssueExcelImportVO issueExcelImportVO, Long projectId) {
+        if ("issueType".equals(excelColumn.getFieldCode()) && !ObjectUtils.isEmpty(issueExcelImportVO.getIssueTypeId())) {
+            List<String> list = requireFieldMap.get(issueExcelImportVO.getIssueTypeId());
             if (CollectionUtils.isEmpty(list)) {
                 PageFieldViewParamVO pageFieldViewParamVO = new PageFieldViewParamVO();
                 pageFieldViewParamVO.setPageCode("agile_issue_create");
                 pageFieldViewParamVO.setSchemeCode("agile_issue");
-                pageFieldViewParamVO.setIssueTypeId(issueCreateVO.getIssueTypeId());
+                pageFieldViewParamVO.setIssueTypeId(issueExcelImportVO.getIssueTypeId());
                 List<PageFieldViewVO> pageFieldViewVOS = pageFieldService.queryPageFieldViewList(ConvertUtil.getOrganizationId(projectId), projectId, pageFieldViewParamVO);
                 List<String> fieldCodes = pageFieldViewVOS.stream().filter(v -> Boolean.TRUE.equals(v.getRequired())).map(PageFieldViewVO::getFieldCode).collect(Collectors.toList());
-                requireFieldMap.put(issueCreateVO.getIssueTypeId(), fieldCodes);
+                requireFieldMap.put(issueExcelImportVO.getIssueTypeId(), fieldCodes);
             }
         }
     }
@@ -1465,11 +1532,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     @Override
     public Boolean checkRequireField(Map<Long, List<String>> requireFieldMap,
                                      ExcelColumnVO excelColumn,
-                                     IssueCreateVO issueCreateVO,
+                                     IssueExcelImportVO issueExcelImportVO,
                                      JSONObject rowJson,
                                      Integer col) {
         Boolean checkRequireField = true;
-        List<String> requiredFields = requireFieldMap.get(issueCreateVO.getIssueTypeId());
+        List<String> requiredFields = requireFieldMap.get(issueExcelImportVO.getIssueTypeId());
         String fieldCode = excelColumn.getFieldCode();
         if (!ObjectUtils.isEmpty(requiredFields)
                 && requiredFields.contains(fieldCode)) {
@@ -1487,14 +1554,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     @Override
     public Boolean checkRequireField(Map<Long, List<String>> requireFieldMap,
                                      ExcelColumnVO excelColum,
-                                     IssueCreateVO issueCreateVO,
+                                     IssueExcelImportVO issueExcelImportVO,
                                      Row row,
                                      Integer col,
                                      Map<Integer, List<Integer>> errorRowColMap) {
         Boolean checkRequireField = true;
         Cell cell = row.getCell(col);
         if (SheetUtils.isCellEmpty(cell)) {
-            List<String> list = requireFieldMap.get(issueCreateVO.getIssueTypeId());
+            List<String> list = requireFieldMap.get(issueExcelImportVO.getIssueTypeId());
             if (!CollectionUtils.isEmpty(list) && list.contains(excelColum.getFieldCode())) {
                 cell = row.createCell(col);
                 cell.setCellValue("必填字段不能为空");
@@ -1509,99 +1576,102 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     public void validateCommonSystemFieldData(JSONObject rowJson,
                                               Integer col,
                                               ExcelColumnVO excelColumn,
-                                              IssueCreateVO issueCreateVO,
+                                              IssueExcelImportVO issueExcelImportVO,
                                               IssueVO parentIssue,
                                               Long projectId,
                                               Map<Integer, ExcelColumnVO> headerMap) {
         String fieldCode = excelColumn.getFieldCode();
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
-        JSONObject cellJson = (JSONObject)rowJson.get(issueTypeCol);
+        JSONObject cellJson = (JSONObject) rowJson.get(issueTypeCol);
         String issueType = cellJson.getString(ExcelSheetData.STRING_CELL);
         String issueTypeCode = getIssueTypeCode(headerMap, issueType);
         switch (fieldCode) {
             case FieldCode.ISSUE_TYPE:
-                validateAndSetIssueType(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetIssueType(rowJson, col, excelColumn, issueExcelImportVO);
                 break;
             case FieldCode.ASSIGNEE:
-                validateAndSetAssignee(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetAssignee(rowJson, col, excelColumn, issueExcelImportVO);
                 break;
             case FieldCode.REPORTER:
-                validateAndSetReporter(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetReporter(rowJson, col, excelColumn, issueExcelImportVO);
                 break;
             case FieldCode.PRIORITY:
-                validateAndSetPriority(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetPriority(rowJson, col, excelColumn, issueExcelImportVO);
                 break;
             case FieldCode.REMAINING_TIME:
-                validateAndSetRemainingTime(rowJson, col, issueCreateVO);
+                validateAndSetRemainingTime(rowJson, col, issueExcelImportVO);
                 break;
             case FieldCode.FIX_VERSION:
-                validateAndSetFixVersion(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetFixVersion(rowJson, col, excelColumn, issueExcelImportVO);
                 break;
             case FieldCode.INFLUENCE_VERSION:
-                validateAndSetInfluenceVersion(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetInfluenceVersion(rowJson, col, excelColumn, issueExcelImportVO);
                 break;
             case FieldCode.STORY_POINTS:
-                validateAndSetStoryPoint(rowJson, col, issueCreateVO, issueTypeCode);
+                validateAndSetStoryPoint(rowJson, col, issueExcelImportVO, issueTypeCode);
                 break;
             case FieldCode.EPIC_NAME:
-                validateAndSetEpicName(rowJson, col, issueCreateVO, issueTypeCode, projectId, headerMap);
+                validateAndSetEpicName(rowJson, col, issueExcelImportVO, issueTypeCode, projectId, headerMap);
                 break;
             case FieldCode.FEATURE:
-                validateAndSetFeature(rowJson, col, excelColumn, issueCreateVO, issueTypeCode, issueType);
+                validateAndSetFeature(rowJson, col, excelColumn, issueExcelImportVO, issueTypeCode, issueType);
                 break;
             case FieldCode.EPIC:
-                validateAndSetEpic(rowJson, col, excelColumn, issueCreateVO, issueTypeCode, parentIssue, issueType);
+                validateAndSetEpic(rowJson, col, excelColumn, issueExcelImportVO, issueTypeCode, parentIssue, issueType);
                 break;
             case FieldCode.SUMMARY:
-                validateAndSetSummary(rowJson, col, issueCreateVO);
+                validateAndSetSummary(rowJson, col, issueExcelImportVO);
                 break;
             case ExcelImportTemplate.IssueHeader.PARENT:
-                setParent(rowJson, col, issueCreateVO, parentIssue, issueType, issueTypeCode);
+                setParent(rowJson, col, issueExcelImportVO, parentIssue, issueType, issueTypeCode);
                 break;
             case FieldCode.DESCRIPTION:
-                setDescription(rowJson, col, issueCreateVO);
+                setDescription(rowJson, col, issueExcelImportVO);
                 break;
             case FieldCode.COMPONENT:
-                validateAndSetComponent(rowJson, col, excelColumn, parentIssue, issueType, issueTypeCode, issueCreateVO);
+                validateAndSetComponent(rowJson, col, excelColumn, parentIssue, issueType, issueTypeCode, issueExcelImportVO);
                 break;
             case FieldCode.SPRINT:
-                validateAndSetSprint(rowJson, col, excelColumn, parentIssue, issueType, issueTypeCode, issueCreateVO);
+                validateAndSetSprint(rowJson, col, excelColumn, parentIssue, issueType, issueTypeCode, issueExcelImportVO);
                 break;
             case FieldCode.LABEL:
-                validateAndSetLabel(rowJson, col, issueCreateVO, projectId);
+                validateAndSetLabel(rowJson, col, issueExcelImportVO, projectId);
                 break;
             case FieldCode.ESTIMATED_START_TIME:
-                validateAndSetEstimatedTime(rowJson, col, issueCreateVO, FieldCode.ESTIMATED_START_TIME, headerMap);
+                validateAndSetEstimatedTime(rowJson, col, issueExcelImportVO, FieldCode.ESTIMATED_START_TIME, headerMap);
                 break;
             case FieldCode.ESTIMATED_END_TIME:
-                validateAndSetEstimatedTime(rowJson, col, issueCreateVO, FieldCode.ESTIMATED_END_TIME, headerMap);
+                validateAndSetEstimatedTime(rowJson, col, issueExcelImportVO, FieldCode.ESTIMATED_END_TIME, headerMap);
                 break;
             case ExcelImportTemplate.IssueHeader.RELATE_ISSUE:
-                validateRelateIssue(rowJson, col, issueCreateVO, projectId);
+                validateRelateIssue(rowJson, col, issueExcelImportVO, projectId);
                 break;
             case FieldCode.MAIN_RESPONSIBLE:
-                validateAndSetMainResponsible(rowJson, col, issueCreateVO, excelColumn, issueTypeCode);
+                validateAndSetMainResponsible(rowJson, col, issueExcelImportVO, excelColumn, issueTypeCode);
                 break;
             case FieldCode.ENVIRONMENT:
-                validateAndSetEnvironment(rowJson, col, issueCreateVO, excelColumn, issueTypeCode);
+                validateAndSetEnvironment(rowJson, col, issueExcelImportVO, excelColumn, issueTypeCode);
                 break;
             case FieldCode.ISSUE_STATUS:
-                validateAndSetIssueStatus(rowJson, col, excelColumn, issueCreateVO, issueType);
+                validateAndSetIssueStatus(rowJson, col, excelColumn, issueExcelImportVO, issueType);
                 break;
             case FieldCode.ACTUAL_START_TIME:
-                validateAndSetActualTime(rowJson, col, issueCreateVO, FieldCode.ACTUAL_START_TIME, headerMap);
+                validateAndSetActualTime(rowJson, col, issueExcelImportVO, FieldCode.ACTUAL_START_TIME, headerMap);
                 break;
             case FieldCode.ACTUAL_END_TIME:
-                validateAndSetActualTime(rowJson, col, issueCreateVO, FieldCode.ACTUAL_END_TIME, headerMap);
+                validateAndSetActualTime(rowJson, col, issueExcelImportVO, FieldCode.ACTUAL_END_TIME, headerMap);
                 break;
             case FieldCode.PARTICIPANT:
-                validateAndSetParticipant(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetParticipant(rowJson, col, excelColumn, issueExcelImportVO);
                 break;
             case FieldCode.ESTIMATE_TIME:
-                validateAndSetEstimateTime(rowJson, col, issueCreateVO);
+                validateAndSetEstimateTime(rowJson, col, issueExcelImportVO);
                 break;
             case FieldCode.PRODUCT:
-                validateAndSetProduct(rowJson, col, excelColumn, issueCreateVO);
+                validateAndSetProduct(rowJson, col, excelColumn, issueExcelImportVO);
+                break;
+            case FieldCode.ISSUE_NUM:
+                validateAndSetIssueNum(rowJson, col, issueExcelImportVO);
                 break;
             default:
                 break;
@@ -1613,7 +1683,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                               Integer col,
                                               ExcelColumnVO excelColumn,
                                               Map<Integer, List<Integer>> errorRowColMap,
-                                              IssueCreateVO issueCreateVO,
+                                              IssueExcelImportVO issueExcelImportVO,
                                               IssueVO parentIssue,
                                               Long projectId,
                                               Map<Integer, ExcelColumnVO> headerMap) {
@@ -1623,88 +1693,88 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         String issueTypeCode = getIssueTypeCode(headerMap, issueType);
         switch (fieldCode) {
             case FieldCode.ISSUE_TYPE:
-                validateAndSetIssueType(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetIssueType(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.ASSIGNEE:
-                validateAndSetAssignee(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetAssignee(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.REPORTER:
-                validateAndSetReporter(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetReporter(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.PRIORITY:
-                validateAndSetPriority(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetPriority(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.REMAINING_TIME:
-                validateAndSetRemainingTime(row, col, errorRowColMap, issueCreateVO);
+                validateAndSetRemainingTime(row, col, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.FIX_VERSION:
-                validateAndSetFixVersion(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetFixVersion(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.INFLUENCE_VERSION:
-                validateAndSetInfluenceVersion(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetInfluenceVersion(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.STORY_POINTS:
-                validateAndSetStoryPoint(row, col, errorRowColMap, issueCreateVO, issueTypeCode);
+                validateAndSetStoryPoint(row, col, errorRowColMap, issueExcelImportVO, issueTypeCode);
                 break;
             case FieldCode.EPIC_NAME:
-                validateAndSetEpicName(row, col, errorRowColMap, issueCreateVO, issueTypeCode, projectId, headerMap);
+                validateAndSetEpicName(row, col, errorRowColMap, issueExcelImportVO, issueTypeCode, projectId, headerMap);
                 break;
             case FieldCode.FEATURE:
-                validateAndSetFeature(row, col, excelColumn, errorRowColMap, issueCreateVO, issueTypeCode, issueType);
+                validateAndSetFeature(row, col, excelColumn, errorRowColMap, issueExcelImportVO, issueTypeCode, issueType);
                 break;
             case FieldCode.EPIC:
-                validateAndSetEpic(row, col, excelColumn, errorRowColMap, issueCreateVO, issueTypeCode, parentIssue, issueType);
+                validateAndSetEpic(row, col, excelColumn, errorRowColMap, issueExcelImportVO, issueTypeCode, parentIssue, issueType);
                 break;
             case FieldCode.SUMMARY:
-                validateAndSetSummary(row, col, errorRowColMap, issueCreateVO);
+                validateAndSetSummary(row, col, errorRowColMap, issueExcelImportVO);
                 break;
             case ExcelImportTemplate.IssueHeader.PARENT:
-                setParent(row, col, issueCreateVO, errorRowColMap, parentIssue, issueType, issueTypeCode);
+                setParent(row, col, issueExcelImportVO, errorRowColMap, parentIssue, issueType, issueTypeCode);
                 break;
             case FieldCode.DESCRIPTION:
-                setDescription(row, col, issueCreateVO);
+                setDescription(row, col, issueExcelImportVO);
                 break;
             case FieldCode.COMPONENT:
-                validateAndSetComponent(row, col, excelColumn, parentIssue, issueType, issueTypeCode, issueCreateVO, errorRowColMap);
+                validateAndSetComponent(row, col, excelColumn, parentIssue, issueType, issueTypeCode, issueExcelImportVO, errorRowColMap);
                 break;
             case FieldCode.SPRINT:
-                validateAndSetSprint(row, col, excelColumn, parentIssue, issueType, issueTypeCode, issueCreateVO, errorRowColMap);
+                validateAndSetSprint(row, col, excelColumn, parentIssue, issueType, issueTypeCode, issueExcelImportVO, errorRowColMap);
                 break;
             case FieldCode.LABEL:
-                validateAndSetLabel(row, col, excelColumn, issueCreateVO, errorRowColMap, projectId);
+                validateAndSetLabel(row, col, excelColumn, issueExcelImportVO, errorRowColMap, projectId);
                 break;
             case FieldCode.ESTIMATED_START_TIME:
-                validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_START_TIME, headerMap);
+                validateAndSetEstimatedTime(row, col, issueExcelImportVO, errorRowColMap, FieldCode.ESTIMATED_START_TIME, headerMap);
                 break;
             case FieldCode.ESTIMATED_END_TIME:
-                validateAndSetEstimatedTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ESTIMATED_END_TIME, headerMap);
+                validateAndSetEstimatedTime(row, col, issueExcelImportVO, errorRowColMap, FieldCode.ESTIMATED_END_TIME, headerMap);
                 break;
             case ExcelImportTemplate.IssueHeader.RELATE_ISSUE:
-                validateRelateIssue(row, col, issueCreateVO, errorRowColMap, projectId);
+                validateRelateIssue(row, col, issueExcelImportVO, errorRowColMap, projectId);
                 break;
             case FieldCode.MAIN_RESPONSIBLE:
-                validateAndSetMainResponsible(row, col, issueCreateVO, errorRowColMap, excelColumn, issueTypeCode);
+                validateAndSetMainResponsible(row, col, issueExcelImportVO, errorRowColMap, excelColumn, issueTypeCode);
                 break;
             case FieldCode.ENVIRONMENT:
-                validateAndSetEnvironment(row, col, issueCreateVO, errorRowColMap, excelColumn, issueTypeCode);
+                validateAndSetEnvironment(row, col, issueExcelImportVO, errorRowColMap, excelColumn, issueTypeCode);
                 break;
             case FieldCode.ISSUE_STATUS:
-                validateAndSetIssueStatus(row, col, excelColumn, errorRowColMap, issueCreateVO, issueType);
+                validateAndSetIssueStatus(row, col, excelColumn, errorRowColMap, issueExcelImportVO, issueType);
                 break;
             case FieldCode.ACTUAL_START_TIME:
-                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_START_TIME, headerMap);
+                validateAndSetActualTime(row, col, issueExcelImportVO, errorRowColMap, FieldCode.ACTUAL_START_TIME, headerMap);
                 break;
             case FieldCode.ACTUAL_END_TIME:
-                validateAndSetActualTime(row, col, issueCreateVO, errorRowColMap, FieldCode.ACTUAL_END_TIME, headerMap);
+                validateAndSetActualTime(row, col, issueExcelImportVO, errorRowColMap, FieldCode.ACTUAL_END_TIME, headerMap);
                 break;
             case FieldCode.PARTICIPANT:
-                validateAndSetParticipant(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetParticipant(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.ESTIMATE_TIME:
-                validateAndSetEstimateTime(row, col, errorRowColMap, issueCreateVO);
+                validateAndSetEstimateTime(row, col, errorRowColMap, issueExcelImportVO);
                 break;
             case FieldCode.PRODUCT:
-                validateAndSetProduct(row, col, excelColumn, errorRowColMap, issueCreateVO);
+                validateAndSetProduct(row, col, excelColumn, errorRowColMap, issueExcelImportVO);
                 break;
             default:
                 break;
@@ -1715,7 +1785,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                          Integer col,
                                          ExcelColumnVO excelColumn,
                                          Map<Integer, List<Integer>> errorRowColMap,
-                                         IssueCreateVO issueCreateVO) {
+                                         IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         Integer rowNum = row.getRowNum();
         String value = cell.toString();
@@ -1726,8 +1796,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             addErrorColumn(rowNum, col, errorRowColMap);
         } else {
             IssueTypeVO issueTypeVO = issueTypeMap.get(value);
-            issueCreateVO.setIssueTypeId(issueTypeVO.getId());
-            issueCreateVO.setTypeCode(issueTypeVO.getTypeCode());
+            issueExcelImportVO.setIssueTypeId(issueTypeVO.getId());
+            issueExcelImportVO.setTypeCode(issueTypeVO.getTypeCode());
         }
     }
 
@@ -1735,7 +1805,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         Map<Integer, List<Integer>> errorRowColMap,
-                                        IssueCreateVO issueCreateVO) {
+                                        IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
@@ -1745,7 +1815,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cell.setCellValue(buildWithErrorMsg(value, "经办人输入错误"));
                 addErrorColumn(row.getRowNum(), col, errorRowColMap);
             } else {
-                issueCreateVO.setAssigneeId(valueIdMap.get(value));
+                issueExcelImportVO.setAssigneeId(valueIdMap.get(value));
             }
         }
     }
@@ -1754,7 +1824,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         Map<Integer, List<Integer>> errorRowColMap,
-                                        IssueCreateVO issueCreateVO) {
+                                        IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
@@ -1764,7 +1834,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cell.setCellValue(buildWithErrorMsg(value, "报告人输入错误"));
                 addErrorColumn(row.getRowNum(), col, errorRowColMap);
             } else {
-                issueCreateVO.setReporterId(valueIdMap.get(value));
+                issueExcelImportVO.setReporterId(valueIdMap.get(value));
             }
         }
     }
@@ -1773,7 +1843,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                         Integer col,
                                         ExcelColumnVO excelColumn,
                                         Map<Integer, List<Integer>> errorRowColMap,
-                                        IssueCreateVO issueCreateVO) {
+                                        IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         String value = "";
         if (SheetUtils.isCellEmpty(cell)) {
@@ -1788,8 +1858,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 addErrorColumn(row.getRowNum(), col, errorRowColMap);
             } else {
                 Long priorityId = valueIdMap.get(value);
-                issueCreateVO.setPriorityCode("priority" + priorityId);
-                issueCreateVO.setPriorityId(priorityId);
+                issueExcelImportVO.setPriorityCode("priority" + priorityId);
+                issueExcelImportVO.setPriorityId(priorityId);
             }
         }
     }
@@ -1797,7 +1867,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetRemainingTime(Row row,
                                              Integer col,
                                              Map<Integer, List<Integer>> errorRowColMap,
-                                             IssueCreateVO issueCreateVO) {
+                                             IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         Integer rowNum = row.getRowNum();
         if (!SheetUtils.isCellEmpty(cell)) {
@@ -1805,7 +1875,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             validateBigDecimal(col, errorRowColMap, cell, rowNum, value);
             List<Integer> errorCol = errorRowColMap.get(rowNum);
             if (ObjectUtils.isEmpty(errorCol)) {
-                issueCreateVO.setRemainingTime(new BigDecimal(value));
+                issueExcelImportVO.setRemainingTime(new BigDecimal(value));
             }
         }
     }
@@ -1842,7 +1912,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                           Integer col,
                                           ExcelColumnVO excelColumn,
                                           Map<Integer, List<Integer>> errorRowColMap,
-                                          IssueCreateVO issueCreateVO) {
+                                          IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
@@ -1857,7 +1927,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 versionIssueRelVO.setVersionId(valueIdMap.get(value));
                 versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
                 versionIssueRelList.add(versionIssueRelVO);
-                issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+                issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
             }
         }
     }
@@ -1866,9 +1936,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                                 Integer col,
                                                 ExcelColumnVO excelColumn,
                                                 Map<Integer, List<Integer>> errorRowColMap,
-                                                IssueCreateVO issueCreateVO) {
+                                                IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
-        if (!Objects.equals("bug", issueCreateVO.getTypeCode())) {
+        if (!Objects.equals("bug", issueExcelImportVO.getTypeCode())) {
             return;
         }
         if (!SheetUtils.isCellEmpty(cell)) {
@@ -1879,7 +1949,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cell.setCellValue(buildWithErrorMsg(value, "请输入正确的影响版本"));
                 addErrorColumn(row.getRowNum(), col, errorRowColMap);
             } else {
-                List<VersionIssueRelVO> versionIssueRelList = issueCreateVO.getVersionIssueRelVOList();
+                List<VersionIssueRelVO> versionIssueRelList = issueExcelImportVO.getVersionIssueRelVOList();
                 if (CollectionUtils.isEmpty(versionIssueRelList)) {
                     versionIssueRelList = new ArrayList<>();
                 }
@@ -1887,7 +1957,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 versionIssueRelVO.setVersionId(valueIdMap.get(value));
                 versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
                 versionIssueRelList.add(versionIssueRelVO);
-                issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+                issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
             }
         }
     }
@@ -1895,7 +1965,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetStoryPoint(Row row,
                                           Integer col,
                                           Map<Integer, List<Integer>> errorRowColMap,
-                                          IssueCreateVO issueCreateVO,
+                                          IssueExcelImportVO issueExcelImportVO,
                                           String issueTypeCode) {
         if (IssueTypeCode.isStory(issueTypeCode)) {
             Cell cell = row.getCell(col);
@@ -1905,7 +1975,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 validateBigDecimal(col, errorRowColMap, cell, rowNum, value);
                 List<Integer> errorCol = errorRowColMap.get(rowNum);
                 if (ObjectUtils.isEmpty(errorCol)) {
-                    issueCreateVO.setStoryPoints(new BigDecimal(value));
+                    issueExcelImportVO.setStoryPoints(new BigDecimal(value));
                 }
             }
         }
@@ -1914,7 +1984,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetEpicName(Row row,
                                         Integer col,
                                         Map<Integer, List<Integer>> errorRowColMap,
-                                        IssueCreateVO issueCreateVO,
+                                        IssueExcelImportVO issueExcelImportVO,
                                         String issueTypeCode,
                                         Long projectId,
                                         Map<Integer, ExcelColumnVO> headerMap) {
@@ -1934,8 +2004,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     cell.setCellValue(buildWithErrorMsg(value, "史诗名称重复"));
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
-                    issueCreateVO.setEpicName(value);
-                    issueCreateVO.setSummary(value);
+                    issueExcelImportVO.setEpicName(value);
+                    issueExcelImportVO.setSummary(value);
                     resetEpicSummary(headerMap, value, row);
                 }
             }
@@ -1957,7 +2027,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                        Integer col,
                                        ExcelColumnVO excelColumn,
                                        Map<Integer, List<Integer>> errorRowColMap,
-                                       IssueCreateVO issueCreateVO,
+                                       IssueExcelImportVO issueExcelImportVO,
                                        String issueTypeCode,
                                        String issueType) {
         if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode) && !SUB_BUG_CN.equals(issueType)) {
@@ -1972,11 +2042,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
                     Long featureId = valueIdMap.get(value);
-                    issueCreateVO.setFeatureId(featureId);
+                    issueExcelImportVO.setFeatureId(featureId);
                     //如果特性关联史诗，也要设置史诗id
                     IssueDTO feature = issueMapper.selectByPrimaryKey(featureId);
                     if (feature != null && Objects.equals(0L, feature.getEpicId())) {
-                        issueCreateVO.setEpicId(feature.getEpicId());
+                        issueExcelImportVO.setEpicId(feature.getEpicId());
                     }
                 }
             }
@@ -1988,14 +2058,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                     Integer col,
                                     ExcelColumnVO excelColumn,
                                     Map<Integer, List<Integer>> errorRowColMap,
-                                    IssueCreateVO issueCreateVO,
+                                    IssueExcelImportVO issueExcelImportVO,
                                     String issueTypeCode,
                                     IssueVO parentIssue,
                                     String issueType) {
 
         if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
             if (SUB_BUG_CN.equals(issueType) && parentIssue != null) {
-                issueCreateVO.setEpicId(parentIssue.getEpicId());
+                issueExcelImportVO.setEpicId(parentIssue.getEpicId());
             } else {
                 Cell cell = row.getCell(col);
                 if (!SheetUtils.isCellEmpty(cell)) {
@@ -2007,7 +2077,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         cell.setCellValue(buildWithErrorMsg(value, "所属史诗输入错误"));
                         addErrorColumn(rowNum, col, errorRowColMap);
                     } else {
-                        issueCreateVO.setEpicId(valueIdMap.get(value));
+                        issueExcelImportVO.setEpicId(valueIdMap.get(value));
                     }
                 }
             }
@@ -2018,7 +2088,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetSummary(Row row,
                                        Integer col,
                                        Map<Integer, List<Integer>> errorRowColMap,
-                                       IssueCreateVO issueCreateVO) {
+                                       IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
         String value = "";
@@ -2031,14 +2101,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cell.setCellValue(buildWithErrorMsg(value, "概要过长"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
-                issueCreateVO.setSummary(value);
+                issueExcelImportVO.setSummary(value);
             }
         }
     }
 
     private void setParent(Row row,
                            Integer col,
-                           IssueCreateVO issueCreateVO,
+                           IssueExcelImportVO issueExcelImportVO,
                            Map<Integer, List<Integer>> errorRowColMap,
                            IssueVO parentIssue,
                            String issueType,
@@ -2051,25 +2121,25 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         String value = cell.toString();
         if (IssueTypeCode.isSubTask(issueTypeCode)) {
             Long parentId = parentIssue.getIssueId();
-            issueCreateVO.setParentIssueId(parentId);
+            issueExcelImportVO.setParentIssueId(parentId);
         } else if (SUB_BUG_CN.equals(issueType)) {
             if (parentIssue.getTypeCode().equals("bug")) {
                 cell.setCellValue(buildWithErrorMsg(value, "子缺陷的父级不能为缺陷类型"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
                 Long parentId = parentIssue.getIssueId();
-                issueCreateVO.setRelateIssueId(parentId);
+                issueExcelImportVO.setRelateIssueId(parentId);
             }
         }
     }
 
     private void setDescription(Row row,
                                 Integer col,
-                                IssueCreateVO issueCreateVO) {
+                                IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
-            issueCreateVO.setDescription("<p>" + value + "</p>");
+            issueExcelImportVO.setDescription("<p>" + value + "</p>");
         }
     }
 
@@ -2079,13 +2149,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                          IssueVO parentIssue,
                                          String issueType,
                                          String issueTypeCode,
-                                         IssueCreateVO issueCreateVO,
+                                         IssueExcelImportVO issueExcelImportVO,
                                          Map<Integer, List<Integer>> errorRowColMap) {
         if (SUB_BUG_CN.equals(issueType)
                 || IssueTypeCode.isSubTask(issueTypeCode)) {
             List<ComponentIssueRelVO> components = parentIssue.getComponentIssueRelVOList();
             if (!ObjectUtils.isEmpty(components)) {
-                issueCreateVO.setComponentIssueRelVOList(parentIssue.getComponentIssueRelVOList());
+                issueExcelImportVO.setComponentIssueRelVOList(parentIssue.getComponentIssueRelVOList());
             }
         } else {
             Cell cell = row.getCell(col);
@@ -2100,7 +2170,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 } else {
                     ComponentIssueRelVO componentIssueRelVO = new ComponentIssueRelVO();
                     componentIssueRelVO.setComponentId(valueIdMap.get(value));
-                    issueCreateVO.setComponentIssueRelVOList(Arrays.asList(componentIssueRelVO));
+                    issueExcelImportVO.setComponentIssueRelVOList(Arrays.asList(componentIssueRelVO));
                 }
             }
         }
@@ -2112,13 +2182,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                       IssueVO parentIssue,
                                       String issueType,
                                       String issueTypeCode,
-                                      IssueCreateVO issueCreateVO,
+                                      IssueExcelImportVO issueExcelImportVO,
                                       Map<Integer, List<Integer>> errorRowColMap) {
         if (SUB_BUG_CN.equals(issueType)
                 || IssueTypeCode.isSubTask(issueTypeCode)) {
             Long sprintId = parentIssue.getSprintId();
             if (sprintId != null && !Objects.equals(0L, sprintId)) {
-                issueCreateVO.setSprintId(sprintId);
+                issueExcelImportVO.setSprintId(sprintId);
             }
         } else if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
             Cell cell = row.getCell(col);
@@ -2131,7 +2201,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     cell.setCellValue(buildWithErrorMsg(value, "请输入正确的冲刺"));
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
-                    issueCreateVO.setSprintId(valueIdMap.get(value));
+                    issueExcelImportVO.setSprintId(valueIdMap.get(value));
                 }
             }
         }
@@ -2140,7 +2210,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetLabel(Row row,
                                      Integer col,
                                      ExcelColumnVO excelColumn,
-                                     IssueCreateVO issueCreateVO,
+                                     IssueExcelImportVO issueExcelImportVO,
                                      Map<Integer, List<Integer>> errorRowColMap,
                                      Long projectId) {
         Cell cell = row.getCell(col);
@@ -2153,14 +2223,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 LabelIssueRelVO label = new LabelIssueRelVO();
                 label.setProjectId(projectId);
                 label.setLabelName(value);
-                issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
+                issueExcelImportVO.setLabelIssueRelVOList(Arrays.asList(label));
             }
         }
     }
 
     private void validateAndSetEstimatedTime(Row row,
                                              Integer col,
-                                             IssueCreateVO issueCreateVO,
+                                             IssueExcelImportVO issueExcelImportVO,
                                              Map<Integer, List<Integer>> errorRowColMap,
                                              String fieldCode,
                                              Map<Integer, ExcelColumnVO> headerMap) {
@@ -2183,10 +2253,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         return;
                     }
                     if (FieldCode.ESTIMATED_START_TIME.equals(fieldCode)) {
-                        issueCreateVO.setEstimatedStartTime(date);
+                        issueExcelImportVO.setEstimatedStartTime(date);
                     }
                     if (FieldCode.ESTIMATED_END_TIME.equals(fieldCode)) {
-                        issueCreateVO.setEstimatedEndTime(date);
+                        issueExcelImportVO.setEstimatedEndTime(date);
                     }
                 }
             }
@@ -2194,10 +2264,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
 
-
     private void validateRelateIssue(Row row,
                                      Integer col,
-                                     IssueCreateVO issueCreateVO,
+                                     IssueExcelImportVO issueExcelImportVO,
                                      Map<Integer, List<Integer>> errorRowColMap,
                                      Long projectId) {
         String projectCode = projectInfoMapper.selectProjectCodeByProjectId(projectId);
@@ -2208,7 +2277,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String regex = "(([0-9]+(，|,))|((!|！)[0-9]+(，|,)))*(([0-9]+)|((!|！)[0-9]+))";
             if (Pattern.matches(regex, value)) {
                 RelatedIssueVO relatedIssueVO = new RelatedIssueVO();
-                issueCreateVO.setRelatedIssueVO(relatedIssueVO);
+                issueExcelImportVO.setRelatedIssueVO(relatedIssueVO);
                 relatedIssueVO.setRow(rowNum);
                 Set<Long> relatedIssueIds = new HashSet<>();
                 Set<Integer> relatedRows = new HashSet<>();
@@ -2248,7 +2317,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private void validateAndSetMainResponsible(Row row,
                                                Integer col,
-                                               IssueCreateVO issueCreateVO,
+                                               IssueExcelImportVO issueExcelImportVO,
                                                Map<Integer, List<Integer>> errorRowColMap,
                                                ExcelColumnVO excelColumnVO,
                                                String issueTypeCode) {
@@ -2262,14 +2331,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cell.setCellValue(buildWithErrorMsg(value, "请输入正确的主要负责人"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
-                issueCreateVO.setMainResponsibleId(map.get(value));
+                issueExcelImportVO.setMainResponsibleId(map.get(value));
             }
         }
     }
 
     private void validateAndSetEnvironment(Row row,
                                            Integer col,
-                                           IssueCreateVO issueCreateVO,
+                                           IssueExcelImportVO issueExcelImportVO,
                                            Map<Integer, List<Integer>> errorRowColMap,
                                            ExcelColumnVO excelColumnVO,
                                            String issueTypeCode) {
@@ -2283,7 +2352,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
                 Map<String, String> envNameCodeMap = excelColumnVO.getEnvNameCodeMap();
-                issueCreateVO.setEnvironment(envNameCodeMap.getOrDefault(value, null));
+                issueExcelImportVO.setEnvironment(envNameCodeMap.getOrDefault(value, null));
             }
         }
     }
@@ -2292,7 +2361,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                            Integer col,
                                            ExcelColumnVO excelColumn,
                                            Map<Integer, List<Integer>> errorRowColMap,
-                                           IssueCreateVO issueCreateVO,
+                                           IssueExcelImportVO issueExcelImportVO,
                                            String issueType) {
         Cell cell = row.getCell(col);
         int rowNum = row.getRowNum();
@@ -2304,14 +2373,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 cell.setCellValue(buildWithErrorMsg(value, "状态输入错误"));
                 addErrorColumn(rowNum, col, errorRowColMap);
             } else {
-                issueCreateVO.setStatusId(statusVO.getId());
+                issueExcelImportVO.setStatusId(statusVO.getId());
             }
         }
     }
 
     private void validateAndSetActualTime(Row row,
                                           Integer col,
-                                          IssueCreateVO issueCreateVO,
+                                          IssueExcelImportVO issueExcelImportVO,
                                           Map<Integer, List<Integer>> errorRowColMap,
                                           String fieldCode,
                                           Map<Integer, ExcelColumnVO> headerMap) {
@@ -2334,10 +2403,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         return;
                     }
                     if (FieldCode.ACTUAL_START_TIME.equals(fieldCode)) {
-                        issueCreateVO.setActualStartTime(date);
+                        issueExcelImportVO.setActualStartTime(date);
                     }
                     if (FieldCode.ACTUAL_END_TIME.equals(fieldCode)) {
-                        issueCreateVO.setActualEndTime(date);
+                        issueExcelImportVO.setActualEndTime(date);
                     }
                 }
             }
@@ -2348,7 +2417,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                            Integer col,
                                            ExcelColumnVO excelColumn,
                                            Map<Integer, List<Integer>> errorRowColMap,
-                                           IssueCreateVO issueCreateVO) {
+                                           IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
@@ -2365,14 +2434,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     participantIds.add(valueIdMap.get(participant));
                 }
             }
-            issueCreateVO.setParticipantIds(participantIds);
+            issueExcelImportVO.setParticipantIds(participantIds);
         }
     }
 
     private void validateAndSetEstimateTime(Row row,
                                             Integer col,
                                             Map<Integer, List<Integer>> errorRowColMap,
-                                            IssueCreateVO issueCreateVO) {
+                                            IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         Integer rowNum = row.getRowNum();
         if (!SheetUtils.isCellEmpty(cell)) {
@@ -2380,7 +2449,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             validateBigDecimal(col, errorRowColMap, cell, rowNum, value);
             List<Integer> errorCol = errorRowColMap.get(rowNum);
             if (ObjectUtils.isEmpty(errorCol)) {
-                issueCreateVO.setEstimateTime(new BigDecimal(value));
+                issueExcelImportVO.setEstimateTime(new BigDecimal(value));
             }
         }
     }
@@ -2389,7 +2458,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                        Integer col,
                                        ExcelColumnVO excelColumn,
                                        Map<Integer, List<Integer>> errorRowColMap,
-                                       IssueCreateVO issueCreateVO) {
+                                       IssueExcelImportVO issueExcelImportVO) {
         Cell cell = row.getCell(col);
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
@@ -2406,10 +2475,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     productIds.add(valueIdMap.get(product));
                 }
             }
-            issueCreateVO.setProductIds(productIds);
+            issueExcelImportVO.setProductIds(productIds);
         }
     }
-
 
 
     private String getIssueTypeCode(Map<Integer, ExcelColumnVO> headerMap,
@@ -2431,8 +2499,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetIssueType(JSONObject rowJson,
                                          Integer col,
                                          ExcelColumnVO excelColumn,
-                                         IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+                                         IssueExcelImportVO issueExcelImportVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
         Map<String, IssueTypeVO> issueTypeMap = excelColumn.getIssueTypeMap();
         List<String> values = excelColumn.getPredefinedValues();
@@ -2441,16 +2509,58 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
             IssueTypeVO issueTypeVO = issueTypeMap.get(value);
-            issueCreateVO.setIssueTypeId(issueTypeVO.getId());
-            issueCreateVO.setTypeCode(issueTypeVO.getTypeCode());
+            if (issueExcelImportVO.getUpdate()) {
+                IssueVO issueVO = issueService.queryIssue(issueExcelImportVO.getProjectId(), issueExcelImportVO.getIssueId(), issueExcelImportVO.getOrganizationId());
+                if (!StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), issueVO.getTypeCode())) {
+                    //先判断有没有更改类型
+                    InitIssueType initIssueType = InitIssueType.valueOf(issueVO.getTypeCode().toUpperCase());
+                    switch (initIssueType) {
+                        case STORY:
+                            //原来是故事，如果下面有子任务则不能转换子任务
+                            if ((!CollectionUtils.isEmpty(issueVO.getSubIssueVOList()) || !CollectionUtils.isEmpty(issueVO.getSubBugVOList()))
+                                    && StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.SUB_TASK.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            //故事下有子缺陷，不能转换成bug类型。
+                            if (!CollectionUtils.isEmpty(issueVO.getSubBugVOList())
+                                    && StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.BUG.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            break;
+                        case SUB_TASK:
+                            // 子任务只能修改到其他子任务类型。
+                            if (!StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.SUB_TASK.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            break;
+                        case BUG:
+                            // 子缺陷只能修改为其他缺陷类型，不可修改为任务，故事。
+                            // 缺陷可以修改为任务，故事。
+                            boolean subBug = false;
+                            if (issueVO.getRelateIssueId() != null && issueVO.getRelateIssueId() != 0) {
+                                subBug = true;
+                            }
+                            if (subBug && !StringUtils.equalsIgnoreCase(issueTypeVO.getTypeCode(), InitIssueType.SUB_TASK.getTypeCode())) {
+                                putTypeError(rowJson, cellJson, value);
+                            }
+                            break;
+                        default:
+                            putTypeError(rowJson, cellJson, value);
+                    }
+                }
+            }
+            issueExcelImportVO.setIssueTypeId(issueTypeVO.getId());
+            issueExcelImportVO.setTypeCode(issueTypeVO.getTypeCode());
+            excelColumn.setValues(Arrays.asList(issueTypeVO.getId()));
         }
     }
+
 
     private void validateAndSetAssignee(JSONObject rowJson,
                                         Integer col,
                                         ExcelColumnVO excelColumn,
-                                        IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+                                        IssueExcelImportVO issueExcelImportVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2464,15 +2574,23 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String errorMsg = buildWithErrorMsg(value, "经办人输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-            issueCreateVO.setAssigneeId(valueIdMap.get(value));
+            if (!ObjectUtils.isEmpty(issueExcelImportVO.getIssueId())) {
+                IssueVO issueVO = issueService.queryIssue(issueExcelImportVO.getProjectId(), issueExcelImportVO.getIssueId(), issueExcelImportVO.getOrganizationId());
+                if (issueVO != null && StringUtils.equalsIgnoreCase(issueVO.getAssigneeName(), value)) {
+                    // 如果经办人一样则不设置此值
+                    return;
+                }
+            }
+            issueExcelImportVO.setAssigneeId(valueIdMap.get(value));
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
     private void validateAndSetReporter(JSONObject rowJson,
                                         Integer col,
                                         ExcelColumnVO excelColumn,
-                                        IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+                                        IssueExcelImportVO issueExcelImportVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2486,15 +2604,16 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String errorMsg = buildWithErrorMsg(value, "报告人输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-            issueCreateVO.setReporterId(valueIdMap.get(value));
+            issueExcelImportVO.setReporterId(valueIdMap.get(value));
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
     private void validateAndSetPriority(JSONObject rowJson,
                                         Integer col,
                                         ExcelColumnVO excelColumn,
-                                        IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+                                        IssueExcelImportVO issueExcelImportVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         String value = "";
         if (ObjectUtils.isEmpty(cellJson)
                 || ObjectUtils.isEmpty(cellJson.getString(ExcelSheetData.STRING_CELL))) {
@@ -2511,15 +2630,16 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
             Long priorityId = valueIdMap.get(value);
-            issueCreateVO.setPriorityCode("priority" + priorityId);
-            issueCreateVO.setPriorityId(priorityId);
+            issueExcelImportVO.setPriorityCode("priority-" + priorityId);
+            issueExcelImportVO.setPriorityId(priorityId);
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
     private void validateAndSetRemainingTime(JSONObject rowJson,
                                              Integer col,
-                                             IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+                                             IssueExcelImportVO issueExcelImportVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2530,7 +2650,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         value = value.trim();
         validateBigDecimal(rowJson, cellJson, value);
         if (!Boolean.TRUE.equals(cellJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-            issueCreateVO.setRemainingTime(new BigDecimal(value));
+            issueExcelImportVO.setRemainingTime(new BigDecimal(value));
         }
     }
 
@@ -2576,8 +2696,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetFixVersion(JSONObject rowJson,
                                           Integer col,
                                           ExcelColumnVO excelColumn,
-                                          IssueCreateVO issueCreateVO) {
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+                                          IssueExcelImportVO issueExcelImportVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2596,18 +2716,19 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelVO.setVersionId(valueIdMap.get(value));
             versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
             versionIssueRelList.add(versionIssueRelVO);
-            issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+            issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
     private void validateAndSetInfluenceVersion(JSONObject rowJson,
                                                 Integer col,
                                                 ExcelColumnVO excelColumn,
-                                                IssueCreateVO issueCreateVO) {
-        if (!Objects.equals("bug", issueCreateVO.getTypeCode())) {
+                                                IssueExcelImportVO issueExcelImportVO) {
+        if (!Objects.equals("bug", issueExcelImportVO.getTypeCode())) {
             return;
         }
-        JSONObject cellJson = (JSONObject)rowJson.get(col);
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
         }
@@ -2621,7 +2742,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String errorMsg = buildWithErrorMsg(value, "请输入正确的影响版本");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-            List<VersionIssueRelVO> versionIssueRelList = issueCreateVO.getVersionIssueRelVOList();
+            List<VersionIssueRelVO> versionIssueRelList = issueExcelImportVO.getVersionIssueRelVOList();
             if (CollectionUtils.isEmpty(versionIssueRelList)) {
                 versionIssueRelList = new ArrayList<>();
             }
@@ -2629,16 +2750,17 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelVO.setVersionId(valueIdMap.get(value));
             versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
             versionIssueRelList.add(versionIssueRelVO);
-            issueCreateVO.setVersionIssueRelVOList(versionIssueRelList);
+            issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
     }
 
     private void validateAndSetStoryPoint(JSONObject rowJson,
                                           Integer col,
-                                          IssueCreateVO issueCreateVO,
+                                          IssueExcelImportVO issueExcelImportVO,
                                           String issueTypeCode) {
         if (IssueTypeCode.isStory(issueTypeCode)) {
-            JSONObject cellJson = (JSONObject)rowJson.get(col);
+            JSONObject cellJson = (JSONObject) rowJson.get(col);
             if (ObjectUtils.isEmpty(cellJson)) {
                 return;
             }
@@ -2649,19 +2771,19 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             value = value.trim();
             validateBigDecimal(rowJson, cellJson, value);
             if (!Boolean.TRUE.equals(cellJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-                issueCreateVO.setStoryPoints(new BigDecimal(value));
+                issueExcelImportVO.setStoryPoints(new BigDecimal(value));
             }
         }
     }
 
     private void validateAndSetEpicName(JSONObject rowJson,
                                         Integer col,
-                                        IssueCreateVO issueCreateVO,
+                                        IssueExcelImportVO issueExcelImportVO,
                                         String issueTypeCode,
                                         Long projectId,
                                         Map<Integer, ExcelColumnVO> headerMap) {
         if (IssueTypeCode.isEpic(issueTypeCode)) {
-            JSONObject cellJson = (JSONObject)rowJson.get(col);
+            JSONObject cellJson = (JSONObject) rowJson.get(col);
             String value = "";
             if (ObjectUtils.isEmpty(cellJson)
                     || ObjectUtils.isEmpty(cellJson.getString(ExcelSheetData.STRING_CELL))) {
@@ -2678,8 +2800,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 String errorMsg = buildWithErrorMsg(value, "史诗名称重复");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
-                issueCreateVO.setEpicName(value);
-                issueCreateVO.setSummary(value);
+                issueExcelImportVO.setEpicName(value);
+                issueExcelImportVO.setSummary(value);
                 resetEpicSummary(headerMap, value, rowJson);
             }
         }
@@ -2701,7 +2823,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String fieldCode = excelColumn.getFieldCode();
             if (FieldCode.SUMMARY.equals(fieldCode)) {
                 int col = entry.getKey();
-                JSONObject cellJson = (JSONObject)rowJson.get(col);
+                JSONObject cellJson = (JSONObject) rowJson.get(col);
                 cellJson.put(ExcelSheetData.STRING_CELL, value);
             }
         }
@@ -2710,11 +2832,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetFeature(JSONObject rowJson,
                                        Integer col,
                                        ExcelColumnVO excelColumn,
-                                       IssueCreateVO issueCreateVO,
+                                       IssueExcelImportVO issueExcelImportVO,
                                        String issueTypeCode,
                                        String issueType) {
         if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode) && !SUB_BUG_CN.equals(issueType)) {
-            JSONObject cellJson = (JSONObject)rowJson.get(col);
+            JSONObject cellJson = (JSONObject) rowJson.get(col);
             if (ObjectUtils.isEmpty(cellJson)) {
                 return;
             }
@@ -2729,11 +2851,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
                 Long featureId = valueIdMap.get(value);
-                issueCreateVO.setFeatureId(featureId);
+                issueExcelImportVO.setFeatureId(featureId);
                 //如果特性关联史诗，也要设置史诗id
                 IssueDTO feature = issueMapper.selectByPrimaryKey(featureId);
                 if (feature != null && Objects.equals(0L, feature.getEpicId())) {
-                    issueCreateVO.setEpicId(feature.getEpicId());
+                    issueExcelImportVO.setEpicId(feature.getEpicId());
                 }
             }
         }
@@ -2742,14 +2864,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetEpic(JSONObject rowJson,
                                     Integer col,
                                     ExcelColumnVO excelColumn,
-                                    IssueCreateVO issueCreateVO,
+                                    IssueExcelImportVO issueExcelImportVO,
                                     String issueTypeCode,
                                     IssueVO parentIssue,
                                     String issueType) {
 
         if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
             if (SUB_BUG_CN.equals(issueType) && parentIssue != null) {
-                issueCreateVO.setEpicId(parentIssue.getEpicId());
+                issueExcelImportVO.setEpicId(parentIssue.getEpicId());
             } else {
                 JSONObject cellJson = (JSONObject) rowJson.get(col);
                 if (ObjectUtils.isEmpty(cellJson)) {
@@ -2765,7 +2887,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     String errorMsg = buildWithErrorMsg(value, "所属史诗输入错误");
                     putErrorMsg(rowJson, cellJson, errorMsg);
                 } else {
-                    issueCreateVO.setEpicId(valueIdMap.get(value));
+                    issueExcelImportVO.setEpicId(valueIdMap.get(value));
+                    excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
                 }
             }
         }
@@ -2773,7 +2896,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private void validateAndSetSummary(JSONObject rowJson,
                                        Integer col,
-                                       IssueCreateVO issueCreateVO) {
+                                       IssueExcelImportVO issueExcelImportVO) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         String value = "";
         if (ObjectUtils.isEmpty(cellJson)
@@ -2783,12 +2906,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
             return;
         }
-        value= cellJson.getString(ExcelSheetData.STRING_CELL);
+        value = cellJson.getString(ExcelSheetData.STRING_CELL);
         if (value.length() > IssueConstant.SUMMARY_LENGTH) {
             String errorMsg = buildWithErrorMsg(value, "概要过长");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-            issueCreateVO.setSummary(value);
+            issueExcelImportVO.setSummary(value);
         }
     }
 
@@ -2804,7 +2927,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private void setParent(JSONObject rowJson,
                            Integer col,
-                           IssueCreateVO issueCreateVO,
+                           IssueExcelImportVO issueExcelImportVO,
                            IssueVO parentIssue,
                            String issueType,
                            String issueTypeCode) {
@@ -2816,21 +2939,21 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         if (IssueTypeCode.isSubTask(issueTypeCode)) {
             Long parentId = parentIssue.getIssueId();
-            issueCreateVO.setParentIssueId(parentId);
+            issueExcelImportVO.setParentIssueId(parentId);
         } else if (SUB_BUG_CN.equals(issueType)) {
             if (parentIssue.getTypeCode().equals("bug")) {
                 String errorMsg = buildWithErrorMsg(value, "子缺陷的父级不能为缺陷类型");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
                 Long parentId = parentIssue.getIssueId();
-                issueCreateVO.setRelateIssueId(parentId);
+                issueExcelImportVO.setRelateIssueId(parentId);
             }
         }
     }
 
     private void setDescription(JSONObject rowJson,
                                 Integer col,
-                                IssueCreateVO issueCreateVO) {
+                                IssueExcelImportVO issueExcelImportVO) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
@@ -2839,7 +2962,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (ObjectUtils.isEmpty(value)) {
             return;
         }
-        issueCreateVO.setDescription("<p>" + value + "</p>");
+        issueExcelImportVO.setDescription("<p>" + value + "</p>");
     }
 
     private void validateAndSetComponent(JSONObject rowJson,
@@ -2848,12 +2971,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                          IssueVO parentIssue,
                                          String issueType,
                                          String issueTypeCode,
-                                         IssueCreateVO issueCreateVO) {
+                                         IssueExcelImportVO issueExcelImportVO) {
         if (SUB_BUG_CN.equals(issueType)
                 || IssueTypeCode.isSubTask(issueTypeCode)) {
             List<ComponentIssueRelVO> components = parentIssue.getComponentIssueRelVOList();
             if (!ObjectUtils.isEmpty(components)) {
-                issueCreateVO.setComponentIssueRelVOList(parentIssue.getComponentIssueRelVOList());
+                issueExcelImportVO.setComponentIssueRelVOList(parentIssue.getComponentIssueRelVOList());
             }
         } else {
             JSONObject cellJson = (JSONObject) rowJson.get(col);
@@ -2872,7 +2995,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             } else {
                 ComponentIssueRelVO componentIssueRelVO = new ComponentIssueRelVO();
                 componentIssueRelVO.setComponentId(valueIdMap.get(value));
-                issueCreateVO.setComponentIssueRelVOList(Arrays.asList(componentIssueRelVO));
+                issueExcelImportVO.setComponentIssueRelVOList(Arrays.asList(componentIssueRelVO));
+                excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
             }
         }
     }
@@ -2883,12 +3007,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                       IssueVO parentIssue,
                                       String issueType,
                                       String issueTypeCode,
-                                      IssueCreateVO issueCreateVO) {
+                                      IssueExcelImportVO issueExcelImportVO) {
         if (SUB_BUG_CN.equals(issueType)
                 || IssueTypeCode.isSubTask(issueTypeCode)) {
             Long sprintId = parentIssue.getSprintId();
             if (sprintId != null && !Objects.equals(0L, sprintId)) {
-                issueCreateVO.setSprintId(sprintId);
+                issueExcelImportVO.setSprintId(sprintId);
             }
         } else if (IssueTypeCode.AGILE_PARENT_ISSUE_TYPES.contains(issueTypeCode)) {
             JSONObject cellJson = (JSONObject) rowJson.get(col);
@@ -2905,14 +3029,15 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 String errorMsg = buildWithErrorMsg(value, "请输入正确的冲刺");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
-                issueCreateVO.setSprintId(valueIdMap.get(value));
+                issueExcelImportVO.setSprintId(valueIdMap.get(value));
+                excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
             }
         }
     }
 
     private void validateAndSetLabel(JSONObject rowJson,
                                      Integer col,
-                                     IssueCreateVO issueCreateVO,
+                                     IssueExcelImportVO issueExcelImportVO,
                                      Long projectId) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
@@ -2929,13 +3054,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             LabelIssueRelVO label = new LabelIssueRelVO();
             label.setProjectId(projectId);
             label.setLabelName(value);
-            issueCreateVO.setLabelIssueRelVOList(Arrays.asList(label));
+            issueExcelImportVO.setLabelIssueRelVOList(Arrays.asList(label));
         }
     }
 
     private void validateAndSetEstimatedTime(JSONObject rowJson,
                                              Integer col,
-                                             IssueCreateVO issueCreateVO,
+                                             IssueExcelImportVO issueExcelImportVO,
                                              String fieldCode,
                                              Map<Integer, ExcelColumnVO> headerMap) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
@@ -2956,10 +3081,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 return;
             }
             if (FieldCode.ESTIMATED_START_TIME.equals(fieldCode)) {
-                issueCreateVO.setEstimatedStartTime(date);
+                issueExcelImportVO.setEstimatedStartTime(date);
             }
             if (FieldCode.ESTIMATED_END_TIME.equals(fieldCode)) {
-                issueCreateVO.setEstimatedEndTime(date);
+                issueExcelImportVO.setEstimatedEndTime(date);
             }
         }
     }
@@ -2992,7 +3117,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (anotherDateCol == null) {
             return false;
         }
-        JSONObject anotherEsTimeCellJson = (JSONObject)rowJson.get(anotherDateCol);
+        JSONObject anotherEsTimeCellJson = (JSONObject) rowJson.get(anotherDateCol);
         if (ObjectUtils.isEmpty(anotherEsTimeCellJson)) {
             return false;
         } else {
@@ -3065,7 +3190,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private void validateRelateIssue(JSONObject rowJson,
                                      Integer col,
-                                     IssueCreateVO issueCreateVO,
+                                     IssueExcelImportVO issueExcelImportVO,
                                      Long projectId) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
@@ -3079,7 +3204,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         String regex = "(([0-9]+(，|,))|((!|！)[0-9]+(，|,)))*(([0-9]+)|((!|！)[0-9]+))";
         if (Pattern.matches(regex, value)) {
             RelatedIssueVO relatedIssueVO = new RelatedIssueVO();
-            issueCreateVO.setRelatedIssueVO(relatedIssueVO);
+            issueExcelImportVO.setRelatedIssueVO(relatedIssueVO);
             relatedIssueVO.setRow(rowJson.getInteger(ExcelSheetData.JSON_KEY_ROW_NUM));
             Set<Long> relatedIssueIds = new HashSet<>();
             Set<Integer> relatedRows = new HashSet<>();
@@ -3118,7 +3243,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private void validateAndSetMainResponsible(JSONObject rowJson,
                                                Integer col,
-                                               IssueCreateVO issueCreateVO,
+                                               IssueExcelImportVO issueExcelImportVO,
                                                ExcelColumnVO excelColumnVO,
                                                String issueTypeCode) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
@@ -3136,14 +3261,15 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 String errorMsg = buildWithErrorMsg(value, "请输入正确的主要负责人");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
-                issueCreateVO.setMainResponsibleId(map.get(value));
+                issueExcelImportVO.setMainResponsibleId(map.get(value));
+                excelColumnVO.setValues(Arrays.asList(map.get(value)));
             }
         }
     }
 
     private void validateAndSetEnvironment(JSONObject rowJson,
                                            Integer col,
-                                           IssueCreateVO issueCreateVO,
+                                           IssueExcelImportVO issueExcelImportVO,
                                            ExcelColumnVO excelColumnVO,
                                            String issueTypeCode) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
@@ -3161,7 +3287,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
                 Map<String, String> envNameCodeMap = excelColumnVO.getEnvNameCodeMap();
-                issueCreateVO.setEnvironment(envNameCodeMap.getOrDefault(value, null));
+                issueExcelImportVO.setEnvironment(envNameCodeMap.getOrDefault(value, null));
             }
         }
     }
@@ -3169,7 +3295,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetIssueStatus(JSONObject rowJson,
                                            Integer col,
                                            ExcelColumnVO excelColumn,
-                                           IssueCreateVO issueCreateVO,
+                                           IssueExcelImportVO issueExcelImportVO,
                                            String issueType) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
@@ -3185,13 +3311,26 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             String errorMsg = buildWithErrorMsg(value, "状态输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
-            issueCreateVO.setStatusId(statusVO.getId());
+            if (!ObjectUtils.isEmpty(issueExcelImportVO.getIssueId())) {
+                IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueExcelImportVO.getIssueId());
+                if (!projectConfigService.validateStatusTransform(issueExcelImportVO.getProjectId(),
+                        issueExcelImportVO.getIssueId(),
+                        APPLY_TYPE_AGILE,
+                        issueDTO.getIssueTypeId(),
+                        issueDTO.getStatusId(),
+                        statusVO.getId())) {
+                    String errorMsg = buildWithErrorMsg(value, "不能进行修改不符合状态机流转条件设置");
+                    putErrorMsg(rowJson, cellJson, errorMsg);
+                }
+            }
+            issueExcelImportVO.setStatusId(statusVO.getId());
+            excelColumn.setValues(Arrays.asList(statusVO.getId()));
         }
     }
 
     private void validateAndSetActualTime(JSONObject rowJson,
                                           Integer col,
-                                          IssueCreateVO issueCreateVO,
+                                          IssueExcelImportVO issueExcelImportVO,
                                           String fieldCode,
                                           Map<Integer, ExcelColumnVO> headerMap) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
@@ -3212,10 +3351,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 return;
             }
             if (FieldCode.ACTUAL_START_TIME.equals(fieldCode)) {
-                issueCreateVO.setActualStartTime(date);
+                issueExcelImportVO.setActualStartTime(date);
             }
             if (FieldCode.ACTUAL_END_TIME.equals(fieldCode)) {
-                issueCreateVO.setActualEndTime(date);
+                issueExcelImportVO.setActualEndTime(date);
             }
         }
     }
@@ -3223,7 +3362,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private void validateAndSetParticipant(JSONObject rowJson,
                                            Integer col,
                                            ExcelColumnVO excelColumn,
-                                           IssueCreateVO issueCreateVO) {
+                                           IssueExcelImportVO issueExcelImportVO) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
@@ -3245,12 +3384,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 participantIds.add(valueIdMap.get(participant));
             }
         }
-        issueCreateVO.setParticipantIds(participantIds);
+        excelColumn.setValues(participantIds);
+        issueExcelImportVO.setParticipantIds(participantIds);
     }
 
     private void validateAndSetEstimateTime(JSONObject rowJson,
                                             Integer col,
-                                            IssueCreateVO issueCreateVO) {
+                                            IssueExcelImportVO issueExcelImportVO) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
@@ -3261,14 +3401,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         validateBigDecimal(rowJson, cellJson, value);
         if (!Boolean.TRUE.equals(cellJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-            issueCreateVO.setEstimateTime(new BigDecimal(value));
+            issueExcelImportVO.setEstimateTime(new BigDecimal(value));
         }
     }
 
     private void validateAndSetProduct(JSONObject rowJson,
                                        Integer col,
                                        ExcelColumnVO excelColumn,
-                                       IssueCreateVO issueCreateVO) {
+                                       IssueExcelImportVO issueExcelImportVO) {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         if (ObjectUtils.isEmpty(cellJson)) {
             return;
@@ -3290,7 +3430,39 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 productIds.add(valueIdMap.get(product));
             }
         }
-        issueCreateVO.setProductIds(productIds);
+        excelColumn.setValues(productIds);
+        issueExcelImportVO.setProductIds(productIds);
+    }
+
+    private void validateAndSetIssueNum(JSONObject rowJson, Integer col, IssueExcelImportVO issueExcelImportVO) {
+        JSONObject cellJson = (JSONObject) rowJson.get(col);
+        if (ObjectUtils.isEmpty(cellJson)) {
+            return;
+        }
+        String value = cellJson.getString(ExcelSheetData.STRING_CELL);
+        if (StringUtils.isEmpty(value)) {
+            return;
+        }
+        if (value.lastIndexOf("-") == -1) {
+            putNumError(rowJson, cellJson, value);
+            return;
+        }
+        IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(issueExcelImportVO.getProjectId(),
+                value.substring(value.lastIndexOf("-") + 1));
+        if (issueNumDTO == null) {
+            putNumError(rowJson, cellJson, value);
+            return;
+        }
+    }
+
+    private void putNumError(JSONObject rowJson, JSONObject cellJson, String value) {
+        String errorMsg = buildWithErrorMsg(value, "编号错误");
+        putErrorMsg(rowJson, cellJson, errorMsg);
+    }
+
+    private void putTypeError(JSONObject rowJson, JSONObject cellJson, String value) {
+        String errorMsg = buildWithErrorMsg(value, "不符合工作项层级结构");
+        putErrorMsg(rowJson, cellJson, errorMsg);
     }
 
 }

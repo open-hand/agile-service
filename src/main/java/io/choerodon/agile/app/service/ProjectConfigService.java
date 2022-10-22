@@ -254,4 +254,21 @@ public interface ProjectConfigService {
     String getApplyType(Long projectId, Long issueTypeId);
 
     String getApplyTypeByTypeCode(Long projectId, String typeCode);
+
+    /**
+     * 判断状态能不能直接转换
+     * @param projectId
+     * @param issueId
+     * @param applyType
+     * @param issueTypeId
+     * @param currentId
+     * @param targetId
+     * @return
+     */
+    Boolean validateStatusTransform(Long projectId,
+                                    Long issueId,
+                                    String applyType,
+                                    Long issueTypeId,
+                                    Long currentId,
+                                    Long targetId);
 }

@@ -64,6 +64,9 @@ public class ExcelColumnVO {
     @ApiModelProperty("自定义字段")
     private PageFieldViewUpdateVO customFieldDetail;
 
+    @ApiModelProperty("excel中值转换过来的值")
+    private List<Long> values;
+
     public String getFieldType() {
         return fieldType;
     }
@@ -150,5 +153,13 @@ public class ExcelColumnVO {
 
     public void setEnvNameCodeMap(Map<String, String> envNameCodeMap) {
         this.envNameCodeMap = envNameCodeMap;
+    }
+
+    public List<Long> getValues() {
+        return values;
+    }
+
+    public void setValues(List<Long> values) {
+        this.values = values;
     }
 }

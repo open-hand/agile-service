@@ -75,6 +75,7 @@ public class FieldCode {
     public static final String DISCOVERY_DATE = "discoveryDate";
 
     public static final String ISSUE_STATUS = "issueStatus";
+    public static final String ISSUE_NUM = "issueNum";
 
     private static final List<String> FIELD_CODE_LIST = new ArrayList<>();
 

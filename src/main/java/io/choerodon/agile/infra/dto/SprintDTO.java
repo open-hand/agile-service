@@ -1,15 +1,18 @@
 package io.choerodon.agile.infra.dto;
 
+import java.util.Date;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+
+import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.validator.constraints.Length;
 
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -21,11 +24,17 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 @VersionAudit
 public class SprintDTO extends AuditDomain {
 
+    /**
+     * 冲刺目标最大长度
+     */
+    public static final int MAX_SPRINT_GAOL_LENGTH = 255;
+
     @Id
     @GeneratedValue
     @Encrypt
     private Long sprintId;
     private String sprintName;
+    @Length(max = SprintDTO.MAX_SPRINT_GAOL_LENGTH)
     private String sprintGoal;
     private Date startDate;
     private Date endDate;

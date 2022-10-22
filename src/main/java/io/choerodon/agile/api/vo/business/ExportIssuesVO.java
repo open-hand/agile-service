@@ -47,6 +47,7 @@ public class ExportIssuesVO {
     public static final String FEATURE = "feature";
     public static final String PROGRESS = "progress";
     public static final String SEQUENCE = "sequence";
+    public static final String PARENT = "parent";
 
 
 
@@ -191,6 +192,8 @@ public class ExportIssuesVO {
     private String progress;
     @ApiModelProperty(value = "序列")
     private String sequence;
+    @ApiModelProperty(value = "父级工作项")
+    private String parent;
 
     public ExportIssuesVO() {
     }
@@ -713,5 +716,13 @@ public class ExportIssuesVO {
 
     public void setProduct(String product) {
         this.product = product;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
     }
 }

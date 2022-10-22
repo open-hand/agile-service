@@ -1,11 +1,13 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.CopyConditionVO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
+import java.util.List;
+
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.List;
+import io.choerodon.agile.api.vo.CopyConditionVO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 /**
  * @author zhaotianxin
@@ -30,5 +32,7 @@ public interface IssueOperateService {
                                   Long organizationId,
                                   String applyType,
                                   String asyncTraceId,
-                                  ServletRequestAttributes requestAttributes);
+                                  ServletRequestAttributes requestAttributes,
+                                  String encryptType,
+                                  SecurityContext context);
 }

@@ -1,19 +1,25 @@
 package io.choerodon.agile.api.vo;
 
 
-import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.validator.constraints.Length;
+
+import io.choerodon.agile.infra.dto.SprintDTO;
+import io.choerodon.agile.infra.utils.StringUtil;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/15.
  *
  * @author dinghuang123@gmail.com
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SprintUpdateVO {
     private static final String OBJECT_VERSION_NUMBER_NULL_ERROR = "error.objectVersionNumber.NotNull";
 
@@ -24,6 +30,7 @@ public class SprintUpdateVO {
     @ApiModelProperty(value = "冲刺名称")
     private String sprintName;
 
+    @Length(max = SprintDTO.MAX_SPRINT_GAOL_LENGTH)
     @ApiModelProperty(value = "冲刺目标")
     private String sprintGoal;
 

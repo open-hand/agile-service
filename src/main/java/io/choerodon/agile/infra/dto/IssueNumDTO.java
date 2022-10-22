@@ -1,5 +1,7 @@
 package io.choerodon.agile.infra.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Created by jian_zhang02@163.com on 2018/6/5.
  */
@@ -10,6 +12,8 @@ public class IssueNumDTO {
     private Long projectId;
     private String summary;
     private String typeCode;
+    @ApiModelProperty(value = "版本号")
+    private Long objectVersionNumber;
 
     public Long getIssueId() {
         return issueId;
@@ -57,5 +61,13 @@ public class IssueNumDTO {
 
     public void setIssueTypeId(Long issueTypeId) {
         this.issueTypeId = issueTypeId;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }

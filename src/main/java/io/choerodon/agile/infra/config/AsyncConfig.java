@@ -4,11 +4,19 @@ import java.util.concurrent.Executor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import io.choerodon.agile.infra.aspect.MessageAspect;
+
+import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.starter.keyencrypt.core.EncryptType;
 
 /**
  * @author superlee
@@ -16,6 +24,39 @@ import io.choerodon.agile.infra.aspect.MessageAspect;
  */
 @Configuration
 public class AsyncConfig extends AsyncConfigurerSupport {
+
+    /**
+     * 线程装饰器, 用以拷贝各种线程变量
+     */
+    private static final TaskDecorator TASK_DECORATOR = runnable -> {
+        // 屏蔽消息发送配置
+        final Boolean sendMsgFlag = MessageAspect.SEND_MSG_FLAG.get();
+        // 主键加密配置
+        final EncryptType encryptType = EncryptContext.encryptType();
+        // HTTP请求头
+        final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        // SecurityContext
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        return () -> {
+            // 获取原值
+            final Boolean originSendMsgFlag = MessageAspect.SEND_MSG_FLAG.get();
+            final EncryptType originEncryptType = EncryptContext.encryptType();
+            final RequestAttributes originRequestAttributes = RequestContextHolder.getRequestAttributes();
+            final SecurityContext originSecurityContext = SecurityContextHolder.getContext();
+            // 设置父线程的值
+            MessageAspect.SEND_MSG_FLAG.set(sendMsgFlag);
+            EncryptContext.setEncryptType(String.valueOf(encryptType));
+            RequestContextHolder.setRequestAttributes(requestAttributes);
+            SecurityContextHolder.setContext(securityContext);
+            // 真实子线程执行
+            runnable.run();
+            // 清除父线程的值
+            MessageAspect.SEND_MSG_FLAG.set(originSendMsgFlag);
+            EncryptContext.setEncryptType(String.valueOf(originEncryptType));
+            RequestContextHolder.setRequestAttributes(originRequestAttributes);
+            SecurityContextHolder.setContext(originSecurityContext);
+        };
+    };
 
     /**
      * 异步线程池
@@ -30,22 +71,13 @@ public class AsyncConfig extends AsyncConfigurerSupport {
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(15);
-        executor.setQueueCapacity(100);
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(16);
+        executor.setQueueCapacity(200);
         executor.setThreadNamePrefix("asyncTaskExecutor-");
-        // 线程修饰器，用于屏蔽消息发送
-        executor.setTaskDecorator(runnable -> {
-            // 需要在原线程里先拿到变量，在塞入异步线程中生效
-            Boolean sendMsgFlag = MessageAspect.SEND_MSG_FLAG.get();
-            return () -> {
-                MessageAspect.SEND_MSG_FLAG.set(sendMsgFlag);
-                runnable.run();
-                MessageAspect.SEND_MSG_FLAG.remove();
-            };
-        });
+        executor.setTaskDecorator(TASK_DECORATOR);
         executor.initialize();
-        return new DelegatingSecurityContextExecutorService(executor.getThreadPoolExecutor());
+        return executor;
     }
 
     /**
@@ -56,11 +88,13 @@ public class AsyncConfig extends AsyncConfigurerSupport {
     @Bean
     public Executor issueImportExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(15);
-        executor.setQueueCapacity(100);
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(16);
+        executor.setQueueCapacity(200);
         executor.setThreadNamePrefix("issueImportExecutor-");
+        executor.setTaskDecorator(TASK_DECORATOR);
         executor.initialize();
         return new DelegatingSecurityContextExecutorService(executor.getThreadPoolExecutor());
     }
+
 }
