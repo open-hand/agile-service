@@ -633,6 +633,8 @@ public class ExcelServiceImpl implements ExcelService {
         processHeaderMap(projectId, organizationId, headerNames, headerMap, withFeature, history, websocketKey);
         // 校验excel中必传参数是否都传了
         validateRequiredSystemField(headerMap, withFeature, history);
+        // 校验字段是否重复出现
+        validateRepeatField(headerMap, history);
         Map<Integer, Set<Integer>> parentSonMap = new HashMap<>();
         Map<Integer, Integer> sonParentMap = new HashMap<>();
         Set<Integer> withoutParentRows = new HashSet<>();
@@ -661,6 +663,23 @@ public class ExcelServiceImpl implements ExcelService {
         //错误数据生成excel
         String status = excelCommonService.generateErrorDataExcelAndUpload(excelSheetData, headerMap, headerNames, history, organizationId, "/templates/IssueImportGuideTemplate.xlsx");
         excelCommonService.updateFinalRecode(history, progress.getSuccessCount(), progress.getFailCount(), status, websocketKey);
+    }
+
+    private void validateRepeatField(Map<Integer, ExcelColumnVO> headerMap, FileOperationHistoryDTO history) {
+        List<String> fieldNames = new ArrayList<>();
+        for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
+            Integer key = entry.getKey();
+            ExcelColumnVO excelColumnVO = entry.getValue();
+            if (fieldNames.contains(excelColumnVO.getFieldCode())) {
+                history.setStatus("template_error_missing_repeat_column");
+                fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
+                FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
+                String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + errorImport.getProjectId();
+                sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+                throw new CommonException("error.excel.header.code.repeat." + excelColumnVO.getFieldCode());
+            }
+            fieldNames.add(excelColumnVO.getFieldCode());
+        }
     }
 
 
