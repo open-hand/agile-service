@@ -542,8 +542,11 @@ public class ExcelUtil {
      */
     public static Workbook dropDownList2007(Workbook workbook, Sheet realSheet, List<String> datas, int startRow, int endRow,
                                                 int startCol, int endCol, String hiddenSheetName, int hiddenSheetIndex) {
-        // 创建一个数据源sheet
-        Sheet hidden = workbook.createSheet(hiddenSheetName);
+        Sheet hidden = workbook.getSheet(hiddenSheetName);
+        if (!ObjectUtils.isEmpty(hidden)) {
+            return workbook;
+        }
+        hidden = workbook.createSheet(hiddenSheetName);
         // 数据源sheet页不显示
         workbook.setSheetHidden(hiddenSheetIndex, true);
         if (datas == null || datas.isEmpty()) {
