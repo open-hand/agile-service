@@ -4,7 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -120,7 +123,9 @@ public class ExcelServiceImpl implements ExcelService {
     private static final int PREDEFINED_VALUE_END_ROW = 500;
     private static final String INSERT = "insert";
     private static final String COMMON_SHEET_NAME = "sheet1";
-
+    private static final String FORMAT_YYYY_MM_DD_HH_MM_SS_TIME = "^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29) (20|21|22|23|[0-1][0-9]):[0-5][0-9]:[0-5][0-9]$";
+    private static final String FORMAT_YYYY_MM_DD_HH_MM_TIME = "^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29) (20|21|22|23|[0-1][0-9]):[0-5][0-9]$";
+    private static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 
     private static final List<String> PROCESS_PREDEFINED_SYSTEM_FIELDS =
             Arrays.asList(
@@ -783,11 +788,36 @@ public class ExcelServiceImpl implements ExcelService {
             //日期格式单元格
             cellJson.put(ExcelSheetData.DATE_CELL, cell.getDateCellValue());
         } else {
-            cellJson.put(ExcelSheetData.STRING_CELL, cell.getStringCellValue().trim());
+            if (!tryToDate(cellJson, cell)) {
+                cellJson.put(ExcelSheetData.STRING_CELL, cell.getStringCellValue().trim());
+            }
         }
         rowJson.put(String.valueOf(columnNum), cellJson);
         rowJson.put(ExcelSheetData.JSON_KEY_ROW_NUM, rowNum);
         sheetData.put(String.valueOf(rowNum), rowJson);
+    }
+
+
+    private boolean tryToDate(JSONObject cellJson, Cell cell) {
+        String strDate = cell.getStringCellValue().trim();
+        Pattern compileMTime = Pattern.compile(FORMAT_YYYY_MM_DD_HH_MM_TIME);
+        Pattern compileSTime = Pattern.compile(FORMAT_YYYY_MM_DD_HH_MM_SS_TIME);
+        SimpleDateFormat sdf = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+        if (compileMTime.matcher(strDate).matches()) {
+            strDate = strDate + ":00";
+        } else if (compileSTime.matcher(strDate).matches()) {
+
+        } else {
+            return false;
+        }
+        Date date = null;
+        try {
+            date = sdf.parse(strDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        cellJson.put(ExcelSheetData.DATE_CELL, date);
+        return true;
     }
 
     private void updateHistoryAndSendMsg(FileOperationHistoryDTO history,

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.*;
@@ -120,6 +121,7 @@ public class IssueExcelImportVO {
     @ApiModelProperty(value = "团队项目id集合")
     private List<Long> teamProjectIds;
     @ApiModelProperty(value = "预计开始时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date estimatedStartTime;
     @ApiModelProperty(value = "预计结束时间")
     private Date estimatedEndTime;

@@ -3069,6 +3069,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         Date date = cellJson.getDate(ExcelSheetData.DATE_CELL);
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
+        //将String类型的日期转换为日期格式
         if (ObjectUtils.isEmpty(date) && !ObjectUtils.isEmpty(value)) {
             //日期格式不正确
             String errorMsg = buildWithErrorMsg(value, DATE_CHECK_MSG);
