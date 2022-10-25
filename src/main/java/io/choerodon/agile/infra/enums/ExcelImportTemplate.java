@@ -238,9 +238,6 @@ public class ExcelImportTemplate {
                 if (!HEADER_CODES.contains(code)) {
                     throw new CommonException("error.illegal.system.field." + code);
                 }
-                if (i == 1) {
-                    fields.add(PARENT);
-                }
                 fields.add(code);
             }
             fields.add(RELATE_ISSUE);
