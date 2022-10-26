@@ -1,5 +1,23 @@
 package io.choerodon.agile.infra.task;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.IssueDailyWorkVO;
 import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.app.service.DelayTaskService;
@@ -11,25 +29,8 @@ import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
 import io.choerodon.asgard.schedule.enums.TriggerTypeEnum;
 import io.choerodon.core.enums.MessageAdditionalType;
-import org.apache.commons.collections.MapIterator;
-import org.apache.commons.collections.keyvalue.MultiKey;
-import org.apache.commons.collections.map.MultiKeyMap;
+
 import org.hzero.boot.message.entity.MessageSender;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 
 /**
@@ -192,31 +193,32 @@ public class IssueDailyWorkSendMessageTask {
                 .collect(Collectors.groupingBy(IssueDailyWorkVO::getAssigneeId));
 
         //key1 userId, key2 projectId, value issueIds保持排序
-        MultiKeyMap userProjectIssueIdsMap = getUserProjectIssueIdsMap(issueList);
+        final MultiKeyMap<Long, List<Long>> userProjectIssueIdsMap = getUserProjectIssueIdsMap(issueList);
         //key1 userId, key2 organizationId, value projectIds
-        MultiKeyMap userOrgProjectIdsMap = getUserOrgProjectIdsMap(userIssueMap, projectMap);
-        MapIterator mapIterator = userOrgProjectIdsMap.mapIterator();
-        while(mapIterator.hasNext()) {
-            MultiKey multiKey = (MultiKey) mapIterator.next();
-            Long userId = (Long) multiKey.getKey(0);
-            Long organizationId = (Long) multiKey.getKey(1);
+        final MultiKeyMap<Long, List<Long>> userOrgProjectIdsMap = getUserOrgProjectIdsMap(userIssueMap, projectMap);
+        for (Map.Entry<MultiKey<? extends Long>, List<Long>> entry : userOrgProjectIdsMap.entrySet()) {
+            final MultiKey<? extends Long> multiKey = entry.getKey();
+            Long userId = multiKey.getKey(0);
+            Long organizationId = multiKey.getKey(1);
 
             UserDTO user = userMap.get(userId);
             if (ObjectUtils.isEmpty(user)) {
-                return;
+                continue;
             }
 
-            List<Long> userOrgProjectIds = (List<Long>) mapIterator.getValue();
+            List<Long> userOrgProjectIds = entry.getValue();
             //从小到大排序
-            Collections.sort(userOrgProjectIds);
             if (CollectionUtils.isEmpty(userOrgProjectIds)) {
-                return;
+                continue;
             }
+            Collections.sort(userOrgProjectIds);
             Map<String, String> paramMap = buildParamMap(organizationId, userOrgProjectIds, userProjectIssueIdsMap, issueMap, projectMap, user);
 
             //获取当前用户下在当前组织下需要发送通知的项目
             List<Long> senderProjectIds = getSenderProjectIds(projectMap, userOrgProjectIds);
-            senderProjectIds.forEach(senderProjectId -> messageSenders.add(getMessageSender(paramMap, user, senderProjectId)));
+            for (Long senderProjectId : senderProjectIds) {
+                messageSenders.add(getMessageSender(paramMap, user, senderProjectId));
+            }
         }
     }
 
@@ -224,10 +226,9 @@ public class IssueDailyWorkSendMessageTask {
         List<ProjectMessageVO> filterProjects = projectMap.values().stream().filter(project -> userOrgProjectIds.contains(project.getId())).collect(Collectors.toList());
         List<Long> pmEnableProjectIds = filterProjects.stream().filter(project -> Boolean.TRUE.equals(project.getPmEnable())).map(ProjectMessageVO::getId).collect(Collectors.toList());
         List<Long> emailEnableProjectIds = filterProjects.stream().filter(project -> Boolean.TRUE.equals(project.getEmailEnable())).map(ProjectMessageVO::getId).collect(Collectors.toList());
-        List<Long> senderProjectIds = new ArrayList<>();
 
         //取当前用户组织下需要发送站内信和邮件的交集项目
-        senderProjectIds.addAll(pmEnableProjectIds);
+        List<Long> senderProjectIds = new ArrayList<>(pmEnableProjectIds);
         senderProjectIds.retainAll(emailEnableProjectIds);
         //若没有交集项目，则邮件和站内信分开发送
         if (CollectionUtils.isEmpty(senderProjectIds)) {
@@ -265,38 +266,40 @@ public class IssueDailyWorkSendMessageTask {
         return userMap;
     }
 
-    private MultiKeyMap getUserOrgProjectIdsMap(Map<Long, List<IssueDailyWorkVO>> userIssueMap, Map<Long, ProjectMessageVO> projectMap) {
-        MultiKeyMap multiKeyMap = new MultiKeyMap();
+    private MultiKeyMap<Long, List<Long>> getUserOrgProjectIdsMap(Map<Long, List<IssueDailyWorkVO>> userIssueMap, Map<Long, ProjectMessageVO> projectMap) {
+        MultiKeyMap<Long, List<Long>> multiKeyMap = new MultiKeyMap<>();
         //获取用户待办问题的所有项目
-        userIssueMap.forEach((userId, issues) -> {
+        for (Map.Entry<Long, List<IssueDailyWorkVO>> entry : userIssueMap.entrySet()) {
+            Long userId = entry.getKey();
+            List<IssueDailyWorkVO> issues = entry.getValue();
             Set<Long> userProjectIds = issues.stream().map(IssueDailyWorkVO::getProjectId).collect(Collectors.toSet());
             //将用户待办问题的所有项目按组织进行划分
-            userProjectIds.forEach(projectId -> {
+            for (Long projectId : userProjectIds) {
                 Long organizationId = projectMap.get(projectId).getOrganizationId();
-                List<Long> userOrgProjectIds = (List<Long>) multiKeyMap.get(userId, organizationId);
+                List<Long> userOrgProjectIds = multiKeyMap.get(userId, organizationId);
                 if (CollectionUtils.isEmpty(userOrgProjectIds)) {
                     userOrgProjectIds = new ArrayList<>();
                     multiKeyMap.put(userId, organizationId, userOrgProjectIds);
                 }
                 userOrgProjectIds.add(projectId);
-            });
-        });
+            }
+        }
         return multiKeyMap;
     }
 
-    private MultiKeyMap getUserProjectIssueIdsMap(List<IssueDailyWorkVO> issueList) {
-        MultiKeyMap multiKeyMap = new MultiKeyMap();
+    private MultiKeyMap<Long, List<Long>> getUserProjectIssueIdsMap(List<IssueDailyWorkVO> issueList) {
+        MultiKeyMap<Long, List<Long>> multiKeyMap = new MultiKeyMap<>();
         //将用户的待办问题按项目划分
-        issueList.forEach(issue -> {
+        for (IssueDailyWorkVO issue : issueList) {
             Long projectId = issue.getProjectId();
             Long assigneeId = issue.getAssigneeId();
-            List<Long> issueIds = (List<Long>) multiKeyMap.get(assigneeId, projectId);
+            List<Long> issueIds = multiKeyMap.get(assigneeId, projectId);
             if (CollectionUtils.isEmpty(issueIds)) {
                 issueIds = new ArrayList<>();
                 multiKeyMap.put(assigneeId, projectId, issueIds);
             }
             issueIds.add(issue.getIssueId());
-        });
+        }
         return multiKeyMap;
     }
 
@@ -322,11 +325,14 @@ public class IssueDailyWorkSendMessageTask {
 
     private Map<String, String> buildParamMap(Long organizationId,
                                               List<Long> userOrgProjectIds,
-                                              MultiKeyMap userProjectIssueIdsMap,
+                                              MultiKeyMap<Long, List<Long>> userProjectIssueIdsMap,
                                               Map<Long, IssueDailyWorkVO> issueMap,
                                               Map<Long, ProjectMessageVO> projectMap,
                                               UserDTO user) {
         OrganizationInfoVO organization = baseFeignClient.query(organizationId).getBody();
+        if(organization == null) {
+            return Collections.emptyMap();
+        }
         Map<String, String> result = new HashMap<>();
         result.put(USER_NAME, user.getRealName());
         result.put(ORGANIZATION_NAME, organization.getTenantName());
@@ -379,13 +385,13 @@ public class IssueDailyWorkSendMessageTask {
     }
 
     private Map<Long, String> buildProjectHtmlTableMap(List<Long> userOrgProjectIds,
-                                                       MultiKeyMap userProjectIssueIdsMap,
+                                                       MultiKeyMap<Long, List<Long>> userProjectIssueIdsMap,
                                                        Map<Long, IssueDailyWorkVO> issueMap,
                                                        Map<Long, ProjectMessageVO> projectMap,
                                                        UserDTO user) {
         Map<Long, String> projectTableMap = new HashMap<>();
         for (Long projectId : userOrgProjectIds) {
-            List<Long> issueIds = (List<Long>) userProjectIssueIdsMap.get(user.getId(), projectId);
+            List<Long> issueIds = userProjectIssueIdsMap.get(user.getId(), projectId);
             List<IssueDailyWorkVO> issueList = new ArrayList<>();
             issueIds.forEach(v -> issueList.add(issueMap.get(v)));
             ProjectMessageVO projectMessageVO = projectMap.get(projectId);
