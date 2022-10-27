@@ -24,6 +24,8 @@ public class IssueRequiredFields {
 
     @ApiModelProperty(value = "必填字段")
     private List<PageFieldViewVO> requiredFields;
+    @ApiModelProperty(value = "问题类型")
+    private IssueTypeVO issueTypeVO;
 
     /**
      * @return issue id
@@ -73,4 +75,11 @@ public class IssueRequiredFields {
         return this;
     }
 
+    public IssueTypeVO getIssueTypeVO() {
+        return issueTypeVO;
+    }
+
+    public void setIssueTypeVO(IssueTypeVO issueTypeVO) {
+        this.issueTypeVO = issueTypeVO;
+    }
 }
