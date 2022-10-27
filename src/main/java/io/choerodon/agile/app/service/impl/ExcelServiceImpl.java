@@ -96,7 +96,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String WEBSOCKET_EXPORT_PUBLISH_VERSION = "agile-export-publish-version";
     private static final String ERROR_FILE_OPERATION_HISTORY_UPDATE = "error.FileOperationHistoryDTO.update";
 
-    protected static final String IMPORT_TEMPLATE_NAME = "导入模板";
+    protected static final String IMPORT_TEMPLATE_NAME = "sheet1";
     protected static final String EPIC_CN = "史诗";
     protected static final String USER_MAP = "userMap";
     protected static final String ISSUE_TYPE_MAP = "issueTypeMap";
