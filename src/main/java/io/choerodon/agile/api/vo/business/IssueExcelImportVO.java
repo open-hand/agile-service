@@ -124,6 +124,7 @@ public class IssueExcelImportVO {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date estimatedStartTime;
     @ApiModelProperty(value = "预计结束时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date estimatedEndTime;
     @ApiModelProperty(value = "自定义字段")
     private List<PageFieldViewUpdateVO> customFields;
@@ -147,9 +148,11 @@ public class IssueExcelImportVO {
     private List<TagVO> tags;
 
     @ApiModelProperty(value = "实际开始时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date actualStartTime;
 
     @ApiModelProperty(value = "实际结束时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date actualEndTime;
 
     @ApiModelProperty(value = "参与人")
