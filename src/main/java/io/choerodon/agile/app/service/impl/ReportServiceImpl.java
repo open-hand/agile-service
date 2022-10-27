@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
@@ -12,8 +11,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.report.CustomChartDataVO;
@@ -39,17 +52,6 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author dinghuang123@gmail.com
@@ -1596,7 +1598,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    @Cacheable(cacheNames = AGILE, key = "'CustomChart' + #projectId + ':' + #customChartSearchVO.toString()")
+//    @Cacheable(cacheNames = AGILE, key = "'CustomChart' + #projectId + ':' + #customChartSearchVO.toString()")
     public CustomChartDataVO queryCustomChartData(CustomChartSearchVO customChartSearchVO, Long projectId, Long organizationId) {
         List<CustomChartPointVO> pointList = queryPoint(customChartSearchVO, projectId, organizationId);
         CustomChartDataVO customChartDataVO = new CustomChartDataVO();
@@ -1638,8 +1640,26 @@ public class ReportServiceImpl implements ReportService {
             emptyPointMap.remove(comparedKey + analysisKey);
         });
 
+        // 这里过滤维度用
+        String analysisField = customChartSearchVO.getAnalysisField();
+        Object fixedDimension = customChartSearchVO.getSearchVO().getOtherArgs().get(analysisField);
+        Object extendDimension = customChartSearchVO.getExtendSearchVO().getOtherArgs().get(analysisField);
         pointList.addAll(emptyPointMap.values());
         pointList.stream()
+                .filter(point -> {
+                    if (fixedDimension instanceof List) {
+                        return ((List<?>) fixedDimension).contains(point.getAnalysisId().toString());
+                    } else {
+                        return true;
+                    }
+                })
+                .filter(point -> {
+                    if (extendDimension instanceof List) {
+                        return ((List<?>) extendDimension).contains(point.getAnalysisId().toString());
+                    } else {
+                        return true;
+                    }
+                })
                 .sorted(Comparator.comparing(CustomChartPointVO::getAnalysisId, Comparator.nullsFirst(Comparator.naturalOrder()))
                         .thenComparing(CustomChartPointVO::getAnalysisValue, Comparator.nullsFirst(Comparator.naturalOrder())))
                 .forEach(point -> {
@@ -1686,7 +1706,7 @@ public class ReportServiceImpl implements ReportService {
         }
         filterSql = dealSearchVO(customChartSearchVO);
         List<CustomChartPointVO> result = issueMapper.selectCustomChartPointVO(
-                new HashSet<>(Arrays.asList(projectId)),
+                Sets.newHashSet(projectId),
                 customChartSearchVO.getSearchVO(),
                 customChartSearchVO.getExtendSearchVO(),
                 filterSql,
