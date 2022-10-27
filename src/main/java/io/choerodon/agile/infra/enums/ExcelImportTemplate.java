@@ -240,7 +240,7 @@ public class ExcelImportTemplate {
                 }
                 fields.add(code);
             }
-            fields.add(RELATE_ISSUE);
+//            fields.add(RELATE_ISSUE);
             return fields;
         }
     }
