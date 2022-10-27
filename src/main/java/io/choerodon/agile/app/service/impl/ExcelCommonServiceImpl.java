@@ -479,7 +479,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 Optional.ofNullable(remoteIamOperator.listUsersByProjectId(projectId, 1, 0, null)).orElse(new Page<>())
                         .getContent()
                         .stream()
-                        .map(UserDTO::getRealName)
+                        .map(u -> {
+                            String userName = u.getRealName();
+                            String ldap = Boolean.TRUE.equals(u.getLdap()) ? u.getLoginName() : u.getEmail();
+                            return userName + "（" + ldap + "）";
+                        })
                         .collect(Collectors.toList());
         objectSchemeFieldDetails.forEach(o -> {
             String fieldCode = o.getCode();
@@ -665,8 +669,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> userNames = new ArrayList<>();
         Map<String, Long> userMap = new HashMap<>();
         users.forEach(u -> {
-            userNames.add(u.getRealName());
-            userMap.put(u.getRealName(), u.getId());
+            String userName = u.getRealName();
+            String ldap = Boolean.TRUE.equals(u.getLdap()) ? u.getLoginName() : u.getEmail();
+            userName = userName + "（" + ldap + "）";
+            userNames.add(userName);
+            userMap.put(userName, u.getId());
         });
 
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
@@ -1292,10 +1299,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         boolean isDateType = excelColumn.isDateType();
         Object customFieldValue = null;
         if (isDateType) {
-            if (ObjectUtils.isEmpty(dateValue)) {
-                //非日期格式
-                String errorMsg = buildWithErrorMsg(stringValue, "自定义字段类型错误");
-                putErrorMsg(rowJson, cellJson, errorMsg);
+            if (!ObjectUtils.isEmpty(stringValue)) {
+                dateStr = stringValue;
+            } else {
+                if (ObjectUtils.isEmpty(dateValue)) {
+                    //非日期格式
+                    String errorMsg = buildWithErrorMsg(stringValue, "自定义字段类型错误");
+                    putErrorMsg(rowJson, cellJson, errorMsg);
+                }
             }
             customFieldValue = dateStr;
         } else {
