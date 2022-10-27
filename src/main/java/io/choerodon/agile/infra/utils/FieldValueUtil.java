@@ -73,7 +73,7 @@ public class FieldValueUtil {
                 case FieldType.MULTIPLE:
                     values.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()).toArray(longValues);
                     value = EncryptionUtils.encryptList(Arrays.asList(longValues));
-                    valueStr = values.stream().map(FieldValueDTO::getOptionValue).collect(Collectors.joining(", "));
+                    valueStr = values.stream().map(FieldValueDTO::getOptionValue).collect(Collectors.joining(","));
                     break;
                 case FieldType.RADIO:
                 case FieldType.SINGLE:
