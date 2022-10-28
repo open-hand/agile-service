@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -1011,10 +1012,22 @@ public class ExcelServiceImpl implements ExcelService {
                 putNumErrorMsg(rowJson, issueNumJson, issueNum);
                 return;
             }
+            // 查询之前issue更新之前的数据 以便于在校验时直接过滤掉重复的数据
+            Long issueId = issueNumDTO.getIssueId();
+            Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            IssueVO issueVO = issueService.queryIssue(projectId, issueNumDTO.getIssueId(), organizationId);
+            PageFieldViewParamVO pageFieldViewParamVO = new PageFieldViewParamVO();
+            pageFieldViewParamVO.setIssueTypeId(issueVO.getIssueTypeId());
+            pageFieldViewParamVO.setSchemeCode("agile_issue");
+            pageFieldViewParamVO.setPageCode("agile_issue_edit");
+            List<PageFieldViewVO> pageFieldViewVOS = pageFieldService.queryPageFieldViewListWithInstanceId(organizationId, projectId, issueId, pageFieldViewParamVO);
+            if (CollectionUtils.isNotEmpty(pageFieldViewVOS)) {
+                issueExcelImportVO.setPageFieldViewVOMap(pageFieldViewVOS.stream().collect(Collectors.toMap(PageFieldViewVO::getFieldId, Function.identity())));
+            }
             issueExcelImportVO.setIssueId(issueNumDTO.getIssueId());
             issueExcelImportVO.setObjectVersionNumber(issueNumDTO.getObjectVersionNumber());
             issueExcelImportVO.setIssueNum(issueNum.substring(issueNum.lastIndexOf("-") + 1));
-
+            issueExcelImportVO.setOldIssue(issueVO);
         } else {
             value = issueTypeJson.getString(ExcelSheetData.STRING_CELL);
             if (withoutParentRows.contains(rowNum)) {
@@ -2224,6 +2237,8 @@ public class ExcelServiceImpl implements ExcelService {
         issueExcelImportVOTemp.setOrganizationId(null);
         issueExcelImportVOTemp.setIssueTypeId(null);
         issueExcelImportVOTemp.setUpdate(null);
+        issueExcelImportVO.setOldIssue(null);
+        issueExcelImportVO.setPageFieldViewVOMap(null);
         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(issueExcelImportVOTemp));
         issueValidator.verifyUpdateData(JSON.parseObject(JSON.toJSONString(issueExcelImportVOTemp)), projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();

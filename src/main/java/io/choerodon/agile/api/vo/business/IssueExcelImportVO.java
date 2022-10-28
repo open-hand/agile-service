@@ -4,6 +4,7 @@ package io.choerodon.agile.api.vo.business;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
@@ -183,6 +184,10 @@ public class IssueExcelImportVO implements Cloneable {
     private Long organizationId;
     @ApiModelProperty("是否是更新")
     private Boolean update;
+
+    private IssueVO oldIssue;
+
+    private Map<Long, PageFieldViewVO> pageFieldViewVOMap;
 
 
     public List<TagVO> getTags() {
@@ -621,6 +626,22 @@ public class IssueExcelImportVO implements Cloneable {
 
     public void setUpdate(Boolean update) {
         this.update = update;
+    }
+
+    public IssueVO getOldIssue() {
+        return oldIssue;
+    }
+
+    public void setOldIssue(IssueVO oldIssue) {
+        this.oldIssue = oldIssue;
+    }
+
+    public Map<Long, PageFieldViewVO> getPageFieldViewVOMap() {
+        return pageFieldViewVOMap;
+    }
+
+    public void setPageFieldViewVOMap(Map<Long, PageFieldViewVO> pageFieldViewVOMap) {
+        this.pageFieldViewVOMap = pageFieldViewVOMap;
     }
 
     @Override
