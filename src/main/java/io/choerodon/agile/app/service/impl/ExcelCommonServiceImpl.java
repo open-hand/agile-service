@@ -2641,13 +2641,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     }
                 }
             }
-
-            if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
-                    || !(issueTypeVO.getId().equals(issueExcelImportVO.getOldIssue().getIssueTypeId()))) {
-                issueExcelImportVO.setIssueTypeId(issueTypeVO.getId());
-                issueExcelImportVO.setTypeCode(issueTypeVO.getTypeCode());
-                excelColumn.setValues(Arrays.asList(issueTypeVO.getId()));
-            }
+            issueExcelImportVO.setIssueTypeId(issueTypeVO.getId());
+            issueExcelImportVO.setTypeCode(issueTypeVO.getTypeCode());
+            excelColumn.setValues(Arrays.asList(issueTypeVO.getId()));
         }
     }
 
@@ -3094,7 +3090,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) || !parentId.equals(issueExcelImportVO.getOldIssue().getParentIssueId())) {
                 issueExcelImportVO.setParentIssueId(parentId);
             }
-        } else if (SUB_BUG_CN.equals(issueType)) {
+        } else if ("bug".equals(issueExcelImportVO.getTypeCode())) {
             if (parentIssue.getTypeCode().equals("bug")) {
                 String errorMsg = buildWithErrorMsg(value, "子缺陷的父级不能为缺陷类型");
                 putErrorMsg(rowJson, cellJson, errorMsg);

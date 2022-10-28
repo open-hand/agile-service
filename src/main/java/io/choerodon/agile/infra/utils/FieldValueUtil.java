@@ -417,8 +417,13 @@ public class FieldValueUtil {
                 dateValue = df.parse(defaultValue);
             } catch (ParseException e2) {
                 //不行就换yyyy-MM-dd HH:mm:ss格式, 再失败就报错
-                DateFormat df = new SimpleDateFormat(DATE_FORMAT);
-                dateValue = df.parse(defaultValue);
+                try {
+                    DateFormat df = new SimpleDateFormat(DATE_FORMAT);
+                    dateValue = df.parse(defaultValue);
+                } catch (ParseException e3) {
+                    DateFormat df = new SimpleDateFormat(TIME_FORMAT);
+                    dateValue = df.parse(defaultValue);
+                }
             }
         }
         return dateValue;
