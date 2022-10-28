@@ -3083,7 +3083,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         cellJson = createCellJsonIfNotExisted(rowJson, col, cellJson);
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
         if (value == null) {
-            value = "";
+            return;
         }
         if (IssueTypeCode.isSubTask(issueTypeCode)) {
             Long parentId = parentIssue.getIssueId();
@@ -3153,9 +3153,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     putErrorMsg(rowJson, cellJson, errorMsg);
                 } else {
                     ComponentIssueRelVO componentIssueRelVO = new ComponentIssueRelVO();
-                    componentIssueRelVO.setComponentId(valueIdMap.get(value));
+                    componentIssueRelVO.setComponentId(valueIdMap.get(component));
                     componentIssueRelVOS.add(componentIssueRelVO);
-                    componentNames.add(valueIdMap.get(value));
+                    componentNames.add(valueIdMap.get(component));
                 }
             }
             List<Long> oldIds = new ArrayList<>();
