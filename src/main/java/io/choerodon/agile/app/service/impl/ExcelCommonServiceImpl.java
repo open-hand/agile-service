@@ -572,7 +572,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     @Override
-    public void validateWorkbook(Workbook workbook, FileOperationHistoryDTO history, String websocketKey) {
+    public void validateWorkbook(Workbook workbook,
+                                 FileOperationHistoryDTO history,
+                                 String websocketKey,
+                                 String templateSheetName) {
         int index = 1;
         try {
             Sheet sheet = workbook.getSheetAt(index);
@@ -581,7 +584,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 illegalSheet = true;
             } else {
                 String sheetName = sheet.getSheetName();
-                illegalSheet = !IMPORT_TEMPLATE_NAME.equals(sheetName);
+                illegalSheet = !Objects.equals(templateSheetName,sheetName);
             }
             if (illegalSheet) {
                 throw new CommonException("error.illegal.sheet.name");

@@ -49,7 +49,10 @@ public interface ExcelCommonService {
 
     Map<String, Long> getManagers(Long projectId);
 
-    void validateWorkbook(Workbook workbook, FileOperationHistoryDTO history, String websocketKey);
+    void validateWorkbook(Workbook workbook,
+                          FileOperationHistoryDTO history,
+                          String websocketKey,
+                          String templateSheetName);
 
     List<String> resolveCodeFromHeader(Workbook workbook,
                                        FileOperationHistoryDTO history,
