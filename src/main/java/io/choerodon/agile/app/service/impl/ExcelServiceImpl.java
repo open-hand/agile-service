@@ -1038,7 +1038,7 @@ public class ExcelServiceImpl implements ExcelService {
             String issueTypeCode = getIssueTypeCode(headerMap, value);
             if (parentIssue == null
                     && (IssueTypeCode.isSubTask(issueTypeCode)
-                    || SUB_BUG_CN.equals(value))) {
+                    || "bug".equals(issueTypeCode))) {
                 JSONObject parentJson = (JSONObject) rowJson.get(parentCol);
                 String parentCellValue = "";
                 if (ObjectUtils.isEmpty(parentJson)
@@ -1113,6 +1113,7 @@ public class ExcelServiceImpl implements ExcelService {
     private String getIssueTypeCode(Map<Integer, ExcelColumnVO> headerMap,
                                     String issueType) {
         if (!ObjectUtils.isEmpty(headerMap)) {
+
             for (Map.Entry<Integer, ExcelColumnVO> entry : headerMap.entrySet()) {
                 if (FieldCode.ISSUE_TYPE.equals(entry.getValue().getFieldCode())) {
                     Map<String, IssueTypeVO> issueTypeMap = entry.getValue().getIssueTypeMap();
@@ -1165,7 +1166,10 @@ public class ExcelServiceImpl implements ExcelService {
             if (issueType == null) {
                 continue;
             }
+            JSONObject parentCellJson = (JSONObject) rowJson.get(parentCol);
+            Boolean son = !ObjectUtils.isEmpty(parentCellJson) && !ObjectUtils.isEmpty(parentCellJson.getString(ExcelSheetData.STRING_CELL));
             IssueTypeLinkDTO issueTypeLink = new IssueTypeLinkDTO(i, issueType);
+            issueTypeLink.setSon(son);
             issueTypeLinks.add(issueTypeLink);
             if (lastIssueTypeLink != null) {
                 lastIssueTypeLink.setNext(issueTypeLink);
@@ -1180,7 +1184,7 @@ public class ExcelServiceImpl implements ExcelService {
             String issueType = entry.getValue();
             String issueTypeCode = getIssueTypeCode(headerMap, issueType);
             if (IssueTypeCode.isSubTask(issueTypeCode)
-                    || SUB_BUG_CN.equals(issueType)) {
+                    || "bug".equals(issueTypeCode)) {
                 Integer parentRow = sonParentMap.get(currentRowNum);
                 if (parentRow == null) {
                     JSONObject rowJson = (JSONObject) dataSheet.get(String.valueOf(currentRowNum));
@@ -1330,12 +1334,13 @@ public class ExcelServiceImpl implements ExcelService {
         for (IssueTypeLinkDTO issueTypeLink : issueTypeLinks) {
             Integer rowNum = issueTypeLink.getRow();
             String type = issueTypeLink.getType();
+
             String issueTypeCode = getIssueTypeCode(headerMap, type);
             //故事和任务下有子任务子缺陷
             //缺陷下只有子任务，但保留子缺陷父子结构，后续有父子关系校验
             if (IssueTypeCode.isStory(issueTypeCode)
                     || IssueTypeCode.isTask(issueTypeCode)
-                    || (IssueTypeCode.isBug(issueTypeCode) && !SUB_BUG_CN.equals(type))) {
+                    || (IssueTypeCode.isBug(issueTypeCode) && !issueTypeLink.getSon())) {
                 parentRecursive(map, issueTypeLink, rowNum, headerMap);
             }
         }
@@ -1363,7 +1368,7 @@ public class ExcelServiceImpl implements ExcelService {
             String nextIssueTypeCode = getIssueTypeCode(headerMap, nextType);
             Integer nextRowNum = next.getRow();
             if (IssueTypeCode.isSubTask(nextIssueTypeCode)
-                    || SUB_BUG_CN.equals(nextType)) {
+                    || (IssueTypeCode.isBug(nextIssueTypeCode) && next.getSon())) {
                 processSonRow(map, rowNum, nextRowNum);
                 parentRecursive(map, next, rowNum, headerMap);
             }

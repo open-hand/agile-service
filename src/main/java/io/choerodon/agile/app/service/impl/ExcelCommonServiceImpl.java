@@ -3082,7 +3082,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         JSONObject cellJson = (JSONObject) rowJson.get(col);
         cellJson = createCellJsonIfNotExisted(rowJson, col, cellJson);
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
-        if (value == null) {
+        // todo 导入更新时跳过修改父级 后续优化
+        if (value == null || Boolean.TRUE.equals(issueExcelImportVO.getUpdate())) {
             return;
         }
         if (IssueTypeCode.isSubTask(issueTypeCode)) {
