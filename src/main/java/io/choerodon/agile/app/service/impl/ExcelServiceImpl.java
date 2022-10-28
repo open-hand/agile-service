@@ -1006,7 +1006,7 @@ public class ExcelServiceImpl implements ExcelService {
                 return;
             }
             IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(projectId,
-                    issueNum.substring(issueNum.lastIndexOf("-") + 1));
+                    issueNum.substring(issueNum.lastIndexOf("-") + 1), true);
             if (issueNumDTO == null) {
                 putNumErrorMsg(rowJson, issueNumJson, issueNum);
                 return;

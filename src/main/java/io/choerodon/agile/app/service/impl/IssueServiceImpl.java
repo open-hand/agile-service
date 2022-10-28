@@ -3539,8 +3539,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
 
     @Override
-    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
-        return issueMapper.queryIssueByIssueNum(projectId, issueNum);
+    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum, boolean includeEpic) {
+        return issueMapper.queryIssueByIssueNum(projectId, issueNum, includeEpic);
     }
 
     @Override

@@ -378,7 +378,7 @@ public interface IssueService {
                                           PageRequest pageRequest,
                                           IssueQueryVO issueQueryVO);
 
-    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
+    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum, boolean includeEpic);
 
     /**
      * 分页查询我的报告
