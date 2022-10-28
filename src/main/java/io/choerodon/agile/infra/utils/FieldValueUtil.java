@@ -125,9 +125,9 @@ public class FieldValueUtil {
                     value = values.get(0).getOptionId();
                     //是否仅需要字符串，用于导出
                     if (isJustStr) {
-                        UserDTO userVO = userMap.get(value);
-                        if (userVO != null) {
-                            valueStr = userVO.getRealName() + "（"+ userVO.getEmail() + "）";
+                        UserDTO user = userMap.get(value);
+                        if (user != null) {
+                            valueStr = queryUserName(user);
                         }
                     } else {
                         valueStr = userMap.getOrDefault(value, new UserDTO());
@@ -142,9 +142,9 @@ public class FieldValueUtil {
                         if (isJustStr) {
                             List<String> userStr = new ArrayList<>();
                             optionIds.forEach(v -> {
-                                UserDTO userVO = userMap.get(v);
-                                if (userVO != null) {
-                                    userStr.add(userVO.getRealName() + "（"+ userVO.getEmail() + "）");
+                                UserDTO user = userMap.get(v);
+                                if (user != null) {
+                                    userStr.add(queryUserName(user));
                                 }
                             });
                             valueStr =  userStr.stream().collect(Collectors.joining(","));
@@ -168,6 +168,17 @@ public class FieldValueUtil {
         }
         view.setValueStr(valueStr);
         view.setValue(value);
+    }
+
+    private static String queryUserName(UserDTO user) {
+        String valueStr;
+        String realName = user.getRealName();
+        if (Boolean.TRUE.equals(user.getLdap())) {
+            valueStr = realName + "（"+ user.getLoginName() + "）";
+        } else {
+            valueStr = realName + "（"+ user.getEmail() + "）";
+        }
+        return valueStr;
     }
 
     /**
