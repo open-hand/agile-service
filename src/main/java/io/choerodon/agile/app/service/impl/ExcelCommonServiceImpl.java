@@ -2180,14 +2180,19 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 String value = cell.toString();
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-                if (!values.contains(value)) {
-                    cell.setCellValue(buildWithErrorMsg(value, "请输入正确的模块"));
-                    addErrorColumn(rowNum, col, errorRowColMap);
-                } else {
+                List<String> list = splitByRegex(value);
+                List<ComponentIssueRelVO> componentIssueRelVOS = new ArrayList<>();
+                for (String val : list) {
+                    if (!values.contains(val)) {
+                        cell.setCellValue(buildWithErrorMsg(value, "请输入正确的模块"));
+                        addErrorColumn(rowNum, col, errorRowColMap);
+                        return;
+                    }
                     ComponentIssueRelVO componentIssueRelVO = new ComponentIssueRelVO();
-                    componentIssueRelVO.setComponentId(valueIdMap.get(value));
-                    issueExcelImportVO.setComponentIssueRelVOList(Arrays.asList(componentIssueRelVO));
+                    componentIssueRelVO.setComponentId(valueIdMap.get(val));
+                    componentIssueRelVOS.add(componentIssueRelVO);
                 }
+                issueExcelImportVO.setComponentIssueRelVOList(componentIssueRelVOS);
             }
         }
     }
