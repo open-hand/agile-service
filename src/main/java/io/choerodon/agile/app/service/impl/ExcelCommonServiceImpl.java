@@ -2045,7 +2045,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 if (value.length() > 20) {
                     cell.setCellValue(buildWithErrorMsg(value, "史诗名称过长，不能超过20位"));
                     addErrorColumn(rowNum, col, errorRowColMap);
-                } else if (Boolean.FALSE.equals(checkEpicNameExist(projectId, value))) {
+                } else if (Boolean.FALSE.equals(checkEpicNameExist(projectId, value, issueExcelImportVO.getIssueId()))) {
                     cell.setCellValue(buildWithErrorMsg(value, "史诗名称重复"));
                     addErrorColumn(rowNum, col, errorRowColMap);
                 } else {
@@ -2853,7 +2853,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (value.length() > 20) {
                 String errorMsg = buildWithErrorMsg(value, "史诗名称过长，不能超过20位");
                 putErrorMsg(rowJson, cellJson, errorMsg);
-            } else if (Boolean.FALSE.equals(checkEpicNameExist(projectId, value))) {
+            } else if (Boolean.FALSE.equals(checkEpicNameExist(projectId, value, issueExcelImportVO.getIssueId()))) {
                 String errorMsg = buildWithErrorMsg(value, "史诗名称重复");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
@@ -2864,12 +2864,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
     }
 
-    private Boolean checkEpicNameExist(Long projectId, String epicName) {
-        IssueDTO issueDTO = new IssueDTO();
-        issueDTO.setProjectId(projectId);
-        issueDTO.setEpicName(epicName);
-        List<IssueDTO> issueDTOList = issueMapper.select(issueDTO);
-        return issueDTOList == null || issueDTOList.isEmpty();
+    private Boolean checkEpicNameExist(Long projectId, String epicName, Long issueId) {
+        return issueMapper.selectCountByCondition(Condition.builder(IssueDTO.class).andWhere(Sqls.custom()
+                .andEqualTo(IssueDTO.FIELD_PROJECT_ID, projectId)
+                .andEqualTo(IssueDTO.FIELD_EPIC_NAME, epicName)
+                .andNotEqualTo(IssueDTO.FIELD_ISSUE_ID, issueId, true)
+        ).build()) <= 0;
     }
 
     private void resetEpicSummary(Map<Integer, ExcelColumnVO> headerMap,
@@ -3532,7 +3532,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(issueExcelImportVO.getProjectId(),
-                value.substring(value.lastIndexOf("-") + 1));
+                value.substring(value.lastIndexOf("-") + 1), true);
         if (issueNumDTO == null) {
             putNumError(rowJson, cellJson, value);
             return;
