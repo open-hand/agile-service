@@ -509,6 +509,22 @@
         GROUP BY issue_type_id, project_id
     </select>
 
+    <select id="selectNextRank" resultType="java.lang.String">
+        SELECT
+        `rank`
+        FROM fd_object_scheme_field_extend
+        WHERE organization_id = #{organizationId}
+        AND (project_id IS NULL
+        <if test="projectId != null">
+            OR project_id = #{projectId}
+        </if>
+        )
+        and issue_type_id = #{issueTypeId}
+        and `rank` > #{rank}
+        order by `rank`
+        limit 1
+    </select>
+
     <update id="updateDefaultValueDeleteOption">
         update fd_object_scheme_field_extend
         set default_value = null
