@@ -2237,6 +2237,8 @@ public class ExcelServiceImpl implements ExcelService {
         issueExcelImportVOTemp.setOrganizationId(null);
         issueExcelImportVOTemp.setIssueTypeId(null);
         issueExcelImportVOTemp.setUpdate(null);
+        issueExcelImportVOTemp.setOldIssue(null);
+        issueExcelImportVOTemp.setPageFieldViewVOMap(null);
         issueExcelImportVO.setOldIssue(null);
         issueExcelImportVO.setPageFieldViewVOMap(null);
         JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(issueExcelImportVOTemp));
