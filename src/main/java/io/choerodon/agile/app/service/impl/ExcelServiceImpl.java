@@ -705,7 +705,7 @@ public class ExcelServiceImpl implements ExcelService {
                                                              FileOperationHistoryDTO history) {
         ExcelConfig excelConfig = ApplicationContextHelper.getContext().getBean(ExcelConfig.class);
         Workbook workbook = StreamingReader.builder().rowCacheSize(excelConfig.getCacheSize()).bufferSize(excelConfig.getBufferSize()).open(inputStream);
-        excelCommonService.validateWorkbook(workbook, history, websocketKey);
+        excelCommonService.validateWorkbook(workbook, history, websocketKey, IMPORT_TEMPLATE_NAME);
         //excel转json
         int sheetNo = 1;
         Sheet sheet = workbook.getSheetAt(sheetNo);
