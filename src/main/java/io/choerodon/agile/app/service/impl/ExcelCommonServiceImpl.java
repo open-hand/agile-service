@@ -1483,6 +1483,32 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private void buildCustomFields(ExcelColumnVO excelColumn, IssueExcelImportVO issueExcelImportVO, Object customFieldValue) {
         PageFieldViewUpdateVO pageFieldViewUpdateVO = excelColumn.getCustomFieldDetail();
+        // 校验自定义字段更新相同值
+        if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) && !ObjectUtils.isEmpty(customFieldValue)) {
+            Map<Long, PageFieldViewVO> pageFieldViewVOMap = issueExcelImportVO.getPageFieldViewVOMap();
+            if (!CollectionUtils.isEmpty(pageFieldViewVOMap) && !ObjectUtils.isEmpty(pageFieldViewVOMap.get(pageFieldViewUpdateVO.getFieldId()))) {
+                PageFieldViewVO pageFieldViewVO = pageFieldViewVOMap.get(pageFieldViewUpdateVO.getFieldId());
+                String oldStr = ObjectUtils.isEmpty(pageFieldViewVO.getValue()) ? "" : pageFieldViewVO.getValue().toString();
+                if (excelColumn.isMultiValue()) {
+                    List<String> oldValue = splitByRegex(oldStr);
+                    List<String> newValue = splitByRegex(customFieldValue.toString());
+                    if (oldValue.size() == newValue.size()) {
+                        boolean updateFlag = false;
+                        for (String val : newValue) {
+                            if (!oldValue.contains(val)) {
+                                updateFlag = true;
+                                break;
+                            }
+                        }
+                        if (!updateFlag) {
+                            return;
+                        }
+                    }
+                } else if (customFieldValue.toString().equals(oldStr)) {
+                    return;
+                }
+            }
+        }
         List<PageFieldViewUpdateVO> customFields = issueExcelImportVO.getCustomFields();
         if (customFields == null) {
             customFields = new ArrayList<>();
@@ -2615,9 +2641,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     }
                 }
             }
-            issueExcelImportVO.setIssueTypeId(issueTypeVO.getId());
-            issueExcelImportVO.setTypeCode(issueTypeVO.getTypeCode());
-            excelColumn.setValues(Arrays.asList(issueTypeVO.getId()));
+
+            if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                    || !(issueTypeVO.getId().equals(issueExcelImportVO.getOldIssue().getIssueTypeId()))) {
+                issueExcelImportVO.setIssueTypeId(issueTypeVO.getId());
+                issueExcelImportVO.setTypeCode(issueTypeVO.getTypeCode());
+                excelColumn.setValues(Arrays.asList(issueTypeVO.getId()));
+            }
         }
     }
 
@@ -2639,17 +2669,36 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (!values.contains(value)) {
             String errorMsg = buildWithErrorMsg(value, "经办人输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
-        } else {
-            if (!ObjectUtils.isEmpty(issueExcelImportVO.getIssueId())) {
-                IssueVO issueVO = issueService.queryIssue(issueExcelImportVO.getProjectId(), issueExcelImportVO.getIssueId(), issueExcelImportVO.getOrganizationId());
-                if (issueVO != null && StringUtils.equalsIgnoreCase(issueVO.getAssigneeName(), value)) {
-                    // 如果经办人一样则不设置此值
-                    return;
-                }
-            }
+        } else if (needUpdateMember(issueExcelImportVO.getUpdate(), valueIdMap.get(value),
+                Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getAssigneeId).orElse(null))) {
             issueExcelImportVO.setAssigneeId(valueIdMap.get(value));
             excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
+    }
+
+    private Boolean needUpdateMember(Boolean update,
+                                     Long newId,
+                                     Long oldId) {
+        return !Boolean.TRUE.equals(update) || !newId.equals(oldId);
+    }
+
+    private Boolean needUpdateMulitField(Boolean update,
+                                         List<Long> newIds,
+                                         List<Long> oldIds) {
+        Boolean updateFlag = true;
+        if (!Boolean.TRUE.equals(update)) {
+            if (!CollectionUtils.isEmpty(oldIds) && newIds.size() == oldIds.size()) {
+                for (Long id : newIds) {
+                    if (!oldIds.contains(id)) {
+                        updateFlag = true;
+                        break;
+                    } else {
+                        updateFlag = false;
+                    }
+                }
+            }
+        }
+        return updateFlag;
     }
 
     private void validateAndSetReporter(JSONObject rowJson,
@@ -2669,7 +2718,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (!values.contains(value)) {
             String errorMsg = buildWithErrorMsg(value, "报告人输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
-        } else {
+        } else if (needUpdateMember(issueExcelImportVO.getUpdate(), valueIdMap.get(value),
+                Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getReporterId).orElse(null))) {
             issueExcelImportVO.setReporterId(valueIdMap.get(value));
             excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
         }
@@ -2696,9 +2746,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             putErrorMsg(rowJson, cellJson, errorMsg);
         } else {
             Long priorityId = valueIdMap.get(value);
-            issueExcelImportVO.setPriorityCode("priority-" + priorityId);
-            issueExcelImportVO.setPriorityId(priorityId);
-            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
+            if (needUpdateMember(issueExcelImportVO.getUpdate(), priorityId,
+                    Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getPriorityId).orElse(null))) {
+                issueExcelImportVO.setPriorityCode("priority-" + priorityId);
+                issueExcelImportVO.setPriorityId(priorityId);
+                excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
+            }
         }
     }
 
@@ -2788,8 +2841,17 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelList.add(versionIssueRelVO);
             versions.add(valueIdMap.get(value));
         }
-        issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
-        excelColumn.setValues(versions);
+        List<Long> oldIds = new ArrayList<>();
+        if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                && CollectionUtils.isEmpty(issueExcelImportVO.getOldIssue().getVersionIssueRelVOList())) {
+            List<VersionIssueRelVO> versionIssueRelVOList = issueExcelImportVO.getOldIssue().getVersionIssueRelVOList();
+            oldIds.addAll(versionIssueRelVOList.stream().filter(v -> FIX_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+        }
+        Boolean updateFlag = needUpdateMulitField(issueExcelImportVO.getUpdate(), versions, oldIds);
+        if (!issueExcelImportVO.getUpdate() || updateFlag) {
+            issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            excelColumn.setValues(versions);
+        }
     }
 
     private void validateAndSetInfluenceVersion(JSONObject rowJson,
@@ -2824,8 +2886,17 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelList.add(versionIssueRelVO);
             versions.add(valueIdMap.get(value));
         }
-        issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
-        excelColumn.setValues(versions);
+        List<Long> oldIds = new ArrayList<>();
+        if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                && CollectionUtils.isEmpty(issueExcelImportVO.getOldIssue().getVersionIssueRelVOList())) {
+            List<VersionIssueRelVO> versionIssueRelVOList = issueExcelImportVO.getOldIssue().getVersionIssueRelVOList();
+            oldIds.addAll(versionIssueRelVOList.stream().filter(v -> INFLUENCE_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+        }
+        Boolean updateFlag = needUpdateMulitField(issueExcelImportVO.getUpdate(), versions, oldIds);
+        if (!issueExcelImportVO.getUpdate() || updateFlag) {
+            issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            excelColumn.setValues(versions);
+        }
     }
 
     private void validateAndSetStoryPoint(JSONObject rowJson,
@@ -2844,7 +2915,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             value = value.trim();
             validateBigDecimal(rowJson, cellJson, value);
             if (!Boolean.TRUE.equals(cellJson.getBoolean(ExcelSheetData.JSON_KEY_IS_ERROR))) {
-                issueExcelImportVO.setStoryPoints(new BigDecimal(value));
+                BigDecimal storyPoints = new BigDecimal(value);
+                BigDecimal oldStoryPoints = Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getStoryPoints).orElse(BigDecimal.ZERO);
+                if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                        || storyPoints.compareTo(oldStoryPoints) == 0) {
+                    issueExcelImportVO.setStoryPoints(storyPoints);
+                }
             }
         }
     }
@@ -2872,10 +2948,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             } else if (Boolean.FALSE.equals(checkEpicNameExist(projectId, value, issueExcelImportVO.getIssueId()))) {
                 String errorMsg = buildWithErrorMsg(value, "史诗名称重复");
                 putErrorMsg(rowJson, cellJson, errorMsg);
-            } else {
-                issueExcelImportVO.setEpicName(value);
-                issueExcelImportVO.setSummary(value);
-                resetEpicSummary(headerMap, value, rowJson);
+            } else if (Boolean.FALSE.equals(issueExcelImportVO.getUpdate()) || (value.equals(issueExcelImportVO.getOldIssue().getEpicName()))) {
+                    issueExcelImportVO.setEpicName(value);
+                    issueExcelImportVO.setSummary(value);
+                    resetEpicSummary(headerMap, value, rowJson);
             }
         }
     }
@@ -2922,7 +2998,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (!values.contains(value)) {
                 String errorMsg = buildWithErrorMsg(value, "所属特性输入错误");
                 putErrorMsg(rowJson, cellJson, errorMsg);
-            } else {
+            } else if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                    || !valueIdMap.get(value).equals(issueExcelImportVO.getOldIssue().getFeatureId())) {
                 Long featureId = valueIdMap.get(value);
                 issueExcelImportVO.setFeatureId(featureId);
                 //如果特性关联史诗，也要设置史诗id
@@ -2959,7 +3036,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 if (!values.contains(value)) {
                     String errorMsg = buildWithErrorMsg(value, "所属史诗输入错误");
                     putErrorMsg(rowJson, cellJson, errorMsg);
-                } else {
+                } else if(!Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                        || !valueIdMap.get(value).equals(issueExcelImportVO.getOldIssue().getEpicId())) {
                     issueExcelImportVO.setEpicId(valueIdMap.get(value));
                     excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
                 }
@@ -2983,7 +3061,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (value.length() > IssueConstant.SUMMARY_LENGTH) {
             String errorMsg = buildWithErrorMsg(value, "概要过长");
             putErrorMsg(rowJson, cellJson, errorMsg);
-        } else {
+        } else if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                || !value.equals(issueExcelImportVO.getOldIssue().getSummary())) {
             issueExcelImportVO.setSummary(value);
         }
     }
@@ -3012,14 +3091,21 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         if (IssueTypeCode.isSubTask(issueTypeCode)) {
             Long parentId = parentIssue.getIssueId();
-            issueExcelImportVO.setParentIssueId(parentId);
+            if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) || !parentId.equals(issueExcelImportVO.getOldIssue().getParentIssueId())) {
+                issueExcelImportVO.setParentIssueId(parentId);
+            }
         } else if (SUB_BUG_CN.equals(issueType)) {
             if (parentIssue.getTypeCode().equals("bug")) {
                 String errorMsg = buildWithErrorMsg(value, "子缺陷的父级不能为缺陷类型");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
                 Long parentId = parentIssue.getIssueId();
-                issueExcelImportVO.setRelateIssueId(parentId);
+                if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) || !parentId.equals(issueExcelImportVO.getOldIssue().getParentIssueId())) {
+                    issueExcelImportVO.setRelateIssueId(parentId);
+                    if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())) {
+                        issueExcelImportVO.setParentIssueId(parentId);
+                    }
+                }
             }
         }
     }
@@ -3076,8 +3162,17 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     componentNames.add(valueIdMap.get(value));
                 }
             }
-            issueExcelImportVO.setComponentIssueRelVOList(componentIssueRelVOS);
-            excelColumn.setValues(componentNames);
+            List<Long> oldIds = new ArrayList<>();
+            if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
+                    && CollectionUtils.isEmpty(issueExcelImportVO.getOldIssue().getComponentIssueRelVOList())) {
+                List<ComponentIssueRelVO> componentIssueRelVOList = issueExcelImportVO.getOldIssue().getComponentIssueRelVOList();
+                oldIds.addAll(componentIssueRelVOList.stream().map(ComponentIssueRelVO::getComponentId).collect(Collectors.toList()));
+            }
+            Boolean updateSetting = needUpdateMulitField(issueExcelImportVO.getUpdate(), componentNames, oldIds);
+            if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) || updateSetting) {
+                issueExcelImportVO.setComponentIssueRelVOList(componentIssueRelVOS);
+                excelColumn.setValues(componentNames);
+            }
         }
     }
 
@@ -3146,15 +3241,20 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (ObjectUtils.isEmpty(value)) {
             return;
         }
-        if (value.length() > 20) {
-            String errorMsg = buildWithErrorMsg(value, "标签名称过长");
-            putErrorMsg(rowJson, cellJson, errorMsg);
-        } else {
-            LabelIssueRelVO label = new LabelIssueRelVO();
-            label.setProjectId(projectId);
-            label.setLabelName(value);
-            issueExcelImportVO.setLabelIssueRelVOList(Arrays.asList(label));
+        List<String> list = splitByRegex(value);
+        List<LabelIssueRelVO> labelIssueRelVOList = new ArrayList<>();
+        for (String labelStr : list) {
+            if (labelStr.length() > 20) {
+                String errorMsg = buildWithErrorMsg(value, "标签名称过长");
+                putErrorMsg(rowJson, cellJson, errorMsg);
+            } else {
+                LabelIssueRelVO label = new LabelIssueRelVO();
+                label.setProjectId(projectId);
+                label.setLabelName(labelStr);
+                labelIssueRelVOList.add(label);
+            }
         }
+        issueExcelImportVO.setLabelIssueRelVOList(labelIssueRelVOList);
     }
 
     private void validateAndSetEstimatedTime(JSONObject rowJson,
@@ -3360,7 +3460,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (!values.contains(value)) {
                 String errorMsg = buildWithErrorMsg(value, "请输入正确的主要负责人");
                 putErrorMsg(rowJson, cellJson, errorMsg);
-            } else {
+                return;
+            }
+            if (needUpdateMember(issueExcelImportVO.getUpdate(), map.get(value),
+                    Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getMainResponsibleId).orElse(null))) {
                 issueExcelImportVO.setMainResponsibleId(map.get(value));
                 excelColumnVO.setValues(Arrays.asList(map.get(value)));
             }
@@ -3484,8 +3587,15 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 participantIds.add(valueIdMap.get(participant));
             }
         }
-        excelColumn.setValues(participantIds);
-        issueExcelImportVO.setParticipantIds(participantIds);
+        List<Long> oldIds = new ArrayList<>();
+        IssueVO oldIssue = issueExcelImportVO.getOldIssue();
+        if (!ObjectUtils.isEmpty(oldIssue) && !CollectionUtils.isEmpty(oldIssue.getParticipants())) {
+            oldIds.addAll(oldIssue.getParticipants().stream().map(UserMessageDTO::getId).collect(Collectors.toList()));
+        }
+        if (needUpdateMulitField(issueExcelImportVO.getUpdate(), participantIds, oldIds)) {
+            excelColumn.setValues(participantIds);
+            issueExcelImportVO.setParticipantIds(participantIds);
+        }
     }
 
     private void validateAndSetEstimateTime(JSONObject rowJson,
@@ -3530,8 +3640,15 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 productIds.add(valueIdMap.get(product));
             }
         }
-        excelColumn.setValues(productIds);
-        issueExcelImportVO.setProductIds(productIds);
+        List<Long> oldIds = new ArrayList<>();
+        IssueVO oldIssue = issueExcelImportVO.getOldIssue();
+        if (!ObjectUtils.isEmpty(oldIssue) && !CollectionUtils.isEmpty(oldIssue.getProductIds())) {
+            oldIds.addAll(oldIssue.getProductIds());
+        }
+        if (needUpdateMulitField(issueExcelImportVO.getUpdate(), productIds, oldIds)) {
+            excelColumn.setValues(productIds);
+            issueExcelImportVO.setProductIds(productIds);
+        }
     }
 
     private void validateAndSetIssueNum(JSONObject rowJson, Integer col, IssueExcelImportVO issueExcelImportVO) {
