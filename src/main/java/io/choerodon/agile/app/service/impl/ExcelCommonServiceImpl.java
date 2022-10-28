@@ -250,7 +250,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<EpicDataVO> epics = issueService.listEpic(projectId);
         epics.forEach(e -> {
             String epicName = e.getEpicName();
-            if (ObjectUtils.isEmpty(epicMap.get(epicName))) {
+            if (ObjectUtils.isEmpty(epicMap.get(epicName)) && StringUtils.isNotBlank(epicName)) {
                 epicMap.put(epicName, e.getIssueId());
             }
         });
@@ -543,15 +543,19 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     @Override
     public void fillInPredefinedValues(Workbook wb, Sheet sheet, List<PredefinedDTO> predefinedList) {
         for (PredefinedDTO predefined : predefinedList) {
+            List<String> values = predefined.values();
+            if(!CollectionUtils.isEmpty(values)) {
+                values = values.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
+            }
             //父级保持issueId倒序
-            if (!SYSTEM_FIELD_HEADER_NOT_SORT.contains(predefined.hidden())) {
-                Collections.sort(predefined.values());
+            if (!SYSTEM_FIELD_HEADER_NOT_SORT.contains(predefined.hidden()) && !CollectionUtils.isEmpty(values)) {
+                Collections.sort(values);
             }
             wb = ExcelUtil
                     .dropDownList2007(
                             wb,
                             sheet,
-                            predefined.values(),
+                            values,
                             predefined.startRow(),
                             predefined.endRow(),
                             predefined.startCol(),
