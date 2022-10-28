@@ -67,6 +67,9 @@ public class ExcelColumnVO {
     @ApiModelProperty("excel中值转换过来的值")
     private List<Long> values;
 
+    @ApiModelProperty("保留属性，放置一些判断参数")
+    private Map<String, String> otherMap;
+
     public String getFieldType() {
         return fieldType;
     }
@@ -161,5 +164,13 @@ public class ExcelColumnVO {
 
     public void setValues(List<Long> values) {
         this.values = values;
+    }
+
+    public Map<String, String> getOtherMap() {
+        return otherMap;
+    }
+
+    public void setOtherMap(Map<String, String> otherMap) {
+        this.otherMap = otherMap;
     }
 }
