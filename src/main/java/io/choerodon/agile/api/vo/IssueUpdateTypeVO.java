@@ -1,14 +1,18 @@
 package io.choerodon.agile.api.vo;
 
 
-import io.choerodon.agile.infra.utils.StringUtil;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.infra.utils.StringUtil;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/6/5
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueUpdateTypeVO {
 
     @ApiModelProperty(value = "问题主键id")
@@ -40,52 +44,59 @@ public class IssueUpdateTypeVO {
         return batchUpdateFieldsValueVo;
     }
 
-    public void setBatchUpdateFieldsValueVo(BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+    public IssueUpdateTypeVO setBatchUpdateFieldsValueVo(BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
         this.batchUpdateFieldsValueVo = batchUpdateFieldsValueVo;
+        return this;
     }
 
     public Long getIssueId() {
         return issueId;
     }
 
-    public void setIssueId(Long issueId) {
+    public IssueUpdateTypeVO setIssueId(Long issueId) {
         this.issueId = issueId;
+        return this;
     }
 
     public String getEpicName() {
         return epicName;
     }
 
-    public void setEpicName(String epicName) {
+    public IssueUpdateTypeVO setEpicName(String epicName) {
         this.epicName = epicName;
+        return this;
     }
 
     public String getTypeCode() {
         return typeCode;
     }
 
-    public void setTypeCode(String typeCode) {
+    public IssueUpdateTypeVO setTypeCode(String typeCode) {
         this.typeCode = typeCode;
+        return this;
     }
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
     }
 
-    public void setObjectVersionNumber(Long objectVersionNumber) {
+    public IssueUpdateTypeVO setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+        return this;
     }
 
     public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueUpdateTypeVO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
-    public void setIssueTypeId(Long issueTypeId) {
+    public IssueUpdateTypeVO setIssueTypeId(Long issueTypeId) {
         this.issueTypeId = issueTypeId;
+        return this;
     }
 
     public Long getIssueTypeId() {
@@ -96,8 +107,9 @@ public class IssueUpdateTypeVO {
         return applyType;
     }
 
-    public void setApplyType(String applyType) {
+    public IssueUpdateTypeVO setApplyType(String applyType) {
         this.applyType = applyType;
+        return this;
     }
 
     @Override

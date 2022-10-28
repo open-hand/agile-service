@@ -17,7 +17,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 /**
  * @author dinghuang123@gmail.com
  */
-public class IssueExcelImportVO {
+public class IssueExcelImportVO implements Cloneable {
     @ApiModelProperty(value = "问题主键id")
     @Encrypt
     private Long issueId;
@@ -621,5 +621,14 @@ public class IssueExcelImportVO {
 
     public void setUpdate(Boolean update) {
         this.update = update;
+    }
+
+    @Override
+    public IssueExcelImportVO clone() {
+        try {
+            return (IssueExcelImportVO) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

@@ -2196,16 +2196,12 @@ public class ExcelServiceImpl implements ExcelService {
     private IssueVO updateIssue(Long projectId, Long organizationId, IssueExcelImportVO issueExcelImportVO) {
         IssueVO result;
         List<PageFieldViewUpdateVO> customFields = issueExcelImportVO.getCustomFields();
-        //问题类型id
-        Long issueTypeId = issueExcelImportVO.getIssueTypeId();
-        //问题类型code
-        String typeCode = issueExcelImportVO.getTypeCode();
         // 工作项的id
         Long issueId = issueExcelImportVO.getIssueId();
         // 1.跟新issue的基本字段 摘要，描述，报告人，经办人等等
         result = updateBaseIssue(projectId, issueExcelImportVO);
         //2.更新issue的类型
-        updateIssueType(projectId, organizationId, issueTypeId, typeCode, issueId);
+        updateIssueType(organizationId, projectId, issueExcelImportVO);
         //3.更新自定义字段的值和其他页面配置的字段
         updateCustomFields(projectId, organizationId, customFields, issueId);
         issueExcelImportVO.setCustomFields(customFields);
@@ -2221,14 +2217,15 @@ public class ExcelServiceImpl implements ExcelService {
      */
     private IssueVO updateBaseIssue(Long projectId, IssueExcelImportVO issueExcelImportVO) {
         IssueVO result;
-        issueExcelImportVO.setCustomFields(null);
-        issueExcelImportVO.setTypeCode(null);
-        issueExcelImportVO.setProjectId(null);
-        issueExcelImportVO.setOrganizationId(null);
-        issueExcelImportVO.setIssueTypeId(null);
-        issueExcelImportVO.setUpdate(null);
-        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(issueExcelImportVO));
-        issueValidator.verifyUpdateData(JSON.parseObject(JSON.toJSONString(issueExcelImportVO)), projectId);
+        IssueExcelImportVO issueExcelImportVOTemp = issueExcelImportVO.clone();
+        issueExcelImportVOTemp.setCustomFields(null);
+        issueExcelImportVOTemp.setTypeCode(null);
+        issueExcelImportVOTemp.setProjectId(null);
+        issueExcelImportVOTemp.setOrganizationId(null);
+        issueExcelImportVOTemp.setIssueTypeId(null);
+        issueExcelImportVOTemp.setUpdate(null);
+        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(issueExcelImportVOTemp));
+        issueValidator.verifyUpdateData(JSON.parseObject(JSON.toJSONString(issueExcelImportVOTemp)), projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueUpdateVO);
         result = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
@@ -2238,18 +2235,18 @@ public class ExcelServiceImpl implements ExcelService {
     /**
      * excel导入更新issue的类型
      *
-     * @param projectId
      * @param organizationId
-     * @param issueTypeId
-     * @param typeCode
-     * @param issueId
+     * @param projectId
+     * @param issueExcelImportVO
      */
-    private void updateIssueType(Long projectId, Long organizationId, Long issueTypeId, String typeCode, Long issueId) {
-        IssueUpdateTypeVO issueUpdateTypeVO = new IssueUpdateTypeVO();
-        issueUpdateTypeVO.setIssueId(issueId);
-        issueUpdateTypeVO.setIssueTypeId(issueTypeId);
-        issueUpdateTypeVO.setApplyType(APPLY_TYPE_AGILE);
-        issueUpdateTypeVO.setTypeCode(typeCode);
+    private void updateIssueType(Long organizationId, Long projectId, IssueExcelImportVO issueExcelImportVO) {
+        IssueUpdateTypeVO issueUpdateTypeVO = new IssueUpdateTypeVO()
+                .setIssueId(issueExcelImportVO.getIssueId())
+                .setProjectId(projectId)
+                .setIssueTypeId(issueExcelImportVO.getIssueTypeId())
+                .setApplyType(APPLY_TYPE_AGILE)
+                .setTypeCode(issueExcelImportVO.getTypeCode())
+                .setEpicName(issueExcelImportVO.getEpicName());
         IssueConvertDTO issueConvertDTO = issueValidator.verifyUpdateTypeData(projectId, issueUpdateTypeVO);
         issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId, projectId);
     }
