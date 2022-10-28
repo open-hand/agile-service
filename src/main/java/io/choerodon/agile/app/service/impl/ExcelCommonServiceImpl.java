@@ -481,11 +481,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 Optional.ofNullable(remoteIamOperator.listUsersByProjectId(projectId, 1, 0, null)).orElse(new Page<>())
                         .getContent()
                         .stream()
-                        .map(u -> {
-                            String userName = u.getRealName();
-                            String ldap = Boolean.TRUE.equals(u.getLdap()) ? u.getLoginName() : u.getEmail();
-                            return userName + "（" + ldap + "）";
-                        })
+                        .map(u -> queryUserName(u))
                         .collect(Collectors.toList());
         objectSchemeFieldDetails.forEach(o -> {
             String fieldCode = o.getCode();
@@ -519,6 +515,22 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         return result;
     }
+
+    private String queryUserName(UserDTO user) {
+        if (user == null) {
+            return null;
+        }
+        String realName = user.getRealName();
+        Boolean isLdap = user.getLdap();
+        String loginName;
+        if (Boolean.TRUE.equals(isLdap)) {
+            loginName = user.getLoginName();
+        } else {
+            loginName = user.getEmail();
+        }
+        return realName + "（" + loginName + "）";
+    }
+
 
     private void isCustomFieldsIllegal(List<String> customFields, List<String> customFieldCodes) {
         customFields.forEach(c -> {
@@ -674,11 +686,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> userNames = new ArrayList<>();
         Map<String, Long> userMap = new HashMap<>();
         users.forEach(u -> {
-            String userName = u.getRealName();
-            String ldap = Boolean.TRUE.equals(u.getLdap()) ? u.getLoginName() : u.getEmail();
-            userName = userName + "（" + ldap + "）";
-            userNames.add(userName);
-            userMap.put(userName, u.getId());
+            String userName = queryUserName(u);
+            if (userName != null) {
+                userNames.add(userName);
+                userMap.put(userName, u.getId());
+            }
         });
 
         Map<String, ObjectSchemeFieldDetailVO> fieldMap = new HashMap<>();
