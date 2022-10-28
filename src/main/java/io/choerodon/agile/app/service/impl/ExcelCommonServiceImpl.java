@@ -2868,7 +2868,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> values = excelColumn.getPredefinedValues();
         Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
         List<String> list = splitByRegex(value);
-        List<VersionIssueRelVO> versionIssueRelList = new ArrayList<>();
+        List<VersionIssueRelVO> versionIssueRelList = CollectionUtils.isEmpty(issueExcelImportVO.getVersionIssueRelVOList()) ? new ArrayList<>() : issueExcelImportVO.getVersionIssueRelVOList();
         List<Long> versions = new ArrayList<>();
         for (String version : list) {
             if (!values.contains(version)) {
