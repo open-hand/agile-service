@@ -18,8 +18,6 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +47,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.boot.file.FileClient;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 
 /**
  * @author huaxin.deng@hand-china.com
@@ -960,7 +960,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         } else {
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = copyTemplateAndInitHeader(headerMap, headerNames, templatePath, workbook);
-            writeErrorData(errorRowJsonList, colNum, sheet);
+            writeErrorData(headerMap, errorRowJsonList, colNum, sheet);
             String errorWorkBookUrl = uploadErrorExcel(workbook, organizationId);
             ExcelUtil.close(workbook);
             history.setFileUrl(errorWorkBookUrl);
@@ -1025,7 +1025,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
 
-    private void writeErrorData(List<JSONObject> errorRowJsonList,
+    private void writeErrorData(Map<Integer, ExcelColumnVO> headerMap, List<JSONObject> errorRowJsonList,
                                 int colNum,
                                 Sheet sheet) {
         Workbook workbook = sheet.getWorkbook();
@@ -1051,13 +1051,39 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         cell.setCellStyle(errorCellStyle);
                     }
                 } else if (!ObjectUtils.isEmpty(date)) {
+                    String fieldType = null;
+                    final ExcelColumnVO excelColumnVO = headerMap.get(col);
+                    if(excelColumnVO != null) {
+                        fieldType = excelColumnVO.getFieldType();
+                        if(FieldType.TIME.equals(fieldType)) {
+                            // 自定义字段支持纯TIME类型, 但是数据库里存的是DATETIME类型, 其中DATE部分为当前操作日期
+                            // 然后前端显示的时候再截掉了DATE部分, 只显示TIME部分
+                            // 所以DATE部分是没有用的
+                            // 为了规避EXCEL中对纯POI导出的TIME的展示BUG
+                            // (EXCEL认为纯时间是1900-1-1 xx:xx:xx, 但是POI解析是会认为是1899-12-31 xx:xx:xx, 导致渲染成了一堆######)
+                            // see https://learn.microsoft.com/zh-cn/office/troubleshoot/excel/wrongly-assumes-1900-is-leap-year
+                            // 所以把EXCEL导出时, DATE部分直接置为当前系统日期
+                            // gaokuo.dai@zknow.com zongqi.hao@zkonw.com
+                            // 2022-10-28
+                            Date temp = new Date();
+                            temp.setHours(date.getHours());
+                            temp.setMinutes(date.getMinutes());
+                            temp.setSeconds(date.getSeconds());
+                            date = temp;
+                        }
+                    }
                     cell.setCellValue(date);
                     CreationHelper createHelper = workbook.getCreationHelper();
                     CellStyle dateCellStyle = workbook.createCellStyle();
                     if (isCellError) {
                         dateCellStyle.setFont(font);
                     }
-                    short fmt = createHelper.createDataFormat().getFormat("m/d/yy h:mm");
+                    final short fmt;
+                    if(FieldType.TIME.equals(fieldType)) {
+                        fmt = createHelper.createDataFormat().getFormat("h:mm:ss");
+                    } else {
+                        fmt = createHelper.createDataFormat().getFormat("m/d/yy h:mm");
+                    }
                     dateCellStyle.setDataFormat(fmt);
                     cell.setCellStyle(dateCellStyle);
                 }
