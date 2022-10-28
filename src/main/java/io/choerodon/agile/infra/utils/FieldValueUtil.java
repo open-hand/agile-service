@@ -406,14 +406,20 @@ public class FieldValueUtil {
 
     private static Date convertDate(String defaultValue) throws ParseException {
         Date dateValue;
-        //兼容Thu Apr 30 2020 00:00:00 GMT+0800和2020-02-13 15:51:22格式的日期
         try {
+            //兼容Thu Apr 30 2020 00:00:00 GMT+0800和2020-02-13 15:51:22格式的日期
             DateFormat df = new SimpleDateFormat(ENGLISH_STRING_DATE_FORMAT, Locale.ENGLISH);
             dateValue = df.parse(defaultValue);
         } catch (ParseException e) {
-            DateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
-            //yyyy-MM-dd HH:mm:ss格式转换失败，直接抛出异常
-            dateValue = df.parse(defaultValue);
+            try {
+                //不行就换yyyy-MM-dd HH:mm:ss格式
+                DateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
+                dateValue = df.parse(defaultValue);
+            } catch (ParseException e2) {
+                //不行就换yyyy-MM-dd HH:mm:ss格式, 再失败就报错
+                DateFormat df = new SimpleDateFormat(DATE_FORMAT);
+                dateValue = df.parse(defaultValue);
+            }
         }
         return dateValue;
     }

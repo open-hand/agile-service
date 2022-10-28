@@ -2456,9 +2456,8 @@ public class ExcelServiceImpl implements ExcelService {
                         issueService.batchDeleteIssuesAgile(projectId, insertIds);
                         continue;
                     }
-                    boolean finalUpdate = update;
                     sonMap.forEach((k, v) -> {
-                        handSonMap(projectId, organizationId, sheetData, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, insertIds, finalUpdate, k, v);
+                        handSonMap(projectId, organizationId, sheetData, relatedIssueList, triggerCarrierVOS, updateTriggerCarrierVOS, insertIds, update, k, v);
                     });
 
                     importedIssueIds.add(result.getIssueId());
