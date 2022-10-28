@@ -18,6 +18,8 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1200,15 +1202,18 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     private void processSprint(Long projectId, ExcelColumnVO excelColumnVO) {
-        List<SprintDTO> sprints = sprintMapper.selectNotDoneByProjectId(projectId);
+        List<SprintDTO> sprints = sprintMapper.selectByCondition(Condition.builder(SprintDTO.class).andWhere(Sqls.custom().andEqualTo("projectId", projectId)).build());
         Map<String, Long> map = new HashMap<>();
         List<String> values = new ArrayList<>();
+        Map<String, String> otherMap = new HashMap<>();
         sprints.forEach(s -> {
             values.add(s.getSprintName());
             map.put(s.getSprintName(), s.getSprintId());
+            otherMap.put(s.getSprintName(), s.getStatusCode());
         });
         excelColumnVO.setValueIdMap(map);
         excelColumnVO.setPredefinedValues(values);
+        excelColumnVO.setOtherMap(otherMap);
     }
 
     private void processUser(Long projectId, ExcelColumnVO excelColumnVO) {
@@ -2718,18 +2723,23 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         List<String> values = excelColumn.getPredefinedValues();
         Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-        if (!values.contains(value)) {
-            String errorMsg = buildWithErrorMsg(value, "请输入正确的版本");
-            putErrorMsg(rowJson, cellJson, errorMsg);
-        } else {
-            List<VersionIssueRelVO> versionIssueRelList = new ArrayList<>();
+        List<String> list = splitByRegex(value);
+        List<VersionIssueRelVO> versionIssueRelList = new ArrayList<>();
+        List<Long> versions = new ArrayList<>();
+        for (String version : list) {
+            if (!values.contains(version)) {
+                String errorMsg = buildWithErrorMsg(value, "请输入正确的版本");
+                putErrorMsg(rowJson, cellJson, errorMsg);
+                return;
+            }
             VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
-            versionIssueRelVO.setVersionId(valueIdMap.get(value));
+            versionIssueRelVO.setVersionId(valueIdMap.get(version));
             versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
             versionIssueRelList.add(versionIssueRelVO);
-            issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
-            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
+            versions.add(valueIdMap.get(value));
         }
+        issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+        excelColumn.setValues(versions);
     }
 
     private void validateAndSetInfluenceVersion(JSONObject rowJson,
@@ -2749,21 +2759,23 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         List<String> values = excelColumn.getPredefinedValues();
         Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-        if (!values.contains(value)) {
-            String errorMsg = buildWithErrorMsg(value, "请输入正确的影响版本");
-            putErrorMsg(rowJson, cellJson, errorMsg);
-        } else {
-            List<VersionIssueRelVO> versionIssueRelList = issueExcelImportVO.getVersionIssueRelVOList();
-            if (CollectionUtils.isEmpty(versionIssueRelList)) {
-                versionIssueRelList = new ArrayList<>();
+        List<String> list = splitByRegex(value);
+        List<VersionIssueRelVO> versionIssueRelList = new ArrayList<>();
+        List<Long> versions = new ArrayList<>();
+        for (String version : list) {
+            if (!values.contains(version)) {
+                String errorMsg = buildWithErrorMsg(value, "请输入正确的影响版本");
+                putErrorMsg(rowJson, cellJson, errorMsg);
+                return;
             }
             VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
-            versionIssueRelVO.setVersionId(valueIdMap.get(value));
+            versionIssueRelVO.setVersionId(valueIdMap.get(version));
             versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
             versionIssueRelList.add(versionIssueRelVO);
-            issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
-            excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
+            versions.add(valueIdMap.get(value));
         }
+        issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+        excelColumn.setValues(versions);
     }
 
     private void validateAndSetStoryPoint(JSONObject rowJson,
@@ -2998,17 +3010,24 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (ObjectUtils.isEmpty(value)) {
                 return;
             }
-            List<String> values = excelColumn.getPredefinedValues();
+            List<String> components = splitByRegex(value);
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-            if (!values.contains(value)) {
-                String errorMsg = buildWithErrorMsg(value, "请输入正确的模块");
-                putErrorMsg(rowJson, cellJson, errorMsg);
-            } else {
-                ComponentIssueRelVO componentIssueRelVO = new ComponentIssueRelVO();
-                componentIssueRelVO.setComponentId(valueIdMap.get(value));
-                issueExcelImportVO.setComponentIssueRelVOList(Arrays.asList(componentIssueRelVO));
-                excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
+            List<ComponentIssueRelVO> componentIssueRelVOS = new ArrayList<>();
+            List<Long> componentNames = new ArrayList<>();
+            for (String component : components) {
+                List<String> values = excelColumn.getPredefinedValues();
+                if (!values.contains(component)) {
+                    String errorMsg = buildWithErrorMsg(value, "请输入正确的模块");
+                    putErrorMsg(rowJson, cellJson, errorMsg);
+                } else {
+                    ComponentIssueRelVO componentIssueRelVO = new ComponentIssueRelVO();
+                    componentIssueRelVO.setComponentId(valueIdMap.get(value));
+                    componentIssueRelVOS.add(componentIssueRelVO);
+                    componentNames.add(valueIdMap.get(value));
+                }
             }
+            issueExcelImportVO.setComponentIssueRelVOList(componentIssueRelVOS);
+            excelColumn.setValues(componentNames);
         }
     }
 
@@ -3034,15 +3053,34 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (ObjectUtils.isEmpty(value)) {
                 return;
             }
+            String[]  sprintNames = value.split("\n");
             List<String> values = excelColumn.getPredefinedValues();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-            if (!values.contains(value)) {
-                String errorMsg = buildWithErrorMsg(value, "请输入正确的冲刺");
-                putErrorMsg(rowJson, cellJson, errorMsg);
-            } else {
-                issueExcelImportVO.setSprintId(valueIdMap.get(value));
-                excelColumn.setValues(Arrays.asList(valueIdMap.get(value)));
+            Map<String, String> otherMap = excelColumn.getOtherMap();
+            Long unCloseSprint = null;
+            int sprintCount = 0;
+            for (String sprintName : sprintNames) {
+                if (!values.contains(sprintName)) {
+                    String errorMsg = buildWithErrorMsg(value, "请输入正确的冲刺");
+                    putErrorMsg(rowJson, cellJson, errorMsg);
+                    return;
+                }
+                // 跳过已完成的冲刺
+                if ("closed".equals(otherMap.get(sprintName))) {
+                    continue;
+                }
+                unCloseSprint = valueIdMap.get(sprintName);
+                sprintCount++;
             }
+            // 校验是否包含多个未完成的冲刺
+            if (sprintCount > 1) {
+                String errorMsg = buildWithErrorMsg(value, "只能包含一个未完成的冲刺");
+                putErrorMsg(rowJson, cellJson, errorMsg);
+                return;
+            }
+            issueExcelImportVO.setSprintId(unCloseSprint);
+            excelColumn.setValues(Arrays.asList(unCloseSprint));
+
         }
     }
 
@@ -3209,7 +3247,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
-        if (ObjectUtils.isEmpty(value)) {
+        if (ObjectUtils.isEmpty(value) || !ObjectUtils.isEmpty(issueExcelImportVO.getIssueId())) {
             return;
         }
         String projectCode = projectInfoMapper.selectProjectCodeByProjectId(projectId);

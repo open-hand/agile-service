@@ -1200,7 +1200,9 @@ public class ExcelServiceImpl implements ExcelService {
             String fieldCode = ExcelImportTemplate.IssueHeader.getCodeByValue(headerName);
             boolean isSystemField = !StringUtils.isEmpty(fieldCode);
             ExcelColumnVO excelColumnVO = new ExcelColumnVO();
-            headerMap.put(i, excelColumnVO);
+            if (withFeature && FieldCode.EPIC_NAME.equals(fieldCode)) {
+                continue;
+            }
             excelColumnVO.setCustomField(!isSystemField);
             if (isSystemField) {
                 excelCommonService.addSystemFieldIfDateType(fieldCode, i, excelColumnVO);
@@ -1210,6 +1212,7 @@ public class ExcelServiceImpl implements ExcelService {
                 containsCustomFields = true;
                 excelColumnVO.setFieldCode(headerName);
             }
+            headerMap.put(i, excelColumnVO);
         }
         if (containsCustomFields) {
             String issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
@@ -1733,6 +1736,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
                 String issueNum = dto.getIssueNum();
                 String summary = dto.getSummary();
+                summary = summary.replace("\n", "");
                 List<String> rowList = relMap.computeIfAbsent(action, x -> new ArrayList<>());
                 String row = action + COLON_CN + issueNum + COLON_CN + summary;
                 rowList.add(row);
@@ -1910,7 +1914,7 @@ public class ExcelServiceImpl implements ExcelService {
                     sprintNames
                             .stream()
                             .map(SprintNameDTO::getSprintName)
-                            .collect(Collectors.joining(","));
+                            .collect(Collectors.joining("\n"));
         }
         exportIssuesVO.setCloseSprintName(closeSprintName);
     }
@@ -2158,7 +2162,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
         if (!StringUtils.isEmpty(exportIssuesVO.getCloseSprintName())) {
             if (sprintName.length() != 0) {
-                sprintName.append("\r\n");
+                sprintName.append("\n");
             }
             sprintName.append(exportIssuesVO.getCloseSprintName());
         }
