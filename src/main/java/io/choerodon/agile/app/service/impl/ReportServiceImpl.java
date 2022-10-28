@@ -1613,7 +1613,7 @@ public class ReportServiceImpl implements ReportService {
 
         // 这里过滤维度用
         String analysisField = customChartSearchVO.getAnalysisField();
-        Object fixedDimension = Optional.ofNullable(customChartSearchVO.getExtendSearchVO()).map(SearchVO::getSearchArgs).map(map -> map.get(analysisField)).orElse(null);
+        Object fixedDimension = Optional.ofNullable(customChartSearchVO.getSearchVO()).map(SearchVO::getOtherArgs).map(map -> map.get(analysisField)).orElse(null);
         Object extendDimension = Optional.ofNullable(customChartSearchVO.getExtendSearchVO()).map(SearchVO::getOtherArgs).map(map -> map.get(analysisField)).orElse(null);
         pointList = pointList.stream()
                 .filter(point -> {
