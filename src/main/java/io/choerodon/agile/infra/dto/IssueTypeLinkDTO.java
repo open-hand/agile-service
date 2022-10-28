@@ -10,6 +10,8 @@ public class IssueTypeLinkDTO {
 
     private String type;
 
+    private Boolean son;
+
     private IssueTypeLinkDTO next;
 
     public IssueTypeLinkDTO(Integer row, String type) {
@@ -35,5 +37,13 @@ public class IssueTypeLinkDTO {
 
     public Boolean hasNext() {
         return next != null;
+    }
+
+    public void setSon(Boolean son) {
+        this.son = son;
+    }
+
+    public Boolean getSon() {
+        return son;
     }
 }
