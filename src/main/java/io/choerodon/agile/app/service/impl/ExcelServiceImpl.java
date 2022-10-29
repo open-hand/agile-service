@@ -2251,6 +2251,8 @@ public class ExcelServiceImpl implements ExcelService {
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueUpdateVO);
         result = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
+        issueExcelImportVO.setParentIssueId(result.getParentIssueId());
+        issueExcelImportVO.setRelateIssueId(result.getRelateIssueId());
         return result;
     }
 
