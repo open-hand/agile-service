@@ -7,15 +7,19 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.operator.NotifyClientOperator;
+
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author superlee
@@ -56,15 +60,11 @@ public class DelayTaskServiceImpl implements DelayTaskService {
 
     @Override
     public void batchSendMessage(List<MessageSender> messageSenders, int step) {
-        if (!ObjectUtils.isEmpty(messageSenders)) {
-            for (int i = 0; i < messageSenders.size(); i += step) {
-                int end = i + step;
-                if (end >= messageSenders.size()) {
-                    end = messageSenders.size();
-                }
-                List<MessageSender> messageSenderList = messageSenders.subList(i, end);
-                notifyClientOperator.batchSendMessage(messageSenderList);
-            }
+        if(CollectionUtils.isEmpty(messageSenders) || step < 1) {
+            return;
+        }
+        for (List<MessageSender> partitionSenders : ListUtils.partition(messageSenders, step)) {
+            notifyClientOperator.batchSendMessage(partitionSenders);
         }
     }
 

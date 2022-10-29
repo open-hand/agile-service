@@ -1,5 +1,7 @@
 package io.choerodon.agile.infra.task;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -7,6 +9,13 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.api.vo.ProjectWithUserVO;
@@ -20,14 +29,8 @@ import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
 import io.choerodon.asgard.schedule.enums.TriggerTypeEnum;
 import io.choerodon.core.enums.MessageAdditionalType;
-import org.hzero.boot.message.entity.MessageSender;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import org.hzero.boot.message.entity.MessageSender;
 
 /**
  * @author superlee
@@ -48,7 +51,7 @@ public class SprintDelaySendMessageTask {
     private static final String LINK = "link";
     private static final String PROJECT_OWNER = "projectOwner";
 
-    private  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private SprintMapper sprintMapper;
@@ -84,7 +87,7 @@ public class SprintDelaySendMessageTask {
         List<SprintDelayCarrierVO> sprintDelayCarrierList = new ArrayList<>();
         if (!ObjectUtils.isEmpty(projectIds)) {
             List<SprintDTO> sprints = sprintMapper.selectActiveSprintsByProjectIds(projectIds);
-            sprints.forEach(x -> {
+            for (SprintDTO x : sprints) {
                 Date endDate = x.getEndDate();
                 if (!ObjectUtils.isEmpty(endDate)) {
                     LocalDateTime now = LocalDateTime.now();
@@ -104,7 +107,7 @@ public class SprintDelaySendMessageTask {
                         sprintDelayCarrierList.add(sprintDelayCarrierVO);
                     }
                 }
-            });
+            }
         }
         Map<Long, UserDTO> userMap = new HashMap<>();
         Map<Long, Set<Long>> projectOwnerMap = new HashMap<>();
@@ -121,11 +124,11 @@ public class SprintDelaySendMessageTask {
                               Map<Long, Set<Long>> projectOwnerMap) {
         Set<Long> userIds = new HashSet<>();
         Set<Long> projectIdForProjectOwner = new HashSet<>();
-        sprintDelayCarrierList.forEach(x -> {
-            Long projectId = x.getProjectId();
+        for (SprintDelayCarrierVO sprintDelayCarrierVO : sprintDelayCarrierList) {
+            Long projectId = sprintDelayCarrierVO.getProjectId();
             ProjectMessageVO projectMessageVO = projectMap.get(projectId);
             Set<Long> userIdSet = new HashSet<>();
-            x.setUserIds(userIdSet);
+            sprintDelayCarrierVO.setUserIds(userIdSet);
             if (!ObjectUtils.isEmpty(projectMessageVO.getUserIds())) {
                 userIdSet.addAll(projectMessageVO.getUserIds());
                 userIds.addAll(projectMessageVO.getUserIds());
@@ -134,17 +137,21 @@ public class SprintDelaySendMessageTask {
             if (receiverTypes != null && receiverTypes.contains(PROJECT_OWNER)) {
                 projectIdForProjectOwner.add(projectId);
             }
-        });
-        if (!projectIdForProjectOwner.isEmpty()) {
-            List<ProjectWithUserVO> projectWithUserList = remoteIamOperator.listProjectOwnerByIds(projectIdForProjectOwner);
-            projectWithUserList.forEach(x -> {
-                projectOwnerMap.computeIfAbsent(x.getProjectId(), y -> x.getUserIds());
-                userIds.addAll(x.getUserIds());
-            });
+        }
+        if (CollectionUtils.isNotEmpty(projectIdForProjectOwner)) {
+            List<ProjectWithUserVO> projectWithUserList =
+                    remoteIamOperator.listProjectOwnerByIds(projectIdForProjectOwner);
+            if(CollectionUtils.isNotEmpty(projectWithUserList)) {
+                for (ProjectWithUserVO x : projectWithUserList) {
+                    projectOwnerMap.computeIfAbsent(x.getProjectId(), y -> x.getUserIds());
+                    userIds.addAll(x.getUserIds());
+                }
+            }
         }
         if (!userIds.isEmpty()) {
             userMap.putAll(
-                    remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true)
+                    Objects.requireNonNull(remoteIamOperator.listUsersByIds(userIds.toArray(new Long[0]), true)
+                                    )
                             .stream()
                             .collect(Collectors.toMap(UserDTO::getId, Function.identity()))
             );
@@ -155,14 +162,14 @@ public class SprintDelaySendMessageTask {
                                                    Map<Long, UserDTO> userMap,
                                                    Map<Long, Set<Long>> projectOwnerMap) {
         List<MessageSender> messageSenders = new ArrayList<>();
-        sprintDelayCarrierList.forEach(x -> {
+        for (SprintDelayCarrierVO x : sprintDelayCarrierList) {
             Long projectId = x.getProjectId();
             SprintDTO sprint = x.getSprintDTO();
             Long delayDay = x.getDelayDay();
             if (ObjectUtils.isEmpty(sprint)
                     || ObjectUtils.isEmpty(sprint.getStartDate())
                     || ObjectUtils.isEmpty(sprint.getEndDate())) {
-                return;
+                continue;
             }
             String url = buildSprintDelayUrl(projectId, x.getProjectName(), x.getOrganizationId());
             Map<String, String> paramMap = new HashMap<>(7);
@@ -180,22 +187,19 @@ public class SprintDelaySendMessageTask {
             messageSender.setAdditionalInformation(additionalInformationMap);
             messageSenders.add(messageSender);
 
-        });
+        }
         return messageSenders;
     }
 
     private String buildSprintDelayUrl(Long projectId,
                                        String projectName,
                                        Long organizationId) {
-        StringBuilder builder = new StringBuilder();
-        builder
-                .append("/#/agile/scrumboard?type=project&id=")
-                .append(projectId)
-                .append("&name=")
-                .append(projectName)
-                .append("&organizationId=")
-                .append(organizationId);
-        return builder.toString();
+        return "/#/agile/scrumboard?type=project&id=" +
+                projectId +
+                "&name=" +
+                projectName +
+                "&organizationId=" +
+                organizationId;
     }
 
     private List<UserDTO> generateUser(Set<Long> userIds,
@@ -211,12 +215,12 @@ public class SprintDelaySendMessageTask {
                                          Map<Long, UserDTO> userMap,
                                          List<UserDTO> users) {
         if (!ObjectUtils.isEmpty(userIds)) {
-            userIds.forEach(x -> {
+            for (Long x : userIds) {
                 UserDTO dto = userMap.get(x);
                 if (dto != null) {
                     users.add(dto);
                 }
-            });
+            }
         }
     }
 }

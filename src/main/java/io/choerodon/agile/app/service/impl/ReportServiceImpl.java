@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
@@ -12,8 +11,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.report.CustomChartDataVO;
@@ -39,17 +52,6 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author dinghuang123@gmail.com
@@ -141,8 +143,8 @@ public class ReportServiceImpl implements ReportService {
     private static final String E_PIC = "Epic";
     private static final String ASC = "asc";
     private static final ExecutorService pool = Executors.newFixedThreadPool(3);
-    private static final String START_SPRINT= "startSprint";
-    private static final String END_SPRINT= "endSprint";
+    private static final String START_SPRINT = "startSprint";
+    private static final String END_SPRINT = "endSprint";
     private static final String V_PROJECT = "v-project";
     private static final String V_USERNAME = "v-username";
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportServiceImpl.class);
@@ -285,14 +287,14 @@ public class ReportServiceImpl implements ReportService {
         if (CollectionUtils.isNotEmpty(personalFilterIds)) {
             list.addAll(boardService.getSearchVO(personalFilterIds));
         }
-        if (Objects.nonNull(currentSearchVO)){
+        if (Objects.nonNull(currentSearchVO)) {
             //处理未匹配的筛选
             boardAssembler.handleOtherArgs(currentSearchVO);
             list.add(currentSearchVO);
         }
-        if (CollectionUtils.isNotEmpty(list)){
+        if (CollectionUtils.isNotEmpty(list)) {
             burnDownSearchVO.setSearchList(list);
-        }else {
+        } else {
             burnDownSearchVO.setSearchList(null);
         }
     }
@@ -449,7 +451,7 @@ public class ReportServiceImpl implements ReportService {
         if (versionDO == null || Objects.equals(versionDO.getStatusCode(), VERSION_ARCHIVED_CODE)) {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
-        Map<String,String> orders = new HashMap<>();
+        Map<String, String> orders = new HashMap<>();
         orders.put("issueNum", "issue_num_convert");
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", orders);
         pageRequest.setSort(sort);
@@ -905,7 +907,7 @@ public class ReportServiceImpl implements ReportService {
         if (issueBeforeSprintList != null && !issueBeforeSprintList.isEmpty()) {
             if (doneBeforeIssue != null && !doneBeforeIssue.isEmpty()) {
                 issueBeforeSprintList.stream().filter(reportIssueConvertDTO ->
-                        doneBeforeIssue.contains(reportIssueConvertDTO.getIssueId()))
+                                doneBeforeIssue.contains(reportIssueConvertDTO.getIssueId()))
                         .forEach(reportIssueConvertDTO -> reportIssueConvertDTO.setStatistical(false));
             }
             reportIssueConvertDTOList.addAll(issueBeforeSprintList);
@@ -1070,7 +1072,7 @@ public class ReportServiceImpl implements ReportService {
         handleCumulativeFlowChangeDuringDate(projectId, startDate, endDate, columnIds, allIssueIds, result);
         //过滤并排序
         List<ColumnChangeVO> columnChangeVOList = result.stream().filter(columnChangeVO ->
-                columnChangeVO.getColumnTo() != null && columnChangeVO.getColumnFrom() != null && !columnChangeVO.getColumnFrom().equals(columnChangeVO.getColumnTo()))
+                        columnChangeVO.getColumnTo() != null && columnChangeVO.getColumnFrom() != null && !columnChangeVO.getColumnFrom().equals(columnChangeVO.getColumnTo()))
                 .filter(columnChangeVO ->
                         (columnChangeVO.getDate().before(cumulativeFlowFilterVO.getEndDate()) || columnChangeVO.getDate().equals(cumulativeFlowFilterVO.getEndDate()))
                                 && (columnChangeVO.getDate().after(cumulativeFlowFilterVO.getStartDate()) || columnChangeVO.getDate().equals(cumulativeFlowFilterVO.getStartDate()))).sorted(Comparator.comparing(ColumnChangeVO::getDate)).collect(Collectors.toList());
@@ -1575,7 +1577,7 @@ public class ReportServiceImpl implements ReportService {
         issueCount.setCreatedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf,
                 bug -> StringUtils.equals(bug.getType(), START_SPRINT)
                         || bug.getStatistical() && StringUtils.equalsAny(bug.getType(),
-                 END_SPRINT, "addDuringSprint")));
+                        END_SPRINT, "addDuringSprint")));
         // 解决bug统计
         issueCount.setCompletedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf, bug -> {
             if (Objects.equals(bug.getType(), START_SPRINT) && !bug.getStatistical()) {
@@ -1596,7 +1598,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    @Cacheable(cacheNames = AGILE, key = "'CustomChart' + #projectId + ':' + #customChartSearchVO.toString()")
+//    @Cacheable(cacheNames = AGILE, key = "'CustomChart' + #projectId + ':' + #customChartSearchVO.toString()")
     public CustomChartDataVO queryCustomChartData(CustomChartSearchVO customChartSearchVO, Long projectId, Long organizationId) {
         List<CustomChartPointVO> pointList = queryPoint(customChartSearchVO, projectId, organizationId);
         CustomChartDataVO customChartDataVO = new CustomChartDataVO();
@@ -1609,7 +1611,25 @@ public class ReportServiceImpl implements ReportService {
         Map<String, CustomChartPointVO> analysisDimensionMap = new HashMap<>(pointList.size());
         Map<String, CustomChartPointVO> emptyPointMap = new HashMap<>(pointList.size());
 
-        pointList.forEach(point -> {
+        // 这里过滤维度用
+        String analysisField = customChartSearchVO.getAnalysisField();
+        Object fixedDimension = Optional.ofNullable(customChartSearchVO.getSearchVO()).map(SearchVO::getOtherArgs).map(map -> map.get(analysisField)).orElse(null);
+        Object extendDimension = Optional.ofNullable(customChartSearchVO.getExtendSearchVO()).map(SearchVO::getOtherArgs).map(map -> map.get(analysisField)).orElse(null);
+        pointList = pointList.stream()
+                .filter(point -> {
+                    if (fixedDimension instanceof List) {
+                        return ((List<?>) fixedDimension).contains(point.getAnalysisId().toString());
+                    }
+                    return true;
+                })
+                .filter(point -> {
+                    if (extendDimension instanceof List) {
+                        return ((List<?>) extendDimension).contains(point.getAnalysisId().toString());
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+        for (CustomChartPointVO point : pointList) {
             String comparedKey = EncryptionUtils.encrypt(point.getComparedId()) + point.getComparedValue();
             String analysisKey = EncryptionUtils.encrypt(point.getAnalysisId()) + point.getAnalysisValue();
             comparedDimensionMap.computeIfAbsent(comparedKey, value -> {
@@ -1636,7 +1656,7 @@ public class ReportServiceImpl implements ReportService {
             point.setComparedKey(comparedKey);
             point.setAnalysisKey(analysisKey);
             emptyPointMap.remove(comparedKey + analysisKey);
-        });
+        }
 
         pointList.addAll(emptyPointMap.values());
         pointList.stream()
@@ -1650,7 +1670,7 @@ public class ReportServiceImpl implements ReportService {
 
         customChartDataVO.setDimensionList(new ArrayList<>(comparedDimensionMap.values()));
         customChartDataVO.getDimensionList().sort((Comparator.comparing(CustomChartDimensionVO::getComparedId, Comparator.nullsFirst(Comparator.naturalOrder()))
-                        .thenComparing(CustomChartDimensionVO::getComparedValue, Comparator.nullsFirst(Comparator.naturalOrder()))));
+                .thenComparing(CustomChartDimensionVO::getComparedValue, Comparator.nullsFirst(Comparator.naturalOrder()))));
         return customChartDataVO;
     }
 
@@ -1686,7 +1706,7 @@ public class ReportServiceImpl implements ReportService {
         }
         filterSql = dealSearchVO(customChartSearchVO);
         List<CustomChartPointVO> result = issueMapper.selectCustomChartPointVO(
-                new HashSet<>(Arrays.asList(projectId)),
+                Sets.newHashSet(projectId),
                 customChartSearchVO.getSearchVO(),
                 customChartSearchVO.getExtendSearchVO(),
                 filterSql,
@@ -1858,7 +1878,7 @@ public class ReportServiceImpl implements ReportService {
         query.setSprintId(sprintId);
         query.setProjectId(projectId);
         SprintDTO sprintDTO = sprintMapper.selectOne(query);
-        if (Objects.isNull(sprintDTO.getActualEndDate())){
+        if (Objects.isNull(sprintDTO.getActualEndDate())) {
             sprintDTO.setActualEndDate(new Date());
         }
         //获取冲刺开启前的issue

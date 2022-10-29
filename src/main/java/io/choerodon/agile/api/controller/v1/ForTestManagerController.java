@@ -1,5 +1,16 @@
 package io.choerodon.agile.api.controller.v1;
 
+import java.util.List;
+import java.util.Optional;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
+
 import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.api.vo.IssueQueryVO;
 import io.choerodon.agile.app.service.IssueService;
@@ -10,17 +21,8 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-import java.util.Optional;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author superlee
@@ -63,7 +65,7 @@ public class ForTestManagerController {
                                                             @PathVariable(name = "project_id") Long projectId,
                                                             @ApiParam(value = "issue编号", required = true)
                                                             @RequestBody String issueNum) {
-        return new ResponseEntity<>(issueService.queryIssueByIssueNum(projectId, issueNum), HttpStatus.OK);
+        return new ResponseEntity<>(issueService.queryIssueByIssueNum(projectId, issueNum, false), HttpStatus.OK);
     }
 
 }

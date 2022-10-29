@@ -1,5 +1,25 @@
 package io.choerodon.agile.infra.task;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.app.service.PriorityService;
@@ -15,24 +35,9 @@ import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
 import io.choerodon.asgard.schedule.enums.TriggerTypeEnum;
 import io.choerodon.core.enums.MessageAdditionalType;
-import org.apache.commons.collections.MapIterator;
-import org.apache.commons.collections.keyvalue.MultiKey;
-import org.apache.commons.collections.map.MultiKeyMap;
+
 import org.hzero.boot.message.entity.MessageSender;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.slf4j.LoggerFactory.getLogger;
+import org.hzero.core.base.BaseConstants;
 
 /**
  * @author superlee
@@ -124,7 +129,7 @@ public class IssueDelaySendMessageTask {
     }
 
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private RemoteIamOperator remoteIamOperator;
@@ -166,7 +171,7 @@ public class IssueDelaySendMessageTask {
         }
         Set<Long> projectIds = projectMap.keySet();
         //key1 projectId, key2 userId, value Set<IssueDelayCarrierVO>
-        MultiKeyMap multiKeyMap = new MultiKeyMap();
+        MultiKeyMap<Long, Set<IssueDelayCarrierVO>> multiKeyMap = new MultiKeyMap<>();
         Map<Long, UserDTO> userMap = new HashMap<>();
         Map<Long, PriorityVO> priorityMap = new HashMap<>();
         Map<Long, StatusVO> statusMap = new HashMap<>();
@@ -190,19 +195,18 @@ public class IssueDelaySendMessageTask {
             processProjectOwner(projectMap, multiKeyMap, issueGroupByProject, userIds, projectIdForProjectOwner, localDateTime);
             if (!userIds.isEmpty()) {
                 userMap.putAll(
-                        remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true)
+                        Objects.requireNonNull(remoteIamOperator.listUsersByIds(userIds.toArray(new Long[0]), true))
                                 .stream()
                                 .collect(Collectors.toMap(UserDTO::getId, Function.identity()))
                 );
             }
         }
         List<MessageSender> messageSenders = new ArrayList<>();
-        MapIterator mapIterator = multiKeyMap.mapIterator();
-        while (mapIterator.hasNext()) {
-            MultiKey multiKey = (MultiKey) mapIterator.next();
-            Long projectId = (Long) multiKey.getKey(0);
-            Long userId = (Long) multiKey.getKey(1);
-            Set<IssueDelayCarrierVO> set = (Set<IssueDelayCarrierVO>) mapIterator.getValue();
+        for (Map.Entry<MultiKey<? extends Long>, Set<IssueDelayCarrierVO>> entry : multiKeyMap.entrySet()) {
+            final MultiKey<? extends Long> multiKey = entry.getKey();
+            Long projectId = multiKey.getKey(0);
+            Long userId = multiKey.getKey(1);
+            Set<IssueDelayCarrierVO> set = entry.getValue();
             if (!ObjectUtils.isEmpty(set)) {
                 List<IssueDelayCarrierVO> list = new ArrayList<>(set);
                 list.sort(Comparator.comparing(IssueDelayCarrierVO::getIssueId));
@@ -211,7 +215,7 @@ public class IssueDelaySendMessageTask {
                     continue;
                 }
                 Map<String, String> paramMap = buildParamMap(list, projectMap.get(projectId), priorityMap, statusMap, userMap);
-                MessageSender messageSender = delayTaskService.buildSender(0L, ISSUE_DELAY, paramMap, Arrays.asList(user));
+                MessageSender messageSender = delayTaskService.buildSender(BaseConstants.DEFAULT_TENANT_ID, ISSUE_DELAY, paramMap, Collections.singletonList(user));
                 Map<String, Object> additionalInformationMap = new HashMap<>();
                 additionalInformationMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(), projectId);
                 messageSender.setAdditionalInformation(additionalInformationMap);
@@ -231,7 +235,7 @@ public class IssueDelaySendMessageTask {
         Map<String, String> result = new HashMap<>();
         String projectName = projectMessageVO.getName();
         result.put(PROJECT_NAME, projectName);
-        result.put(DELAY_COUNT, list.size() + "");
+        result.put(DELAY_COUNT, list.size() + StringUtils.EMPTY);
         result.put(HTML_TABLE, String.format(P_PROJECT_TABLE, buildHtmlTable(list, projectMessageVO, priorityMap, statusMap, userMap, false)));
         result.put(OUT_HTML_TABLE, String.format(P_PROJECT_TABLE, buildHtmlTable(list, projectMessageVO, priorityMap, statusMap, userMap, true)));
         return result;
@@ -278,18 +282,18 @@ public class IssueDelaySendMessageTask {
                             + "&paramIssueId="
                             + issueId
                             + "&paramOpenIssueId=" + issueId;
-            PriorityVO priorityVO = Optional.ofNullable(priorityMap.get(dto.getPriorityId())).orElse(null);
-            StatusVO statusVO = Optional.ofNullable(statusMap.get(dto.getStatusId())).orElse(null);
-            String startDate = Optional.ofNullable(dto.getEstimatedStartTime()).map(x -> sdf.format(x)).orElse("");
-            String endDate = Optional.ofNullable(dto.getEstimatedEndTime()).map(x -> sdf.format(x)).orElse("");
-            String assignee = "";
+            PriorityVO priorityVO = priorityMap.get(dto.getPriorityId());
+            StatusVO statusVO = statusMap.get(dto.getStatusId());
+            String startDate = Optional.ofNullable(dto.getEstimatedStartTime()).map(sdf::format).orElse(StringUtils.EMPTY);
+            String endDate = Optional.ofNullable(dto.getEstimatedEndTime()).map(sdf::format).orElse(StringUtils.EMPTY);
+            String assignee = StringUtils.EMPTY;
             if (dto.getAssigneeId() != null) {
                 UserDTO user = userMap.get(dto.getAssigneeId());
                 if (user != null) {
                     assignee = getNameByLdap(user);
                 }
             }
-            String reporter = "";
+            String reporter = StringUtils.EMPTY;
             if (dto.getReporterId() != null) {
                 UserDTO user = userMap.get(dto.getReporterId());
                 if (user != null) {
@@ -323,7 +327,7 @@ public class IssueDelaySendMessageTask {
             String priorityName = priorityVO.getName();
             return "<span style=\"padding: 2px 3px; font-size: 12px; height: 20px; border-radius: 2px; color: " + priorityColor + " ; background-color: " + priorityColor + "1F;\">"+ priorityName +BACKSLASH_SPAN;
         }
-        return "";
+        return StringUtils.EMPTY;
     }
 
     private String getStatus(StatusVO statusVO) {
@@ -333,7 +337,7 @@ public class IssueDelaySendMessageTask {
             String statusColor = STATUS_COLOR_MAP.get(statusType);
             return "<span style=\"padding: 2px 3px; font-size: 12px; height: 20px; border-radius: 2px; color: #FFFFFF; background-color: " + statusColor +";\">"+ statusName +BACKSLASH_SPAN;
         }
-        return "";
+        return StringUtils.EMPTY;
     }
 
     private String getNameByLdap(UserDTO userDTO) {
@@ -344,16 +348,20 @@ public class IssueDelaySendMessageTask {
         }
     }
 
-    private void processProjectOwner(Map<Long, ProjectMessageVO> projectMap, MultiKeyMap multiKeyMap, Map<Long, List<IssueDTO>> issueGroupByProject, Set<Long> userIds, Set<Long> projectIdForProjectOwner, LocalDateTime localDateTime) {
+    private void processProjectOwner(Map<Long, ProjectMessageVO> projectMap, MultiKeyMap<Long, Set<IssueDelayCarrierVO>> multiKeyMap, Map<Long, List<IssueDTO>> issueGroupByProject, Set<Long> userIds, Set<Long> projectIdForProjectOwner, LocalDateTime localDateTime) {
         if (!projectIdForProjectOwner.isEmpty()) {
-            List<ProjectWithUserVO> projectWithUserList = remoteIamOperator.listProjectOwnerByIds(projectIdForProjectOwner);
-            projectWithUserList.forEach(x -> {
+            List<ProjectWithUserVO> projectWithUserList =
+                    remoteIamOperator.listProjectOwnerByIds(projectIdForProjectOwner);
+            if(CollectionUtils.isEmpty(projectWithUserList)) {
+                return;
+            }
+            for (ProjectWithUserVO x : projectWithUserList) {
                 Long projectId = x.getProjectId();
                 userIds.addAll(x.getUserIds());
-                x.getUserIds().forEach(y -> {
+                for (Long y : x.getUserIds()) {
                     List<IssueDTO> issueList = issueGroupByProject.get(projectId);
-                    if (!CollectionUtils.isEmpty(issueList)) {
-                        issueList.forEach(z -> {
+                    if (CollectionUtils.isNotEmpty(issueList)) {
+                        for (IssueDTO z : issueList) {
                             Long organizationId = projectMap.get(projectId).getOrganizationId();
                             LocalDateTime estimatedEndDate = z.getEstimatedEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
@@ -364,15 +372,15 @@ public class IssueDelaySendMessageTask {
                                     projectId,
                                     y,
                                     new IssueDelayCarrierVO(z, z.getIssueId(), delayDay, organizationId));
-                        });
+                        }
                     }
-                });
-            });
+                }
+            }
         }
     }
 
     private void processIssueToMultiKeyMap(Map<Long, ProjectMessageVO> projectMap,
-                                           MultiKeyMap multiKeyMap,
+                                           MultiKeyMap<Long, Set<IssueDelayCarrierVO>> multiKeyMap,
                                            LocalDateTime localDateTime,
                                            Map<Long, List<IssueDTO>> issueGroupByProject,
                                            Set<Long> userIds,
@@ -381,15 +389,15 @@ public class IssueDelaySendMessageTask {
                                            Map<Long, StatusVO> statusVOMap) {
         Map<Long, Map<Long, PriorityVO>> priorityMap = new HashMap<>();
         Map<Long, Map<Long, StatusVO>> statusMap = new HashMap<>();
-        issueGroupByProject.forEach((k, v) -> {
-            Long projectId = k;
-            List<IssueDTO> issueList = v;
-            ProjectMessageVO projectMessageVO = projectMap.get(projectId);
+        for (Map.Entry<Long, List<IssueDTO>> entry : issueGroupByProject.entrySet()) {
+            Long key = entry.getKey();
+            List<IssueDTO> issueList = entry.getValue();
+            ProjectMessageVO projectMessageVO = projectMap.get(key);
             Set<String> receiverTypes = projectMessageVO.getReceiverTypes();
             Long organizationId = projectMessageVO.getOrganizationId();
             queryOrganizationPriorityMap(organizationId, priorityMap);
             queryOrganizationStatusMap(organizationId, statusMap);
-            issueList.forEach(x -> {
+            for (IssueDTO x : issueList) {
                 Date estimatedEndTime = x.getEstimatedEndTime();
                 LocalDateTime estimatedEndDate = estimatedEndTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                 long delayDay = estimatedEndDate.isBefore(localDateTime) ?
@@ -401,38 +409,38 @@ public class IssueDelaySendMessageTask {
                     addSystemUserType(MAIN_RESPONSIBLE, x.getMainResponsibleId(), userTypeMap, userIds);
                     userTypeMap.put(SPECIFIER, projectMessageVO.getUserIds());
                     if (receiverTypes.contains(PROJECT_OWNER)) {
-                        projectIdForProjectOwner.add(projectId);
+                        projectIdForProjectOwner.add(key);
                     }
                     //问题逾期通知增加关注人
-                    userTypeMap.put(STAR_USER, new HashSet<>(starBeaconMapper.selectUsersByInstanceId(projectId, x.getIssueId())));
+                    userTypeMap.put(STAR_USER, new HashSet<>(starBeaconMapper.selectUsersByInstanceId(key, x.getIssueId())));
                     addToMultiKeyMap(x, projectMessageVO, delayDay, multiKeyMap, userIds, userTypeMap);
                     //问题逾期通知增加自定义人员字段选项
                     addCustomUserType(organizationId, x, delayDay, receiverTypes, multiKeyMap, userIds);
                 }
-            });
-        });
-        priorityMap.forEach((k, v) -> v.forEach(priorityVOMap::put));
-        statusMap.forEach((k, v) -> v.forEach(statusVOMap::put));
+            }
+        }
+        priorityMap.values().forEach(priorityVOMap::putAll);
+        statusMap.values().forEach(statusVOMap::putAll);
     }
 
     private void addCustomUserType(Long organizationId,
                                    IssueDTO issueDTO,
                                    long delayDay,
                                    Set<String> receiverTypes,
-                                   MultiKeyMap multiKeyMap,
+                                   MultiKeyMap<Long, Set<IssueDelayCarrierVO>> multiKeyMap,
                                    Set<Long> userIds) {
         List<String> customUserTypes = new ArrayList<>(receiverTypes);
         customUserTypes.removeAll(Arrays.asList(StatusNoticeUserType.BASE_USER_TYPE_LIST));
-        if (!CollectionUtils.isEmpty(customUserTypes)) {
+        if (CollectionUtils.isNotEmpty(customUserTypes)) {
             List<Long> customFieldUserIds = fieldValueMapper.selectUserIdByField(issueDTO.getProjectId(), customUserTypes, issueDTO.getIssueId());
-            if (!CollectionUtils.isEmpty(customFieldUserIds)) {
-                customFieldUserIds.forEach(userId -> {
+            if (CollectionUtils.isNotEmpty(customFieldUserIds)) {
+                for (Long userId : customFieldUserIds) {
                     userIds.add(userId);
                     addValueToMultiKeyMap(multiKeyMap,
                             issueDTO.getProjectId(),
                             userId,
                             new IssueDelayCarrierVO(issueDTO, issueDTO.getIssueId(), delayDay, organizationId));
-                });
+                }
             }
         }
     }
@@ -447,30 +455,31 @@ public class IssueDelaySendMessageTask {
     private void addToMultiKeyMap(IssueDTO issueDTO,
                                   ProjectMessageVO projectMessageVO,
                                   long delayDay,
-                                  MultiKeyMap multiKeyMap,
+                                  MultiKeyMap<Long, Set<IssueDelayCarrierVO>> multiKeyMap,
                                   Set<Long> userIds,
                                   Map<String,Set<Long>> userTypeMap) {
         Set<String> receiverTypes = projectMessageVO.getReceiverTypes();
         Long organizationId = projectMessageVO.getOrganizationId();
 
-        userTypeMap.forEach((userType, userIdList) -> {
-            if (receiverTypes.contains(userType) && !CollectionUtils.isEmpty(userIdList)) {
-                userIdList.forEach(userId -> {
+        for (Map.Entry<String, Set<Long>> entry : userTypeMap.entrySet()) {
+            String userType = entry.getKey();
+            Set<Long> userIdList = entry.getValue();
+            if (receiverTypes.contains(userType) && CollectionUtils.isNotEmpty(userIdList)) {
+                for (Long userId : userIdList) {
                     userIds.add(userId);
                     addValueToMultiKeyMap(multiKeyMap,
                             issueDTO.getProjectId(),
                             userId,
                             new IssueDelayCarrierVO(issueDTO, issueDTO.getIssueId(), delayDay, organizationId));
-                });
+                }
             }
-        });
+        }
     }
 
     private void queryOrganizationStatusMap(Long organizationId,
                                             Map<Long, Map<Long, StatusVO>> statusMap) {
         if (ObjectUtils.isEmpty(statusMap.get(organizationId))) {
-            Map orgStatusMap = new HashMap();
-            statusService.queryAllStatusMap(organizationId).forEach((k, v) -> orgStatusMap.put(k, v));
+            Map<Long, StatusVO> orgStatusMap = new HashMap<>(statusService.queryAllStatusMap(organizationId));
             statusMap.put(organizationId, orgStatusMap);
         }
     }
@@ -478,17 +487,16 @@ public class IssueDelaySendMessageTask {
     private void queryOrganizationPriorityMap(Long organizationId,
                                               Map<Long, Map<Long, PriorityVO>> priorityMap) {
         if (ObjectUtils.isEmpty(priorityMap.get(organizationId))) {
-            Map orgPriorityMap = new HashMap();
-            priorityService.queryByOrganizationId(organizationId).forEach((k, v) -> orgPriorityMap.put(k, v));
+            Map<Long, PriorityVO> orgPriorityMap = new HashMap<>(priorityService.queryByOrganizationId(organizationId));
             priorityMap.put(organizationId, orgPriorityMap);
         }
     }
 
-    private void addValueToMultiKeyMap(MultiKeyMap multiKeyMap,
+    private void addValueToMultiKeyMap(MultiKeyMap<Long, Set<IssueDelayCarrierVO>> multiKeyMap,
                                        Long projectId,
                                        Long userId,
                                        IssueDelayCarrierVO issueDelayCarrierVO) {
-        Set<IssueDelayCarrierVO> set = (Set<IssueDelayCarrierVO>) multiKeyMap.get(projectId, userId);
+        Set<IssueDelayCarrierVO> set = multiKeyMap.get(projectId, userId);
         if (set == null) {
             set = new HashSet<>();
             multiKeyMap.put(projectId, userId, set);

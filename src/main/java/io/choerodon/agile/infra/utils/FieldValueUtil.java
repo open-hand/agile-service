@@ -73,7 +73,7 @@ public class FieldValueUtil {
                 case FieldType.MULTIPLE:
                     values.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()).toArray(longValues);
                     value = EncryptionUtils.encryptList(Arrays.asList(longValues));
-                    valueStr = values.stream().map(FieldValueDTO::getOptionValue).collect(Collectors.joining(", "));
+                    valueStr = values.stream().map(FieldValueDTO::getOptionValue).collect(Collectors.joining(","));
                     break;
                 case FieldType.RADIO:
                 case FieldType.SINGLE:
@@ -125,9 +125,9 @@ public class FieldValueUtil {
                     value = values.get(0).getOptionId();
                     //是否仅需要字符串，用于导出
                     if (isJustStr) {
-                        UserDTO userVO = userMap.get(value);
-                        if (userVO != null) {
-                            valueStr = userVO.getRealName() + "（"+ userVO.getEmail() + "）";
+                        UserDTO user = userMap.get(value);
+                        if (user != null) {
+                            valueStr = queryUserName(user);
                         }
                     } else {
                         valueStr = userMap.getOrDefault(value, new UserDTO());
@@ -142,9 +142,9 @@ public class FieldValueUtil {
                         if (isJustStr) {
                             List<String> userStr = new ArrayList<>();
                             optionIds.forEach(v -> {
-                                UserDTO userVO = userMap.get(v);
-                                if (userVO != null) {
-                                    userStr.add(userVO.getRealName() + "（"+ userVO.getEmail() + "）");
+                                UserDTO user = userMap.get(v);
+                                if (user != null) {
+                                    userStr.add(queryUserName(user));
                                 }
                             });
                             valueStr =  userStr.stream().collect(Collectors.joining(","));
@@ -168,6 +168,17 @@ public class FieldValueUtil {
         }
         view.setValueStr(valueStr);
         view.setValue(value);
+    }
+
+    private static String queryUserName(UserDTO user) {
+        String valueStr;
+        String realName = user.getRealName();
+        if (Boolean.TRUE.equals(user.getLdap())) {
+            valueStr = realName + "（"+ user.getLoginName() + "）";
+        } else {
+            valueStr = realName + "（"+ user.getEmail() + "）";
+        }
+        return valueStr;
     }
 
     /**
@@ -395,14 +406,25 @@ public class FieldValueUtil {
 
     private static Date convertDate(String defaultValue) throws ParseException {
         Date dateValue;
-        //兼容Thu Apr 30 2020 00:00:00 GMT+0800和2020-02-13 15:51:22格式的日期
         try {
+            //兼容Thu Apr 30 2020 00:00:00 GMT+0800和2020-02-13 15:51:22格式的日期
             DateFormat df = new SimpleDateFormat(ENGLISH_STRING_DATE_FORMAT, Locale.ENGLISH);
             dateValue = df.parse(defaultValue);
         } catch (ParseException e) {
-            DateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
-            //yyyy-MM-dd HH:mm:ss格式转换失败，直接抛出异常
-            dateValue = df.parse(defaultValue);
+            try {
+                //不行就换yyyy-MM-dd HH:mm:ss格式
+                DateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
+                dateValue = df.parse(defaultValue);
+            } catch (ParseException e2) {
+                //不行就换yyyy-MM-dd HH:mm:ss格式, 再失败就报错
+                try {
+                    DateFormat df = new SimpleDateFormat(DATE_FORMAT);
+                    dateValue = df.parse(defaultValue);
+                } catch (ParseException e3) {
+                    DateFormat df = new SimpleDateFormat(TIME_FORMAT);
+                    dateValue = df.parse(defaultValue);
+                }
+            }
         }
         return dateValue;
     }

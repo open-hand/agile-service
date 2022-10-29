@@ -197,4 +197,6 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
     List<ObjectSchemeFieldExtendDTO> selectIssueTypeMinRank(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId);
 
     void updateDefaultValueDeleteOption(@Param("fieldId") Long fieldId, @Param("optionId") Long optionId, @Param("organizationId") Long organizationId);
+
+    String selectNextRank(ObjectSchemeFieldExtendDTO dto);
 }

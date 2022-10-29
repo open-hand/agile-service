@@ -4,7 +4,9 @@ package io.choerodon.agile.api.vo.business;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.*;
@@ -16,7 +18,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 /**
  * @author dinghuang123@gmail.com
  */
-public class IssueExcelImportVO {
+public class IssueExcelImportVO implements Cloneable {
     @ApiModelProperty(value = "问题主键id")
     @Encrypt
     private Long issueId;
@@ -120,8 +122,10 @@ public class IssueExcelImportVO {
     @ApiModelProperty(value = "团队项目id集合")
     private List<Long> teamProjectIds;
     @ApiModelProperty(value = "预计开始时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date estimatedStartTime;
     @ApiModelProperty(value = "预计结束时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date estimatedEndTime;
     @ApiModelProperty(value = "自定义字段")
     private List<PageFieldViewUpdateVO> customFields;
@@ -145,9 +149,11 @@ public class IssueExcelImportVO {
     private List<TagVO> tags;
 
     @ApiModelProperty(value = "实际开始时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date actualStartTime;
 
     @ApiModelProperty(value = "实际结束时间")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date actualEndTime;
 
     @ApiModelProperty(value = "参与人")
@@ -178,6 +184,10 @@ public class IssueExcelImportVO {
     private Long organizationId;
     @ApiModelProperty("是否是更新")
     private Boolean update;
+
+    private IssueVO oldIssue;
+
+    private Map<Long, PageFieldViewVO> pageFieldViewVOMap;
 
 
     public List<TagVO> getTags() {
@@ -616,5 +626,30 @@ public class IssueExcelImportVO {
 
     public void setUpdate(Boolean update) {
         this.update = update;
+    }
+
+    public IssueVO getOldIssue() {
+        return oldIssue;
+    }
+
+    public void setOldIssue(IssueVO oldIssue) {
+        this.oldIssue = oldIssue;
+    }
+
+    public Map<Long, PageFieldViewVO> getPageFieldViewVOMap() {
+        return pageFieldViewVOMap;
+    }
+
+    public void setPageFieldViewVOMap(Map<Long, PageFieldViewVO> pageFieldViewVOMap) {
+        this.pageFieldViewVOMap = pageFieldViewVOMap;
+    }
+
+    @Override
+    public IssueExcelImportVO clone() {
+        try {
+            return (IssueExcelImportVO) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

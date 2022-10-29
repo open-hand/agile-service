@@ -46,7 +46,7 @@ import org.springframework.util.ObjectUtils;
 public class SendMsgUtil {
 
     private static final String URL_TEMPLATE1 = "#/agile/work-list/issue?type=project&id=";
-    private static final String URL_TEMPLATE9 = "#/waterfall/wbs?type=project&id=";
+    private static final String URL_TEMPLATE9 = "#/agile/wbs?type=project&id=";
     private static final String URL_TEMPLATE10 = "#/agile/pro-risk?type=project&id=";
     private static final String URL_TEMPLATE2 = "&name=";
     private static final String URL_TEMPLATE3 = "&paramName=";

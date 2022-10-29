@@ -3539,8 +3539,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
 
     @Override
-    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
-        return issueMapper.queryIssueByIssueNum(projectId, issueNum);
+    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum, boolean includeEpic) {
+        return issueMapper.queryIssueByIssueNum(projectId, issueNum, includeEpic);
     }
 
     @Override
@@ -4159,6 +4159,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     });
             issueTypeFieldMap.put(issueTypeId, createPageFields);
         });
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         List<IssueRequiredFields> result = new ArrayList<>();
         for (IssueVO issue : issueVOList) {
             List<PageFieldViewVO> createPageFields = issueTypeFieldMap.get(issue.getIssueTypeId());
@@ -4180,6 +4181,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     .setSummary(issue.getSummary())
                     .setIssueNum(issue.getIssueNum())
                     .setRequiredFields(requiredSystemFields);
+            Long issueTypeId = issue.getIssueTypeId();
+            issueRequiredFields.setIssueTypeVO(issueTypeDTOMap.get(issueTypeId));
             result.add(issueRequiredFields);
         }
         return result;
