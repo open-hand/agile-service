@@ -2219,7 +2219,7 @@ public class ExcelServiceImpl implements ExcelService {
         // 1.跟新issue的基本字段 摘要，描述，报告人，经办人等等
         result = updateBaseIssue(projectId, issueExcelImportVO);
         //2.更新issue的类型
-        updateIssueType(organizationId, projectId, issueExcelImportVO);
+//        updateIssueType(organizationId, projectId, issueExcelImportVO);
         //3.更新自定义字段的值和其他页面配置的字段
         updateCustomFields(projectId, organizationId, customFields, issueId);
         issueExcelImportVO.setCustomFields(customFields);
@@ -2251,8 +2251,14 @@ public class ExcelServiceImpl implements ExcelService {
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(jsonObject, issueUpdateVO);
         result = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
-        issueExcelImportVO.setParentIssueId(result.getParentIssueId());
-        issueExcelImportVO.setRelateIssueId(result.getRelateIssueId());
+        // 设置父子结构
+        if (!ObjectUtils.isEmpty(result.getParentIssueId())) {
+            if (IssueTypeCode.isSubTask(result.getTypeCode())) {
+                issueExcelImportVO.setParentIssueId(result.getParentIssueId());
+            } else if (IssueTypeCode.isBug(result.getTypeCode())) {
+                issueExcelImportVO.setRelateIssueId(result.getParentIssueId());
+            }
+        }
         return result;
     }
 
