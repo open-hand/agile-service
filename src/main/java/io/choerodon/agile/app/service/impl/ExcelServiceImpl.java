@@ -646,7 +646,10 @@ public class ExcelServiceImpl implements ExcelService {
         Set<Integer> withoutParentRows = new HashSet<>();
         int issueTypeCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_TYPE);
         // issueNum col
-        int issueNumCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_NUM);
+        Integer issueNumCol = getColIndexByFieldCode(headerMap, FieldCode.ISSUE_NUM);
+        if (issueNumCol == null) {
+            issueNumCol = -1;
+        }
         int parentCol = getColIndexByFieldCode(headerMap, ExcelImportTemplate.IssueHeader.PARENT);
         processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, excelSheetData, issueTypeCol, parentCol, headerMap);
         ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
