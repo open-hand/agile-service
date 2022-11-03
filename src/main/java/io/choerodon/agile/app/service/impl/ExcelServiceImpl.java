@@ -651,7 +651,7 @@ public class ExcelServiceImpl implements ExcelService {
             issueNumCol = -1;
         }
         int parentCol = getColIndexByFieldCode(headerMap, ExcelImportTemplate.IssueHeader.PARENT);
-        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, excelSheetData, issueTypeCol, parentCol, headerMap);
+        processParentSonRelationship(parentSonMap, sonParentMap, withoutParentRows, excelSheetData, issueTypeCol, parentCol, issueNumCol, headerMap);
         ExcelImportTemplate.Progress progress = new ExcelImportTemplate.Progress();
         List<Long> importedIssueIds = new ArrayList<>();
         List<RelatedIssueVO> relatedIssueList = new ArrayList<>();
@@ -1018,7 +1018,11 @@ public class ExcelServiceImpl implements ExcelService {
             // 查询之前issue更新之前的数据 以便于在校验时直接过滤掉重复的数据
             Long issueId = issueNumDTO.getIssueId();
             Long organizationId = ConvertUtil.getOrganizationId(projectId);
-            IssueVO issueVO = issueService.queryIssue(projectId, issueNumDTO.getIssueId(), organizationId);
+            IssueVO issueVO = issueService.queryIssue(projectId, issueId, organizationId);
+            final String parentIssueNum = org.apache.commons.lang3.ObjectUtils.defaultIfNull(issueVO.getParentIssueNum(), issueVO.getRelateIssueNum());
+            if(parentIssue == null && parentIssueNum != null) {
+                parentIssue = issueMapper.selectByIssueNum(projectId, parentIssueNum);
+            }
             PageFieldViewParamVO pageFieldViewParamVO = new PageFieldViewParamVO();
             pageFieldViewParamVO.setIssueTypeId(issueVO.getIssueTypeId());
             pageFieldViewParamVO.setSchemeCode("agile_issue");
@@ -1027,7 +1031,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (CollectionUtils.isNotEmpty(pageFieldViewVOS)) {
                 issueExcelImportVO.setPageFieldViewVOMap(pageFieldViewVOS.stream().collect(Collectors.toMap(PageFieldViewVO::getFieldId, Function.identity())));
             }
-            issueExcelImportVO.setIssueId(issueNumDTO.getIssueId());
+            issueExcelImportVO.setIssueId(issueId);
             issueExcelImportVO.setObjectVersionNumber(issueNumDTO.getObjectVersionNumber());
             issueExcelImportVO.setIssueNum(issueNum.substring(issueNum.lastIndexOf("-") + 1));
             issueExcelImportVO.setOldIssue(issueVO);
@@ -1041,7 +1045,7 @@ public class ExcelServiceImpl implements ExcelService {
             String issueTypeCode = getIssueTypeCode(headerMap, value);
             if (parentIssue == null
                     && (IssueTypeCode.isSubTask(issueTypeCode)
-                    || "bug".equals(issueTypeCode))) {
+                    || SUB_BUG_CN.equals(value))) {
                 JSONObject parentJson = (JSONObject) rowJson.get(parentCol);
                 String parentCellValue = "";
                 if (ObjectUtils.isEmpty(parentJson)
@@ -1145,11 +1149,13 @@ public class ExcelServiceImpl implements ExcelService {
                                               ExcelSheetData excelSheetData,
                                               int issueTypeCol,
                                               int parentCol,
+                                              int issueNumCol,
                                               Map<Integer, ExcelColumnVO> headerMap) {
         Map<Integer, String> rowIssueTypeMap = new LinkedHashMap<>();
         List<IssueTypeLinkDTO> issueTypeLinks = new ArrayList<>();
         Integer rowNum = excelSheetData.getRowNum();
         JSONObject dataSheet = excelSheetData.getSheetData();
+        Map<Integer, Boolean> colNumToIsSunMap = new HashMap<>();
         for (int i = 1; i <= rowNum; i++) {
             int size = issueTypeLinks.size();
             IssueTypeLinkDTO lastIssueTypeLink = null;
@@ -1169,8 +1175,13 @@ public class ExcelServiceImpl implements ExcelService {
             if (issueType == null) {
                 continue;
             }
-            JSONObject parentCellJson = (JSONObject) rowJson.get(parentCol);
-            Boolean son = !ObjectUtils.isEmpty(parentCellJson) && !ObjectUtils.isEmpty(parentCellJson.getString(ExcelSheetData.STRING_CELL));
+            String parentCellValue =  Optional.ofNullable((JSONObject) rowJson.get(parentCol)).map(jsonNode -> jsonNode.getString(ExcelSheetData.STRING_CELL)).orElse(null);
+            String issueNumCellValue =  Optional.ofNullable((JSONObject) rowJson.get(issueNumCol)).map(jsonNode -> jsonNode.getString(ExcelSheetData.STRING_CELL)).orElse(null);
+            boolean isUpdate = StringUtils.isNotBlank(issueNumCellValue);
+            String issueTypeCode = getIssueTypeCode(headerMap, issueType);
+            // 柴晓燕说, 创建时, 类型名称叫"子缺陷"或类型Type是"sub_task", 或者更新时, "父级故事/任务/缺陷"列不为空时, 认为是子级工作项
+            boolean son = (!isUpdate && (SUB_BUG_CN.equals(issueType) || IssueTypeCode.isSubTask(issueTypeCode))) || (isUpdate && StringUtils.isNotBlank(parentCellValue));
+            colNumToIsSunMap.put(i, son);
             IssueTypeLinkDTO issueTypeLink = new IssueTypeLinkDTO(i, issueType);
             issueTypeLink.setSon(son);
             issueTypeLinks.add(issueTypeLink);
@@ -1186,8 +1197,9 @@ public class ExcelServiceImpl implements ExcelService {
             Integer currentRowNum = entry.getKey();
             String issueType = entry.getValue();
             String issueTypeCode = getIssueTypeCode(headerMap, issueType);
-            if (IssueTypeCode.isSubTask(issueTypeCode)
-                    || "bug".equals(issueTypeCode)) {
+            final boolean isSon = Boolean.TRUE.equals(colNumToIsSunMap.get(currentRowNum));
+            if (isSon && (IssueTypeCode.isSubTask(issueTypeCode)
+                    || "bug".equals(issueTypeCode))) {
                 Integer parentRow = sonParentMap.get(currentRowNum);
                 if (parentRow == null) {
                     JSONObject rowJson = (JSONObject) dataSheet.get(String.valueOf(currentRowNum));
