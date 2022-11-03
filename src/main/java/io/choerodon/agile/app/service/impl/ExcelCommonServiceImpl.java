@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -1416,9 +1417,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                   JSONObject cellJson) {
         if (FieldType.NUMBER.equals(fieldType)) {
             //数字类型，校验数字格式
-            try {
-                Long.valueOf(value);
-            } catch (Exception e) {
+            if(!NumberUtils.isParsable(value)) {
                 String errorMsg = buildWithErrorMsg(value, "自定义字段数字类型格式错误，请输入数字");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             }
@@ -3083,26 +3082,22 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         cellJson = createCellJsonIfNotExisted(rowJson, col, cellJson);
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
         // todo 导入更新时跳过修改父级 后续优化
-        if (value == null || Boolean.TRUE.equals(issueExcelImportVO.getUpdate())) {
+        if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())) {
             return;
+        }
+        if(value == null) {
+            value = StringUtils.EMPTY;
         }
         if (IssueTypeCode.isSubTask(issueTypeCode)) {
             Long parentId = parentIssue.getIssueId();
-            if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) || !parentId.equals(issueExcelImportVO.getOldIssue().getParentIssueId())) {
-                issueExcelImportVO.setParentIssueId(parentId);
-            }
-        } else if ("bug".equals(issueExcelImportVO.getTypeCode())) {
+            issueExcelImportVO.setParentIssueId(parentId);
+        } else if (SUB_BUG_CN.equals(issueType)) {
             if (parentIssue.getTypeCode().equals("bug")) {
                 String errorMsg = buildWithErrorMsg(value, "子缺陷的父级不能为缺陷类型");
                 putErrorMsg(rowJson, cellJson, errorMsg);
             } else {
                 Long parentId = parentIssue.getIssueId();
-                if (!Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) || !parentId.equals(issueExcelImportVO.getOldIssue().getParentIssueId())) {
-                    issueExcelImportVO.setRelateIssueId(parentId);
-                    if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())) {
-                        issueExcelImportVO.setParentIssueId(parentId);
-                    }
-                }
+                issueExcelImportVO.setRelateIssueId(parentId);
             }
         }
     }
