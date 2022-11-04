@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import springfox.documentation.annotations.ApiIgnore;
 
 import io.choerodon.agile.api.validator.IssueValidator;
@@ -424,7 +422,7 @@ public class IssueController {
                                                     @ApiParam(value = "复制条件", required = true)
                                                     @RequestBody CopyConditionVO copyConditionVO) {
         issueValidator.checkPredefinedFields(copyConditionVO.getPredefinedFieldNames());
-        issueOperateService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
+        issueOperateService.asyncCloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
