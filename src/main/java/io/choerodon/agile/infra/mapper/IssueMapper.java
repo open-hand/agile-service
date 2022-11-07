@@ -358,17 +358,30 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                             @Param("isTreeView") Boolean isTreeView);
 
 
+    @Deprecated
     List<IssueDTO> queryIssueIdsList(@Param("projectIds") Set<Long> projectIds,
                                      @Param("searchVO") SearchVO searchVO,
                                      @Param("filterSql") String filterSql,
                                      @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
                                      @Param("sortMap") Map<String, Object> sortMap);
 
+
+    List<IssueDTO> queryIssueList(@Param("projectIds") Set<Long> projectIds,
+                                  @Param("quickFilterSql") String quickFilterSql,
+                                  @Param("advancedSql") String advancedSql,
+                                  @Param("sortMap") Map<String, Object> sortMap);
+
+    @Deprecated
     List<IssueDTO> queryParentIssueIdsList(@Param("projectIds") Set<Long> projectIds,
                                            @Param("searchVO") SearchVO searchVO,
                                            @Param("filterSql") String filterSql,
                                            @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
                                            @Param("sortMap") Map<String, Object> sortMap);
+
+    List<IssueDTO> queryRootList(@Param("projectIds") Set<Long> projectIds,
+                                 @Param("quickFilterSql") String quickFilterSql,
+                                 @Param("advancedSql") String advancedSql,
+                                 @Param("sortMap") Map<String, Object> sortMap);
 
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
@@ -474,6 +487,12 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                              @Param("filterSql") String filterSql,
                                              @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
                                              @Param("sortMap") Map<String, Object> sortMap);
+
+    List<IssueDTO> queryChildrenList(@Param("issueIds") List<Long> issueIds,
+                                     @Param("projectIds") Set<Long> projectIds,
+                                     @Param("quickFilterSql") String quickFilterSql,
+                                     @Param("advancedSql") String advancedSql,
+                                     @Param("sortMap") Map<String, Object> sortMap);
 
     List<IssueDTO> queryStoryAndTaskByProjectId(@Param("projectId") Long projectId, @Param("searchVO") SearchVO searchVO);
 

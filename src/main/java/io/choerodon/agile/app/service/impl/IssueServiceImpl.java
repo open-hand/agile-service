@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -38,8 +39,10 @@ import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.IssuePayload;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
@@ -354,6 +357,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private ObjectMapper objectMapper;
     @Autowired
     private DevopsClientOperator devopsClientOperator;
+    @Autowired
+    private AdvancedParamParserService advancedParamParserService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -736,6 +741,77 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             return new Page<>();
         }
     }
+
+    @Override
+    public Page<IssueListFieldKVVO> pagedQueryWorkList(Long projectId,
+                                                       SearchParamVO searchParamVO,
+                                                       PageRequest pageRequest,
+                                                       Long organizationId) {
+        if (organizationId == null) {
+            organizationId = ConvertUtil.getOrganizationId(projectId);
+        }
+        boolean isTreeView = Boolean.TRUE.equals(searchParamVO.getTreeFlag());
+        String quickFilterSql = getQuickFilter(searchParamVO.getQuickFilterIds());
+        Set<Long> projectIds = SetUtils.unmodifiableSet(projectId);
+        String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds);
+        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, searchParamVO, quickFilterSql, advancedSql, organizationId, isTreeView);
+        Page<IssueListFieldKVVO> issueListDTOPage = new Page<>();
+        if (!CollectionUtils.isEmpty(issueIdPage.getContent())) {
+            List<Long> issueIds = issueIdPage.getContent();
+            Set<Long> childrenIds = new HashSet<>();
+            if (isTreeView) {
+                List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null);
+                //todo 支持第三方调用，筛选出父级时同时把所有子级返回
+                boolean withSubIssues = false;
+//                        !Boolean.FALSE.equals(
+//                                Optional.ofNullable(searchVO.getSearchArgs())
+//                                        .map(x -> x.get("withSubIssues"))
+//                                        .orElse(false));
+                // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
+                    childrenIds.add(0L);
+                }
+                childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
+            }
+            List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
+            Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+            Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+            List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+            Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), allIssueIds, false);
+            Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
+            List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
+            if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
+                boolean countSubIssue = Boolean.TRUE.equals(searchParamVO.getCountSubIssue());
+                agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId), issueListFieldKVVOS, countSubIssue);
+            }
+            issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
+        }
+        return issueListDTOPage;
+    }
+
+    private Page<Long> pagedQueryRoot(PageRequest pageRequest,
+                                      Long projectId,
+                                      SearchParamVO searchParamVO,
+                                      String quickFilterSql,
+                                      String advancedSql,
+                                      Long organizationId,
+                                      boolean isTreeView) {
+        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId);
+        //todo summary/content分割处理
+//        splitIssueNumProjectCodePrefix(searchVO, projectIds);
+        Page<IssueDTO> issuePage;
+        if (isTreeView) {
+            issuePage =
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryRootList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap));
+        } else {
+            issuePage =
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap));
+        }
+        List<Long> issueIds = issuePage.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        return PageUtil.buildPageInfoWithPageInfoList(issuePage, issueIds);
+    }
+
 
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
         Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId);
@@ -3407,6 +3483,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public String getQuickFilter(List<Long> quickFilterIds) {
+        if (ObjectUtils.isEmpty(quickFilterIds)) {
+            return null;
+        }
         List<String> sqlQuerys = quickFilterMapper.selectSqlQueryByIds(quickFilterIds);
         if (sqlQuerys.isEmpty()) {
             return null;
@@ -3754,6 +3833,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             });
         }
     }
+
 
     private Page<IssueDTO> queryIssuesByTypeAndUserId(List<Long> projectIds,
                                                       Long userId,

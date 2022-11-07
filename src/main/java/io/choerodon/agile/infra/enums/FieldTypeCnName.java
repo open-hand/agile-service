@@ -62,6 +62,15 @@ public enum FieldTypeCnName {
                 .findFirst();
     }
 
+    public static Optional<FieldTypeCnName> ofCode(String code) {
+        if (code == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(FieldTypeCnName.values())
+                .filter(typeCnName -> code.equals(typeCnName.getCode()))
+                .findFirst();
+    }
+
     public static boolean isOption(String value) {
         return Stream.of(RADIO, CHECKBOX, SINGLE, MULTIPLE).anyMatch(
                 fieldType -> fieldType.getCode().equals(value));

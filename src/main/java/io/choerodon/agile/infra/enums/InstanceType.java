@@ -31,4 +31,14 @@ public enum InstanceType {
         }
     }
 
+    public String getSchemeCode() {
+        if (this.equals(ISSUE)) {
+            return ObjectSchemeCode.AGILE_ISSUE;
+        } else if (this.equals(BACKLOG)) {
+            return ObjectSchemeCode.BACKLOG;
+        } else {
+            throw new CommonException("error.illegal.instance.type");
+        }
+    }
+
 }
