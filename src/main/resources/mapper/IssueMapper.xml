@@ -826,6 +826,60 @@
         </if>
     </select>
 
+    <select id="queryIssueList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.project_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        from agile_issue ai
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
+        where ai.issue_id in
+        (
+        SELECT
+        ai.issue_id
+        FROM agile_issue ai
+        WHERE ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        AND ai.apply_type = 'agile'
+        <if test="quickFilterSql != null">
+            AND ai.issue_id IN (${filterSql})
+        </if>
+        <if test="advancedSql != null">
+            ${advancedSql}
+        </if>
+        )
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </select>
+
 
     <select id="queryParentIssueIdsList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
@@ -921,6 +975,120 @@
             ORDER BY ${sortMap.orderStr}
         </if>
     </select>
+
+    <select id="queryRootList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.project_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        from (
+        select temp.issue_id
+        from (
+            SELECT
+            case
+            when ai.type_code = 'sub_task' then ai.parent_issue_id
+            when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
+            else ai.issue_id
+            end as issue_id
+            FROM agile_issue ai
+            WHERE ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.apply_type = 'agile'
+            <if test="quickFilterSql != null">
+                AND ai.issue_id IN (${filterSql})
+            </if>
+            <if test="advancedSql != null">
+                ${advancedSql}
+            </if>
+        ) temp
+        group by temp.issue_id
+        ) ai1
+        join agile_issue ai
+        on (
+            ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            and ai.apply_type = 'agile'
+            and ai1.issue_id = ai.issue_id
+        )
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        and (
+        ai.type_code in ('issue_epic', 'story', 'task')
+        or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0))
+        )
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </select>
+
+
+    <select id="queryRootList_COUNT" resultType="java.lang.Long">
+        select count(distinct temp.issue_id)
+        from (
+        select
+        case
+        when ai.type_code = 'sub_task' then ai.parent_issue_id
+        when ai.type_code = 'bug' and ai.relate_issue_id is not null and ai.relate_issue_id != 0 then ai.relate_issue_id
+        else ai.issue_id
+        end as issue_id
+        from agile_issue ai
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        <if test="quickFilterSql != null">
+            AND ai.issue_id IN (${filterSql})
+        </if>
+        <if test="advancedSql != null">
+            ${advancedSql}
+        </if>
+        ) temp
+        join agile_issue ai on ai.issue_id = temp.issue_id
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        and (
+        ai.type_code in ('issue_epic', 'story', 'task')
+        or (ai.type_code = 'bug' and (ai.relate_issue_id is null or ai.relate_issue_id = 0))
+        )
+    </select>
+
 
     <select id="queryParentIssueIdsList_COUNT" resultType="java.lang.Long">
         select count(distinct temp.issue_id)
@@ -1036,6 +1204,68 @@
                 AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
                 OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%'))
             </foreach>
+        </if>
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </select>
+
+    <select id="queryChildrenList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.project_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        from agile_issue ai
+        <if test="sortMap != null and sortMap.sortFieldId != null ">
+            LEFT JOIN
+            (
+            SELECT
+            instance_id,
+            date_value,
+            option_id,
+            string_value,
+            text_value,
+            number_value
+            FROM fd_field_value ffv
+            JOIN agile_issue ai ON ai.issue_id = ffv.instance_id
+            AND ai.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            WHERE ffv.field_id = #{sortMap.sortFieldId}
+            AND ffv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+            AND ai.issue_type_id IN
+            <foreach collection="sortMap.fieldExtendIssueTypeIds" item="issueTypeId" open="(" separator="," close=")">
+                #{issueTypeId}
+            </foreach>
+            ) fv ON ai.issue_id = fv.instance_id
+        </if>
+        where ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.apply_type = 'agile'
+        and ai.type_code in ('sub_task', 'bug')
+        and (
+        ai.parent_issue_id in
+        <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        or
+        ai.type_code = 'bug'
+        and ai.relate_issue_id in
+        <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        )
+        <if test="quickFilterSql != null">
+            AND ai.issue_id IN (${filterSql})
+        </if>
+        <if test="advancedSql != null">
+            ${advancedSql}
         </if>
         <if test="sortMap != null and sortMap.orderStr != null">
             ORDER BY ${sortMap.orderStr}

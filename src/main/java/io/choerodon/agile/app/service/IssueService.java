@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.infra.dto.IssueNumDTO;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.dto.TestCaseDTO;
@@ -520,4 +521,9 @@ public interface IssueService {
     void setProgress(List<IssueListFieldKVVO> waterfallIssues,
                      List<IssueListFieldKVVO> agileIssues,
                      Set<Long> projectIds);
+
+    Page<IssueListFieldKVVO> pagedQueryWorkList(Long projectId,
+                                                SearchParamVO searchParamVO,
+                                                PageRequest pageRequest,
+                                                Long organizationId);
 }
