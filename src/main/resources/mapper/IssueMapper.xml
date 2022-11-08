@@ -872,7 +872,7 @@
             AND ai.issue_id IN (${filterSql})
         </if>
         <if test="advancedSql != null">
-            ${advancedSql}
+            and ${advancedSql}
         </if>
         )
         <if test="sortMap != null and sortMap.orderStr != null">
@@ -1000,7 +1000,7 @@
                 AND ai.issue_id IN (${filterSql})
             </if>
             <if test="advancedSql != null">
-                ${advancedSql}
+                and ${advancedSql}
             </if>
         ) temp
         group by temp.issue_id
@@ -1074,7 +1074,7 @@
             AND ai.issue_id IN (${filterSql})
         </if>
         <if test="advancedSql != null">
-            ${advancedSql}
+            and ${advancedSql}
         </if>
         ) temp
         join agile_issue ai on ai.issue_id = temp.issue_id
@@ -1265,7 +1265,7 @@
             AND ai.issue_id IN (${filterSql})
         </if>
         <if test="advancedSql != null">
-            ${advancedSql}
+            and ${advancedSql}
         </if>
         <if test="sortMap != null and sortMap.orderStr != null">
             ORDER BY ${sortMap.orderStr}
