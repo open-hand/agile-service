@@ -96,6 +96,7 @@ public class AdvancedParamValidator {
             boolean skip = true;
             if (predefined) {
                 String fieldCode = field.getFieldCode();
+                //todo 处理不在数据库，但在FieldCode中定义的字段，如所属特性
                 ObjectSchemeFieldDTO dto = predefinedFieldMap.get(fieldCode);
                 skip = (dto == null);
                 if (!skip) {
@@ -165,7 +166,6 @@ public class AdvancedParamValidator {
         Assert.notNull(field, DATA_INVALID);
         Boolean predefined = field.getPredefined();
         Assert.notNull(predefined, DATA_INVALID);
-        Assert.notNull(field.getFieldType(), DATA_INVALID);
         if (Boolean.TRUE.equals(field.getPredefined())) {
             //系统字段，fieldCode不能为空
             Assert.notNull(field.getFieldCode(), DATA_INVALID);

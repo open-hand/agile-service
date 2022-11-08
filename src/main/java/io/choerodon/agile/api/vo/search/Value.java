@@ -30,18 +30,22 @@ public class Value {
     private List<Long> noEncryptIdList;
 
     @ApiModelProperty("数字快速搜索值")
+    @Deprecated
     private Integer valueInteger;
     @ApiModelProperty("数字数组快速搜索值")
+    @Deprecated
     private List<Integer> valueIntegerList;
     @ApiModelProperty("数字(允许小数)快速搜索值")
     private BigDecimal valueDecimal;
     @ApiModelProperty("数字(允许小数)数组快速搜索值")
     private List<BigDecimal> valueDecimalList;
     @ApiModelProperty("bool快速搜索值")
+    @Deprecated
     private Boolean valueBool;
     @ApiModelProperty("时间快速搜索值")
     private Date valueDate;
     @ApiModelProperty("时分秒快速搜索值")
+    @Deprecated
     private String valueDateTime;
 
     private String valueSpecial;
