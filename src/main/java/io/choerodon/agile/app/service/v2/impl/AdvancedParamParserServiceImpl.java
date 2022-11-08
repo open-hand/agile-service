@@ -51,6 +51,15 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
      */
     public static final String SQL_TEMPLATE_SELF_TABLE_IN_OR_NOT_IN = " %s %s ( %s ) ";
     /**
+     * (priority_id = 0 or priority_id is null)
+     */
+    public static final String SQL_TEMPLATE_SELF_TABLE_IS_NULL = " (%s = 0 or %s is null) ";
+    /**
+     * (priority_id != 0 and priority_id is not null)
+     */
+    public static final String SQL_TEMPLATE_SELF_TABLE_IS_NOT_NULL = " (%s != 0 and %s is not null) ";
+
+    /**
      * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
      */
     public static final String SQL_TEMPLATE_LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where %s in ( %s ) %s) ";
@@ -107,46 +116,59 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                         SearchParamVO searchParamVO,
                         Set<Long> projectIds) {
         advancedParamValidator.validate(searchParamVO);
-        StringBuilder sqlBuilder = new StringBuilder();
         Map<String, FieldTableVO> predefinedFieldMap = buildPredefinedFieldMap();
-        searchParamVO.getConditions()
-                .forEach(condition -> {
-                    Field field = condition.getField();
-                    String fieldType = field.getFieldType();
-                    String operation = condition.getOperation();
-                    sqlBuilder.append(condition.getRelationship());
-                    if (Operation.isBracket(operation)) {
-                        //括号，a && (b || c)，读取 b和c然后加括号
-                        List<Condition> subConditions = condition.getSubConditions();
-                    } else {
-                        FieldTypeCnName fieldTypeCnName = FieldTypeCnName.ofCode(fieldType).get();
-                        switch (fieldTypeCnName) {
-                            case MEMBER:
-                            case MULTI_MEMBER:
-                            case MULTIPLE:
-                            case SINGLE:
-                            case RADIO:
-                            case CHECKBOX:
-                                generateSelectorSql(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType);
-                            case TIME:
-                            case DATETIME:
-                            case DATE:
-                                //时间
+        List<Condition> conditions = searchParamVO.getConditions();
+        return generateSql(instanceType, projectIds, predefinedFieldMap, conditions);
+    }
 
-                            case NUMBER:
-                                //数字
+    private String generateSql(InstanceType instanceType,
+                               Set<Long> projectIds,
+                               Map<String, FieldTableVO> predefinedFieldMap,
+                               List<Condition> conditions) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        for (int i = 0; i < conditions.size(); i++) {
+            Condition condition = conditions.get(i);
+            Field field = condition.getField();
+            String fieldType = field.getFieldType();
+            String operation = condition.getOperation();
+            if (i > 0) {
+                //第一个不拼
+                sqlBuilder.append(condition.getRelationship());
+            }
+            if (Operation.isBracket(operation)) {
+                //括号，a && (b || c)，读取 b和c然后加括号
+                List<Condition> subConditions = condition.getSubConditions();
+                sqlBuilder
+                        .append(BaseConstants.Symbol.LEFT_BRACE)
+                        .append(" ")
+                        .append(generateSql(instanceType, projectIds, predefinedFieldMap, subConditions))
+                        .append(" ")
+                        .append(BaseConstants.Symbol.RIGHT_BRACE);
+            } else {
+                FieldTypeCnName fieldTypeCnName = FieldTypeCnName.ofCode(fieldType).get();
+                switch (fieldTypeCnName) {
+                    case MEMBER:
+                    case MULTI_MEMBER:
+                    case MULTIPLE:
+                    case SINGLE:
+                    case RADIO:
+                    case CHECKBOX:
+                        generateSelectorSql(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType);
+                    case TIME:
+                    case DATETIME:
+                    case DATE:
+                        //时间
 
-                            case TEXT:
-                            case INPUT:
-                            default:
-                                break;
-                        }
+                    case NUMBER:
+                        //数字
 
-
-                    }
-
-
-                });
+                    case TEXT:
+                    case INPUT:
+                    default:
+                        break;
+                }
+            }
+        }
         return sqlBuilder.toString();
     }
 
@@ -159,9 +181,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         String operation = condition.getOperation();
         //选择器，只支持in, not in, is null, is not null
         Assert.isTrue(Operation.SELECTOR_OPERATIONS.contains(operation), DATA_INVALID);
-        operation = resetSelectorOperation(operation);
+        String linkedOperation = resetSelectorOperation(operation);
         List<? extends Object> values = getOptionValues(condition);
-        /////
         boolean isPredefined = field.getPredefined();
         String alias = "ai";
         if (isPredefined) {
@@ -174,19 +195,30 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 case FieldCode.TAG:
                     break;
                 case FieldCode.FIX_VERSION:
-                    generateLinkedTableSql(sqlBuilder, operation, values, fieldTable, alias, "and relation_type = 'fix'");
+                    generateLinkedTableSql(sqlBuilder, linkedOperation, values, fieldTable, alias, "and relation_type = 'fix'");
                     break;
                 case FieldCode.INFLUENCE_VERSION:
-                    generateLinkedTableSql(sqlBuilder, operation, values, fieldTable, alias, "and relation_type = 'influence'");
+                    generateLinkedTableSql(sqlBuilder, linkedOperation, values, fieldTable, alias, "and relation_type = 'influence'");
                     break;
                 default:
                     if (!isLinkedTable) {
+                        //主表字段
                         String mainTableFilterColumn = buildMainTableFilterColumn(fieldTable.getField(), alias);
-                        sqlBuilder.append(
-                                String.format(SQL_TEMPLATE_SELF_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, operation, StringUtils.join(values, BaseConstants.Symbol.COMMA)));
+                        if (Operation.isNull(operation)) {
+                            sqlBuilder.append(String.format(SQL_TEMPLATE_SELF_TABLE_IS_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                        } else if (Operation.isNotNull(operation)) {
+                            sqlBuilder.append(String.format(SQL_TEMPLATE_SELF_TABLE_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                        } else {
+                            sqlBuilder.append(
+                                    String.format(
+                                            SQL_TEMPLATE_SELF_TABLE_IN_OR_NOT_IN,
+                                            mainTableFilterColumn,
+                                            operation,
+                                            StringUtils.join(values, BaseConstants.Symbol.COMMA)));
+                        }
                     } else {
                         //关联表
-                        generateLinkedTableSql(sqlBuilder, operation, values, fieldTable, alias, "");
+                        generateLinkedTableSql(sqlBuilder, linkedOperation, values, fieldTable, alias, "");
                     }
                     break;
             }
@@ -199,7 +231,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     String.format(
                             SQL_TEMPLATE_CUSTOM_FIELD_IN_OR_NOT_IN,
                             mainTableFilterColumn,
-                            operation,
+                            linkedOperation,
                             StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
                             fieldId,
                             StringUtils.join(values, BaseConstants.Symbol.COMMA),
@@ -234,7 +266,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     }
 
     private String resetSelectorOperation(String operation) {
-        //选择器情况 is null == not in; is not null = in
+        //关联关系时，选择器情况 is null == not in; is not null = in
         if (Operation.isNull(operation)) {
             operation = Operation.NOT_IN.toString();
         }
