@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.v2.impl;
 import static org.hzero.core.base.BaseConstants.ErrorCode.DATA_INVALID;
 import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,6 +25,7 @@ import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.enums.InstanceType;
+import io.choerodon.core.exception.CommonException;
 
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.Pair;
@@ -50,6 +52,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     public static final String SQL_YYYY_MM_DD_HH_MM = "%Y-%m-%d %H:%i";
 
+    public static final String SINGLE_QUOT = "'";
+
     /**
      * ==============下拉框=================
      */
@@ -71,6 +75,10 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     public static final String SQL_SELF_TABLE_IS_NOT_NULL = " (%s is not null) ";
 
+    public static final String SQL_SELF_TABLE_EQUAL = " (%s %s %s) ";
+
+    public static final String SQL_LIKE_VALUE = " CONCAT(CONCAT('%s' ,'%s') ,'%s') ";
+
     /**
      * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
      */
@@ -80,16 +88,18 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
      */
     public static final String SQL_CUSTOM_FIELD_IN_OR_NOT_IN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and option_id in ( %s ) and scheme_code = '%s') ";
 
+    public static final String SQL_CUSTOM_FIELD_EQUAL_OR_LIKE = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s %s and scheme_code = '%s') ";
+
 
     /**
      * ================日期===============
      */
 
-    public static final String SQL_CUSTOM_FIELD_DATE_BETWEEN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s >= '%s' and %s <= '%s' and scheme_code = '%s') ";
+    public static final String SQL_CUSTOM_FIELD_DATE_BETWEEN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s >= %s and %s <= %s and scheme_code = '%s') ";
 
-    public static final String SQL_CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and date_value %s and scheme_code = '%s') ";
+    public static final String SQL_CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s and scheme_code = '%s') ";
 
-    public static final String SQL_DATE_BETWEEN = " ( %s >= '%s' and %s <= '%s' ) ";
+    public static final String SQL_DATE_BETWEEN = " ( %s >= %s and %s <= %s ) ";
 
     public static final String SQL_DATE_FORMATTER = "DATE_FORMAT(%s, '%s')";
 
@@ -184,11 +194,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     case TIME:
                     case DATETIME:
                     case DATE:
-                        generateDateSql(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType);
+                        generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, Date.class);
                     case NUMBER:
-                        //数字
+                        generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, BigDecimal.class);
                     case TEXT:
                     case INPUT:
+                        generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, String.class);
                     default:
                         break;
                 }
@@ -211,51 +222,64 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 .append(BaseConstants.Symbol.RIGHT_BRACE);
     }
 
-    private void generateDateSql(StringBuilder sqlBuilder,
-                                 Map<String, FieldTableVO> predefinedFieldMap,
-                                 Condition condition,
-                                 Set<Long> projectIds,
-                                 InstanceType instanceType) {
+    private void generateSqlByClazz(StringBuilder sqlBuilder,
+                                    Map<String, FieldTableVO> predefinedFieldMap,
+                                    Condition condition,
+                                    Set<Long> projectIds,
+                                    InstanceType instanceType,
+                                    Class clazz) {
         Field field = condition.getField();
         String operation = condition.getOperation();
-        //时间 between/is_null/is_not_null
-        Assert.isTrue(Operation.DATE_OPERATIONS.contains(operation), DATA_INVALID);
-        Pair<Date, Date> datePair = getDateValues(condition);
+        List<String> options = new ArrayList<>();
+        //判断与类型相关的操作符
+        if (clazz == Date.class || clazz == BigDecimal.class) {
+            options.addAll(Operation.DATE_OR_NUMBER_OPERATIONS);
+        } else if (clazz == String.class) {
+            options.addAll(Operation.STRING_OPERATIONS);
+        }
+        Assert.isTrue(options.contains(operation), DATA_INVALID);
+        String fieldCode = field.getFieldCode();
+        Pair<String, String> dataPair = getPairValues(condition, clazz, field);
         boolean isPredefined = field.getPredefined();
         String alias = "ai";
         if (isPredefined) {
-            String fieldCode = field.getFieldCode();
             FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
             Assert.notNull(fieldTable, DATA_INVALID);
-            String column = buildDateColumn(fieldTable.getField(), alias, fieldCode);
-            String patter = queryPatterByFieldCode(fieldCode);
-            DateFormat dateFormat = new SimpleDateFormat(patter);
-            appendPredefinedDateSql(sqlBuilder, operation, datePair, column, dateFormat);
+            String column = buildColumnByCode(fieldTable.getField(), alias, fieldCode);
+            appendPredefinedDateSql(sqlBuilder, operation, dataPair, column);
         } else {
             String primaryKey = "issue_id";
             String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
             String schemeCode = instanceType.getSchemeCode();
-            appendCustomDateSql(sqlBuilder, projectIds, operation, datePair, mainTableFilterColumn, field, schemeCode);
+            appendCustomDateSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
         }
     }
 
     private void appendCustomDateSql(StringBuilder sqlBuilder,
                                      Set<Long> projectIds,
                                      String operation,
-                                     Pair<Date, Date> datePair,
+                                     Pair<String, String> datePair,
                                      String mainTableFilterColumn,
                                      Field field,
                                      String schemeCode) {
-        String patter = BaseConstants.Pattern.DATETIME;
         Long fieldId = field.getFieldId();
         String fieldType = field.getFieldType();
-        //时间选择器格式化
-        String columnName = "date_value";
-        if (FieldTypeCnName.TIME.equals(FieldTypeCnName.ofCode(fieldType).get())) {
-            patter = BaseConstants.Pattern.TIME_SS;
-            columnName = "DATE_FORMAT(date_value, '%H:%i:%s')";
+        String columnName;
+        if (FieldTypeCnName.TIME_TYPES.contains(fieldType)) {
+            columnName = "date_value";
+        } else if (FieldTypeCnName.NUMBER_TYPES.contains(fieldType)) {
+            columnName = "number_value";
+        } else if (FieldTypeCnName.INPUT.equals(fieldType)) {
+            columnName = "string_value";
+        } else if (FieldTypeCnName.TEXT.equals(fieldType)) {
+            columnName = "text_value";
+        } else {
+            throw new CommonException("error.illegal.field.type");
         }
-        DateFormat dateFormat = new SimpleDateFormat(patter);
+        if (FieldTypeCnName.TIME.getCode().equals(fieldType)) {
+            //时间选择器格式化
+            columnName = "DATE_FORMAT(" + columnName + ", '%H:%i:%s')";
+        }
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
                 sqlBuilder.append(
@@ -266,9 +290,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
                                 fieldId,
                                 columnName,
-                                dateFormat.format(datePair.getFirst()),
+                                datePair.getFirst(),
                                 columnName,
-                                dateFormat.format(datePair.getSecond()),
+                                datePair.getSecond(),
                                 schemeCode));
                 break;
             case IS_NOT_NULL:
@@ -279,6 +303,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 Operation.IN.toString(),
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
                                 fieldId,
+                                columnName,
                                 " is not null ",
                                 schemeCode));
                 break;
@@ -290,7 +315,36 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 Operation.IN.toString(),
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
                                 fieldId,
+                                columnName,
                                 " is null ",
+                                schemeCode));
+                break;
+            case EQUAL:
+                String value = datePair.getFirst();
+                sqlBuilder.append(
+                        String.format(
+                                SQL_CUSTOM_FIELD_EQUAL_OR_LIKE,
+                                mainTableFilterColumn,
+                                Operation.IN.toString(),
+                                StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
+                                fieldId,
+                                columnName,
+                                "=",
+                                value,
+                                schemeCode));
+                break;
+            case LIKE:
+                String valueStr = String.format(SQL_LIKE_VALUE, "%", datePair.getFirst(), "%");
+                sqlBuilder.append(
+                        String.format(
+                                SQL_CUSTOM_FIELD_EQUAL_OR_LIKE,
+                                mainTableFilterColumn,
+                                Operation.IN.toString(),
+                                StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
+                                fieldId,
+                                columnName,
+                                "like",
+                                valueStr,
                                 schemeCode));
                 break;
             default:
@@ -301,18 +355,17 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     private void appendPredefinedDateSql(StringBuilder sqlBuilder,
                                          String operation,
-                                         Pair<Date, Date> datePair,
-                                         String column,
-                                         DateFormat dateFormat) {
+                                         Pair<String, String> datePair,
+                                         String column) {
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
                 sqlBuilder.append(
                         String.format(
                                 SQL_DATE_BETWEEN,
                                 column,
-                                dateFormat.format(datePair.getFirst()),
+                                datePair.getFirst(),
                                 column,
-                                dateFormat.format(datePair.getSecond())));
+                                datePair.getSecond()));
                 break;
             case IS_NOT_NULL:
                 sqlBuilder.append(String.format(SQL_SELF_TABLE_IS_NOT_NULL, column));
@@ -320,21 +373,38 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IS_NULL:
                 sqlBuilder.append(String.format(SQL_SELF_TABLE_IS_NULL, column));
                 break;
+            case EQUAL:
+                String value = datePair.getFirst();
+                sqlBuilder.append(String.format(SQL_SELF_TABLE_EQUAL, column, "=", value));
+                break;
+            case LIKE:
+                String valueStr = String.format(SQL_LIKE_VALUE, "%", datePair.getFirst(), "%");
+                sqlBuilder.append(String.format(SQL_SELF_TABLE_EQUAL, column, "like", valueStr));
+                break;
             default:
                 // =, >, >=, <, <=
                 break;
         }
     }
 
-    private String queryPatterByFieldCode(String fieldCode) {
-        if (DATETIME_MM_FIELD_LIST.contains(fieldCode)) {
-            return BaseConstants.Pattern.DATETIME_MM;
+    private String queryPatterByFieldCode(Field field) {
+        String patter = BaseConstants.Pattern.DATETIME;
+        if (field.getPredefined()) {
+            //预定义
+            String fieldCode = field.getFieldCode();
+            if (DATETIME_MM_FIELD_LIST.contains(fieldCode)) {
+                patter = BaseConstants.Pattern.DATETIME_MM;
+            }
         } else {
-            return BaseConstants.Pattern.DATETIME;
+            String fieldType = field.getFieldType();
+            if (FieldTypeCnName.TIME.getCode().equals(fieldType)) {
+                patter = BaseConstants.Pattern.TIME_SS;
+            }
         }
+        return patter;
     }
 
-    private String buildDateColumn(String column, String alias, String fieldCode) {
+    private String buildColumnByCode(String column, String alias, String fieldCode) {
         String thisColumn = buildMainTableFilterColumn(column, alias);
         if (DATETIME_MM_FIELD_LIST.contains(fieldCode)) {
             //需要处理特殊日期格式
@@ -343,31 +413,51 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return thisColumn;
     }
 
-    private Pair<Date, Date> getDateValues(Condition condition) {
+    private Pair<String, String> getPairValues(Condition condition,
+                                               Class clazz,
+                                               Field field) {
         Pair<Value, Value> pair = condition.getBetweenValues();
         String operation = condition.getOperation();
         if (Operation.isNotNull(operation) || Operation.isNull(operation)) {
             //为空或不为空 跳过
             return Pair.of(null, null);
         }
-        Date firstDate = null;
-        Date secondDate = null;
+        String first = null;
+        String second = null;
         if (pair == null) {
             Value value = condition.getValue();
             Assert.notNull(value, DATA_INVALID);
-            firstDate = value.getValueDate();
-            Assert.notNull(firstDate, DATA_INVALID);
+            first = getValueByClazz(clazz, value, field);
         } else {
             Value firstValue = pair.getFirst();
             Value secondValue = pair.getSecond();
             Assert.notNull(firstValue, DATA_INVALID);
             Assert.notNull(secondValue, DATA_INVALID);
-            firstDate = firstValue.getValueDate();
-            secondDate = secondValue.getValueDate();
-            Assert.notNull(firstDate, DATA_INVALID);
-            Assert.notNull(secondDate, DATA_INVALID);
+            first = getValueByClazz(clazz, firstValue, field);
+            second = getValueByClazz(clazz, secondValue, field);
         }
-        return Pair.of(firstDate, secondDate);
+        return Pair.of(first, second);
+    }
+
+    private String getValueByClazz(Class clazz, Value value, Field field) {
+        String valueStr = null;
+        if (clazz == Date.class) {
+            String patter = queryPatterByFieldCode(field);
+            DateFormat dateFormat = new SimpleDateFormat(patter);
+            Date date = value.getValueDate();
+            Assert.notNull(date, DATA_INVALID);
+            //日期value需要拼上'
+            valueStr = new StringBuilder(SINGLE_QUOT).append(dateFormat.format(date)).append(SINGLE_QUOT).toString();
+        } else if (clazz == BigDecimal.class) {
+            BigDecimal bigDecimal = value.getValueDecimal();
+            Assert.notNull(bigDecimal, DATA_INVALID);
+            valueStr = bigDecimal.toString();
+        } else if (clazz == String.class) {
+            valueStr = value.getValueStr();
+            Assert.notNull(valueStr, DATA_INVALID);
+            valueStr = new StringBuilder(SINGLE_QUOT).append(valueStr).append(SINGLE_QUOT).toString();
+        }
+        return valueStr;
     }
 
     private void generateSelectorSql(StringBuilder sqlBuilder,
