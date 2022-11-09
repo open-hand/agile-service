@@ -55,9 +55,17 @@ public class SearchConstant {
                         IS_NULL.toString(),
                         IS_NOT_NULL.toString());
 
-        public static final List<String> DATE_OPERATIONS =
+        public static final List<String> DATE_OR_NUMBER_OPERATIONS =
                 Arrays.asList(
                         BETWEEN.toString(),
+                        IS_NULL.toString(),
+                        IS_NOT_NULL.toString(),
+                        EQUAL.toString());
+
+        public static final List<String> STRING_OPERATIONS =
+                Arrays.asList(
+                        LIKE.toString(),
+                        EQUAL.toString(),
                         IS_NULL.toString(),
                         IS_NOT_NULL.toString());
 
