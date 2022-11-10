@@ -33,7 +33,7 @@ public class IssueV2Controller {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页查询问题列表，包含子任务")
-    @PostMapping(value = "/agile/work_list")
+    @PostMapping(value = "/work_list")
     public ResponseEntity<Page<IssueListFieldKVVO>> pagedQueryWorkList(@ApiIgnore
                                                                        @ApiParam(value = "分页信息", required = true)
                                                                        @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
