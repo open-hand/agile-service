@@ -41,7 +41,7 @@ public class IssueV2Controller {
                                                                        @ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId,
                                                                        @ApiParam(value = "查询参数", required = true)
-                                                                       @RequestBody(required = false) SearchParamVO searchParamVO,
+                                                                       @RequestBody SearchParamVO searchParamVO,
                                                                        @ApiParam(value = "查询参数", required = true)
                                                                        @RequestParam(required = false) Long organizationId) {
         return Results.success(issueService.pagedQueryWorkList(projectId, searchParamVO, pageRequest, organizationId));

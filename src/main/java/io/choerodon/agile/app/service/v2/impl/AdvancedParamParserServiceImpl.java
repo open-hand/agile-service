@@ -191,15 +191,19 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     case RADIO:
                     case CHECKBOX:
                         generateSelectorSql(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType);
+                        break;
                     case TIME:
                     case DATETIME:
                     case DATE:
                         generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, Date.class);
+                        break;
                     case NUMBER:
                         generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, BigDecimal.class);
+                        break;
                     case TEXT:
                     case INPUT:
                         generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, String.class);
+                        break;
                     default:
                         break;
                 }
