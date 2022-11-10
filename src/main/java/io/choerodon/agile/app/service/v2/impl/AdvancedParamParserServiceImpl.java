@@ -572,6 +572,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         //todo list object tag处理
         List<? extends Object> values;
         Value value = condition.getValue();
+        if (value == null) {
+            return null;
+        }
         Field field = condition.getField();
         boolean noEncryptFlag = Boolean.TRUE.equals(field.getNoEncryptFlag());
         if (noEncryptFlag) {
