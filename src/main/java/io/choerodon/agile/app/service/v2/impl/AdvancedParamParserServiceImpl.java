@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.validator.AdvancedParamValidator;
 import io.choerodon.agile.api.vo.FieldTableVO;
@@ -458,7 +459,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             Date date = value.getValueDate();
             Assert.notNull(date, DATA_INVALID);
             //日期value需要拼上'
-            valueStr = new StringBuilder(SINGLE_QUOT).append(dateFormat.format(date)).append(SINGLE_QUOT).toString();
+            valueStr = appendSingleQuot(dateFormat.format(date));
         } else if (clazz == BigDecimal.class) {
             BigDecimal bigDecimal = value.getValueDecimal();
             Assert.notNull(bigDecimal, DATA_INVALID);
@@ -466,9 +467,13 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         } else if (clazz == String.class) {
             valueStr = value.getValueStr();
             Assert.notNull(valueStr, DATA_INVALID);
-            valueStr = new StringBuilder(SINGLE_QUOT).append(valueStr).append(SINGLE_QUOT).toString();
+            valueStr = appendSingleQuot(valueStr);
         }
         return valueStr;
+    }
+
+    private String appendSingleQuot(String value) {
+        return new StringBuilder(SINGLE_QUOT).append(value).append(SINGLE_QUOT).toString();
     }
 
     private String generateSelectorSql(Map<String, FieldTableVO> predefinedFieldMap,
@@ -636,8 +641,16 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         }
         Field field = condition.getField();
         boolean noEncryptFlag = Boolean.TRUE.equals(field.getNoEncryptFlag());
+        boolean isEnv = FieldCode.ENVIRONMENT.equals(field.getFieldCode());
         if (noEncryptFlag) {
             values = value.getNoEncryptIdList();
+        } else if (isEnv) {
+            List<String> valueStrList = value.getValueStrList();
+            List<String> result = new ArrayList<>();
+            if(!ObjectUtils.isEmpty(valueStrList)) {
+                valueStrList.forEach(v -> result.add(appendSingleQuot(v)));
+            }
+            values = result;
         } else {
             values = value.getValueIdList();
         }
