@@ -869,7 +869,7 @@
         </foreach>
         AND ai.apply_type = 'agile'
         <if test="quickFilterSql != null">
-            AND ai.issue_id IN (${filterSql})
+            AND ai.issue_id IN (${quickFilterSql})
         </if>
         <if test="advancedSql != null and advancedSql.length() > 0">
             and ${advancedSql}
@@ -997,7 +997,7 @@
             </foreach>
             AND ai.apply_type = 'agile'
             <if test="quickFilterSql != null">
-                AND ai.issue_id IN (${filterSql})
+                AND ai.issue_id IN (${quickFilterSql})
             </if>
             <if test="advancedSql != null and advancedSql.length() > 0">
                 and ${advancedSql}
@@ -1071,7 +1071,7 @@
         </foreach>
         and ai.apply_type = 'agile'
         <if test="quickFilterSql != null">
-            AND ai.issue_id IN (${filterSql})
+            AND ai.issue_id IN (${quickFilterSql})
         </if>
         <if test="advancedSql != null and advancedSql.length() > 0">
             and ${advancedSql}
@@ -1262,7 +1262,7 @@
         </foreach>
         )
         <if test="quickFilterSql != null">
-            AND ai.issue_id IN (${filterSql})
+            AND ai.issue_id IN (${quickFilterSql})
         </if>
         <if test="advancedSql != null and advancedSql.length() > 0">
             and ${advancedSql}
