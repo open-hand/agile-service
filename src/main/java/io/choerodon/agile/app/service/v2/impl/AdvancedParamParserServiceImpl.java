@@ -78,7 +78,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     public static final String SQL_SELF_TABLE_EQUAL = " (%s %s %s) ";
 
-    public static final String SQL_LIKE_VALUE = " CONCAT(CONCAT('%s' ,'%s') ,'%s') ";
+    public static final String SQL_LIKE_VALUE = " CONCAT(CONCAT('%s' , %s) ,'%s') ";
 
     /**
      * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
@@ -281,9 +281,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             columnName = "date_value";
         } else if (FieldTypeCnName.NUMBER_TYPES.contains(fieldType)) {
             columnName = "number_value";
-        } else if (FieldTypeCnName.INPUT.equals(fieldType)) {
+        } else if (FieldTypeCnName.INPUT.getCode().equals(fieldType)) {
             columnName = "string_value";
-        } else if (FieldTypeCnName.TEXT.equals(fieldType)) {
+        } else if (FieldTypeCnName.TEXT.getCode().equals(fieldType)) {
             columnName = "text_value";
         } else {
             throw new CommonException("error.illegal.field.type");
