@@ -164,7 +164,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                         Set<Long> projectIds) {
         advancedParamValidator.validate(searchParamVO);
         Map<String, FieldTableVO> predefinedFieldMap = buildPredefinedFieldMap();
-        List<Condition> conditions = searchParamVO.getConditions();
+        List<Condition> conditions = new ArrayList<>();
+        conditions.addAll(searchParamVO.getConditions());
+        conditions.addAll(searchParamVO.getAdvancedConditions());
         return generateSql(instanceType, projectIds, predefinedFieldMap, conditions);
     }
 
