@@ -33,17 +33,23 @@ public class SearchConstant {
 
 
     public enum Operation {
-        EQUAL,
-        LIKE,
-        IN,
-        NOT_IN,
-        BETWEEN,
-        IS_NULL,
-        IS_NOT_NULL,
+        EQUAL("="),
+        LIKE("like"),
+        IN("in"),
+        NOT_IN("not in"),
+        BETWEEN(" %s >= %s and %s <= %s"),
+        IS_NULL("not in"),
+        IS_NOT_NULL("in"),
         /**
          * 括号
          */
-        BRACKET;
+        BRACKET("");
+
+        private String opt;
+
+        Operation(String opt) {
+            this.opt = opt;
+        }
 
         /**
          * 选择器支持的操作
@@ -105,6 +111,10 @@ public class SearchConstant {
                 }
             }
             return false;
+        }
+
+        public String getOpt() {
+            return this.opt;
         }
     }
 
