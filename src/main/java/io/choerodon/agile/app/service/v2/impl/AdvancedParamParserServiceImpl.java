@@ -82,11 +82,15 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     /**
      * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
      */
-    public static final String SQL_LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where %s in ( %s ) %s) ";
+    public static final String SQL_LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and %s in ( %s ) %s) ";
+
+    public static final String SQL_LINKED_TABLE_IS_NULL_OR_NOT_NULL = " %s %s ( select %s from %s where project_id in (%s) %s) ";
     /**
      * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
      */
     public static final String SQL_CUSTOM_FIELD_IN_OR_NOT_IN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and option_id in ( %s ) and scheme_code = '%s') ";
+
+    public static final String SQL_CUSTOM_FIELD_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and scheme_code = '%s') ";
 
     public static final String SQL_CUSTOM_FIELD_EQUAL_OR_LIKE = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s %s and scheme_code = '%s') ";
 
@@ -190,19 +194,19 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     case SINGLE:
                     case RADIO:
                     case CHECKBOX:
-                        generateSelectorSql(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType);
+                        sqlBuilder.append(generateSelectorSql(predefinedFieldMap, condition, projectIds, instanceType));
                         break;
                     case TIME:
                     case DATETIME:
                     case DATE:
-                        generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, Date.class);
+                        sqlBuilder.append(generateSqlByClazz(predefinedFieldMap, condition, projectIds, instanceType, Date.class));
                         break;
                     case NUMBER:
-                        generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, BigDecimal.class);
+                        sqlBuilder.append(generateSqlByClazz(predefinedFieldMap, condition, projectIds, instanceType, BigDecimal.class));
                         break;
                     case TEXT:
                     case INPUT:
-                        generateSqlByClazz(sqlBuilder, predefinedFieldMap, condition, projectIds, instanceType, String.class);
+                        sqlBuilder.append(generateSqlByClazz(predefinedFieldMap, condition, projectIds, instanceType, String.class));
                         break;
                     default:
                         break;
@@ -226,12 +230,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 .append(BaseConstants.Symbol.RIGHT_BRACE);
     }
 
-    private void generateSqlByClazz(StringBuilder sqlBuilder,
-                                    Map<String, FieldTableVO> predefinedFieldMap,
-                                    Condition condition,
-                                    Set<Long> projectIds,
-                                    InstanceType instanceType,
-                                    Class clazz) {
+    private String generateSqlByClazz(Map<String, FieldTableVO> predefinedFieldMap,
+                                      Condition condition,
+                                      Set<Long> projectIds,
+                                      InstanceType instanceType,
+                                      Class clazz) {
+        StringBuilder sqlBuilder = new StringBuilder();
         Field field = condition.getField();
         String operation = condition.getOperation();
         List<String> options = new ArrayList<>();
@@ -257,6 +261,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             String schemeCode = instanceType.getSchemeCode();
             appendCustomDateSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
         }
+        return sqlBuilder.toString();
     }
 
     private void appendCustomDateSql(StringBuilder sqlBuilder,
@@ -464,16 +469,15 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return valueStr;
     }
 
-    private void generateSelectorSql(StringBuilder sqlBuilder,
-                                     Map<String, FieldTableVO> predefinedFieldMap,
-                                     Condition condition,
-                                     Set<Long> projectIds,
-                                     InstanceType instanceType) {
+    private String generateSelectorSql(Map<String, FieldTableVO> predefinedFieldMap,
+                                       Condition condition,
+                                       Set<Long> projectIds,
+                                       InstanceType instanceType) {
+        StringBuilder sqlBuilder = new StringBuilder();
         Field field = condition.getField();
         String operation = condition.getOperation();
         //选择器，只支持in, not in, is null, is not null
         Assert.isTrue(Operation.SELECTOR_OPERATIONS.contains(operation), DATA_INVALID);
-        String linkedOperation = resetSelectorOperation(operation);
         List<? extends Object> values = getOptionValues(condition);
         boolean isPredefined = field.getPredefined();
         String alias = "ai";
@@ -487,62 +491,126 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 case FieldCode.TAG:
                     break;
                 case FieldCode.FIX_VERSION:
-                    generateLinkedTableSql(sqlBuilder, linkedOperation, values, fieldTable, alias, "and relation_type = 'fix'");
+                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'"));
                     break;
                 case FieldCode.INFLUENCE_VERSION:
-                    generateLinkedTableSql(sqlBuilder, linkedOperation, values, fieldTable, alias, "and relation_type = 'influence'");
+                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'influence'"));
                     break;
                 default:
                     if (!isLinkedTable) {
                         //主表字段
-                        String mainTableFilterColumn = buildMainTableFilterColumn(fieldTable.getField(), alias);
-                        if (Operation.isNull(operation)) {
-                            sqlBuilder.append(String.format(SQL_SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn));
-                        } else if (Operation.isNotNull(operation)) {
-                            sqlBuilder.append(String.format(SQL_SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn));
-                        } else {
-                            sqlBuilder.append(
-                                    String.format(
-                                            SQL_SELF_TABLE_IN_OR_NOT_IN,
-                                            mainTableFilterColumn,
-                                            operation,
-                                            StringUtils.join(values, BaseConstants.Symbol.COMMA)));
-                        }
+                        sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable));
                     } else {
                         //关联表
-                        generateLinkedTableSql(sqlBuilder, linkedOperation, values, fieldTable, alias, "");
+                        sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, ""));
                     }
                     break;
             }
         } else {
-            String primaryKey = "issue_id";
-            String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
-            Long fieldId = field.getFieldId();
-            String schemeCode = instanceType.getSchemeCode();
-            sqlBuilder.append(
-                    String.format(
-                            SQL_CUSTOM_FIELD_IN_OR_NOT_IN,
-                            mainTableFilterColumn,
-                            linkedOperation,
-                            StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
-                            fieldId,
-                            StringUtils.join(values, BaseConstants.Symbol.COMMA),
-                            schemeCode));
+            sqlBuilder.append(generateCustomFieldSelectorSql(alias, field, instanceType, operation, projectIds, values));
         }
+        return sqlBuilder.toString();
     }
 
-    private void generateLinkedTableSql(StringBuilder sqlBuilder,
-                                        String operation,
-                                        List<?> values,
-                                        FieldTableVO fieldTable,
-                                        String alias,
-                                        String additionalCondition) {
+    private String generateCustomFieldSelectorSql(String alias,
+                                                  Field field,
+                                                  InstanceType instanceType,
+                                                  String operation,
+                                                  Set<Long> projectIds,
+                                                  List<? extends Object> values) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        String primaryKey = "issue_id";
+        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
+        Long fieldId = field.getFieldId();
+        String schemeCode = instanceType.getSchemeCode();
+        Operation opt = Operation.valueOf(operation);
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        switch (opt) {
+            case IN:
+            case NOT_IN:
+                sqlBuilder.append(
+                        String.format(
+                                SQL_CUSTOM_FIELD_IN_OR_NOT_IN,
+                                mainTableFilterColumn,
+                                opt.getOpt(),
+                                projectIdStr,
+                                fieldId,
+                                StringUtils.join(values, BaseConstants.Symbol.COMMA),
+                                schemeCode));
+                break;
+            case IS_NULL:
+            case IS_NOT_NULL:
+                sqlBuilder.append(
+                        String.format(
+                                SQL_CUSTOM_FIELD_IS_NULL_OR_NOT_NULL,
+                                mainTableFilterColumn,
+                                opt.getOpt(),
+                                projectIdStr,
+                                fieldId,
+                                schemeCode));
+                break;
+            default:
+                break;
+        }
+        return sqlBuilder.toString();
+    }
+
+    private String generateSelfTableSql(String operation,
+                                        List<?> values, String alias,
+                                        FieldTableVO fieldTable) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        Operation opt = Operation.valueOf(operation);
+        String mainTableFilterColumn = buildMainTableFilterColumn(fieldTable.getField(), alias);
+        switch (opt) {
+            case IN:
+            case NOT_IN:
+                sqlBuilder.append(
+                        String.format(
+                                SQL_SELF_TABLE_IN_OR_NOT_IN,
+                                mainTableFilterColumn,
+                                opt.getOpt(),
+                                StringUtils.join(values, BaseConstants.Symbol.COMMA)));
+                break;
+            case IS_NULL:
+                sqlBuilder.append(String.format(SQL_SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                break;
+            case IS_NOT_NULL:
+                sqlBuilder.append(String.format(SQL_SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                break;
+            default:
+                break;
+        }
+        return sqlBuilder.toString();
+    }
+
+    private String generateLinkedTableSql(String operation,
+                                          List<?> values,
+                                          FieldTableVO fieldTable,
+                                          String alias,
+                                          Set<Long> projectIds,
+                                          String additionalCondition) {
+        StringBuilder sqlBuilder = new StringBuilder();
         String dbColumn = fieldTable.getField();
         String primaryKey = "issue_id";
         String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
         String table = fieldTable.getTable();
-        sqlBuilder.append(
-                String.format(SQL_LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, operation, primaryKey, table, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        Operation opt = Operation.valueOf(operation);
+        switch (opt) {
+            case IN:
+            case NOT_IN:
+                sqlBuilder.append(
+                        String.format(SQL_LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
+                break;
+            case IS_NULL:
+            case IS_NOT_NULL:
+                sqlBuilder.append(
+                        String.format(SQL_LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, additionalCondition));
+                break;
+            default:
+                break;
+        }
+        return sqlBuilder.toString();
     }
 
     private String buildMainTableFilterColumn(String column,
@@ -555,17 +623,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             mainTableFilterColumn = alias + BaseConstants.Symbol.POINT + column;
         }
         return mainTableFilterColumn;
-    }
-
-    private String resetSelectorOperation(String operation) {
-        //关联关系时，选择器情况 is null == not in; is not null = in
-        if (Operation.isNull(operation)) {
-            operation = Operation.NOT_IN.toString();
-        }
-        if (Operation.isNotNull(operation)) {
-            operation = Operation.IN.toString();
-        }
-        return operation;
     }
 
     private List<? extends Object> getOptionValues(Condition condition) {
