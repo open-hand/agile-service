@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,10 +25,12 @@ import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.enums.InstanceType;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.core.exception.CommonException;
 
 import org.hzero.core.base.BaseConstants;
@@ -48,24 +48,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     private AdvancedParamValidator advancedParamValidator;
     @Autowired
     private ObjectMapper objectMapper;
-
-    private static final String TABLE_AGILE_ISSUE = "agile_issue";
-    private static final String TABLE_AGILE_ISSUE_SPRINT_REL = "agile_issue_sprint_rel";
-    private static final String TABLE_AGILE_COMPONENT_ISSUE_REL = "agile_component_issue_rel";
-    private static final String TABLE_AGILE_LABEL_ISSUE_REL = "agile_label_issue_rel";
-    private static final String TABLE_AGILE_VERSION_ISSUE_REL = "agile_version_issue_rel";
-    private static final String TABLE_AGILE_ISSUE_PARTICIPANT_REL = "agile_issue_participant_rel";
-    private static final String TABLE_AGILE_ISSUE_PRODUCT_REL = "agile_issue_product_rel";
-    private static final String TABLE_AGILE_TAG_ISSUE_REL = "agile_tag_issue_rel";
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     public static final String SQL_YYYY_MM_DD_HH_MM = "%Y-%m-%d %H:%i";
 
     public static final String SINGLE_QUOT = "'";
-
-
-
-
-    protected static final Map<String, FieldTableVO> PREDEFINED_FIELD_TABLE_MAP;
 
     private static final List<String> DATETIME_MM_FIELD_LIST =
             Arrays.asList(
@@ -74,46 +62,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     FieldCode.ACTUAL_START_TIME,
                     FieldCode.ACTUAL_END_TIME
             );
-
-
-    static {
-        List<FieldTableVO> fieldTableList = Arrays.asList(
-                new FieldTableVO(FieldCode.ISSUE_TYPE, "issue_type_id", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.STATUS, "status_id", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ASSIGNEE, "assignee_id", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.SPRINT, "sprint_id", TABLE_AGILE_ISSUE_SPRINT_REL),
-                new FieldTableVO(FieldCode.PRIORITY, "priority_id", TABLE_AGILE_ISSUE),
-                //todo 特性&史诗
-                new FieldTableVO(FieldCode.FEATURE, "feature_id", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.REPORTER, "reporter_id", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.COMPONENT, "component_id", TABLE_AGILE_COMPONENT_ISSUE_REL),
-                new FieldTableVO(FieldCode.LABEL, "label_id", TABLE_AGILE_LABEL_ISSUE_REL),
-                new FieldTableVO(FieldCode.FIX_VERSION, "version_id", TABLE_AGILE_VERSION_ISSUE_REL),
-                new FieldTableVO(FieldCode.INFLUENCE_VERSION, "version_id", TABLE_AGILE_VERSION_ISSUE_REL),
-                new FieldTableVO(FieldCode.EPIC, "epic_id", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.CREATION_DATE, "creation_date", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.LAST_UPDATE_DATE, "last_update_date", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ESTIMATED_START_TIME, "estimated_start_time", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ESTIMATED_END_TIME, "estimated_end_time", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ACTUAL_START_TIME, "actual_start_time", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ACTUAL_END_TIME, "actual_end_time", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.MAIN_RESPONSIBLE, "main_responsible_id", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ENVIRONMENT, "environment", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.CREATOR, "created_by", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.UPDATOR, "last_updated_by", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.PARTICIPANT, "participant_id", TABLE_AGILE_ISSUE_PARTICIPANT_REL),
-                //todo 特殊处理
-                new FieldTableVO(FieldCode.TAG, null, TABLE_AGILE_TAG_ISSUE_REL),
-                new FieldTableVO(FieldCode.STORY_POINTS, "story_points", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.REMAINING_TIME, "remaining_time", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ESTIMATE_TIME, "estimate_time", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.PRODUCT, "product_id", TABLE_AGILE_ISSUE_PRODUCT_REL)
-                //todo 是否关联燕千云单据
-                //todo 关联燕千云单号
-        );
-        PREDEFINED_FIELD_TABLE_MAP =
-                fieldTableList.stream().collect(Collectors.toMap(FieldTableVO::getName, Function.identity()));
-    }
 
     @Override
     public String parse(InstanceType instanceType,
@@ -212,8 +160,15 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         if (isPredefined) {
             FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
             Assert.notNull(fieldTable, DATA_INVALID);
-            String column = buildColumnByCode(fieldTable.getField(), alias, fieldCode);
-            appendPredefinedSql(sqlBuilder, operation, dataPair, column);
+            switch (fieldCode) {
+                case FieldCode.YQ_CLOUD_NUM:
+                    sqlBuilder.append(generateYqCloudNumSql(operation, dataPair, fieldTable, alias, projectIds));
+                    break;
+                default:
+                    String column = buildColumnByCode(fieldTable.getField(), alias, fieldCode);
+                    appendPredefinedSql(sqlBuilder, operation, dataPair, column);
+                    break;
+            }
         } else {
             String primaryKey = "issue_id";
             String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
@@ -223,10 +178,42 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return sqlBuilder.toString();
     }
 
+    private String generateYqCloudNumSql(String operation,
+                                         Pair<String, String> dataPair,
+                                         FieldTableVO fieldTable,
+                                         String alias,
+                                         Set<Long> projectIds) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        String dbColumn = fieldTable.getField();
+        String primaryKey = "issue_id";
+        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
+        String table = fieldTable.getTable();
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        Operation opt = Operation.valueOf(operation);
+        switch (Operation.valueOf(operation)) {
+            case IS_NOT_NULL:
+            case IS_NULL:
+                sqlBuilder.append(
+                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, " and source = 'yqcloud' and instance_type = 'issue'"));
+                break;
+            case EQUAL:
+                String value = dataPair.getFirst();
+                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), primaryKey, table, projectIdStr, opt.getOpt(), value));
+                break;
+            case LIKE:
+                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
+                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), primaryKey, table, projectIdStr, opt.getOpt(), valueStr));
+                break;
+            default:
+                break;
+        }
+        return sqlBuilder.toString();
+    }
+
     private void appendCustomSql(StringBuilder sqlBuilder,
                                  Set<Long> projectIds,
                                  String operation,
-                                 Pair<String, String> datePair,
+                                 Pair<String, String> dataPair,
                                  String mainTableFilterColumn,
                                  Field field,
                                  String schemeCode) {
@@ -258,9 +245,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
                                 fieldId,
                                 columnName,
-                                datePair.getFirst(),
+                                dataPair.getFirst(),
                                 columnName,
-                                datePair.getSecond(),
+                                dataPair.getSecond(),
                                 schemeCode));
                 break;
             case IS_NOT_NULL:
@@ -288,7 +275,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 schemeCode));
                 break;
             case EQUAL:
-                String value = datePair.getFirst();
+                String value = dataPair.getFirst();
                 sqlBuilder.append(
                         String.format(
                                 CUSTOM_FIELD_EQUAL_OR_LIKE,
@@ -302,7 +289,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 schemeCode));
                 break;
             case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", datePair.getFirst(), "%");
+                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
                 sqlBuilder.append(
                         String.format(
                                 CUSTOM_FIELD_EQUAL_OR_LIKE,
@@ -323,7 +310,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     private void appendPredefinedSql(StringBuilder sqlBuilder,
                                      String operation,
-                                     Pair<String, String> datePair,
+                                     Pair<String, String> dataPair,
                                      String column) {
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
@@ -331,9 +318,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                         String.format(
                                 DATE_BETWEEN,
                                 column,
-                                datePair.getFirst(),
+                                dataPair.getFirst(),
                                 column,
-                                datePair.getSecond()));
+                                dataPair.getSecond()));
                 break;
             case IS_NOT_NULL:
                 sqlBuilder.append(String.format(SELF_TABLE_IS_NOT_NULL, column));
@@ -342,11 +329,11 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 sqlBuilder.append(String.format(SELF_TABLE_IS_NULL, column));
                 break;
             case EQUAL:
-                String value = datePair.getFirst();
+                String value = dataPair.getFirst();
                 sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "=", value));
                 break;
             case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", datePair.getFirst(), "%");
+                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
                 sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "like", valueStr));
                 break;
             default:
@@ -449,7 +436,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             String fieldCode = field.getFieldCode();
             FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
             Assert.notNull(fieldTable, DATA_INVALID);
-            boolean isLinkedTable = !TABLE_AGILE_ISSUE.equals(fieldTable.getTable());
+            boolean isLinkedTable = !SearchConstant.TABLE_AGILE_ISSUE.equals(fieldTable.getTable());
             switch (fieldCode) {
                 case FieldCode.TAG:
                     sqlBuilder.append(generateTagSql(operation, values, fieldTable, alias, projectIds));
@@ -485,7 +472,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         List<TagVO> tags;
         try {
             String json = objectMapper.writeValueAsString(values);
-            tags = objectMapper.readValue(json, new TypeReference<List<TagVO>>() {});
+            tags = objectMapper.readValue(json, new TypeReference<List<TagVO>>() {
+            });
         } catch (JsonProcessingException e) {
             throw new CommonException("error.convert.object.value", e);
         }
@@ -691,7 +679,10 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     }
 
     private Map<String, FieldTableVO> buildPredefinedFieldMap() {
-        Map<String, FieldTableVO> map = new HashMap<>(PREDEFINED_FIELD_TABLE_MAP);
+        Map<String, FieldTableVO> map = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
+        if (agilePluginService != null) {
+            map.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
+        }
         //todo 瀑布，需求，项目群
         return map;
     }

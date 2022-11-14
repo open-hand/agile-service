@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.core.exception.CommonException;
 
 import java.lang.reflect.Field;
@@ -61,7 +62,7 @@ public class FieldCode {
     public static final String PROGRESS_FEEDBACK = "progressFeedback";
     public static final String EMAIL = "email";
     public static final String BELONG_TO_BACKLOG = "belongToBacklog";
-    public static final String PARENT = "parent";
+
     public static final String PROGRESS = "progress";
     // 风险字段：风险分类、影响度、发生概率、临近度、应对策略、预计解决日期、实际解决日期、相关方、发现日期
     public static final String RISK_CATEGORY = "riskCategory";
@@ -76,6 +77,19 @@ public class FieldCode {
 
     public static final String ISSUE_STATUS = "issueStatus";
     public static final String ISSUE_NUM = "issueNum";
+
+    /**
+     * 以下字段数据库中没有对应字段
+     */
+    public static final String PARENT = "parent";
+    public static final String YQ_CLOUD_NUM = "yqCloudNum";
+
+    /**
+     * 模拟系统字段，用于在数据库中没有的，但是界面筛选需要的字段
+     */
+    public static final List<ObjectSchemeFieldDTO> MOCK_FIELDS = Arrays.asList(
+            new ObjectSchemeFieldDTO().setCode(YQ_CLOUD_NUM).setFieldType(FieldTypeCnName.INPUT.getCode())
+    );
 
     private static final List<String> FIELD_CODE_LIST = new ArrayList<>();
 
