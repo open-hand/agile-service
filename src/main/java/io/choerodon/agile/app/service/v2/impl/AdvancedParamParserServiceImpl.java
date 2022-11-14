@@ -10,6 +10,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.validator.AdvancedParamValidator;
 import io.choerodon.agile.api.vo.FieldTableVO;
+import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.api.vo.search.Condition;
@@ -41,6 +45,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     @Autowired
     private AdvancedParamValidator advancedParamValidator;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private static final String TABLE_AGILE_ISSUE = "agile_issue";
     private static final String TABLE_AGILE_ISSUE_SPRINT_REL = "agile_issue_sprint_rel";
@@ -86,6 +92,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     public static final String SQL_LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and %s in ( %s ) %s) ";
 
     public static final String SQL_LINKED_TABLE_IS_NULL_OR_NOT_NULL = " %s %s ( select %s from %s where project_id in (%s) %s) ";
+
+    public static final String SQL_TAG_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and (%s) ) ";
     /**
      * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
      */
@@ -257,23 +265,23 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
             Assert.notNull(fieldTable, DATA_INVALID);
             String column = buildColumnByCode(fieldTable.getField(), alias, fieldCode);
-            appendPredefinedDateSql(sqlBuilder, operation, dataPair, column);
+            appendPredefinedSql(sqlBuilder, operation, dataPair, column);
         } else {
             String primaryKey = "issue_id";
             String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
             String schemeCode = instanceType.getSchemeCode();
-            appendCustomDateSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
+            appendCustomSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
         }
         return sqlBuilder.toString();
     }
 
-    private void appendCustomDateSql(StringBuilder sqlBuilder,
-                                     Set<Long> projectIds,
-                                     String operation,
-                                     Pair<String, String> datePair,
-                                     String mainTableFilterColumn,
-                                     Field field,
-                                     String schemeCode) {
+    private void appendCustomSql(StringBuilder sqlBuilder,
+                                 Set<Long> projectIds,
+                                 String operation,
+                                 Pair<String, String> datePair,
+                                 String mainTableFilterColumn,
+                                 Field field,
+                                 String schemeCode) {
         Long fieldId = field.getFieldId();
         String fieldType = field.getFieldType();
         String columnName;
@@ -365,10 +373,10 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         }
     }
 
-    private void appendPredefinedDateSql(StringBuilder sqlBuilder,
-                                         String operation,
-                                         Pair<String, String> datePair,
-                                         String column) {
+    private void appendPredefinedSql(StringBuilder sqlBuilder,
+                                     String operation,
+                                     Pair<String, String> datePair,
+                                     String column) {
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
                 sqlBuilder.append(
@@ -496,6 +504,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             boolean isLinkedTable = !TABLE_AGILE_ISSUE.equals(fieldTable.getTable());
             switch (fieldCode) {
                 case FieldCode.TAG:
+                    sqlBuilder.append(generateTagSql(operation, values, fieldTable, alias, projectIds));
                     break;
                 case FieldCode.FIX_VERSION:
                     sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'"));
@@ -515,6 +524,75 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             }
         } else {
             sqlBuilder.append(generateCustomFieldSelectorSql(alias, field, instanceType, operation, projectIds, values));
+        }
+        return sqlBuilder.toString();
+    }
+
+    private String generateTagSql(String operation,
+                                  List<? extends Object> values,
+                                  FieldTableVO fieldTable,
+                                  String alias,
+                                  Set<Long> projectIds) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        List<TagVO> tags;
+        try {
+            String json = objectMapper.writeValueAsString(values);
+            tags = objectMapper.readValue(json, new TypeReference<List<TagVO>>() {});
+        } catch (JsonProcessingException e) {
+            throw new CommonException("error.convert.object.value", e);
+        }
+        if (tags == null) {
+            return sqlBuilder.toString();
+        }
+        String primaryKey = "issue_id";
+        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
+        Operation opt = Operation.valueOf(operation);
+        Iterator<TagVO> tagIterator = tags.iterator();
+        StringBuilder conditionBuilder = new StringBuilder();
+        while (tagIterator.hasNext()) {
+            TagVO tag = tagIterator.next();
+            conditionBuilder.append(BaseConstants.Symbol.LEFT_BRACE)
+                    .append("tag_project_id = ")
+                    .append(tag.getProjectId())
+                    .append(" and app_service_code = ")
+                    .append(appendSingleQuot(tag.getAppServiceCode()))
+                    .append(" and tag_name = ")
+                    .append(appendSingleQuot(tag.getTagName()))
+                    .append(BaseConstants.Symbol.RIGHT_BRACE);
+            if (tagIterator.hasNext()) {
+                conditionBuilder.append(" or ");
+            }
+        }
+        String conditionSql = conditionBuilder.toString();
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        String table = fieldTable.getTable();
+        switch (opt) {
+            case IN:
+            case NOT_IN:
+                sqlBuilder.append(
+                        String.format(
+                                SQL_TAG_IN_OR_NOT_IN,
+                                mainTableFilterColumn,
+                                opt.getOpt(),
+                                primaryKey,
+                                table,
+                                projectIdStr,
+                                conditionSql));
+                break;
+            case IS_NULL:
+            case IS_NOT_NULL:
+                sqlBuilder.append(
+                        String.format(
+                                SQL_LINKED_TABLE_IS_NULL_OR_NOT_NULL,
+                                mainTableFilterColumn,
+                                opt.getOpt(),
+                                primaryKey,
+                                table,
+                                projectIdStr,
+                                ""));
+                break;
+            default:
+                break;
         }
         return sqlBuilder.toString();
     }
@@ -633,26 +711,33 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     }
 
     private List<? extends Object> getOptionValues(Condition condition) {
-        //todo list object tag处理
         List<? extends Object> values;
         Value value = condition.getValue();
         if (value == null) {
             return null;
         }
         Field field = condition.getField();
+        String fieldCode = Optional.ofNullable(field.getFieldCode()).orElse("");
         boolean noEncryptFlag = Boolean.TRUE.equals(field.getNoEncryptFlag());
-        boolean isEnv = FieldCode.ENVIRONMENT.equals(field.getFieldCode());
-        if (noEncryptFlag) {
-            values = value.getNoEncryptIdList();
-        } else if (isEnv) {
-            List<String> valueStrList = value.getValueStrList();
-            List<String> result = new ArrayList<>();
-            if(!ObjectUtils.isEmpty(valueStrList)) {
-                valueStrList.forEach(v -> result.add(appendSingleQuot(v)));
-            }
-            values = result;
-        } else {
-            values = value.getValueIdList();
+        switch (fieldCode) {
+            case FieldCode.ENVIRONMENT:
+                List<String> valueStrList = value.getValueStrList();
+                List<String> result = new ArrayList<>();
+                if (!ObjectUtils.isEmpty(valueStrList)) {
+                    valueStrList.forEach(v -> result.add(appendSingleQuot(v)));
+                }
+                values = result;
+                break;
+            case FieldCode.TAG:
+                values = value.getObjectList();
+                break;
+            default:
+                if (noEncryptFlag) {
+                    values = value.getNoEncryptIdList();
+                } else {
+                    values = value.getValueIdList();
+                }
+                break;
         }
         return values;
     }
