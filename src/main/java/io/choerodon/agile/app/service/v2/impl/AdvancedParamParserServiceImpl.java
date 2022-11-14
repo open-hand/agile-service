@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.v2.impl;
 
+import static io.choerodon.agile.infra.enums.search.SearchConstant.SqlTemplate.*;
 import static org.hzero.core.base.BaseConstants.ErrorCode.DATA_INVALID;
 import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
 
@@ -61,60 +62,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     public static final String SINGLE_QUOT = "'";
 
-    /**
-     * ==============下拉框=================
-     */
 
-    /**
-     * priority_id in (1,2,3)
-     */
-    public static final String SQL_SELF_TABLE_IN_OR_NOT_IN = " %s %s ( %s ) ";
-    /**
-     * (priority_id = 0 or priority_id is null)
-     */
-    public static final String SQL_SELF_TABLE_ID_IS_NULL = " (%s = 0 or %s is null) ";
-    /**
-     * (priority_id != 0 and priority_id is not null)
-     */
-    public static final String SQL_SELF_TABLE_ID_IS_NOT_NULL = " (%s != 0 and %s is not null) ";
-
-    public static final String SQL_SELF_TABLE_IS_NULL = " (%s is null) ";
-
-    public static final String SQL_SELF_TABLE_IS_NOT_NULL = " (%s is not null) ";
-
-    public static final String SQL_SELF_TABLE_EQUAL = " (%s %s %s) ";
-
-    public static final String SQL_LIKE_VALUE = " CONCAT(CONCAT('%s' , %s) ,'%s') ";
-
-    /**
-     * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
-     */
-    public static final String SQL_LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and %s in ( %s ) %s) ";
-
-    public static final String SQL_LINKED_TABLE_IS_NULL_OR_NOT_NULL = " %s %s ( select %s from %s where project_id in (%s) %s) ";
-
-    public static final String SQL_TAG_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and (%s) ) ";
-    /**
-     * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
-     */
-    public static final String SQL_CUSTOM_FIELD_IN_OR_NOT_IN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and option_id in ( %s ) and scheme_code = '%s') ";
-
-    public static final String SQL_CUSTOM_FIELD_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and scheme_code = '%s') ";
-
-    public static final String SQL_CUSTOM_FIELD_EQUAL_OR_LIKE = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s %s and scheme_code = '%s') ";
-
-
-    /**
-     * ================日期===============
-     */
-
-    public static final String SQL_CUSTOM_FIELD_DATE_BETWEEN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s >= %s and %s <= %s and scheme_code = '%s') ";
-
-    public static final String SQL_CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s and scheme_code = '%s') ";
-
-    public static final String SQL_DATE_BETWEEN = " ( %s >= %s and %s <= %s ) ";
-
-    public static final String SQL_DATE_FORMATTER = "DATE_FORMAT(%s, '%s')";
 
 
     protected static final Map<String, FieldTableVO> PREDEFINED_FIELD_TABLE_MAP;
@@ -304,7 +252,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case BETWEEN:
                 sqlBuilder.append(
                         String.format(
-                                SQL_CUSTOM_FIELD_DATE_BETWEEN,
+                                CUSTOM_FIELD_DATE_BETWEEN,
                                 mainTableFilterColumn,
                                 Operation.IN.toString(),
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
@@ -318,7 +266,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IS_NOT_NULL:
                 sqlBuilder.append(
                         String.format(
-                                SQL_CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL,
+                                CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL,
                                 mainTableFilterColumn,
                                 Operation.IN.toString(),
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
@@ -330,7 +278,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IS_NULL:
                 sqlBuilder.append(
                         String.format(
-                                SQL_CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL,
+                                CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL,
                                 mainTableFilterColumn,
                                 Operation.IN.toString(),
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
@@ -343,7 +291,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 String value = datePair.getFirst();
                 sqlBuilder.append(
                         String.format(
-                                SQL_CUSTOM_FIELD_EQUAL_OR_LIKE,
+                                CUSTOM_FIELD_EQUAL_OR_LIKE,
                                 mainTableFilterColumn,
                                 Operation.IN.toString(),
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
@@ -354,10 +302,10 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 schemeCode));
                 break;
             case LIKE:
-                String valueStr = String.format(SQL_LIKE_VALUE, "%", datePair.getFirst(), "%");
+                String valueStr = String.format(LIKE_VALUE, "%", datePair.getFirst(), "%");
                 sqlBuilder.append(
                         String.format(
-                                SQL_CUSTOM_FIELD_EQUAL_OR_LIKE,
+                                CUSTOM_FIELD_EQUAL_OR_LIKE,
                                 mainTableFilterColumn,
                                 Operation.IN.toString(),
                                 StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
@@ -381,25 +329,25 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case BETWEEN:
                 sqlBuilder.append(
                         String.format(
-                                SQL_DATE_BETWEEN,
+                                DATE_BETWEEN,
                                 column,
                                 datePair.getFirst(),
                                 column,
                                 datePair.getSecond()));
                 break;
             case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SQL_SELF_TABLE_IS_NOT_NULL, column));
+                sqlBuilder.append(String.format(SELF_TABLE_IS_NOT_NULL, column));
                 break;
             case IS_NULL:
-                sqlBuilder.append(String.format(SQL_SELF_TABLE_IS_NULL, column));
+                sqlBuilder.append(String.format(SELF_TABLE_IS_NULL, column));
                 break;
             case EQUAL:
                 String value = datePair.getFirst();
-                sqlBuilder.append(String.format(SQL_SELF_TABLE_EQUAL, column, "=", value));
+                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "=", value));
                 break;
             case LIKE:
-                String valueStr = String.format(SQL_LIKE_VALUE, "%", datePair.getFirst(), "%");
-                sqlBuilder.append(String.format(SQL_SELF_TABLE_EQUAL, column, "like", valueStr));
+                String valueStr = String.format(LIKE_VALUE, "%", datePair.getFirst(), "%");
+                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "like", valueStr));
                 break;
             default:
                 // =, >, >=, <, <=
@@ -428,7 +376,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         String thisColumn = buildMainTableFilterColumn(column, alias);
         if (DATETIME_MM_FIELD_LIST.contains(fieldCode)) {
             //需要处理特殊日期格式
-            thisColumn = String.format(SQL_DATE_FORMATTER, thisColumn, SQL_YYYY_MM_DD_HH_MM);
+            thisColumn = String.format(DATE_FORMATTER, thisColumn, SQL_YYYY_MM_DD_HH_MM);
         }
         return thisColumn;
     }
@@ -571,7 +519,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case NOT_IN:
                 sqlBuilder.append(
                         String.format(
-                                SQL_TAG_IN_OR_NOT_IN,
+                                TAG_IN_OR_NOT_IN,
                                 mainTableFilterColumn,
                                 opt.getOpt(),
                                 primaryKey,
@@ -583,7 +531,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IS_NOT_NULL:
                 sqlBuilder.append(
                         String.format(
-                                SQL_LINKED_TABLE_IS_NULL_OR_NOT_NULL,
+                                LINKED_TABLE_IS_NULL_OR_NOT_NULL,
                                 mainTableFilterColumn,
                                 opt.getOpt(),
                                 primaryKey,
@@ -615,7 +563,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case NOT_IN:
                 sqlBuilder.append(
                         String.format(
-                                SQL_CUSTOM_FIELD_IN_OR_NOT_IN,
+                                CUSTOM_FIELD_IN_OR_NOT_IN,
                                 mainTableFilterColumn,
                                 opt.getOpt(),
                                 projectIdStr,
@@ -627,7 +575,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IS_NOT_NULL:
                 sqlBuilder.append(
                         String.format(
-                                SQL_CUSTOM_FIELD_IS_NULL_OR_NOT_NULL,
+                                CUSTOM_FIELD_IS_NULL_OR_NOT_NULL,
                                 mainTableFilterColumn,
                                 opt.getOpt(),
                                 projectIdStr,
@@ -651,16 +599,16 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case NOT_IN:
                 sqlBuilder.append(
                         String.format(
-                                SQL_SELF_TABLE_IN_OR_NOT_IN,
+                                SELF_TABLE_IN_OR_NOT_IN,
                                 mainTableFilterColumn,
                                 opt.getOpt(),
                                 StringUtils.join(values, BaseConstants.Symbol.COMMA)));
                 break;
             case IS_NULL:
-                sqlBuilder.append(String.format(SQL_SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn));
                 break;
             case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SQL_SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn));
                 break;
             default:
                 break;
@@ -685,12 +633,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IN:
             case NOT_IN:
                 sqlBuilder.append(
-                        String.format(SQL_LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
+                        String.format(LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
                 sqlBuilder.append(
-                        String.format(SQL_LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, additionalCondition));
+                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, additionalCondition));
                 break;
             default:
                 break;
