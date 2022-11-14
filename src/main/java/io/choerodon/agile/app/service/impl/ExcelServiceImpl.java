@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monitorjbl.xlsx.StreamingReader;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
@@ -1711,6 +1712,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void setParent(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, IssueDTO> issueDTOMap) {
+        if(exportIssuesVO == null || issue == null || MapUtils.isEmpty(issueDTOMap)) {
+            return;
+        }
         String typeCode = issue.getTypeCode();
         IssueDTO parent = null;
         if ("sub_task".equals(typeCode)) {
