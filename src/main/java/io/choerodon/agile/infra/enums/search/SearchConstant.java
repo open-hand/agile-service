@@ -131,4 +131,63 @@ public class SearchConstant {
         }
     }
 
+    public class SqlTemplate {
+
+        /**
+         * ==============下拉框=================
+         */
+
+        /**
+         * priority_id in (1,2,3)
+         */
+        public static final String SELF_TABLE_IN_OR_NOT_IN = " %s %s ( %s ) ";
+        /**
+         * (priority_id = 0 or priority_id is null)
+         */
+        public static final String SELF_TABLE_ID_IS_NULL = " (%s = 0 or %s is null) ";
+        /**
+         * (priority_id != 0 and priority_id is not null)
+         */
+        public static final String SELF_TABLE_ID_IS_NOT_NULL = " (%s != 0 and %s is not null) ";
+
+        public static final String SELF_TABLE_IS_NULL = " (%s is null) ";
+
+        public static final String SELF_TABLE_IS_NOT_NULL = " (%s is not null) ";
+
+        public static final String SELF_TABLE_EQUAL = " (%s %s %s) ";
+
+        public static final String LIKE_VALUE = " CONCAT(CONCAT('%s' , %s) ,'%s') ";
+
+        /**
+         * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
+         */
+        public static final String LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and %s in ( %s ) %s) ";
+
+        public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " %s %s ( select %s from %s where project_id in (%s) %s) ";
+
+        public static final String TAG_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and (%s) ) ";
+        /**
+         * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
+         */
+        public static final String CUSTOM_FIELD_IN_OR_NOT_IN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and option_id in ( %s ) and scheme_code = '%s') ";
+
+        public static final String CUSTOM_FIELD_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and scheme_code = '%s') ";
+
+        public static final String CUSTOM_FIELD_EQUAL_OR_LIKE = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s %s and scheme_code = '%s') ";
+
+
+        /**
+         * ================日期===============
+         */
+
+        public static final String CUSTOM_FIELD_DATE_BETWEEN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s >= %s and %s <= %s and scheme_code = '%s') ";
+
+        public static final String CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s and scheme_code = '%s') ";
+
+        public static final String DATE_BETWEEN = " ( %s >= %s and %s <= %s ) ";
+
+        public static final String DATE_FORMATTER = "DATE_FORMAT(%s, '%s')";
+
+    }
+
 }
