@@ -17,6 +17,7 @@ import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 
@@ -52,12 +53,14 @@ public class AdvancedParamValidator {
         if (!predefinedFieldCodes.isEmpty()) {
             ObjectSchemeFieldDTO dto = new ObjectSchemeFieldDTO();
             dto.setSystem(true);
-            objectSchemeFieldMapper.select(dto)
-                    .forEach(x -> {
-                        if (predefinedFieldCodes.contains(x.getCode())) {
-                            predefinedFieldMap.put(x.getCode(), x);
-                        }
-                    });
+            List<ObjectSchemeFieldDTO> dbFields = objectSchemeFieldMapper.select(dto);
+            //部分系统字段，只做界面筛选，在数据库里没有数据
+            dbFields.addAll(FieldCode.MOCK_FIELDS);
+            dbFields.forEach(x -> {
+                if (predefinedFieldCodes.contains(x.getCode())) {
+                    predefinedFieldMap.put(x.getCode(), x);
+                }
+            });
         }
         Map<Long, ObjectSchemeFieldDTO> customFieldMap = new HashMap<>();
         if (!customFieldIds.isEmpty()) {

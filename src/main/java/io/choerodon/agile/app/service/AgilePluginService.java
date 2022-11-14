@@ -655,4 +655,10 @@ public interface AgilePluginService {
      * @param instanceOpenRelVOCollection 由需求生成的关系VO集合
      */
     void afterBackLogMoveProject(Long organizationId, Collection<? extends InstanceOpenRelVO> instanceOpenRelVOCollection);
+
+    /**
+     * 高级筛选查商业版字段和表映射关系
+     * @return
+     */
+    Map<String, FieldTableVO> queryAdvanceParamFieldTableMap();
 }

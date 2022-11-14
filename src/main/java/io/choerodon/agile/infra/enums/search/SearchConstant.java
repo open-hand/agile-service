@@ -2,7 +2,11 @@ package io.choerodon.agile.infra.enums.search;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.infra.enums.FieldCode;
 
 /**
@@ -15,6 +19,53 @@ public class SearchConstant {
      * 不需要加密的字段
      */
     public static final List<String> NO_ENCRYPT_FIELDS = Arrays.asList(FieldCode.SUB_PROJECT);
+
+    public static final String TABLE_AGILE_ISSUE = "agile_issue";
+    public static final String TABLE_AGILE_ISSUE_SPRINT_REL = "agile_issue_sprint_rel";
+    public static final String TABLE_AGILE_COMPONENT_ISSUE_REL = "agile_component_issue_rel";
+    public static final String TABLE_AGILE_LABEL_ISSUE_REL = "agile_label_issue_rel";
+    public static final String TABLE_AGILE_VERSION_ISSUE_REL = "agile_version_issue_rel";
+    public static final String TABLE_AGILE_ISSUE_PARTICIPANT_REL = "agile_issue_participant_rel";
+    public static final String TABLE_AGILE_ISSUE_PRODUCT_REL = "agile_issue_product_rel";
+    public static final String TABLE_AGILE_TAG_ISSUE_REL = "agile_tag_issue_rel";
+
+    public static final Map<String, FieldTableVO> PREDEFINED_FIELD_TABLE_MAP;
+
+    static {
+        List<FieldTableVO> fieldTableList = Arrays.asList(
+                new FieldTableVO(FieldCode.ISSUE_TYPE, "issue_type_id", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.STATUS, "status_id", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ASSIGNEE, "assignee_id", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.SPRINT, "sprint_id", TABLE_AGILE_ISSUE_SPRINT_REL),
+                new FieldTableVO(FieldCode.PRIORITY, "priority_id", TABLE_AGILE_ISSUE),
+                //todo 特性&史诗
+                new FieldTableVO(FieldCode.FEATURE, "feature_id", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.REPORTER, "reporter_id", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.COMPONENT, "component_id", TABLE_AGILE_COMPONENT_ISSUE_REL),
+                new FieldTableVO(FieldCode.LABEL, "label_id", TABLE_AGILE_LABEL_ISSUE_REL),
+                new FieldTableVO(FieldCode.FIX_VERSION, "version_id", TABLE_AGILE_VERSION_ISSUE_REL),
+                new FieldTableVO(FieldCode.INFLUENCE_VERSION, "version_id", TABLE_AGILE_VERSION_ISSUE_REL),
+                new FieldTableVO(FieldCode.EPIC, "epic_id", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.CREATION_DATE, "creation_date", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.LAST_UPDATE_DATE, "last_update_date", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ESTIMATED_START_TIME, "estimated_start_time", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ESTIMATED_END_TIME, "estimated_end_time", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ACTUAL_START_TIME, "actual_start_time", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ACTUAL_END_TIME, "actual_end_time", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.MAIN_RESPONSIBLE, "main_responsible_id", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ENVIRONMENT, "environment", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.CREATOR, "created_by", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.UPDATOR, "last_updated_by", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.PARTICIPANT, "participant_id", TABLE_AGILE_ISSUE_PARTICIPANT_REL),
+                new FieldTableVO(FieldCode.TAG, null, TABLE_AGILE_TAG_ISSUE_REL),
+                new FieldTableVO(FieldCode.STORY_POINTS, "story_points", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.REMAINING_TIME, "remaining_time", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ESTIMATE_TIME, "estimate_time", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.PRODUCT, "product_id", TABLE_AGILE_ISSUE_PRODUCT_REL)
+        );
+        PREDEFINED_FIELD_TABLE_MAP =
+                fieldTableList.stream().collect(Collectors.toMap(FieldTableVO::getName, Function.identity()));
+    }
 
 
     public enum Relationship {
@@ -166,6 +217,8 @@ public class SearchConstant {
         public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " %s %s ( select %s from %s where project_id in (%s) %s) ";
 
         public static final String TAG_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and (%s) ) ";
+
+        public static final String YQ_CLOUD_NUM_LIKE_OR_EQUAL = " %s %s ( select %s from %s where project_id in (%s) and source = 'yqcloud' and instance_type = 'issue' and open_instance_num %s %s) ";
         /**
          * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
          */
