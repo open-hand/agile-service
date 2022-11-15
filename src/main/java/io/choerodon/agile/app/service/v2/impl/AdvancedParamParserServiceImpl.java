@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,10 +28,12 @@ import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 
 import org.hzero.core.base.BaseConstants;
@@ -50,6 +53,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     private ObjectMapper objectMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
 
     public static final String SQL_YYYY_MM_DD_HH_MM = "%Y-%m-%d %H:%i";
 
@@ -164,6 +169,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 case FieldCode.YQ_CLOUD_NUM:
                     sqlBuilder.append(generateYqCloudNumSql(operation, dataPair, fieldTable, alias, projectIds));
                     break;
+                case FieldCode.CONTENT:
+                    sqlBuilder.append(generateContentSql(operation, dataPair, alias, projectIds, predefinedFieldMap));
+                    break;
                 default:
                     String column = buildColumnByCode(fieldTable.getField(), alias, fieldCode);
                     appendPredefinedSql(sqlBuilder, operation, dataPair, column);
@@ -178,13 +186,53 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return sqlBuilder.toString();
     }
 
+    private String generateContentSql(String operation,
+                                      Pair<String, String> dataPair,
+                                      String alias,
+                                      Set<Long> projectIds,
+                                      Map<String, FieldTableVO> predefinedFieldMap) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        //去除searchVO.searchArgs.issueNum或searchVO.contents的项目code前缀
+        List<ProjectInfoDTO> projectInfos = projectInfoMapper.selectByProjectIds(projectIds);
+        if (projectInfos.isEmpty()) {
+            return sqlBuilder.toString();
+        }
+        List<String> projectCodes = projectInfos.stream().map(ProjectInfoDTO::getProjectCode).collect(Collectors.toList());
+        String content = dataPair.getFirst();
+        Pair<String, String> pair = Pair.of(null, null);
+        if (!ObjectUtils.isEmpty(content)) {
+            String substringContent = content;
+            for(String projectCode : projectCodes) {
+                String prefix = SINGLE_QUOT + projectCode + "-";
+                if (content.startsWith(prefix)) {
+                    substringContent = content.substring(prefix.length());
+                    substringContent = SINGLE_QUOT + substringContent;
+                    break;
+                }
+            }
+            pair = Pair.of(substringContent, null);
+        }
+
+        sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
+        //content == summary和issueNum
+        FieldTableVO summary = predefinedFieldMap.get(FieldCode.SUMMARY);
+        String summaryCol = buildColumnByCode(summary.getField(), alias, FieldCode.SUMMARY);
+        appendPredefinedSql(sqlBuilder, operation, pair, summaryCol);
+        sqlBuilder.append(" or ");
+
+        FieldTableVO issueNum = predefinedFieldMap.get(FieldCode.ISSUE_NUM);
+        String issueNumCol = buildColumnByCode(issueNum.getField(), alias, FieldCode.ISSUE_NUM);
+        appendPredefinedSql(sqlBuilder, operation, pair, issueNumCol);
+        sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
+        return sqlBuilder.toString();
+    }
+
     private String generateYqCloudNumSql(String operation,
                                          Pair<String, String> dataPair,
                                          FieldTableVO fieldTable,
                                          String alias,
                                          Set<Long> projectIds) {
         StringBuilder sqlBuilder = new StringBuilder();
-        String dbColumn = fieldTable.getField();
         String primaryKey = "issue_id";
         String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
         String table = fieldTable.getTable();
