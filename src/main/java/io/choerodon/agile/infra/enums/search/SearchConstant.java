@@ -7,7 +7,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.FieldTableVO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.FieldTypeCnName;
 
 /**
  * @author superlee
@@ -28,6 +30,8 @@ public class SearchConstant {
     public static final String TABLE_AGILE_ISSUE_PARTICIPANT_REL = "agile_issue_participant_rel";
     public static final String TABLE_AGILE_ISSUE_PRODUCT_REL = "agile_issue_product_rel";
     public static final String TABLE_AGILE_TAG_ISSUE_REL = "agile_tag_issue_rel";
+    public static final String TABLE_FD_STAR_BEACON = "fd_star_beacon";
+    public static final String TABLE_AGILE_DATA_LOG = "agile_data_log";
 
     public static final Map<String, FieldTableVO> PREDEFINED_FIELD_TABLE_MAP;
 
@@ -62,12 +66,43 @@ public class SearchConstant {
                 new FieldTableVO(FieldCode.REMAINING_TIME, "remaining_time", TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.ESTIMATE_TIME, "estimate_time", TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.PRODUCT, "product_id", TABLE_AGILE_ISSUE_PRODUCT_REL),
-                new FieldTableVO(FieldCode.CONTENT, null, TABLE_AGILE_ISSUE),
+                new FieldTableVO(Field.CONTENT, null, TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.SUMMARY, "summary", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.ISSUE_NUM, "issue_num", TABLE_AGILE_ISSUE)
+                new FieldTableVO(FieldCode.ISSUE_NUM, "issue_num", TABLE_AGILE_ISSUE),
+                new FieldTableVO(Field.MY_STAR, "user_id", TABLE_FD_STAR_BEACON),
+                new FieldTableVO(Field.MY_PARTICIPATE, null, TABLE_AGILE_DATA_LOG)
         );
         PREDEFINED_FIELD_TABLE_MAP =
                 fieldTableList.stream().collect(Collectors.toMap(FieldTableVO::getName, Function.identity()));
+    }
+
+    /**
+     * 模拟系统字段，用于在数据库中没有的，但是界面筛选需要的字段
+     */
+    public static final List<ObjectSchemeFieldDTO> MOCK_FIELDS = Arrays.asList(
+            new ObjectSchemeFieldDTO().setCode(Field.YQ_CLOUD_NUM).setFieldType(FieldTypeCnName.INPUT.getCode()),
+            new ObjectSchemeFieldDTO().setCode(Field.CONTENT).setFieldType(FieldTypeCnName.INPUT.getCode()),
+            new ObjectSchemeFieldDTO().setCode(Field.MY_STAR).setFieldType(FieldTypeCnName.SINGLE.getCode()),
+            new ObjectSchemeFieldDTO().setCode(Field.MY_PARTICIPATE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+    );
+
+    public class Field {
+        /**
+         * 燕千云编号
+         */
+        public static final String YQ_CLOUD_NUM = "yqCloudNum";
+        /**
+         * 输入框模糊搜索
+         */
+        public static final String CONTENT = "content";
+        /**
+         * 我关注的
+         */
+        public static final String MY_STAR = "myStar";
+        /**
+         * 我参与的
+         */
+        public static final String MY_PARTICIPATE = "myParticipate";
     }
 
 
