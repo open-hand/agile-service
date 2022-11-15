@@ -1,14 +1,14 @@
 package io.choerodon.agile.infra.mapper;
 
+import java.util.List;
+import java.util.Set;
+
+import org.apache.ibatis.annotations.Param;
+
 import io.choerodon.agile.api.vo.IssueSprintVO;
 import io.choerodon.agile.infra.dto.IssueSprintDTO;
 import io.choerodon.agile.infra.dto.IssueSprintRelDTO;
 import io.choerodon.mybatis.common.BaseMapper;
-
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -19,7 +19,7 @@ public interface IssueSprintRelMapper extends BaseMapper<IssueSprintRelDTO> {
     IssueSprintRelDTO selectNoClosed(@Param("projectId") Long projectId, @Param("issueId") Long issueId);
 
     /**
-     * 查询对应的所有冲刺与问题的关系id
+     * 查询对应的所有未关闭的冲刺与问题的关系id
      * @param projectId 项目id
      * @param issueIds 问题id
      * @return 所有冲刺与问题的关系id

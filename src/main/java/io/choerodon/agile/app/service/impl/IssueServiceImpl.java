@@ -13,20 +13,10 @@ import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
-import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
-import io.choerodon.core.domain.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -63,6 +53,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
@@ -1746,26 +1737,27 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //处理用户，前端可能会传0，处理为null
         issueConvertDTO.initializationIssueUser();
         if (fieldList.contains(SPRINT_ID_FIELD)) {
-            IssueConvertDTO oldIssue = modelMapper.map(originIssue, IssueConvertDTO.class);
-            Long sprintId = issueConvertDTO.getSprintId();
-            //处理子任务的冲刺
-            List<Long> issueIds = issueMapper.querySubIssueIdsByIssueId(projectId, issueConvertDTO.getIssueId());
-            List<Long> subBugIds = issueMapper.querySubBugIdsByIssueId(projectId, issueConvertDTO.getIssueId());
-            if (subBugIds != null && !subBugIds.isEmpty()) {
-                issueIds.addAll(subBugIds);
-            }
-            Boolean exitSprint = issueConvertDTO.getSprintId() != null && !Objects.equals(issueConvertDTO.getSprintId(), 0L);
-            Boolean condition = (!Objects.equals(oldIssue.getSprintId(), issueUpdateVO.getSprintId()));
+            final IssueConvertDTO oldIssue = modelMapper.map(originIssue, IssueConvertDTO.class);
+            final Long sprintId = issueConvertDTO.getSprintId();
+
+            // 查询关联的子任务和子缺陷，一并处理
+            final List<Long> subTaskIds = issueMapper.querySubIssueIdsByIssueId(projectId, issueConvertDTO.getIssueId());
+            final List<Long> subBugIds = issueMapper.querySubBugIdsByIssueId(projectId, issueConvertDTO.getIssueId());
+            final List<Long> issueIds = ListUtils.union(subTaskIds, subBugIds);
             issueIds.add(issueConvertDTO.getIssueId());
-            if (condition) {
-                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, issueConvertDTO.getSprintId(), issueIds);
+            // 检查冲刺是否有变化
+            boolean sprintChanged = (!Objects.equals(oldIssue.getSprintId(), issueUpdateVO.getSprintId()));
+            if (sprintChanged) {
+                // 如果冲刺有变化
+                // 批量删除父子工作项, 所有未关闭冲刺的关联关系
+                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, sprintId, issueIds);
                 issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
+                // 批量插入父子工作项, 目标冲刺的关联关系
+                issueAccessDataService.issueToDestinationByIds(projectId, sprintId, issueIds, new Date(), customUserDetails.getUserId());
+                // 触发商业版插件逻辑
                 if (agilePluginService != null) {
                     agilePluginService.updateIssueSprintChanged(oldIssue, projectId, sprintId, issueType);
                 }
-            }
-            if (exitSprint) {
-                issueAccessDataService.issueToDestinationByIds(projectId, issueConvertDTO.getSprintId(), issueIds, new Date(), customUserDetails.getUserId());
             }
             if (oldIssue.isIssueRank()) {
                 calculationRank(projectId, issueConvertDTO);
