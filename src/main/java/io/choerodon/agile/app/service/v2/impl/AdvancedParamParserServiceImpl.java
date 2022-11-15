@@ -502,6 +502,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 case SearchConstant.Field.MY_STAR:
                     sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and type = 'issue'", INSTANCE_ID));
                     break;
+                case SearchConstant.Field.MY_PARTICIPATE:
+                    sqlBuilder.append(generateMyParticipateSql(projectIds, operation, alias, fieldTable, values));
+                    break;
                 default:
                     if (!isLinkedTable) {
                         //主表字段
@@ -515,6 +518,35 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         } else {
             sqlBuilder.append(generateCustomFieldSelectorSql(alias, field, instanceType, operation, projectIds, values));
         }
+        return sqlBuilder.toString();
+    }
+
+    private String generateMyParticipateSql(Set<Long> projectIds,
+                                            String operation,
+                                            String alias,
+                                            FieldTableVO fieldTable,
+                                            List<? extends Object> values) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
+        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
+        String assigneeColumn = "assignee_id";
+        assigneeColumn = buildMainTableFilterColumn(assigneeColumn, alias);
+        String valueStr = StringUtils.join(values, BaseConstants.Symbol.COMMA);
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        Operation opt = Operation.valueOf(operation);
+        sqlBuilder.append(
+                String.format(MY_PARTICIPATE,
+                        assigneeColumn,
+                        valueStr,
+                        mainTableFilterColumn,
+                        opt,
+                        primaryKey,
+                        fieldTable.getTable(),
+                        projectIdStr,
+                        valueStr,
+                        valueStr));
+        sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
     }
 

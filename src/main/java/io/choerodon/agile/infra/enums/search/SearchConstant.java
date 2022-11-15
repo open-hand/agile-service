@@ -252,6 +252,8 @@ public class SearchConstant {
          */
         public static final String LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and %s in ( %s ) %s) ";
 
+        public static final String MY_PARTICIPATE = " %s in (%s) or %s %s ( select %s from %s where project_id in (%s) and field = 'assignee' and ( new_value in ( %s ) or old_value in ( %s ))) ";
+
         public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " %s %s ( select %s from %s where project_id in (%s) %s) ";
 
         public static final String TAG_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and (%s) ) ";
