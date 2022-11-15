@@ -61,7 +61,10 @@ public class SearchConstant {
                 new FieldTableVO(FieldCode.STORY_POINTS, "story_points", TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.REMAINING_TIME, "remaining_time", TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.ESTIMATE_TIME, "estimate_time", TABLE_AGILE_ISSUE),
-                new FieldTableVO(FieldCode.PRODUCT, "product_id", TABLE_AGILE_ISSUE_PRODUCT_REL)
+                new FieldTableVO(FieldCode.PRODUCT, "product_id", TABLE_AGILE_ISSUE_PRODUCT_REL),
+                new FieldTableVO(FieldCode.CONTENT, null, TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.SUMMARY, "summary", TABLE_AGILE_ISSUE),
+                new FieldTableVO(FieldCode.ISSUE_NUM, "issue_num", TABLE_AGILE_ISSUE)
         );
         PREDEFINED_FIELD_TABLE_MAP =
                 fieldTableList.stream().collect(Collectors.toMap(FieldTableVO::getName, Function.identity()));

@@ -83,12 +83,14 @@ public class FieldCode {
      */
     public static final String PARENT = "parent";
     public static final String YQ_CLOUD_NUM = "yqCloudNum";
+    public static final String CONTENT = "content";
 
     /**
      * 模拟系统字段，用于在数据库中没有的，但是界面筛选需要的字段
      */
     public static final List<ObjectSchemeFieldDTO> MOCK_FIELDS = Arrays.asList(
-            new ObjectSchemeFieldDTO().setCode(YQ_CLOUD_NUM).setFieldType(FieldTypeCnName.INPUT.getCode())
+            new ObjectSchemeFieldDTO().setCode(YQ_CLOUD_NUM).setFieldType(FieldTypeCnName.INPUT.getCode()),
+            new ObjectSchemeFieldDTO().setCode(CONTENT).setFieldType(FieldTypeCnName.INPUT.getCode())
     );
 
     private static final List<String> FIELD_CODE_LIST = new ArrayList<>();
