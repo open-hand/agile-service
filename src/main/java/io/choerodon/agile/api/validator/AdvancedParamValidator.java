@@ -55,7 +55,7 @@ public class AdvancedParamValidator {
             dto.setSystem(true);
             List<ObjectSchemeFieldDTO> dbFields = objectSchemeFieldMapper.select(dto);
             //部分系统字段，只做界面筛选，在数据库里没有数据
-            dbFields.addAll(FieldCode.MOCK_FIELDS);
+            dbFields.addAll(SearchConstant.MOCK_FIELDS);
             dbFields.forEach(x -> {
                 if (predefinedFieldCodes.contains(x.getCode())) {
                     predefinedFieldMap.put(x.getCode(), x);

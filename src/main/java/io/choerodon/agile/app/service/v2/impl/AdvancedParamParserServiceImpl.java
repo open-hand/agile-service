@@ -60,6 +60,10 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     public static final String SINGLE_QUOT = "'";
 
+    private static final String DEFAULT_PRIMARY_KEY = "issue_id";
+
+    private static final String INSTANCE_ID = "instance_id";
+
     private static final List<String> DATETIME_MM_FIELD_LIST =
             Arrays.asList(
                     FieldCode.ESTIMATED_START_TIME,
@@ -166,10 +170,10 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
             Assert.notNull(fieldTable, DATA_INVALID);
             switch (fieldCode) {
-                case FieldCode.YQ_CLOUD_NUM:
+                case SearchConstant.Field.YQ_CLOUD_NUM:
                     sqlBuilder.append(generateYqCloudNumSql(operation, dataPair, fieldTable, alias, projectIds));
                     break;
-                case FieldCode.CONTENT:
+                case SearchConstant.Field.CONTENT:
                     sqlBuilder.append(generateContentSql(operation, dataPair, alias, projectIds, predefinedFieldMap));
                     break;
                 default:
@@ -202,7 +206,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         Pair<String, String> pair = Pair.of(null, null);
         if (!ObjectUtils.isEmpty(content)) {
             String substringContent = content;
-            for(String projectCode : projectCodes) {
+            for (String projectCode : projectCodes) {
                 String prefix = SINGLE_QUOT + projectCode + "-";
                 if (content.startsWith(prefix)) {
                     substringContent = content.substring(prefix.length());
@@ -490,10 +494,13 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     sqlBuilder.append(generateTagSql(operation, values, fieldTable, alias, projectIds));
                     break;
                 case FieldCode.FIX_VERSION:
-                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'"));
+                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'", null));
                     break;
                 case FieldCode.INFLUENCE_VERSION:
-                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'influence'"));
+                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'influence'", null));
+                    break;
+                case SearchConstant.Field.MY_STAR:
+                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and type = 'issue'", INSTANCE_ID));
                     break;
                 default:
                     if (!isLinkedTable) {
@@ -501,7 +508,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                         sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable));
                     } else {
                         //关联表
-                        sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, ""));
+                        sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "", null));
                     }
                     break;
             }
@@ -657,10 +664,14 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                           FieldTableVO fieldTable,
                                           String alias,
                                           Set<Long> projectIds,
-                                          String additionalCondition) {
+                                          String additionalCondition,
+                                          String innerColumn) {
         StringBuilder sqlBuilder = new StringBuilder();
         String dbColumn = fieldTable.getField();
-        String primaryKey = "issue_id";
+        String primaryKey = DEFAULT_PRIMARY_KEY;
+        if (innerColumn == null) {
+            innerColumn = primaryKey;
+        }
         String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
         String table = fieldTable.getTable();
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
@@ -669,12 +680,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IN:
             case NOT_IN:
                 sqlBuilder.append(
-                        String.format(LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
+                        String.format(LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
                 sqlBuilder.append(
-                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, additionalCondition));
+                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, additionalCondition));
                 break;
             default:
                 break;
