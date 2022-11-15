@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo.search;
 
 import java.util.List;
+import java.util.Set;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -22,6 +23,16 @@ public class SearchParamVO {
 
     @Encrypt
     private List<Long> quickFilterIds;
+    @Encrypt
+    private Set<Long> issueIds;
+
+    public Set<Long> getIssueIds() {
+        return issueIds;
+    }
+
+    public void setIssueIds(Set<Long> issueIds) {
+        this.issueIds = issueIds;
+    }
 
     public Boolean getCountSubIssue() {
         return countSubIssue;

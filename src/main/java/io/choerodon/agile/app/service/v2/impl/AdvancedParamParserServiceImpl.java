@@ -81,13 +81,14 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         List<Condition> conditions = new ArrayList<>();
         conditions.addAll(searchParamVO.getConditions());
         conditions.addAll(searchParamVO.getAdvancedConditions());
-        return generateSql(instanceType, projectIds, predefinedFieldMap, conditions);
+        return generateSql(instanceType, projectIds, predefinedFieldMap, conditions, searchParamVO.getIssueIds());
     }
 
     private String generateSql(InstanceType instanceType,
                                Set<Long> projectIds,
                                Map<String, FieldTableVO> predefinedFieldMap,
-                               List<Condition> conditions) {
+                               List<Condition> conditions,
+                               Set<Long> issueIds) {
         StringBuilder sqlBuilder = new StringBuilder();
         for (int i = 0; i < conditions.size(); i++) {
             Condition condition = conditions.get(i);
@@ -129,6 +130,24 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 }
             }
         }
+        String issueIdSql = generateIssueIdSql(issueIds);
+        if (sqlBuilder.length() > 0 && issueIdSql.length() > 0) {
+            sqlBuilder.append(" and ");
+        }
+        sqlBuilder.append(issueIdSql);
+        return sqlBuilder.toString();
+    }
+
+    private String generateIssueIdSql(Set<Long> issueIds) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        if (ObjectUtils.isEmpty(issueIds)) {
+            return sqlBuilder.toString();
+        }
+        String alias = "ai";
+        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
+        String issueIdStr = "(" + StringUtils.join(issueIds, BaseConstants.Symbol.COMMA) + ")";
+        sqlBuilder.append(String.format(SELF_TABLE_EQUAL, mainTableFilterColumn, "in", issueIdStr));
         return sqlBuilder.toString();
     }
 
@@ -141,7 +160,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         sqlBuilder
                 .append(BaseConstants.Symbol.LEFT_BRACE)
                 .append(" ")
-                .append(generateSql(instanceType, projectIds, predefinedFieldMap, subConditions))
+                .append(generateSql(instanceType, projectIds, predefinedFieldMap, subConditions, null))
                 .append(" ")
                 .append(BaseConstants.Symbol.RIGHT_BRACE);
     }
@@ -182,7 +201,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     break;
             }
         } else {
-            String primaryKey = "issue_id";
+            String primaryKey = DEFAULT_PRIMARY_KEY;
             String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
             String schemeCode = instanceType.getSchemeCode();
             appendCustomSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
@@ -237,7 +256,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                          String alias,
                                          Set<Long> projectIds) {
         StringBuilder sqlBuilder = new StringBuilder();
-        String primaryKey = "issue_id";
+        String primaryKey = DEFAULT_PRIMARY_KEY;
         String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
         String table = fieldTable.getTable();
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
@@ -567,7 +586,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         if (tags == null) {
             return sqlBuilder.toString();
         }
-        String primaryKey = "issue_id";
+        String primaryKey = DEFAULT_PRIMARY_KEY;
         String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
         Operation opt = Operation.valueOf(operation);
         Iterator<TagVO> tagIterator = tags.iterator();
@@ -627,7 +646,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                                   Set<Long> projectIds,
                                                   List<? extends Object> values) {
         StringBuilder sqlBuilder = new StringBuilder();
-        String primaryKey = "issue_id";
+        String primaryKey = DEFAULT_PRIMARY_KEY;
         String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
         Long fieldId = field.getFieldId();
         String schemeCode = instanceType.getSchemeCode();
