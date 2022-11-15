@@ -1,24 +1,26 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.app.service.IssueAccessDataService;
-import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
-import io.choerodon.agile.infra.annotation.DataLog;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.mapper.IssueSprintRelMapper;
-import io.choerodon.agile.infra.utils.BaseFieldUtil;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.core.exception.CommonException;
+import java.util.Date;
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
-import java.util.List;
+import io.choerodon.agile.app.service.IssueAccessDataService;
+import io.choerodon.agile.infra.annotation.DataLog;
+import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
+import io.choerodon.agile.infra.dto.MoveIssueDTO;
+import io.choerodon.agile.infra.dto.VersionIssueRelDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.IssueSprintRelMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.agile.infra.utils.RedisUtil;
+import io.choerodon.core.exception.CommonException;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -129,6 +131,7 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
     @Override
     @DataLog(type = "batchRemoveSprint", single = false)
     public int removeIssueFromSprintByIssueIds(BatchRemoveSprintDTO batchRemoveSprintDTO) {
+        // 查询所有未关闭的冲刺
         List<Long> issueSprintRelIds = issueSprintRelMapper.selectAllIssueSprintRelIds(batchRemoveSprintDTO.getProjectId(), batchRemoveSprintDTO.getIssueIds());
         if (!CollectionUtils.isEmpty(issueSprintRelIds)) {
             return issueSprintRelMapper.deleteByIds(issueSprintRelIds);
