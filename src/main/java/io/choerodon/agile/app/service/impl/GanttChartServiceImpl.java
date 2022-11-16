@@ -9,6 +9,15 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.ProductVO;
 import io.choerodon.agile.api.vo.business.TagVO;
@@ -30,14 +39,6 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author superlee
@@ -1461,7 +1462,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                     Set<Long> projectIds,
                                     List<Long> issueIds,
                                     Map<String, Object> fieldCodeValues) {
-        List<VersionIssueRelVO> versionIssueRelVOS = versionIssueRelMapper.listByIssueIds(projectIds, issueIds, FieldCode.FIX_VERSION.equals(fieldCode) ? "fix" : "influence");
+        List<VersionIssueRelVO> versionIssueRelVOS = versionIssueRelMapper.listByIssueIds(projectIds, issueIds, FieldCode.FIX_VERSION.equals(fieldCode) ? ProductVersionService.VERSION_RELATION_TYPE_FIX : ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
         if (!CollectionUtils.isEmpty(versionIssueRelVOS)) {
             Map<Long, List<VersionIssueRelVO>> issueComponentBriefGroup = versionIssueRelVOS.stream().collect(Collectors.groupingBy(VersionIssueRelVO::getIssueId));
             fieldCodeValues.put(fieldCode, issueComponentBriefGroup);

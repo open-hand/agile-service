@@ -91,8 +91,6 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String DOWNLOAD_FILE_PUBLISH_VERSION = "download_file_publish_version";
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.issue.close.workbook";
     private static final String PROJECT_ERROR = "error.project.notFound";
-    private static final String FIX_RELATION_TYPE = "fix";
-    private static final String INFLUENCE_RELATION_TYPE = "influence";
     private static final String UPLOAD_FILE_CUSTOM_FIELD = "upload_file_customer_field";
     private static final String WEBSOCKET_IMPORT_CUSTOM_FIELD_CODE = "agile-import-customer-field-";
     protected static final String WEBSOCKET_EXPORT_PUBLISH_VERSION = "agile-export-publish-version";
@@ -1582,8 +1580,8 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
                     Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
                     Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, ProductVersionService.VERSION_RELATION_TYPE_FIX).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
                     Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
                     Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
                     Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Collections.singletonList(projectId), issueIds, true);

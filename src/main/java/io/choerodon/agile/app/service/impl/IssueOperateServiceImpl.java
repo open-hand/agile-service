@@ -1,21 +1,16 @@
 package io.choerodon.agile.app.service.impl;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.api.vo.CopyConditionVO;
@@ -27,11 +22,11 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
+import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
@@ -43,8 +38,6 @@ import org.hzero.starter.keyencrypt.core.EncryptContext;
 public class IssueOperateServiceImpl implements IssueOperateService {
     private static final String WEBSOCKET_BATCH_DELETE_ISSUE = "agile-batch-delete-issue";
     private static final String WEBSOCKET_EXECUTION_LINK_ISSUE_LINKAGE = "agile-execution-link-issue-linkage";
-    private static final String CLONE_ISSUE_KEY = "cloneIssue:";
-    private static final String DOING_STATUS = "doing";
 
     @Autowired
     private IssueService issueService;
@@ -56,17 +49,12 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     private IssueMapper issueMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
-    @Autowired
-    private RedisUtil redisUtil;
-    @Autowired
-    @Lazy
-    private IssueOperateService issueOperateService;
 
     @Async
     @Override
     public void batchDeleteIssue(Long projectId, List<Long> issueIds) {
         if (!CollectionUtils.isEmpty(issueIds)) {
-            String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + "-" + projectId;
+            String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + BaseConstants.Symbol.MIDDLE_LINE + projectId;
             Long userId = DetailsHelper.getUserDetails().getUserId();
             BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
             batchUpdateFieldStatusVO.setKey(messageCode);
@@ -85,8 +73,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                 batchUpdateFieldStatusVO.setProcess(progress);
                 messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 // 查询子任务ids
-                List<Long> subList = new ArrayList<>();
-                subList.addAll(issueMapper.selectSubListByIssueIds(projectId,issueIds));
+                List<Long> subList = new ArrayList<>(issueMapper.selectSubListByIssueIds(projectId, issueIds));
                 int i = 0;
                 for (Long issueId : issueIds) {
                     i++;
@@ -125,7 +112,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
         Set<Long> influenceIssueIds = new HashSet<>();
         // 获取当前的issue
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String websocketKey = WEBSOCKET_EXECUTION_LINK_ISSUE_LINKAGE + "-" + projectId;
+        String websocketKey = WEBSOCKET_EXECUTION_LINK_ISSUE_LINKAGE + BaseConstants.Symbol.MIDDLE_LINE + projectId;
         LinkIssueLinkageMessageVO linkIssueLinkageMessageVO = new LinkIssueLinkageMessageVO();
         linkIssueLinkageMessageVO.setKey(websocketKey);
         try {
@@ -145,29 +132,6 @@ public class IssueOperateServiceImpl implements IssueOperateService {
         }
     }
 
-    @Override
-    public void cloneIssueByIssueId(Long projectId,
-                                    Long issueId,
-                                    CopyConditionVO copyConditionVO,
-                                    Long organizationId,
-                                    String applyType,
-                                    String asyncTraceId,
-                                    ServletRequestAttributes requestAttributes) {
-        RequestContextHolder.setRequestAttributes(requestAttributes);
-        redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
-        issueOperateService.asyncCloneIssueByIssueId(
-                projectId,
-                issueId,
-                copyConditionVO,
-                organizationId,
-                applyType,
-                asyncTraceId,
-                requestAttributes,
-                EncryptContext.encryptType() == null ? null : EncryptContext.encryptType().toString(),
-                SecurityContextHolder.getContext()
-        );
-    }
-
     @Async
     @Override
     public void asyncCloneIssueByIssueId(Long projectId,
@@ -175,15 +139,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                                          CopyConditionVO copyConditionVO,
                                          Long organizationId,
                                          String applyType,
-                                         String asyncTraceId,
-                                         ServletRequestAttributes requestAttributes,
-                                         String encryptType,
-                                         SecurityContext context) {
-        RequestContextHolder.setRequestAttributes(requestAttributes);
-        if(encryptType != null) {
-            EncryptContext.setEncryptType(encryptType);
-        }
-        SecurityContextHolder.setContext(context);
+                                         String asyncTraceId) {
         issueService.cloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId);
     }
 }

@@ -1,13 +1,15 @@
 package io.choerodon.agile.api.validator;
 
+import java.util.Objects;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.choerodon.agile.app.service.ProductVersionService;
 import io.choerodon.agile.infra.dto.ProductVersionDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ProductVersionMapper;
 import io.choerodon.core.exception.CommonException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/6/3.
@@ -15,9 +17,6 @@ import java.util.Objects;
  */
 @Component
 public class StoryMapValidator {
-
-    private static final String ARCHIVED = "archived";
-    private static final String RELEASED = "released";
 
     @Autowired
     private IssueMapper issueMapper;
@@ -37,7 +36,7 @@ public class StoryMapValidator {
             if (productVersionDTO == null) {
                 throw new CommonException("error.version.notFound");
             }
-            if (ARCHIVED.equals(productVersionDTO.getStatusCode()) || RELEASED.equals(productVersionDTO.getStatusCode())) {
+            if (ProductVersionService.VERSION_STATUS_CODE_ARCHIVED.equals(productVersionDTO.getStatusCode()) || ProductVersionService.VERSION_STATUS_CODE_RELEASED.equals(productVersionDTO.getStatusCode())) {
                 throw new CommonException("error.productStatus.notRight");
             }
         }
