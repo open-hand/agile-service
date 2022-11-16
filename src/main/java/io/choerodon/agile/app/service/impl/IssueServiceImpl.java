@@ -1297,19 +1297,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return !ObjectUtils.isEmpty(agilePluginService.getProgram(organizationId, projectId));
     }
 
-    private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
-        if (Boolean.TRUE.equals(x.getSystem())) {
+    private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO pageFieldView, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
+        if (Boolean.TRUE.equals(pageFieldView.getSystem())) {
             //系统字段
-            String code = x.getFieldCode();
+            String code = pageFieldView.getFieldCode();
             if (FieldCode.EPIC.equals(code) && belongToProgram) {
                 return;
             }
-            if (isSystemFieldEmpty(x.getFieldCode(), issue)) {
-                requiredSystemFields.add(x);
+            if (isSystemFieldEmpty(pageFieldView.getFieldCode(), issue)) {
+                requiredSystemFields.add(pageFieldView);
             }
         } else {
-            if (ObjectUtils.isEmpty(customFieldMap.get(x.getFieldCode()))) {
-                requiredCustomFields.add(x);
+            if (ObjectUtils.isEmpty(customFieldMap.get(pageFieldView.getFieldCode()))) {
+                requiredCustomFields.add(pageFieldView);
             }
         }
     }
@@ -1365,8 +1365,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 value = issue.getLabelIssueRelVOList();
                 break;
             case FieldCode.FIX_VERSION:
+                value = issue.getVersionIssueRelVOList() == null ?
+                        null :
+                        issue.getVersionIssueRelVOList().stream()
+                                .filter(versionIssueRel -> Objects.equals(versionIssueRel.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_FIX))
+                                .filter(versionIssueRel -> !Objects.equals(versionIssueRel.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED))
+                                .collect(Collectors.toList());
+                break;
             case FieldCode.INFLUENCE_VERSION:
-                value = issue.getVersionIssueRelVOList();
+                value = issue.getVersionIssueRelVOList() == null ?
+                        null :
+                        issue.getVersionIssueRelVOList().stream()
+                                .filter(versionIssueRel -> Objects.equals(versionIssueRel.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE))
+                                .collect(Collectors.toList());
                 break;
             case FieldCode.SPRINT:
                 List<SprintNameVO> sprints = issue.getCloseSprint();
@@ -4217,12 +4228,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (ObjectUtils.isEmpty(issueDTOList)) {
             return new ArrayList<>();
         }
-        Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), issueIds, false);
+        Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Collections.singletonList(projectId), issueIds, false);
         List<Long> issueTypeIds = issueDTOList.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
         List<IssueVO> issueVOList = issueAssembler.issueDOToCopyIssueVOList(issueDTOList, organizationId, projectId, issueIds);
         Map<Long, List<PageFieldViewVO>> issueTypeFieldMap = new HashMap<>();
         boolean belongToProgram = belongToProgram(organizationId, projectId);
-        issueTypeIds.forEach(issueTypeId -> {
+        for (Long issueTypeId : issueTypeIds) {
             PageFieldViewParamVO param = new PageFieldViewParamVO();
             param.setIssueTypeId(issueTypeId);
             param.setSchemeCode(AGILE_SCHEME_CODE);
@@ -4235,16 +4246,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                             .map(PageFieldViewVO::getFieldId)
                             .collect(Collectors.toSet());
             param.setPageCode(PageCode.AGILE_ISSUE_EDIT);
-            pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param)
-                    .forEach(x -> {
-                        Long fieldId = x.getFieldId();
-                        if (!fieldIds.contains(fieldId)) {
-                            createPageFields.add(x);
-                            fieldIds.add(fieldId);
-                        }
-                    });
+            for (PageFieldViewVO pageFieldView : pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param)) {
+                Long fieldId = pageFieldView.getFieldId();
+                if (!fieldIds.contains(fieldId)) {
+                    createPageFields.add(pageFieldView);
+                    fieldIds.add(fieldId);
+                }
+            }
             issueTypeFieldMap.put(issueTypeId, createPageFields);
-        });
+        }
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         List<IssueRequiredFields> result = new ArrayList<>();
         for (IssueVO issue : issueVOList) {
@@ -4255,11 +4265,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
             List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
             List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
-            createPageFields.forEach(x -> {
-                if (Boolean.TRUE.equals(x.getRequired())) {
-                    handlerSystemAndCustomRequiredField(customFieldMap, belongToProgram, x, requiredSystemFields, requiredCustomFields, issue);
+            for (PageFieldViewVO createPageField : createPageFields) {
+                if (Boolean.TRUE.equals(createPageField.getRequired())) {
+                    handlerSystemAndCustomRequiredField(customFieldMap, belongToProgram, createPageField, requiredSystemFields, requiredCustomFields, issue);
                 }
-            });
+            }
             requiredSystemFields.addAll(requiredCustomFields);
             fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issue.getIssueTypeId(), requiredSystemFields);
             IssueRequiredFields issueRequiredFields = new IssueRequiredFields()

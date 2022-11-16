@@ -73,7 +73,7 @@ public class IssueController {
                                                 @RequestBody IssueCreateVO issueCreateVO) {
         issueValidator.verifyCreateData(issueCreateVO, projectId, applyType);
         return Optional.ofNullable(stateMachineClientService.createIssue(issueCreateVO, applyType))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+                .map(Results::created)
                 .orElseThrow(() -> new CommonException("error.Issue.createIssue"));
     }
 
@@ -100,7 +100,7 @@ public class IssueController {
                                                       @RequestBody IssueSubCreateVO issueSubCreateVO) {
         issueValidator.verifySubCreateData(issueSubCreateVO, projectId);
         return Optional.ofNullable(stateMachineClientService.createSubIssue(issueSubCreateVO))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+                .map(Results::created)
                 .orElseThrow(() -> new CommonException("error.Issue.createSubIssue"));
     }
 
@@ -115,7 +115,7 @@ public class IssueController {
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueUpdate,issueUpdateVO);
         return Optional.ofNullable(issueService.updateIssue(projectId, issueUpdateVO, fieldList))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+                .map(Results::created)
                 .orElseThrow(() -> new CommonException("error.Issue.updateIssue"));
     }
 
@@ -242,34 +242,34 @@ public class IssueController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("通过issueId删除")
     @DeleteMapping(value = "/{issueId}")
-    public ResponseEntity deleteIssue(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>deleteIssue(@ApiParam(value = "项目id", required = true)
                                       @PathVariable(name = "project_id") Long projectId,
                                       @ApiParam(value = "issueId", required = true)
                                       @PathVariable @Encrypt Long issueId) {
         issueService.deleteIssue(projectId, issueId);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除自己创建的issue")
     @DeleteMapping(value = "/delete_self_issue/{issueId}")
-    public ResponseEntity deleteSelfIssue(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>deleteSelfIssue(@ApiParam(value = "项目id", required = true)
                                       @PathVariable(name = "project_id") Long projectId,
                                       @ApiParam(value = "issueId", required = true)
                                       @PathVariable @Encrypt Long issueId) {
         issueService.deleteSelfIssue(projectId, issueId);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("批量删除Issue,给测试")
     @DeleteMapping(value = "/to_version_test")
-    public ResponseEntity batchDeleteIssues(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>batchDeleteIssues(@ApiParam(value = "项目id", required = true)
                                             @PathVariable(name = "project_id") Long projectId,
                                             @ApiParam(value = "issue id", required = true)
                                             @RequestBody @Encrypt  List<Long> issueIds) {
         issueService.batchDeleteIssues(projectId, issueIds);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -289,14 +289,14 @@ public class IssueController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("批量替换issue版本,给测试")
     @PostMapping(value = "/to_version_test/{versionId}")
-    public ResponseEntity batchIssueToVersionTest(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>batchIssueToVersionTest(@ApiParam(value = "项目id", required = true)
                                                   @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "versionId", required = true)
                                                   @PathVariable @Encrypt(ignoreValue = {"0"}) Long versionId,
                                                   @ApiParam(value = "issue id", required = true)
                                                   @RequestBody @Encrypt List<Long> issueIds) {
         issueService.batchIssueToVersionTest(projectId, versionId, issueIds);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -358,7 +358,7 @@ public class IssueController {
                                                                               @RequestParam Long organizationId,
                                                                               @ApiParam(value = "问题类型id", required = true)
                                                                               @RequestParam @Encrypt Long issueTypeId) {
-        return ResponseEntity.ok(issueService.listRequiredFieldByIssueType(projectId, organizationId, issueId, issueTypeId));
+        return Results.success(issueService.listRequiredFieldByIssueType(projectId, organizationId, issueId, issueTypeId));
     }
 
 
@@ -437,7 +437,7 @@ public class IssueController {
                                                         @PathVariable(name = "issueId") @Encrypt Long issueId,
                                                         @ApiParam(value = "异步任务id", required = true)
                                                         @RequestParam(value = "asyncTraceId") String asyncTraceId) {
-        return ResponseEntity.ok(issueService.queryAsyncCloneStatus(projectId, issueId, asyncTraceId));
+        return Results.success(issueService.queryAsyncCloneStatus(projectId, issueId, asyncTraceId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -617,7 +617,7 @@ public class IssueController {
                                                           @RequestParam(value = "param", required = false) String param,
                                                           @ApiParam(value = "忽略的用户id")
                                                           @RequestBody(required = false) @Encrypt Set<Long> ignoredUserIds) {
-        return ResponseEntity.ok(issueService.pagingQueryUsers(pageRequest, projectId, param, ignoredUserIds));
+        return Results.success(issueService.pagingQueryUsers(pageRequest, projectId, param, ignoredUserIds));
     }
 
     @CustomPageRequest
@@ -633,7 +633,7 @@ public class IssueController {
                                                               @RequestParam(value = "param", required = false) String param,
                                                               @ApiParam(value = "忽略的用户id")
                                                               @RequestBody(required = false) @Encrypt Set<Long> ignoredUserIds) {
-        return ResponseEntity.ok(issueService.pagingQueryReporters(pageRequest, projectId, param, ignoredUserIds));
+        return Results.success(issueService.pagingQueryReporters(pageRequest, projectId, param, ignoredUserIds));
     }
 
     @CustomPageRequest
@@ -649,46 +649,46 @@ public class IssueController {
                                                                      @RequestParam String issueType,
                                                                      @ApiParam(value = "模糊查询参数")
                                                                      @RequestParam(value = "param", required = false) String param) {
-        return ResponseEntity.ok(issueService.pagingQueryAvailableParents(pageRequest, projectId, issueType, param));
+        return Results.success(issueService.pagingQueryAvailableParents(pageRequest, projectId, issueType, param));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("批量删除issue")
     @PostMapping(value = "/batch_delete")
-    public ResponseEntity batchDeleteIssue(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>batchDeleteIssue(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "issueIds", required = true)
                                            @RequestBody @Encrypt List<Long> issueIds) {
         issueOperateService.batchDeleteIssue(projectId, issueIds);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return Results.success();
     }
 
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("测试专用-执行状态变更去修改issue状态")
     @PostMapping(value = "/execution_update_status")
-    public ResponseEntity executionUpdateStatus(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>executionUpdateStatus(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                 @ApiParam(value = "issueId", required = true)
                                                 @RequestParam @Encrypt Long issueId,
                                                 @ApiParam(value = "更新的issue状态")
                                                 @RequestBody ExecutionUpdateIssueVO executionUpdateIssueVO) {
         issueService.executionUpdateStatus(projectId, issueId, executionUpdateIssueVO);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
+    @ApiOperation("查询当前项目下的关联内容")
     @GetMapping(value = "/{issueId}/list_link_contents")
     public ResponseEntity<List<String>> listLinkContents(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
                                                          @ApiParam(value = "issue id", required = true)
                                                          @PathVariable @Encrypt Long issueId) {
-        return ResponseEntity.ok(issueService.listLinkContents(projectId, issueId));
+        return Results.success(issueService.listLinkContents(projectId, issueId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查询当前项目下的epic，提供给列表下拉")
+    @ApiOperation("查询当前工作项下的必填字段")
     @GetMapping(value = "/{issueId}/all_required_field")
     public ResponseEntity<List<IssueRequiredFields>> listAllRequiredField(@ApiParam(value = "项目id", required = true)
                                                                           @PathVariable(name = "project_id") Long projectId,
@@ -697,6 +697,6 @@ public class IssueController {
                                                                           @RequestParam Long organizationId,
                                                                           @ApiParam(value = "是否复制子项", required = true)
                                                                           @RequestParam Boolean subTask) {
-        return ResponseEntity.ok(issueService.listAllRequiredField(projectId, organizationId, issueId, subTask));
+        return Results.success(issueService.listAllRequiredField(projectId, organizationId, issueId, subTask));
     }
 }
