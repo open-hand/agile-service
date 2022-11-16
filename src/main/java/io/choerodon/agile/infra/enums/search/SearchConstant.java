@@ -6,10 +6,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.util.Assert;
+
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
+
+import org.hzero.core.base.BaseConstants;
 
 /**
  * @author superlee
@@ -42,8 +46,6 @@ public class SearchConstant {
                 new FieldTableVO(FieldCode.ASSIGNEE, "assignee_id", TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.SPRINT, "sprint_id", TABLE_AGILE_ISSUE_SPRINT_REL),
                 new FieldTableVO(FieldCode.PRIORITY, "priority_id", TABLE_AGILE_ISSUE),
-                //todo 特性&史诗
-                new FieldTableVO(FieldCode.FEATURE, "feature_id", TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.REPORTER, "reporter_id", TABLE_AGILE_ISSUE),
                 new FieldTableVO(FieldCode.COMPONENT, "component_id", TABLE_AGILE_COMPONENT_ISSUE_REL),
                 new FieldTableVO(FieldCode.LABEL, "label_id", TABLE_AGILE_LABEL_ISSUE_REL),
@@ -83,7 +85,8 @@ public class SearchConstant {
             new ObjectSchemeFieldDTO().setCode(Field.YQ_CLOUD_NUM).setFieldType(FieldTypeCnName.INPUT.getCode()),
             new ObjectSchemeFieldDTO().setCode(Field.CONTENT).setFieldType(FieldTypeCnName.INPUT.getCode()),
             new ObjectSchemeFieldDTO().setCode(Field.MY_STAR).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.MY_PARTICIPATE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            new ObjectSchemeFieldDTO().setCode(Field.MY_PARTICIPATE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
+            new ObjectSchemeFieldDTO().setCode(FieldCode.FEATURE).setFieldType(FieldTypeCnName.SINGLE.getCode())
     );
 
     public class Field {
@@ -220,7 +223,7 @@ public class SearchConstant {
         }
     }
 
-    public class SqlTemplate {
+    public static class SqlTemplate {
 
         /**
          * ==============下拉框=================
@@ -229,15 +232,15 @@ public class SearchConstant {
         /**
          * priority_id in (1,2,3)
          */
-        public static final String SELF_TABLE_IN_OR_NOT_IN = " %s %s ( %s ) ";
+        public static final String SELF_TABLE_IN_OR_NOT_IN = " %s %s ( %s ) %s";
         /**
          * (priority_id = 0 or priority_id is null)
          */
-        public static final String SELF_TABLE_ID_IS_NULL = " (%s = 0 or %s is null) ";
+        public static final String SELF_TABLE_ID_IS_NULL = " (%s = 0 or %s is null) %s ";
         /**
          * (priority_id != 0 and priority_id is not null)
          */
-        public static final String SELF_TABLE_ID_IS_NOT_NULL = " (%s != 0 and %s is not null) ";
+        public static final String SELF_TABLE_ID_IS_NOT_NULL = " (%s != 0 and %s is not null) %s ";
 
         public static final String SELF_TABLE_IS_NULL = " (%s is null) ";
 
@@ -268,6 +271,10 @@ public class SearchConstant {
 
         public static final String CUSTOM_FIELD_EQUAL_OR_LIKE = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s %s and scheme_code = '%s') ";
 
+        public static final String EPIC_IN_OR_NOT_IN = " ((%s %s (%s) and %s in ( 'story', 'task', 'bug', 'feature' )) or (%s %s( select issue_id from agile_issue where issue_id = %s and epic_id in (%s)) and %s = 'sub_task')) ";
+        public static final String EPIC_IS_NULL = " (((#{epicIdWithAlias} = 0 or #{epicIdWithAlias} is null) and #{typeCode} in ( 'story', 'task', 'bug', 'feature' )) or (#{parentIssueId} in (select issue_id from agile_issue where issue_id = #{parentIssueId} and (epic_id = 0 or epic_id is null) ) and #{typeCode} = 'sub_task')) ";
+        public static final String EPIC_IS_NOT_NULL = "  (((#{epicIdWithAlias} != 0 and #{epicIdWithAlias} is not null) and #{typeCode} in ( 'story', 'task', 'bug', 'feature' )) or (#{parentIssueId} in (select issue_id from agile_issue where issue_id = #{parentIssueId} and (epic_id != 0 and epic_id is not null) ) and #{typeCode} = 'sub_task')) ";
+
 
         /**
          * ================日期===============
@@ -280,6 +287,20 @@ public class SearchConstant {
         public static final String DATE_BETWEEN = " ( %s >= %s and %s <= %s ) ";
 
         public static final String DATE_FORMATTER = "DATE_FORMAT(%s, '%s')";
+
+
+        public static String fillInParam(Map<String, String> map,
+                                         String sqlTemplate) {
+            Assert.notNull(map, BaseConstants.ErrorCode.DATA_INVALID);
+            Assert.notNull(sqlTemplate, BaseConstants.ErrorCode.DATA_INVALID);
+            String result = sqlTemplate;
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("#{").append(entry.getKey()).append("}");
+                result = result.replace(builder.toString(), entry.getValue());
+            }
+            return result;
+        }
 
     }
 

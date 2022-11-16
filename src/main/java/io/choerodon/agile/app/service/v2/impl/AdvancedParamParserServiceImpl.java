@@ -525,10 +525,18 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 case SearchConstant.Field.MY_PARTICIPATE:
                     sqlBuilder.append(generateMyParticipateSql(projectIds, operation, alias, fieldTable, values));
                     break;
+                case FieldCode.FEATURE:
+                    String mainTableFilterColumn = buildMainTableFilterColumn("type_code", alias);
+                    String additionalCondition = " and " + mainTableFilterColumn + " in ( 'story', 'task', 'bug' ) ";
+                    sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable, additionalCondition));
+                    break;
+                case FieldCode.EPIC:
+                    sqlBuilder.append(generateEpicSql(operation, values, alias, fieldTable));
+                    break;
                 default:
                     if (!isLinkedTable) {
                         //主表字段
-                        sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable));
+                        sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable, ""));
                     } else {
                         //关联表
                         sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "", null));
@@ -537,6 +545,46 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             }
         } else {
             sqlBuilder.append(generateCustomFieldSelectorSql(alias, field, instanceType, operation, projectIds, values));
+        }
+        return sqlBuilder.toString();
+    }
+
+    private String generateEpicSql(String operation, List<?> values, String alias, FieldTableVO fieldTable) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        Operation opt = Operation.valueOf(operation);
+        String epicIdWithAlias = buildMainTableFilterColumn(fieldTable.getField(), alias);
+        String valueStr = StringUtils.join(values, BaseConstants.Symbol.COMMA);
+        String typeCode = buildMainTableFilterColumn("type_code", alias);
+        String parentIssueId = buildMainTableFilterColumn("parent_issue_id", alias);
+        Map<String,String> dataMap = new HashMap<>();
+        dataMap.put("epicIdWithAlias", epicIdWithAlias);
+        dataMap.put("valueStr", valueStr);
+        dataMap.put("typeCode", typeCode);
+        dataMap.put("parentIssueId", parentIssueId);
+        switch (opt) {
+            case IN:
+            case NOT_IN:
+                sqlBuilder.append(
+                        String.format(
+                                EPIC_IN_OR_NOT_IN,
+                                epicIdWithAlias,
+                                opt.getOpt(),
+                                valueStr,
+                                typeCode,
+                                parentIssueId,
+                                opt.getOpt(),
+                                parentIssueId,
+                                valueStr,
+                                typeCode));
+                break;
+            case IS_NULL:
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, EPIC_IS_NULL));
+                break;
+            case IS_NOT_NULL:
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, EPIC_IS_NOT_NULL));
+                break;
+            default:
+                break;
         }
         return sqlBuilder.toString();
     }
@@ -685,7 +733,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     private String generateSelfTableSql(String operation,
                                         List<?> values, String alias,
-                                        FieldTableVO fieldTable) {
+                                        FieldTableVO fieldTable,
+                                        String additionalCondition) {
         StringBuilder sqlBuilder = new StringBuilder();
         Operation opt = Operation.valueOf(operation);
         String mainTableFilterColumn = buildMainTableFilterColumn(fieldTable.getField(), alias);
@@ -697,13 +746,14 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                 SELF_TABLE_IN_OR_NOT_IN,
                                 mainTableFilterColumn,
                                 opt.getOpt(),
-                                StringUtils.join(values, BaseConstants.Symbol.COMMA)));
+                                StringUtils.join(values, BaseConstants.Symbol.COMMA),
+                                additionalCondition));
                 break;
             case IS_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
                 break;
             case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn));
+                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
                 break;
             default:
                 break;
