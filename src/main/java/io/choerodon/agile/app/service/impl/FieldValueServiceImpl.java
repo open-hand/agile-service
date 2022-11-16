@@ -1,7 +1,26 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
@@ -17,31 +36,14 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.lang3.StringUtils;
-import org.hzero.core.base.AopProxy;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import org.hzero.core.base.AopProxy;
 
 /**
  * @author shinan.chen
@@ -473,7 +475,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
             fieldListRemove(v, fieldList, issueUpdateVO, programMap);
             if (fixVersion != null) {
-                issueUpdateVO.setVersionType("fix");
+                issueUpdateVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
                 issueUpdateVO.setVersionIssueRelVOList(fixVersion);
             }
             // 获取传入的状态
@@ -578,7 +580,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
         fieldListRemove(issueDTO, fieldList, issueUpdateVO, programMap);
         if (fixVersion != null) {
-            issueUpdateVO.setVersionType("fix");
+            issueUpdateVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             issueUpdateVO.setVersionIssueRelVOList(fixVersion);
         }
         // 获取传入的状态
@@ -689,7 +691,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private void handlerBugInfluenceVersion(Long projectId,IssueDTO issueDTO, List<VersionIssueRelVO> influenceVersion, IssueVO issueVO) {
         if ("bug".equals(issueDTO.getTypeCode()) && influenceVersion != null) {
             IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
-            issueUpdateVO1.setVersionType("influence");
+            issueUpdateVO1.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             issueUpdateVO1.setVersionIssueRelVOList(influenceVersion);
             issueUpdateVO1.setIssueId(issueDTO.getIssueId());
             issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());

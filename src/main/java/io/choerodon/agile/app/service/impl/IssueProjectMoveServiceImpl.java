@@ -605,7 +605,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             if (!ObjectUtils.isEmpty(influenceVersions)) {
                 List<VersionIssueRelVO> list = EncryptionUtils.jsonToList(influenceVersions, VersionIssueRelVO.class);
                 fieldList.add("versionId");
-                issueService.handleUpdateVersionIssueRelWithoutRuleNotice(list, targetProjectVO.getId(), issueDTO.getIssueId(), "influence");
+                issueService.handleUpdateVersionIssueRelWithoutRuleNotice(list, targetProjectVO.getId(), issueDTO.getIssueId(), ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             }
         }
         issueService.addCollectionFieldIfNotNull(issueUpdateVO, fieldList);
@@ -728,12 +728,12 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             }
             if (!CollectionUtils.isEmpty(issueDTO.getVersionIssueRelDTOList())) {
                 issueUpdateVO.setVersionIssueRelVOList(new ArrayList<>());
-                issueUpdateVO.setVersionType("fix");
+                issueUpdateVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             }
         }
         issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO, field);
         if (Objects.equals(issueDTO.getTypeCode(), "bug")) {
-            issueService.handleUpdateVersionIssueRelWithoutRuleNotice(new ArrayList<>(), projectId, issueDTO.getIssueId(), "influence");
+            issueService.handleUpdateVersionIssueRelWithoutRuleNotice(new ArrayList<>(), projectId, issueDTO.getIssueId(), ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
         }
         // 清空原项目和冲刺的关系
         IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();

@@ -14,6 +14,12 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  */
 public interface ProductVersionService {
 
+    String VERSION_STATUS_CODE_PLANNING = "version_planning";
+    String VERSION_STATUS_CODE_RELEASED = "released";
+    String VERSION_STATUS_CODE_ARCHIVED = "archived";
+    String VERSION_RELATION_TYPE_FIX = "fix";
+    String VERSION_RELATION_TYPE_INFLUENCE = "influence";
+
     ProductVersionDetailVO createVersion(Long projectId, ProductVersionCreateVO versionCreateDTO);
 
     Boolean deleteVersion(Long projectId, Long versionId, Long targetVersionId);

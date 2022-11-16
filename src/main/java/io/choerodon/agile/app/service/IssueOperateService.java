@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
  * @date 2020-11-27 17:05
  */
 public interface IssueOperateService {
+
     void batchDeleteIssue(Long projectId, List<Long> issueIds);
 
     void updateIssueStatusLinkage(Long projectId, Long issueId, IssueDTO issueDTO, String applyType, String encryptType, RequestAttributes requestAttributes);

@@ -30,6 +30,11 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  */
 public interface IssueService {
 
+    String CLONE_ISSUE_KEY = "cloneIssue:";
+    String DOING_STATUS = "doing";
+    String FAILED_STATUS = "failed";
+    String SUCCEED_STATUS = "succeed";
+
     void setIssueMapper(IssueMapper issueMapper);
 
     IssueVO queryIssueCreate(Long projectId, Long issueId);

@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +23,7 @@ import io.choerodon.agile.app.service.StateMachineClientService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -33,6 +35,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.Results;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -46,8 +49,8 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 @RequestMapping(value = "/v1/projects/{project_id}/issues")
 public class IssueController {
 
+    @Autowired
     private IssueService issueService;
-
     @Autowired
     private VerifyUpdateUtil verifyUpdateUtil;
     @Autowired
@@ -56,10 +59,8 @@ public class IssueController {
     private StateMachineClientService stateMachineClientService;
     @Autowired
     private IssueOperateService issueOperateService;
-
-    public IssueController(IssueService issueService) {
-        this.issueService = issueService;
-    }
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建issue")
@@ -423,6 +424,7 @@ public class IssueController {
                                                     @RequestBody CopyConditionVO copyConditionVO) {
         issueValidator.checkPredefinedFields(copyConditionVO.getPredefinedFieldNames());
         issueOperateService.asyncCloneIssueByIssueId(projectId, issueId, copyConditionVO, organizationId, applyType, asyncTraceId);
+        redisUtil.set(IssueService.CLONE_ISSUE_KEY + issueId + BaseConstants.Symbol.COLON + asyncTraceId , IssueService.DOING_STATUS, 24L, TimeUnit.HOURS);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

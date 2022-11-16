@@ -1,7 +1,18 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.*;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.validator.StoryMapValidator;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.MoveIssueVO;
 import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
@@ -18,18 +29,9 @@ import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/5/31.
@@ -154,7 +156,7 @@ public class StoryMapServiceImpl implements StoryMapService {
                 VersionIssueRelDTO versionIssueRelDTO = new VersionIssueRelDTO();
                 versionIssueRelDTO.setIssueId(versionIssueRelVO.getIssueId());
                 versionIssueRelDTO.setVersionId(versionIssueRelVO.getVersionId());
-                versionIssueRelDTO.setRelationType("fix");
+                versionIssueRelDTO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
                 versionIssueRelDTO.setProjectId(projectId);
                 versionIssueRelService.delete(versionIssueRelDTO);
             }

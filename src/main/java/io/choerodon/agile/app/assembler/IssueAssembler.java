@@ -27,10 +27,7 @@ import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.app.service.IssueTypeService;
-import io.choerodon.agile.app.service.LookupValueService;
-import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -251,8 +248,8 @@ public class IssueAssembler extends AbstractAssembler {
             List<VersionIssueRelVO> versionList = toTargetList(issueDO.getVersionIssueRelDTOS(), VersionIssueRelVO.class);
             issueListFieldKVVO.setVersionIssueRelVOS(versionList);
             if (!CollectionUtils.isEmpty(versionList)) {
-                issueListFieldKVVO.setFixVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals("fix",versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
-                issueListFieldKVVO.setInfluenceVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals("influence",versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
+                issueListFieldKVVO.setFixVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals(ProductVersionService.VERSION_RELATION_TYPE_FIX,versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
+                issueListFieldKVVO.setInfluenceVersionIssueRelVOS(versionList.stream().filter(versionIssueRelDTO -> Objects.equals(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE,versionIssueRelDTO.getRelationType())).collect(Collectors.toList()));
             }
             issueListFieldKVVO.setIssueComponentBriefVOS(toTargetList(issueDO.getIssueComponentBriefDTOS(), IssueComponentBriefVO.class));
             issueListFieldKVVO.setIssueSprintVOS(toTargetList(issueDO.getIssueSprintDTOS(), IssueSprintVO.class));
@@ -649,8 +646,8 @@ public class IssueAssembler extends AbstractAssembler {
     }
 
     private List<VersionIssueRelVO> copyVersionIssueRel(List<VersionIssueRelDTO> versionIssueRelDTOList, boolean copyFixVersion, boolean copyInfluenceVersion) {
-        List<VersionIssueRelDTO> fixVersionIssueRelDTOList = versionIssueRelDTOList.stream().filter(v -> "fix".equals(v.getRelationType())).collect(Collectors.toList());
-        List<VersionIssueRelDTO> influenceVersionIssueRelDTOList = versionIssueRelDTOList.stream().filter(v -> "influence".equals(v.getRelationType())).collect(Collectors.toList());
+        List<VersionIssueRelDTO> fixVersionIssueRelDTOList = versionIssueRelDTOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(v.getRelationType())).collect(Collectors.toList());
+        List<VersionIssueRelDTO> influenceVersionIssueRelDTOList = versionIssueRelDTOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE.equals(v.getRelationType())).collect(Collectors.toList());
         List<VersionIssueRelVO> versionIssueRelVOList = new ArrayList<>(versionIssueRelDTOList.size());
         if (copyFixVersion) {
             fixVersionIssueRelDTOList.forEach(versionIssueRelDO -> {

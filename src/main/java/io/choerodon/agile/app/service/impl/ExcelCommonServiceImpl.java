@@ -63,9 +63,6 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
-    private static final String VERSION_PLANNING = "version_planning";
-    private static final String FIX_RELATION_TYPE = "fix";
-    private static final String INFLUENCE_RELATION_TYPE = "influence";
     private static final String MULTIPART_NAME = "file";
     private static final String ORIGINAL_FILE_NAME = ".xlsx";
     private static final String FILE_NAME = "error.xlsx";
@@ -328,7 +325,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> versionList = new ArrayList<>();
         productVersionCommons.forEach(p -> {
             String statusCode = p.getStatusCode();
-            if (VERSION_PLANNING.equals(statusCode)) {
+            if (ProductVersionService.VERSION_STATUS_CODE_PLANNING.equals(statusCode)) {
                 versionList.add(p.getName());
             }
         });
@@ -352,7 +349,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> versionList = new ArrayList<>();
         productVersionCommons.forEach(p -> {
             String statusCode = p.getStatusCode();
-            if (VERSION_PLANNING.equals(statusCode)) {
+            if (ProductVersionService.VERSION_STATUS_CODE_PLANNING.equals(statusCode)) {
                 versionList.add(p.getName());
             }
         });
@@ -1226,7 +1223,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> values = new ArrayList<>();
         productVersionCommons.forEach(p -> {
             String statusCode = p.getStatusCode();
-            if (VERSION_PLANNING.equals(statusCode)) {
+            if (ProductVersionService.VERSION_STATUS_CODE_PLANNING.equals(statusCode)) {
                 values.add(p.getName());
                 map.put(p.getName(), p.getVersionId());
             }
@@ -2011,7 +2008,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 List<VersionIssueRelVO> versionIssueRelList = new ArrayList<>();
                 VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
                 versionIssueRelVO.setVersionId(valueIdMap.get(value));
-                versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
+                versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
                 versionIssueRelList.add(versionIssueRelVO);
                 issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
             }
@@ -2041,7 +2038,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 }
                 VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
                 versionIssueRelVO.setVersionId(valueIdMap.get(value));
-                versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
+                versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
                 versionIssueRelList.add(versionIssueRelVO);
                 issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
             }
@@ -2832,7 +2829,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             }
             VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
             versionIssueRelVO.setVersionId(valueIdMap.get(version));
-            versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
+            versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             versionIssueRelList.add(versionIssueRelVO);
             versions.add(valueIdMap.get(value));
         }
@@ -2840,7 +2837,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
                 && CollectionUtils.isEmpty(issueExcelImportVO.getOldIssue().getVersionIssueRelVOList())) {
             List<VersionIssueRelVO> versionIssueRelVOList = issueExcelImportVO.getOldIssue().getVersionIssueRelVOList();
-            oldIds.addAll(versionIssueRelVOList.stream().filter(v -> FIX_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+            oldIds.addAll(versionIssueRelVOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
         }
         Boolean updateFlag = needUpdateMulitField(issueExcelImportVO.getUpdate(), versions, oldIds);
         if (!issueExcelImportVO.getUpdate() || updateFlag) {
@@ -2877,7 +2874,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             }
             VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
             versionIssueRelVO.setVersionId(valueIdMap.get(version));
-            versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
+            versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             versionIssueRelList.add(versionIssueRelVO);
             versions.add(valueIdMap.get(value));
         }
@@ -2885,7 +2882,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate())
                 && CollectionUtils.isEmpty(issueExcelImportVO.getOldIssue().getVersionIssueRelVOList())) {
             List<VersionIssueRelVO> versionIssueRelVOList = issueExcelImportVO.getOldIssue().getVersionIssueRelVOList();
-            oldIds.addAll(versionIssueRelVOList.stream().filter(v -> INFLUENCE_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+            oldIds.addAll(versionIssueRelVOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
         }
         Boolean updateFlag = needUpdateMulitField(issueExcelImportVO.getUpdate(), versions, oldIds);
         if (!issueExcelImportVO.getUpdate() || updateFlag) {

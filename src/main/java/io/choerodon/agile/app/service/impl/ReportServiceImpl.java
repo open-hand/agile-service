@@ -117,7 +117,6 @@ public class ReportServiceImpl implements ReportService {
     private static final String FIELD_REMAINING_TIME_NAME = "remaining_time";
     private static final String FIELD_STORY_POINTS_NAME = "story_points";
     private static final String SPRINT_CLOSED = "closed";
-    private static final String VERSION_ARCHIVED_CODE = "archived";
     private static final String VERSION_REPORT_ERROR = "error.report.version";
     private static final String ISSUE_STORY_CODE = "story";
     private static final String ASSIGNEE = "assignee";
@@ -448,7 +447,7 @@ public class ReportServiceImpl implements ReportService {
         versionDO.setProjectId(projectId);
         versionDO.setVersionId(versionId);
         versionDO = versionMapper.selectOne(versionDO);
-        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), VERSION_ARCHIVED_CODE)) {
+        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED)) {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
         Map<String, String> orders = new HashMap<>();
@@ -470,7 +469,7 @@ public class ReportServiceImpl implements ReportService {
         versionDO.setProjectId(projectId);
         versionDO.setVersionId(versionId);
         versionDO = versionMapper.selectOne(versionDO);
-        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), VERSION_ARCHIVED_CODE)) {
+        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED)) {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
         List<VersionReportVO> versionReport = new ArrayList<>();

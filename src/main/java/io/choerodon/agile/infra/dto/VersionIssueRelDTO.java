@@ -1,15 +1,19 @@
 package io.choerodon.agile.infra.dto;
 
+import java.util.Date;
+import java.util.List;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+
+import io.choerodon.agile.app.service.ProductVersionService;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author dinghuang123@gmail.com
@@ -19,8 +23,6 @@ import java.util.List;
 @ModifyAudit
 @VersionAudit
 public class VersionIssueRelDTO extends AuditDomain{
-
-    private static final String STATUS_CODE_PLANNING = "version_planning";
 
     @Id
     @GeneratedValue
@@ -146,7 +148,7 @@ public class VersionIssueRelDTO extends AuditDomain{
 
     public ProductVersionDTO createProductVersionDTO() {
         ProductVersionDTO productVersionDTO = new ProductVersionDTO();
-        productVersionDTO.setStatusCode(STATUS_CODE_PLANNING);
+        productVersionDTO.setStatusCode(ProductVersionService.VERSION_STATUS_CODE_PLANNING);
         productVersionDTO.setName(this.name);
         productVersionDTO.setProjectId(this.projectId);
         return productVersionDTO;
