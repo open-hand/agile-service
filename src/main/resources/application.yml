@@ -68,6 +68,8 @@ hzero:
       name: choerodon-gateway
     monitor:
       name: choerodon-monitor
+  resource:
+    pattern: /v1/*, /v2/*
 choerodon:
   saga:
     service: choerodon-asgard
