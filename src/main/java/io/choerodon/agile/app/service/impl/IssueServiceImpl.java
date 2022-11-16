@@ -24,6 +24,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -3075,21 +3076,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (predefinedFieldNames.contains(FIX_VERSION)) {
             List<VersionIssueRelDTO> versionIssueRelations = issueDetail.getVersionIssueRelDTOList();
             if(CollectionUtils.isNotEmpty(versionIssueRelations)) {
-                versionIssueRelations = versionIssueRelations.stream().filter(relation -> !Objects.equals(relation.getRelationType(), FIX_VERSION)
-                        || !Objects.equals(relation.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED)).collect(Collectors.toList());
+                versionIssueRelations = versionIssueRelations.stream().filter(relation -> !(
+                        Objects.equals(relation.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_FIX)
+                        && Objects.equals(relation.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED)
+                )).collect(Collectors.toList());
                 issueDetail.setVersionIssueRelDTOList(versionIssueRelations);
             }
         }
     }
 
     private void setFieldValueEmpty(IssueDetailDTO issueDetailDTO, String fieldName) {
+        // 获得写方法
         Method method;
-        try {
-            PropertyDescriptor pd = new PropertyDescriptor(fieldName, issueDetailDTO.getClass());
-            method = pd.getWriteMethod();//获得写方法
-        } catch (IntrospectionException e) {
+        PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(issueDetailDTO.getClass(), fieldName);
+        if(pd == null) {
             throw new CommonException("error.copy.issue.setFiledValueEmpty");
         }
+        method = pd.getWriteMethod();
         if (!ObjectUtils.isEmpty(method)) {
             try {
                 if (Objects.equals(EPIC_ID_FIELD, fieldName)) {
