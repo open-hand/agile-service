@@ -17,7 +17,6 @@ import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 
