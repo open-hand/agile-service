@@ -257,6 +257,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                          Set<Long> projectIds) {
         StringBuilder sqlBuilder = new StringBuilder();
         String primaryKey = DEFAULT_PRIMARY_KEY;
+        String innerColumn = INSTANCE_ID;
         String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
         String table = fieldTable.getTable();
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
@@ -265,15 +266,15 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case IS_NOT_NULL:
             case IS_NULL:
                 sqlBuilder.append(
-                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), primaryKey, table, projectIdStr, " and source = 'yqcloud' and instance_type = 'issue'"));
+                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, " and source = 'yqcloud' and instance_type = 'issue'"));
                 break;
             case EQUAL:
                 String value = dataPair.getFirst();
-                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), primaryKey, table, projectIdStr, opt.getOpt(), value));
+                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), innerColumn, table, projectIdStr, opt.getOpt(), value));
                 break;
             case LIKE:
                 String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), primaryKey, table, projectIdStr, opt.getOpt(), valueStr));
+                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), innerColumn, table, projectIdStr, opt.getOpt(), valueStr));
                 break;
             default:
                 break;
