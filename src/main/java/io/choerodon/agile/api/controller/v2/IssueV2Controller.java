@@ -1,4 +1,4 @@
-package io.choerodon.agile.api.controller.v1;
+package io.choerodon.agile.api.controller.v2;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,7 +26,7 @@ import org.hzero.core.util.Results;
  * @since 2022-11-03
  */
 @RestController
-@RequestMapping(value = "/v1/projects/{project_id}/issues")
+@RequestMapping(value = "/v2/projects/{project_id}/issues")
 public class IssueV2Controller {
 
     @Autowired
