@@ -494,7 +494,8 @@ public interface IssueService {
 
     Map<String, Object> processSortMap(PageRequest pageRequest,
                                        Long projectId,
-                                       Long organizationId);
+                                       Long organizationId,
+                                       String alias);
 
     void splitIssueNumProjectCodePrefix(SearchVO searchVO, Set<Long> projectIds);
 

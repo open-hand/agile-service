@@ -53,6 +53,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
@@ -751,8 +752,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         boolean isTreeView = Boolean.TRUE.equals(searchParamVO.getTreeFlag());
         String quickFilterSql = getQuickFilter(searchParamVO.getQuickFilterIds());
         Set<Long> projectIds = SetUtils.unmodifiableSet(projectId);
-        String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds);
-        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, searchParamVO, quickFilterSql, advancedSql, organizationId, isTreeView);
+        Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
+        if (agilePluginService != null) {
+            predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
+        }
+        String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
+        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, organizationId, isTreeView);
         Page<IssueListFieldKVVO> issueListDTOPage = new Page<>();
         if (!CollectionUtils.isEmpty(issueIdPage.getContent())) {
             List<Long> issueIds = issueIdPage.getContent();
@@ -790,14 +795,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     private Page<Long> pagedQueryRoot(PageRequest pageRequest,
                                       Long projectId,
-                                      SearchParamVO searchParamVO,
                                       String quickFilterSql,
                                       String advancedSql,
                                       Long organizationId,
                                       boolean isTreeView) {
-        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId);
-        //todo summary/content分割处理
-//        splitIssueNumProjectCodePrefix(searchVO, projectIds);
+        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         Page<IssueDTO> issuePage;
         if (isTreeView) {
             issuePage =
@@ -812,20 +814,21 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
 
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
-        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId);
+        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         return pagedQueryByTreeView(pageRequest, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, sortMap, isTreeView);
     }
 
     @Override
     public Map<String, Object> processSortMap(PageRequest pageRequest,
                                               Long projectId,
-                                              Long organizationId) {
+                                              Long organizationId,
+                                              String alias) {
         Map<String, Object> sortMap = new HashMap<>();
         if (ObjectUtils.isEmpty(pageRequest.getSort())) {
             return sortMap;
         }
         if (!handleSortField(pageRequest).equals(StringUtils.EMPTY)) {
-            setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
+            setSortMap(organizationId, projectId, pageRequest, sortMap, alias);
         } else {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
             sortMap.put(ORDER_STR, orderStr);

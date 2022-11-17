@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.TableAliasConstant;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
@@ -213,7 +214,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         String filterSql = ganttChartService.getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
         addProjectSortIfNotExisted(pageRequest);
-        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId);
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }

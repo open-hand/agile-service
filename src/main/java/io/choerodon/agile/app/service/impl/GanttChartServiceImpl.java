@@ -30,6 +30,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.GanttDimension;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.TableAliasConstant;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -556,7 +557,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         addDimensionIfNotExisted(searchVO, dimension);
         addGanttDefaultOrder(searchVO, pageRequest);
         boardAssembler.handleOtherArgs(searchVO);
-        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, ConvertUtil.getOrganizationId(projectId));
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, ConvertUtil.getOrganizationId(projectId), TableAliasConstant.DEFAULT_ALIAS);
         List<Long> issueIds;
         Set<Long> projectIds = new HashSet<>(Arrays.asList(projectId));
         if (GanttDimension.isTask(instanceType) && !Objects.equals(0L, instanceId)) {
@@ -805,7 +806,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             ganttDefaultOrder = true;
         }
         Long projectId = new ArrayList<>(projectMap.entrySet()).get(0).getKey();
-        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, organizationId);
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         Page<Long> page = issueService.pagedQueryByTreeView(pageRequest, projectIds, searchVO, filterSql, sortMap, isTreeView);
         List<Long> issueIds = page.getContent();
         Map<Long, Long> issueEpicMap = new HashMap<>();
