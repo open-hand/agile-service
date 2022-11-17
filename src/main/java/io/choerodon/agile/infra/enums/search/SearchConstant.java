@@ -295,6 +295,10 @@ public class SearchConstant {
             Assert.notNull(sqlTemplate, BaseConstants.ErrorCode.DATA_INVALID);
             String result = sqlTemplate;
             for (Map.Entry<String, String> entry : map.entrySet()) {
+                String value = entry.getValue();
+                if (value == null) {
+                    continue;
+                }
                 StringBuilder builder = new StringBuilder();
                 builder.append("#{").append(entry.getKey()).append("}");
                 result = result.replace(builder.toString(), entry.getValue());
