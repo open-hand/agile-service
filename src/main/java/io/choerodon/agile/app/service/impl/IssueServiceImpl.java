@@ -1369,7 +1369,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                         null :
                         issue.getVersionIssueRelVOList().stream()
                                 .filter(versionIssueRel -> Objects.equals(versionIssueRel.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_FIX))
-                                .filter(versionIssueRel -> !Objects.equals(versionIssueRel.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED))
+                                .filter(versionIssueRel -> Objects.equals(versionIssueRel.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_PLANNING))
                                 .collect(Collectors.toList());
                 break;
             case FieldCode.INFLUENCE_VERSION:
@@ -3083,13 +3083,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueDetail.setPriorityCode("priority-" + priorityVO.getId());
             issueDetail.setPriorityId(priorityVO.getId());
         }
-        // 过滤掉已归档的"修复的版本"
+        // 过滤掉已归档/已发版的"修复的版本"
         if (predefinedFieldNames.contains(FIX_VERSION)) {
             List<VersionIssueRelDTO> versionIssueRelations = issueDetail.getVersionIssueRelDTOList();
             if(CollectionUtils.isNotEmpty(versionIssueRelations)) {
                 versionIssueRelations = versionIssueRelations.stream().filter(relation -> !(
                         Objects.equals(relation.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_FIX)
-                        && Objects.equals(relation.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED)
+                        && !Objects.equals(relation.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_PLANNING)
                 )).collect(Collectors.toList());
                 issueDetail.setVersionIssueRelDTOList(versionIssueRelations);
             }
