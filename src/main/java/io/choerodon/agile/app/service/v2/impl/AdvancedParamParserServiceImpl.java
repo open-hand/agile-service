@@ -26,7 +26,6 @@ import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
-import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
@@ -51,8 +50,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     private AdvancedParamValidator advancedParamValidator;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired(required = false)
-    private AgilePluginService agilePluginService;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
 
@@ -75,9 +72,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     @Override
     public String parse(InstanceType instanceType,
                         SearchParamVO searchParamVO,
-                        Set<Long> projectIds) {
+                        Set<Long> projectIds,
+                        Map<String, FieldTableVO> predefinedFieldMap) {
         advancedParamValidator.validate(searchParamVO);
-        Map<String, FieldTableVO> predefinedFieldMap = buildPredefinedFieldMap();
         List<Condition> conditions = new ArrayList<>();
         conditions.addAll(searchParamVO.getConditions());
         conditions.addAll(searchParamVO.getAdvancedConditions());
@@ -197,7 +194,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     break;
                 default:
                     String column = buildColumnByCode(fieldTable.getField(), alias, fieldCode);
-                    appendPredefinedSql(sqlBuilder, operation, dataPair, column);
+                    sqlBuilder.append(appendPredefinedSql(operation, dataPair, column));
                     break;
             }
         } else {
@@ -240,12 +237,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         //content == summary和issueNum
         FieldTableVO summary = predefinedFieldMap.get(FieldCode.SUMMARY);
         String summaryCol = buildColumnByCode(summary.getField(), alias, FieldCode.SUMMARY);
-        appendPredefinedSql(sqlBuilder, operation, pair, summaryCol);
+        sqlBuilder.append(appendPredefinedSql(operation, pair, summaryCol));
         sqlBuilder.append(" or ");
 
         FieldTableVO issueNum = predefinedFieldMap.get(FieldCode.ISSUE_NUM);
         String issueNumCol = buildColumnByCode(issueNum.getField(), alias, FieldCode.ISSUE_NUM);
-        appendPredefinedSql(sqlBuilder, operation, pair, issueNumCol);
+        sqlBuilder.append(appendPredefinedSql(operation, pair, issueNumCol));
         sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
     }
@@ -380,10 +377,10 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         }
     }
 
-    private void appendPredefinedSql(StringBuilder sqlBuilder,
-                                     String operation,
-                                     Pair<String, String> dataPair,
-                                     String column) {
+    private String appendPredefinedSql(String operation,
+                                       Pair<String, String> dataPair,
+                                       String column) {
+        StringBuilder sqlBuilder = new StringBuilder();
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
                 sqlBuilder.append(
@@ -412,6 +409,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 // =, >, >=, <, <=
                 break;
         }
+        return sqlBuilder.toString();
     }
 
     private String queryPatterByFieldCode(Field field) {
@@ -556,7 +554,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         String valueStr = StringUtils.join(values, BaseConstants.Symbol.COMMA);
         String typeCode = buildMainTableFilterColumn("type_code", alias);
         String parentIssueId = buildMainTableFilterColumn("parent_issue_id", alias);
-        Map<String,String> dataMap = new HashMap<>();
+        Map<String, String> dataMap = new HashMap<>();
         dataMap.put("epicIdWithAlias", epicIdWithAlias);
         dataMap.put("valueStr", valueStr);
         dataMap.put("typeCode", typeCode);
@@ -818,6 +816,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         boolean noEncryptFlag = Boolean.TRUE.equals(field.getNoEncryptFlag());
         switch (fieldCode) {
             case FieldCode.ENVIRONMENT:
+            case  FieldCode.FEATURE_TYPE:
                 List<String> valueStrList = value.getValueStrList();
                 List<String> result = new ArrayList<>();
                 if (!ObjectUtils.isEmpty(valueStrList)) {
@@ -838,15 +837,5 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         }
         return values;
     }
-
-    private Map<String, FieldTableVO> buildPredefinedFieldMap() {
-        Map<String, FieldTableVO> map = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
-        if (agilePluginService != null) {
-            map.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
-        }
-        //todo 瀑布，需求，项目群
-        return map;
-    }
-
 
 }

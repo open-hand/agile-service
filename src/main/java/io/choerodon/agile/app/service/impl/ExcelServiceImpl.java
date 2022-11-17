@@ -1506,7 +1506,7 @@ public class ExcelServiceImpl implements ExcelService {
             final String searchSql = filterSql;
             double lastProcess = 0D;
             PageRequest sourcePage = new PageRequest(0, 1, sort);
-            Map<String, Object> sortMap = issueService.processSortMap(sourcePage, projectId, organizationId);
+            Map<String, Object> sortMap = issueService.processSortMap(sourcePage, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
             while (true) {
                 //查询所有父节点问题
                 PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
