@@ -35,8 +35,8 @@ import org.hzero.core.util.Pair;
 @Service
 public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenerator {
 
-    private static final String INSTANCE_ID = "instance_id";
-    private static final String DEFAULT_PRIMARY_KEY = "issue_id";
+    public static final String INSTANCE_ID = "instance_id";
+    public static final String DEFAULT_PRIMARY_KEY = "issue_id";
 
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
@@ -53,22 +53,26 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                            Pair<String, String> dataPair,
                            boolean isSelector) {
         String type = fieldTable.getType();
+        String sql = "";
         switch (type) {
             case FieldTableVO.TYPE_BASE:
-                return parseBaseSql(fieldTable, condition, projectIds, values, dataPair, isSelector);
+                sql = parseBaseSql(fieldTable, condition, projectIds, values, dataPair, isSelector);
+                break;
             case FieldTableVO.TYPE_PROGRAM:
-                return null;
+                if (agilePluginService != null) {
+                    sql = agilePluginService.parseProgramSql(fieldTable, condition, projectIds, values, dataPair, isSelector);
+                }
+                break;
             case FieldTableVO.TYPE_BACKLOG:
-                return null;
+                break;
             case FieldTableVO.TYPE_WATERFALL:
-                return null;
+                break;
             case FieldTableVO.TYPE_TRIGGER:
-                return null;
+                break;
             default:
                 throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
         }
-
-
+        return sql;
     }
 
     private String parseBaseSql(FieldTableVO fieldTable,
@@ -93,9 +97,6 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         String operation = condition.getOperation();
         String alias = "ai";
         switch (fieldCode) {
-            case SearchConstant.Field.YQ_CLOUD_NUM:
-                sqlBuilder.append(generateYqCloudNumSql(operation, dataPair, fieldTable, alias, projectIds));
-                break;
             case SearchConstant.Field.CONTENT:
                 sqlBuilder.append(generateContentSql(operation, dataPair, alias, projectIds));
                 break;
@@ -129,18 +130,13 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
             case SearchConstant.Field.MY_PARTICIPATE:
                 sqlBuilder.append(generateMyParticipateSql(projectIds, operation, alias, fieldTable, values));
                 break;
-            case FieldCode.FEATURE:
-                String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn("type_code", alias);
-                String additionalCondition = " and " + mainTableFilterColumn + " in ( 'story', 'task', 'bug' ) ";
-                sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable, additionalCondition));
-                break;
             case FieldCode.EPIC:
                 sqlBuilder.append(generateEpicSql(operation, values, alias, fieldTable));
                 break;
             default:
                 if (!isLinkedTable) {
                     //主表字段
-                    sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable, ""));
+                    sqlBuilder.append(SqlUtil.generateSelfTableSql(operation, values, alias, fieldTable, ""));
                 } else {
                     //关联表
                     sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "", null));
@@ -180,38 +176,6 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 break;
             default:
                 // =, >, >=, <, <=
-                break;
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String generateYqCloudNumSql(String operation,
-                                         Pair<String, String> dataPair,
-                                         FieldTableVO fieldTable,
-                                         String alias,
-                                         Set<Long> projectIds) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        String primaryKey = DEFAULT_PRIMARY_KEY;
-        String innerColumn = INSTANCE_ID;
-        String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
-        String table = fieldTable.getTable();
-        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
-        switch (SearchConstant.Operation.valueOf(operation)) {
-            case IS_NOT_NULL:
-            case IS_NULL:
-                sqlBuilder.append(
-                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, " and source = 'yqcloud' and instance_type = 'issue'"));
-                break;
-            case EQUAL:
-                String value = dataPair.getFirst();
-                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, SearchConstant.Operation.IN.getOpt(), innerColumn, table, projectIdStr, opt.getOpt(), value));
-                break;
-            case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, SearchConstant.Operation.IN.getOpt(), innerColumn, table, projectIdStr, opt.getOpt(), valueStr));
-                break;
-            default:
                 break;
         }
         return sqlBuilder.toString();
@@ -388,36 +352,6 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         return sqlBuilder.toString();
     }
 
-
-    private String generateSelfTableSql(String operation,
-                                        List<?> values, String alias,
-                                        FieldTableVO fieldTable,
-                                        String additionalCondition) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
-        String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(fieldTable.getField(), alias);
-        switch (opt) {
-            case IN:
-            case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                SELF_TABLE_IN_OR_NOT_IN,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                StringUtils.join(values, BaseConstants.Symbol.COMMA),
-                                additionalCondition));
-                break;
-            case IS_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
-                break;
-            case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
-                break;
-            default:
-                break;
-        }
-        return sqlBuilder.toString();
-    }
 
     private String generateEpicSql(String operation, List<?> values, String alias, FieldTableVO fieldTable) {
         StringBuilder sqlBuilder = new StringBuilder();
