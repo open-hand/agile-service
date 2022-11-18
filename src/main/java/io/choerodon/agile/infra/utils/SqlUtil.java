@@ -3,8 +3,7 @@ package io.choerodon.agile.infra.utils;
 import static io.choerodon.agile.infra.enums.search.SearchConstant.SqlTemplate.*;
 import static io.choerodon.agile.infra.enums.search.SearchConstant.SqlTemplate.SELF_TABLE_ID_IS_NOT_NULL;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,6 +12,7 @@ import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.util.Pair;
 
 /**
  * @author superlee
@@ -23,6 +23,9 @@ public class SqlUtil {
     public static final String SINGLE_QUOT = "'";
 
     public static final String SQL_YYYY_MM_DD_HH_MM = "%Y-%m-%d %H:%i";
+
+    public static final String INSTANCE_ID = "instance_id";
+    public static final String DEFAULT_PRIMARY_KEY = "issue_id";
 
     public static final List<String> DATETIME_MM_FIELD_LIST =
             Arrays.asList(
@@ -81,6 +84,88 @@ public class SqlUtil {
                 sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
                 break;
             default:
+                break;
+        }
+        return sqlBuilder.toString();
+    }
+
+    public static String generateLinkedTableSql(String operation,
+                                                List<?> values,
+                                                FieldTableVO fieldTable,
+                                                String alias,
+                                                Set<Long> projectIds,
+                                                String additionalCondition,
+                                                String innerColumn,
+                                                boolean isProgram) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        String dbColumn = fieldTable.getField();
+        String primaryKey = DEFAULT_PRIMARY_KEY;
+        if (innerColumn == null) {
+            innerColumn = primaryKey;
+        }
+        String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
+        String table = fieldTable.getTable();
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
+        Map<String, String> dataMap = new HashMap<>();
+        dataMap.put("mainTableCol", mainTableFilterColumn);
+        dataMap.put("opt", opt.getOpt());
+        dataMap.put("innerCol", innerColumn);
+        dataMap.put("table", table);
+        dataMap.put("projectIdStr", projectIdStr);
+        dataMap.put("dbColumn", dbColumn);
+        dataMap.put("additionalCondition", additionalCondition);
+        if (!isProgram) {
+            dataMap.put("projectCol", "project_id");
+        } else {
+            dataMap.put("projectCol", "program_id");
+        }
+        switch (opt) {
+            case IN:
+            case NOT_IN:
+                dataMap.put("valueStr", StringUtils.join(values, BaseConstants.Symbol.COMMA));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, LINKED_TABLE_IN_OR_NOT_IN));
+                break;
+            case IS_NULL:
+            case IS_NOT_NULL:
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, LINKED_TABLE_IS_NULL_OR_NOT_NULL));
+                break;
+            default:
+                break;
+        }
+        return sqlBuilder.toString();
+    }
+
+    public static String appendPredefinedSql(String operation,
+                                             Pair<String, String> dataPair,
+                                             String column) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        switch (SearchConstant.Operation.valueOf(operation)) {
+            case BETWEEN:
+                sqlBuilder.append(
+                        String.format(
+                                DATE_BETWEEN,
+                                column,
+                                dataPair.getFirst(),
+                                column,
+                                dataPair.getSecond()));
+                break;
+            case IS_NOT_NULL:
+                sqlBuilder.append(String.format(SELF_TABLE_IS_NOT_NULL, column));
+                break;
+            case IS_NULL:
+                sqlBuilder.append(String.format(SELF_TABLE_IS_NULL, column));
+                break;
+            case EQUAL:
+                String value = dataPair.getFirst();
+                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "=", value));
+                break;
+            case LIKE:
+                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
+                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "like", valueStr));
+                break;
+            default:
+                // =, >, >=, <, <=
                 break;
         }
         return sqlBuilder.toString();
