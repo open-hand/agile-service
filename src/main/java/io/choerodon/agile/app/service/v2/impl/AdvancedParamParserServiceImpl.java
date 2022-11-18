@@ -8,11 +8,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,18 +17,16 @@ import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.validator.AdvancedParamValidator;
 import io.choerodon.agile.api.vo.FieldTableVO;
-import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
+import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
-import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.enums.InstanceType;
-import io.choerodon.agile.infra.enums.search.SearchConstant;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
+import io.choerodon.agile.infra.utils.SqlUtil;
 import io.choerodon.core.exception.CommonException;
 
 import org.hzero.core.base.BaseConstants;
@@ -48,26 +42,13 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
 
     @Autowired
     private AdvancedParamValidator advancedParamValidator;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private ProjectInfoMapper projectInfoMapper;
 
-    public static final String SQL_YYYY_MM_DD_HH_MM = "%Y-%m-%d %H:%i";
-
-    public static final String SINGLE_QUOT = "'";
+    @Autowired
+    private PredefinedFieldSqlGenerator predefinedFieldSqlGenerator;
 
     private static final String DEFAULT_PRIMARY_KEY = "issue_id";
-
     private static final String INSTANCE_ID = "instance_id";
 
-    private static final List<String> DATETIME_MM_FIELD_LIST =
-            Arrays.asList(
-                    FieldCode.ESTIMATED_START_TIME,
-                    FieldCode.ESTIMATED_END_TIME,
-                    FieldCode.ACTUAL_START_TIME,
-                    FieldCode.ACTUAL_END_TIME
-            );
 
     @Override
     public String parse(InstanceType instanceType,
@@ -108,7 +89,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                     case SINGLE:
                     case RADIO:
                     case CHECKBOX:
-                        sqlBuilder.append(generateSelectorSql(predefinedFieldMap, condition, projectIds, instanceType));
+                        sqlBuilder.append(generateSqlByClazz(predefinedFieldMap, condition, projectIds, instanceType, List.class));
                         break;
                     case TIME:
                     case DATETIME:
@@ -142,7 +123,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         }
         String alias = "ai";
         String primaryKey = DEFAULT_PRIMARY_KEY;
-        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
+        String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         String issueIdStr = "(" + StringUtils.join(issueIds, BaseConstants.Symbol.COMMA) + ")";
         sqlBuilder.append(String.format(SELF_TABLE_EQUAL, mainTableFilterColumn, "in", issueIdStr));
         return sqlBuilder.toString();
@@ -160,123 +141,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 .append(generateSql(instanceType, projectIds, predefinedFieldMap, subConditions, null))
                 .append(" ")
                 .append(BaseConstants.Symbol.RIGHT_BRACE);
-    }
-
-    private String generateSqlByClazz(Map<String, FieldTableVO> predefinedFieldMap,
-                                      Condition condition,
-                                      Set<Long> projectIds,
-                                      InstanceType instanceType,
-                                      Class clazz) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        Field field = condition.getField();
-        String operation = condition.getOperation();
-        List<String> options = new ArrayList<>();
-        //判断与类型相关的操作符
-        if (clazz == Date.class || clazz == BigDecimal.class) {
-            options.addAll(Operation.DATE_OR_NUMBER_OPERATIONS);
-        } else if (clazz == String.class) {
-            options.addAll(Operation.STRING_OPERATIONS);
-        }
-        Assert.isTrue(options.contains(operation), DATA_INVALID);
-        String fieldCode = field.getFieldCode();
-        Pair<String, String> dataPair = getPairValues(condition, clazz, field);
-        boolean isPredefined = field.getPredefined();
-        String alias = "ai";
-        if (isPredefined) {
-            FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
-            Assert.notNull(fieldTable, DATA_INVALID);
-            switch (fieldCode) {
-                case SearchConstant.Field.YQ_CLOUD_NUM:
-                    sqlBuilder.append(generateYqCloudNumSql(operation, dataPair, fieldTable, alias, projectIds));
-                    break;
-                case SearchConstant.Field.CONTENT:
-                    sqlBuilder.append(generateContentSql(operation, dataPair, alias, projectIds, predefinedFieldMap));
-                    break;
-                default:
-                    String column = buildColumnByCode(fieldTable.getField(), alias, fieldCode);
-                    sqlBuilder.append(appendPredefinedSql(operation, dataPair, column));
-                    break;
-            }
-        } else {
-            String primaryKey = DEFAULT_PRIMARY_KEY;
-            String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
-            String schemeCode = instanceType.getSchemeCode();
-            appendCustomSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String generateContentSql(String operation,
-                                      Pair<String, String> dataPair,
-                                      String alias,
-                                      Set<Long> projectIds,
-                                      Map<String, FieldTableVO> predefinedFieldMap) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        //去除searchVO.searchArgs.issueNum或searchVO.contents的项目code前缀
-        List<ProjectInfoDTO> projectInfos = projectInfoMapper.selectByProjectIds(projectIds);
-        if (projectInfos.isEmpty()) {
-            return sqlBuilder.toString();
-        }
-        List<String> projectCodes = projectInfos.stream().map(ProjectInfoDTO::getProjectCode).collect(Collectors.toList());
-        String content = dataPair.getFirst();
-        Pair<String, String> pair = Pair.of(null, null);
-        if (!ObjectUtils.isEmpty(content)) {
-            String substringContent = content;
-            for (String projectCode : projectCodes) {
-                String prefix = SINGLE_QUOT + projectCode + "-";
-                if (content.startsWith(prefix)) {
-                    substringContent = content.substring(prefix.length());
-                    substringContent = SINGLE_QUOT + substringContent;
-                    break;
-                }
-            }
-            pair = Pair.of(substringContent, null);
-        }
-
-        sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
-        //content == summary和issueNum
-        FieldTableVO summary = predefinedFieldMap.get(FieldCode.SUMMARY);
-        String summaryCol = buildColumnByCode(summary.getField(), alias, FieldCode.SUMMARY);
-        sqlBuilder.append(appendPredefinedSql(operation, pair, summaryCol));
-        sqlBuilder.append(" or ");
-
-        FieldTableVO issueNum = predefinedFieldMap.get(FieldCode.ISSUE_NUM);
-        String issueNumCol = buildColumnByCode(issueNum.getField(), alias, FieldCode.ISSUE_NUM);
-        sqlBuilder.append(appendPredefinedSql(operation, pair, issueNumCol));
-        sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
-        return sqlBuilder.toString();
-    }
-
-    private String generateYqCloudNumSql(String operation,
-                                         Pair<String, String> dataPair,
-                                         FieldTableVO fieldTable,
-                                         String alias,
-                                         Set<Long> projectIds) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        String primaryKey = DEFAULT_PRIMARY_KEY;
-        String innerColumn = INSTANCE_ID;
-        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
-        String table = fieldTable.getTable();
-        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        Operation opt = Operation.valueOf(operation);
-        switch (Operation.valueOf(operation)) {
-            case IS_NOT_NULL:
-            case IS_NULL:
-                sqlBuilder.append(
-                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, " and source = 'yqcloud' and instance_type = 'issue'"));
-                break;
-            case EQUAL:
-                String value = dataPair.getFirst();
-                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), innerColumn, table, projectIdStr, opt.getOpt(), value));
-                break;
-            case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                sqlBuilder.append(String.format(YQ_CLOUD_NUM_LIKE_OR_EQUAL, mainTableFilterColumn, Operation.IN.getOpt(), innerColumn, table, projectIdStr, opt.getOpt(), valueStr));
-                break;
-            default:
-                break;
-        }
-        return sqlBuilder.toString();
     }
 
     private void appendCustomSql(StringBuilder sqlBuilder,
@@ -377,47 +241,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         }
     }
 
-    private String appendPredefinedSql(String operation,
-                                       Pair<String, String> dataPair,
-                                       String column) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        switch (Operation.valueOf(operation)) {
-            case BETWEEN:
-                sqlBuilder.append(
-                        String.format(
-                                DATE_BETWEEN,
-                                column,
-                                dataPair.getFirst(),
-                                column,
-                                dataPair.getSecond()));
-                break;
-            case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_IS_NOT_NULL, column));
-                break;
-            case IS_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_IS_NULL, column));
-                break;
-            case EQUAL:
-                String value = dataPair.getFirst();
-                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "=", value));
-                break;
-            case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "like", valueStr));
-                break;
-            default:
-                // =, >, >=, <, <=
-                break;
-        }
-        return sqlBuilder.toString();
-    }
-
     private String queryPatterByFieldCode(Field field) {
         String patter = BaseConstants.Pattern.DATETIME;
         if (field.getPredefined()) {
             //预定义
             String fieldCode = field.getFieldCode();
-            if (DATETIME_MM_FIELD_LIST.contains(fieldCode)) {
+            if (SqlUtil.DATETIME_MM_FIELD_LIST.contains(fieldCode)) {
                 patter = BaseConstants.Pattern.DATETIME_MM;
             }
         } else {
@@ -427,15 +256,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             }
         }
         return patter;
-    }
-
-    private String buildColumnByCode(String column, String alias, String fieldCode) {
-        String thisColumn = buildMainTableFilterColumn(column, alias);
-        if (DATETIME_MM_FIELD_LIST.contains(fieldCode)) {
-            //需要处理特殊日期格式
-            thisColumn = String.format(DATE_FORMATTER, thisColumn, SQL_YYYY_MM_DD_HH_MM);
-        }
-        return thisColumn;
     }
 
     private Pair<String, String> getPairValues(Condition condition,
@@ -472,7 +292,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             Date date = value.getValueDate();
             Assert.notNull(date, DATA_INVALID);
             //日期value需要拼上'
-            valueStr = appendSingleQuot(dateFormat.format(date));
+            valueStr = SqlUtil.appendSingleQuot(dateFormat.format(date));
         } else if (clazz == BigDecimal.class) {
             BigDecimal bigDecimal = value.getValueDecimal();
             Assert.notNull(bigDecimal, DATA_INVALID);
@@ -480,221 +300,67 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         } else if (clazz == String.class) {
             valueStr = value.getValueStr();
             Assert.notNull(valueStr, DATA_INVALID);
-            valueStr = appendSingleQuot(valueStr);
+            valueStr = SqlUtil.appendSingleQuot(valueStr);
         }
         return valueStr;
     }
 
-    private String appendSingleQuot(String value) {
-        return new StringBuilder(SINGLE_QUOT).append(value).append(SINGLE_QUOT).toString();
-    }
-
-    private String generateSelectorSql(Map<String, FieldTableVO> predefinedFieldMap,
-                                       Condition condition,
-                                       Set<Long> projectIds,
-                                       InstanceType instanceType) {
+    private String generateSqlByClazz(Map<String, FieldTableVO> predefinedFieldMap,
+                                      Condition condition,
+                                      Set<Long> projectIds,
+                                      InstanceType instanceType,
+                                      Class clazz) {
         StringBuilder sqlBuilder = new StringBuilder();
         Field field = condition.getField();
         String operation = condition.getOperation();
-        //选择器，只支持in, not in, is null, is not null
-        Assert.isTrue(Operation.SELECTOR_OPERATIONS.contains(operation), DATA_INVALID);
-        List<? extends Object> values = getOptionValues(condition);
+        List<String> options = new ArrayList<>();
+        List<? extends Object> values = null;
+        Pair<String, String> dataPair = null;
+        //判断与类型相关的操作符
+        if (clazz == Date.class || clazz == BigDecimal.class) {
+            options.addAll(Operation.DATE_OR_NUMBER_OPERATIONS);
+            dataPair = getPairValues(condition, clazz, field);
+        } else if (clazz == String.class) {
+            options.addAll(Operation.STRING_OPERATIONS);
+            dataPair = getPairValues(condition, clazz, field);
+        } else if (clazz == List.class) {
+            //选择器类型字段取值
+            options.addAll(Operation.SELECTOR_OPERATIONS);
+            values = getOptionValues(condition);
+        }
+
+        Assert.isTrue(options.contains(operation), DATA_INVALID);
+        String fieldCode = field.getFieldCode();
         boolean isPredefined = field.getPredefined();
         String alias = "ai";
+        boolean isSelector = (clazz == List.class);
         if (isPredefined) {
-            //预定义字段
-            String fieldCode = field.getFieldCode();
             FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
             Assert.notNull(fieldTable, DATA_INVALID);
-            boolean isLinkedTable = !SearchConstant.TABLE_AGILE_ISSUE.equals(fieldTable.getTable());
-            switch (fieldCode) {
-                case FieldCode.TAG:
-                    sqlBuilder.append(generateTagSql(operation, values, fieldTable, alias, projectIds));
-                    break;
-                case FieldCode.FIX_VERSION:
-                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'", null));
-                    break;
-                case FieldCode.INFLUENCE_VERSION:
-                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'influence'", null));
-                    break;
-                case SearchConstant.Field.MY_STAR:
-                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and type = 'issue'", INSTANCE_ID));
-                    break;
-                case SearchConstant.Field.MY_PARTICIPATE:
-                    sqlBuilder.append(generateMyParticipateSql(projectIds, operation, alias, fieldTable, values));
-                    break;
-                case FieldCode.FEATURE:
-                    String mainTableFilterColumn = buildMainTableFilterColumn("type_code", alias);
-                    String additionalCondition = " and " + mainTableFilterColumn + " in ( 'story', 'task', 'bug' ) ";
-                    sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable, additionalCondition));
-                    break;
-                case FieldCode.EPIC:
-                    sqlBuilder.append(generateEpicSql(operation, values, alias, fieldTable));
-                    break;
-                default:
-                    if (!isLinkedTable) {
-                        //主表字段
-                        sqlBuilder.append(generateSelfTableSql(operation, values, alias, fieldTable, ""));
-                    } else {
-                        //关联表
-                        sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "", null));
-                    }
-                    break;
-            }
+            sqlBuilder.append(predefinedFieldSqlGenerator.parseSql(fieldTable, condition, projectIds, values, dataPair, isSelector));
         } else {
-            sqlBuilder.append(generateCustomFieldSelectorSql(alias, field, instanceType, operation, projectIds, values));
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String generateEpicSql(String operation, List<?> values, String alias, FieldTableVO fieldTable) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        Operation opt = Operation.valueOf(operation);
-        String epicIdWithAlias = buildMainTableFilterColumn(fieldTable.getField(), alias);
-        String valueStr = StringUtils.join(values, BaseConstants.Symbol.COMMA);
-        String typeCode = buildMainTableFilterColumn("type_code", alias);
-        String parentIssueId = buildMainTableFilterColumn("parent_issue_id", alias);
-        Map<String, String> dataMap = new HashMap<>();
-        dataMap.put("epicIdWithAlias", epicIdWithAlias);
-        dataMap.put("valueStr", valueStr);
-        dataMap.put("typeCode", typeCode);
-        dataMap.put("parentIssueId", parentIssueId);
-        switch (opt) {
-            case IN:
-            case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                EPIC_IN_OR_NOT_IN,
-                                epicIdWithAlias,
-                                opt.getOpt(),
-                                valueStr,
-                                typeCode,
-                                parentIssueId,
-                                opt.getOpt(),
-                                parentIssueId,
-                                valueStr,
-                                typeCode));
-                break;
-            case IS_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, EPIC_IS_NULL));
-                break;
-            case IS_NOT_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, EPIC_IS_NOT_NULL));
-                break;
-            default:
-                break;
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String generateMyParticipateSql(Set<Long> projectIds,
-                                            String operation,
-                                            String alias,
-                                            FieldTableVO fieldTable,
-                                            List<? extends Object> values) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
-        String primaryKey = DEFAULT_PRIMARY_KEY;
-        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
-        String assigneeColumn = "assignee_id";
-        assigneeColumn = buildMainTableFilterColumn(assigneeColumn, alias);
-        String valueStr = StringUtils.join(values, BaseConstants.Symbol.COMMA);
-        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        Operation opt = Operation.valueOf(operation);
-        sqlBuilder.append(
-                String.format(MY_PARTICIPATE,
-                        assigneeColumn,
-                        valueStr,
-                        mainTableFilterColumn,
-                        opt,
-                        primaryKey,
-                        fieldTable.getTable(),
-                        projectIdStr,
-                        valueStr,
-                        valueStr));
-        sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
-        return sqlBuilder.toString();
-    }
-
-    private String generateTagSql(String operation,
-                                  List<? extends Object> values,
-                                  FieldTableVO fieldTable,
-                                  String alias,
-                                  Set<Long> projectIds) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        List<TagVO> tags;
-        try {
-            String json = objectMapper.writeValueAsString(values);
-            tags = objectMapper.readValue(json, new TypeReference<List<TagVO>>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new CommonException("error.convert.object.value", e);
-        }
-        if (tags == null) {
-            return sqlBuilder.toString();
-        }
-        String primaryKey = DEFAULT_PRIMARY_KEY;
-        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
-        Operation opt = Operation.valueOf(operation);
-        Iterator<TagVO> tagIterator = tags.iterator();
-        StringBuilder conditionBuilder = new StringBuilder();
-        while (tagIterator.hasNext()) {
-            TagVO tag = tagIterator.next();
-            conditionBuilder.append(BaseConstants.Symbol.LEFT_BRACE)
-                    .append("tag_project_id = ")
-                    .append(tag.getProjectId())
-                    .append(" and app_service_code = ")
-                    .append(appendSingleQuot(tag.getAppServiceCode()))
-                    .append(" and tag_name = ")
-                    .append(appendSingleQuot(tag.getTagName()))
-                    .append(BaseConstants.Symbol.RIGHT_BRACE);
-            if (tagIterator.hasNext()) {
-                conditionBuilder.append(" or ");
+            if (isSelector) {
+                sqlBuilder.append(generateCustomFieldSelectorSql(field, instanceType, operation, projectIds, values));
+            } else {
+                String primaryKey = DEFAULT_PRIMARY_KEY;
+                String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
+                String schemeCode = instanceType.getSchemeCode();
+                appendCustomSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
             }
         }
-        String conditionSql = conditionBuilder.toString();
-        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        String table = fieldTable.getTable();
-        switch (opt) {
-            case IN:
-            case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                TAG_IN_OR_NOT_IN,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                primaryKey,
-                                table,
-                                projectIdStr,
-                                conditionSql));
-                break;
-            case IS_NULL:
-            case IS_NOT_NULL:
-                sqlBuilder.append(
-                        String.format(
-                                LINKED_TABLE_IS_NULL_OR_NOT_NULL,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                primaryKey,
-                                table,
-                                projectIdStr,
-                                ""));
-                break;
-            default:
-                break;
-        }
         return sqlBuilder.toString();
     }
 
-    private String generateCustomFieldSelectorSql(String alias,
-                                                  Field field,
+
+    private String generateCustomFieldSelectorSql(Field field,
                                                   InstanceType instanceType,
                                                   String operation,
                                                   Set<Long> projectIds,
                                                   List<? extends Object> values) {
+        String alias = "ai";
         StringBuilder sqlBuilder = new StringBuilder();
         String primaryKey = DEFAULT_PRIMARY_KEY;
-        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
+        String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         Long fieldId = field.getFieldId();
         String schemeCode = instanceType.getSchemeCode();
         Operation opt = Operation.valueOf(operation);
@@ -729,82 +395,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return sqlBuilder.toString();
     }
 
-    private String generateSelfTableSql(String operation,
-                                        List<?> values, String alias,
-                                        FieldTableVO fieldTable,
-                                        String additionalCondition) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        Operation opt = Operation.valueOf(operation);
-        String mainTableFilterColumn = buildMainTableFilterColumn(fieldTable.getField(), alias);
-        switch (opt) {
-            case IN:
-            case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                SELF_TABLE_IN_OR_NOT_IN,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                StringUtils.join(values, BaseConstants.Symbol.COMMA),
-                                additionalCondition));
-                break;
-            case IS_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
-                break;
-            case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
-                break;
-            default:
-                break;
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String generateLinkedTableSql(String operation,
-                                          List<?> values,
-                                          FieldTableVO fieldTable,
-                                          String alias,
-                                          Set<Long> projectIds,
-                                          String additionalCondition,
-                                          String innerColumn) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        String dbColumn = fieldTable.getField();
-        String primaryKey = DEFAULT_PRIMARY_KEY;
-        if (innerColumn == null) {
-            innerColumn = primaryKey;
-        }
-        String mainTableFilterColumn = buildMainTableFilterColumn(primaryKey, alias);
-        String table = fieldTable.getTable();
-        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        Operation opt = Operation.valueOf(operation);
-        switch (opt) {
-            case IN:
-            case NOT_IN:
-                sqlBuilder.append(
-                        String.format(LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
-                break;
-            case IS_NULL:
-            case IS_NOT_NULL:
-                sqlBuilder.append(
-                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, additionalCondition));
-                break;
-            default:
-                break;
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String buildMainTableFilterColumn(String column,
-                                              String alias) {
-
-        String mainTableFilterColumn;
-        if (alias == null) {
-            mainTableFilterColumn = column;
-        } else {
-            mainTableFilterColumn = alias + BaseConstants.Symbol.POINT + column;
-        }
-        return mainTableFilterColumn;
-    }
-
     private List<? extends Object> getOptionValues(Condition condition) {
         List<? extends Object> values;
         Value value = condition.getValue();
@@ -816,11 +406,11 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         boolean noEncryptFlag = Boolean.TRUE.equals(field.getNoEncryptFlag());
         switch (fieldCode) {
             case FieldCode.ENVIRONMENT:
-            case  FieldCode.FEATURE_TYPE:
+            case FieldCode.FEATURE_TYPE:
                 List<String> valueStrList = value.getValueStrList();
                 List<String> result = new ArrayList<>();
                 if (!ObjectUtils.isEmpty(valueStrList)) {
-                    valueStrList.forEach(v -> result.add(appendSingleQuot(v)));
+                    valueStrList.forEach(v -> result.add(SqlUtil.appendSingleQuot(v)));
                 }
                 values = result;
                 break;
