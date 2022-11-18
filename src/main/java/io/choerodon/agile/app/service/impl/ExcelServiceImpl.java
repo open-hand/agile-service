@@ -317,14 +317,16 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private void validateSystemField(List<String> systemFields, boolean withFeature) {
-        List<String> requiredCode =
+        List<String> requiredCodes =
                 ExcelImportTemplate
                         .IssueHeader
                         .getByRequired(true)
                         .stream()
                         .map(ExcelImportTemplate.Header::getCode)
                         .collect(Collectors.toList());
-        requiredCode.forEach(r -> checkAndThrowException(systemFields, r));
+        for (String requiredCode : requiredCodes) {
+            checkAndThrowException(systemFields, requiredCode);
+        }
 //        if (withFeature) {
 //            checkAndThrowException(systemFields, FieldCode.FEATURE);
 //        } else {
@@ -2470,7 +2472,7 @@ public class ExcelServiceImpl implements ExcelService {
             Set<Integer> sonSet = parentSonMap.get(currentRowNum);
             boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
             //拿到issueNum 用于判断是否是更新数据
-            //是否是跟新数据
+            //是否是更新数据
             boolean update = getUpdate(issueNumJson);
             if ((IssueTypeCode.isStory(issueTypeCode)
                     || IssueTypeCode.isTask(issueTypeCode)
