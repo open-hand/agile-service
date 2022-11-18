@@ -253,11 +253,12 @@ public class SearchConstant {
         /**
          * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
          */
-        public static final String LINKED_TABLE_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and %s in ( %s ) %s) ";
+        public static final String LINKED_TABLE_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} in ( #{valueStr} ) #{additionalCondition}) ";
+
+        public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) #{additionalCondition}) ";
 
         public static final String MY_PARTICIPATE = " %s in (%s) or %s %s ( select %s from %s where project_id in (%s) and field = 'assignee' and ( new_value in ( %s ) or old_value in ( %s ))) ";
 
-        public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " %s %s ( select %s from %s where project_id in (%s) %s) ";
 
         public static final String TAG_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and (%s) ) ";
 

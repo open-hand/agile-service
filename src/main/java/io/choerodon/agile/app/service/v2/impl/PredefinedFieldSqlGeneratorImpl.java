@@ -35,9 +35,6 @@ import org.hzero.core.util.Pair;
 @Service
 public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenerator {
 
-    public static final String INSTANCE_ID = "instance_id";
-    public static final String DEFAULT_PRIMARY_KEY = "issue_id";
-
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
     @Autowired
@@ -102,7 +99,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 break;
             default:
                 String column = SqlUtil.buildColumnByCode(fieldTable.getField(), alias, fieldCode);
-                sqlBuilder.append(appendPredefinedSql(operation, dataPair, column));
+                sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, dataPair, column));
                 break;
         }
         return sqlBuilder.toString();
@@ -119,13 +116,13 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 sqlBuilder.append(generateTagSql(operation, values, fieldTable, alias, projectIds));
                 break;
             case FieldCode.FIX_VERSION:
-                sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'", null));
+                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'", null, false));
                 break;
             case FieldCode.INFLUENCE_VERSION:
-                sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'influence'", null));
+                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'influence'", null, false));
                 break;
             case SearchConstant.Field.MY_STAR:
-                sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and type = 'issue'", INSTANCE_ID));
+                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and type = 'issue'", SqlUtil.INSTANCE_ID, false));
                 break;
             case SearchConstant.Field.MY_PARTICIPATE:
                 sqlBuilder.append(generateMyParticipateSql(projectIds, operation, alias, fieldTable, values));
@@ -139,43 +136,8 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                     sqlBuilder.append(SqlUtil.generateSelfTableSql(operation, values, alias, fieldTable, ""));
                 } else {
                     //关联表
-                    sqlBuilder.append(generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "", null));
+                    sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "", null, false));
                 }
-                break;
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String appendPredefinedSql(String operation,
-                                       Pair<String, String> dataPair,
-                                       String column) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        switch (SearchConstant.Operation.valueOf(operation)) {
-            case BETWEEN:
-                sqlBuilder.append(
-                        String.format(
-                                DATE_BETWEEN,
-                                column,
-                                dataPair.getFirst(),
-                                column,
-                                dataPair.getSecond()));
-                break;
-            case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_IS_NOT_NULL, column));
-                break;
-            case IS_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_IS_NULL, column));
-                break;
-            case EQUAL:
-                String value = dataPair.getFirst();
-                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "=", value));
-                break;
-            case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "like", valueStr));
-                break;
-            default:
-                // =, >, >=, <, <=
                 break;
         }
         return sqlBuilder.toString();
@@ -210,11 +172,11 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
         //content == summary和issueNum
         String summaryCol = SqlUtil.buildColumnByCode(FieldCode.SUMMARY, alias, FieldCode.SUMMARY);
-        sqlBuilder.append(appendPredefinedSql(operation, pair, summaryCol));
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, summaryCol));
         sqlBuilder.append(" or ");
 
         String issueNumCol = SqlUtil.buildColumnByCode(FieldCode.ISSUE_NUM, alias, FieldCode.ISSUE_NUM);
-        sqlBuilder.append(appendPredefinedSql(operation, pair, issueNumCol));
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, issueNumCol));
         sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
     }
@@ -236,7 +198,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         if (tags == null) {
             return sqlBuilder.toString();
         }
-        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String primaryKey = SqlUtil.DEFAULT_PRIMARY_KEY;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
         Iterator<TagVO> tagIterator = tags.iterator();
@@ -258,6 +220,14 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         String conditionSql = conditionBuilder.toString();
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
         String table = fieldTable.getTable();
+        Map<String, String> dataMap = new HashMap<>();
+        dataMap.put("mainTableCol", mainTableFilterColumn);
+        dataMap.put("opt", opt.getOpt());
+        dataMap.put("innerCol", primaryKey);
+        dataMap.put("table", table);
+        dataMap.put("projectIdStr", projectIdStr);
+        dataMap.put("additionalCondition", "");
+        dataMap.put("projectCol", "project_id");
         switch (opt) {
             case IN:
             case NOT_IN:
@@ -273,49 +243,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
-                sqlBuilder.append(
-                        String.format(
-                                LINKED_TABLE_IS_NULL_OR_NOT_NULL,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                primaryKey,
-                                table,
-                                projectIdStr,
-                                ""));
-                break;
-            default:
-                break;
-        }
-        return sqlBuilder.toString();
-    }
-
-    private String generateLinkedTableSql(String operation,
-                                          List<?> values,
-                                          FieldTableVO fieldTable,
-                                          String alias,
-                                          Set<Long> projectIds,
-                                          String additionalCondition,
-                                          String innerColumn) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        String dbColumn = fieldTable.getField();
-        String primaryKey = DEFAULT_PRIMARY_KEY;
-        if (innerColumn == null) {
-            innerColumn = primaryKey;
-        }
-        String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
-        String table = fieldTable.getTable();
-        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
-        switch (opt) {
-            case IN:
-            case NOT_IN:
-                sqlBuilder.append(
-                        String.format(LINKED_TABLE_IN_OR_NOT_IN, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, dbColumn, StringUtils.join(values, BaseConstants.Symbol.COMMA), additionalCondition));
-                break;
-            case IS_NULL:
-            case IS_NOT_NULL:
-                sqlBuilder.append(
-                        String.format(LINKED_TABLE_IS_NULL_OR_NOT_NULL, mainTableFilterColumn, opt.getOpt(), innerColumn, table, projectIdStr, additionalCondition));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, LINKED_TABLE_IS_NULL_OR_NOT_NULL));
                 break;
             default:
                 break;
@@ -330,7 +258,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                                             List<? extends Object> values) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
-        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String primaryKey = SqlUtil.DEFAULT_PRIMARY_KEY;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         String assigneeColumn = "assignee_id";
         assigneeColumn = SqlUtil.buildMainTableFilterColumn(assigneeColumn, alias);
