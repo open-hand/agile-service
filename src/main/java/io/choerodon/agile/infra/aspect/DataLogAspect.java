@@ -736,7 +736,7 @@ public class DataLogAspect {
                 StringBuilder newSprintIdStr = new StringBuilder();
                 StringBuilder newSprintNameStr = new StringBuilder();
                 List<SprintNameDTO> sprintNames = issueMapper.querySprintNameByIssueId(issueId);
-                handleBatchCreateDataLogForSpring(sprintNames, sprintNameDTO, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
+                handleBatchCreateDataLogForSprint(sprintNames, sprintNameDTO, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
             }
             dataLogRedisUtil.deleteByBatchRemoveSprintToTarget(sprintId, projectId, null);
         }
@@ -1080,11 +1080,11 @@ public class DataLogAspect {
             StringBuilder newSprintIdStr = new StringBuilder();
             StringBuilder newSprintNameStr = new StringBuilder();
             List<SprintNameDTO> sprintNames = issueMapper.querySprintNameByIssueId(issueId);
-            handleBatchCreateDataLogForSpring(sprintNames, activeSprintName, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
+            handleBatchCreateDataLogForSprint(sprintNames, activeSprintName, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
         }
     }
 
-    private void handleBatchCreateDataLogForSpring(List<SprintNameDTO> sprintNames, SprintNameDTO activeSprintName,
+    private void handleBatchCreateDataLogForSprint(List<SprintNameDTO> sprintNames, SprintNameDTO activeSprintName,
                                                    StringBuilder newSprintNameStr, StringBuilder newSprintIdStr,
                                                    SprintDTO sprintDTO, Long projectId, Long issueId) {
         String oldSprintIdStr = sprintNames.stream().map(sprintName -> sprintName.getSprintId().toString()).collect(Collectors.joining(","));
