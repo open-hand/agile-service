@@ -26,6 +26,7 @@ import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.enums.InstanceType;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.utils.SqlUtil;
 import io.choerodon.core.exception.CommonException;
 
@@ -168,72 +169,37 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             //时间选择器格式化
             columnName = "DATE_FORMAT(" + columnName + ", '%H:%i:%s')";
         }
+        Operation opt = Operation.valueOf(operation);
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        Map<String, String> dataMap = new HashMap<>();
+        dataMap.put("mainTableCol", mainTableFilterColumn);
+        dataMap.put("opt", opt.getOpt());
+        dataMap.put("projectIdStr", projectIdStr);
+        dataMap.put("fieldId", fieldId.toString());
+        dataMap.put("schemeCode", schemeCode);
+        dataMap.put("columnName", columnName);
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
-                sqlBuilder.append(
-                        String.format(
-                                CUSTOM_FIELD_DATE_BETWEEN,
-                                mainTableFilterColumn,
-                                Operation.IN.toString(),
-                                StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
-                                fieldId,
-                                columnName,
-                                dataPair.getFirst(),
-                                columnName,
-                                dataPair.getSecond(),
-                                schemeCode));
-                break;
-            case IS_NOT_NULL:
-                sqlBuilder.append(
-                        String.format(
-                                CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL,
-                                mainTableFilterColumn,
-                                Operation.IN.toString(),
-                                StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
-                                fieldId,
-                                columnName,
-                                " is not null ",
-                                schemeCode));
+                dataMap.put("opt", Operation.IN.getOpt());
+                dataMap.put("first", dataPair.getFirst());
+                dataMap.put("second", dataPair.getSecond());
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_DATE_BETWEEN));
                 break;
             case IS_NULL:
-                sqlBuilder.append(
-                        String.format(
-                                CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL,
-                                mainTableFilterColumn,
-                                Operation.IN.toString(),
-                                StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
-                                fieldId,
-                                columnName,
-                                " is null ",
-                                schemeCode));
+            case IS_NOT_NULL:
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_IS_NULL_OR_NOT_NULL));
                 break;
             case EQUAL:
                 String value = dataPair.getFirst();
-                sqlBuilder.append(
-                        String.format(
-                                CUSTOM_FIELD_EQUAL_OR_LIKE,
-                                mainTableFilterColumn,
-                                Operation.IN.toString(),
-                                StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
-                                fieldId,
-                                columnName,
-                                "=",
-                                value,
-                                schemeCode));
+                dataMap.put("columnOpt", Operation.EQUAL.getOpt());
+                dataMap.put("columnValue", value);
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
             case LIKE:
                 String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                sqlBuilder.append(
-                        String.format(
-                                CUSTOM_FIELD_EQUAL_OR_LIKE,
-                                mainTableFilterColumn,
-                                Operation.IN.toString(),
-                                StringUtils.join(projectIds, BaseConstants.Symbol.COMMA),
-                                fieldId,
-                                columnName,
-                                "like",
-                                valueStr,
-                                schemeCode));
+                dataMap.put("columnOpt", Operation.LIKE.getOpt());
+                dataMap.put("columnValue", valueStr);
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
             default:
                 // =, >, >=, <, <=
@@ -365,29 +331,21 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         String schemeCode = instanceType.getSchemeCode();
         Operation opt = Operation.valueOf(operation);
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        Map<String, String> dataMap = new HashMap<>();
+        dataMap.put("mainTableCol", mainTableFilterColumn);
+        dataMap.put("opt", opt.getOpt());
+        dataMap.put("projectIdStr", projectIdStr);
+        dataMap.put("fieldId", fieldId.toString());
+        dataMap.put("schemeCode", schemeCode);
+        dataMap.put("optionIds", StringUtils.join(values, BaseConstants.Symbol.COMMA));
         switch (opt) {
             case IN:
             case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                CUSTOM_FIELD_IN_OR_NOT_IN,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                projectIdStr,
-                                fieldId,
-                                StringUtils.join(values, BaseConstants.Symbol.COMMA),
-                                schemeCode));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_IN_OR_NOT_IN));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
-                sqlBuilder.append(
-                        String.format(
-                                CUSTOM_FIELD_IS_NULL_OR_NOT_NULL,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                projectIdStr,
-                                fieldId,
-                                schemeCode));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_IS_NULL_OR_NOT_NULL));
                 break;
             default:
                 break;

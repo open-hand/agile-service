@@ -266,11 +266,11 @@ public class SearchConstant {
         /**
          * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
          */
-        public static final String CUSTOM_FIELD_IN_OR_NOT_IN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and option_id in ( %s ) and scheme_code = '%s') ";
+        public static final String CUSTOM_FIELD_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select instance_id from fd_field_value where project_id in ( #{projectIdStr} ) and field_id = #{fieldId} and option_id in ( #{optionIds} ) and scheme_code = '#{schemeCode}') ";
 
-        public static final String CUSTOM_FIELD_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and scheme_code = '%s') ";
+        public static final String CUSTOM_FIELD_IS_NULL_OR_NOT_NULL = " #{mainTableCol} #{opt} ( select instance_id from fd_field_value where project_id in ( #{projectIdStr} ) and field_id = #{fieldId} and scheme_code = '#{schemeCode}') ";
 
-        public static final String CUSTOM_FIELD_EQUAL_OR_LIKE = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s %s and scheme_code = '%s') ";
+        public static final String CUSTOM_FIELD_EQUAL_OR_LIKE = " #{mainTableCol} #{opt} ( select instance_id from fd_field_value where project_id in ( #{projectIdStr} ) and field_id = #{fieldId} and #{columnName} #{columnOpt} #{columnValue} and scheme_code = '#{schemeCode}') ";
 
         public static final String EPIC_IN_OR_NOT_IN = " ((%s %s (%s) and %s in ( 'story', 'task', 'bug', 'feature' )) or (%s %s( select issue_id from agile_issue where issue_id = %s and epic_id in (%s)) and %s = 'sub_task')) ";
         public static final String EPIC_IS_NULL = " (((#{epicIdWithAlias} = 0 or #{epicIdWithAlias} is null) and #{typeCode} in ( 'story', 'task', 'bug', 'feature' )) or (#{parentIssueId} in (select issue_id from agile_issue where issue_id = #{parentIssueId} and (epic_id = 0 or epic_id is null) ) and #{typeCode} = 'sub_task')) ";
@@ -281,9 +281,9 @@ public class SearchConstant {
          * ================日期===============
          */
 
-        public static final String CUSTOM_FIELD_DATE_BETWEEN = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s >= %s and %s <= %s and scheme_code = '%s') ";
+        public static final String CUSTOM_FIELD_DATE_BETWEEN = " #{mainTableCol} #{opt} ( select instance_id from fd_field_value where project_id in ( #{projectIdStr} ) and field_id = #{fieldId} and #{columnName} >= #{first} and #{columnName} <= #{second} and scheme_code = '#{schemeCode}') ";
 
-        public static final String CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s and scheme_code = '%s') ";
+//        public static final String CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s and scheme_code = '%s') ";
 
         public static final String DATE_BETWEEN = " ( %s >= %s and %s <= %s ) ";
 
