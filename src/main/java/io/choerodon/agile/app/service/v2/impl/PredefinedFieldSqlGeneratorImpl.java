@@ -175,7 +175,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, summaryCol));
         sqlBuilder.append(" or ");
 
-        String issueNumCol = SqlUtil.buildColumnByCode(FieldCode.ISSUE_NUM, alias, FieldCode.ISSUE_NUM);
+        String issueNumCol = SqlUtil.buildColumnByCode("issue_num", alias, FieldCode.ISSUE_NUM);
         sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, issueNumCol));
         sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
