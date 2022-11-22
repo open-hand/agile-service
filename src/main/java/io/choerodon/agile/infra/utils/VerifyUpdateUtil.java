@@ -1,24 +1,26 @@
 package io.choerodon.agile.infra.utils;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.infra.annotation.Update;
-import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.ArrayUtils;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.infra.annotation.Update;
+import io.choerodon.core.exception.CommonException;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -151,7 +153,8 @@ public class VerifyUpdateUtil {
                         field1.setAccessible(true);
                         handleFieldType(field1, obj, value, false);
                     } catch (Exception e) {
-                        LOGGER.error("reflect error: {}", e);
+                        LOGGER.error("reflect error");
+                        LOGGER.error(e.getMessage(), e);
                     }
                 });
                 list.add(obj);
