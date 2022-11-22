@@ -2801,8 +2801,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueId, new CopyIssueRequiredFieldVO());
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 10);
-        Long newIssueId;
-        Long objectVersionNumber;
+        final Long newIssueId;
+        final Long objectVersionNumber;
+        final String newIssueNum;
         issueDetailDTO.setSummary(copyConditionVO.getSummary());
         IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
         List<String> handlerRequireFiled = new ArrayList<>();
@@ -2811,6 +2812,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             handlerRequireFiled = handlerCopyRequirePredefinedField(issueSubCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
             IssueSubVO newIssue = stateMachineClientService.createSubIssueWithoutRuleNotice(issueSubCreateVO);
             newIssueId = newIssue.getIssueId();
+            newIssueNum = newIssue.getIssueNum();
             objectVersionNumber = newIssue.getObjectVersionNumber();
         } else {
             IssueCreateVO issueCreateVO = issueAssembler.issueDtoToIssueCreateDto(issueDetailDTO, predefinedFieldNames);
@@ -2820,6 +2822,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             handlerRequireFiled = handlerCopyRequirePredefinedField(issueCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
             IssueVO newIssue = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, applyType);
             newIssueId = newIssue.getIssueId();
+            newIssueNum = newIssue.getIssueNum();
             objectVersionNumber = newIssue.getObjectVersionNumber();
         }
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 30);
@@ -2844,6 +2847,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
         }
         paramsMap.put("newIssueId", EncryptionUtils.encrypt(newIssueId));
+        paramsMap.put("newIssueNum", newIssueNum);
         sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
         redisUtil.set(CLONE_ISSUE_KEY + issueId +BaseConstants.Symbol.COLON + asyncTraceId , SUCCEED_STATUS, 24L, TimeUnit.HOURS);
     }
