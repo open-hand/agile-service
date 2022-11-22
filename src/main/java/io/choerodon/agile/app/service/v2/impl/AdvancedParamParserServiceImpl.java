@@ -11,6 +11,7 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -23,6 +24,7 @@ import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
+import io.choerodon.agile.domain.entity.SqlTemplateData;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.enums.InstanceType;
@@ -126,7 +128,13 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         String primaryKey = DEFAULT_PRIMARY_KEY;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         String issueIdStr = "(" + StringUtils.join(issueIds, BaseConstants.Symbol.COMMA) + ")";
-        sqlBuilder.append(String.format(SELF_TABLE_EQUAL, mainTableFilterColumn, "in", issueIdStr));
+        EvaluationContext context =
+                new SqlTemplateData()
+                        .setColumn(mainTableFilterColumn)
+                        .setOpt(Operation.IN.getOpt())
+                        .setValue(issueIdStr)
+                        .ofContext();
+        sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(context, SELF_TABLE_EQUAL));
         return sqlBuilder.toString();
     }
 
@@ -171,35 +179,32 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         }
         Operation opt = Operation.valueOf(operation);
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        Map<String, String> dataMap = new HashMap<>();
-        dataMap.put("mainTableCol", mainTableFilterColumn);
-        dataMap.put("opt", opt.getOpt());
-        dataMap.put("projectIdStr", projectIdStr);
-        dataMap.put("fieldId", fieldId.toString());
-        dataMap.put("schemeCode", schemeCode);
-        dataMap.put("columnName", columnName);
+        SqlTemplateData data =
+                new SqlTemplateData()
+                        .setMainTableCol(mainTableFilterColumn)
+                        .setOpt(opt.getOpt())
+                        .setProjectIdStr(projectIdStr)
+                        .setFieldId(fieldId.toString())
+                        .setSchemeCode(schemeCode)
+                        .setColumnName(columnName);
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
-                dataMap.put("opt", Operation.IN.getOpt());
-                dataMap.put("first", dataPair.getFirst());
-                dataMap.put("second", dataPair.getSecond());
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_DATE_BETWEEN));
+                data.setOpt(Operation.IN.getOpt()).setFirst(dataPair.getFirst()).setSecond(dataPair.getSecond());
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_DATE_BETWEEN));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_IS_NULL_OR_NOT_NULL));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_IS_NULL_OR_NOT_NULL));
                 break;
             case EQUAL:
                 String value = dataPair.getFirst();
-                dataMap.put("columnOpt", Operation.EQUAL.getOpt());
-                dataMap.put("columnValue", value);
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_EQUAL_OR_LIKE));
+                data.setColumnOpt(Operation.EQUAL.getOpt()).setColumnValue(value);
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
             case LIKE:
                 String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                dataMap.put("columnOpt", Operation.LIKE.getOpt());
-                dataMap.put("columnValue", valueStr);
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_EQUAL_OR_LIKE));
+                data.setColumnOpt(Operation.LIKE.getOpt()).setColumnValue(valueStr);
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
             default:
                 // =, >, >=, <, <=
@@ -331,21 +336,23 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         String schemeCode = instanceType.getSchemeCode();
         Operation opt = Operation.valueOf(operation);
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
-        Map<String, String> dataMap = new HashMap<>();
-        dataMap.put("mainTableCol", mainTableFilterColumn);
-        dataMap.put("opt", opt.getOpt());
-        dataMap.put("projectIdStr", projectIdStr);
-        dataMap.put("fieldId", fieldId.toString());
-        dataMap.put("schemeCode", schemeCode);
-        dataMap.put("optionIds", StringUtils.join(values, BaseConstants.Symbol.COMMA));
+        EvaluationContext context =
+                new SqlTemplateData()
+                        .setMainTableCol(mainTableFilterColumn)
+                        .setOpt(opt.getOpt())
+                        .setProjectIdStr(projectIdStr)
+                        .setFieldId(fieldId.toString())
+                        .setSchemeCode(schemeCode)
+                        .setOptionIds(StringUtils.join(values, BaseConstants.Symbol.COMMA))
+                        .ofContext();
         switch (opt) {
             case IN:
             case NOT_IN:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_IN_OR_NOT_IN));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(context, CUSTOM_FIELD_IN_OR_NOT_IN));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, CUSTOM_FIELD_IS_NULL_OR_NOT_NULL));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(context, CUSTOM_FIELD_IS_NULL_OR_NOT_NULL));
                 break;
             default:
                 break;

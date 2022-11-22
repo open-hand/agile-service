@@ -8,6 +8,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
 import io.choerodon.agile.api.vo.FieldTableVO;
+import io.choerodon.agile.domain.entity.SqlTemplateData;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 
@@ -107,28 +108,29 @@ public class SqlUtil {
         String table = fieldTable.getTable();
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
         SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
-        Map<String, String> dataMap = new HashMap<>();
-        dataMap.put("mainTableCol", mainTableFilterColumn);
-        dataMap.put("opt", opt.getOpt());
-        dataMap.put("innerCol", innerColumn);
-        dataMap.put("table", table);
-        dataMap.put("projectIdStr", projectIdStr);
-        dataMap.put("dbColumn", dbColumn);
-        dataMap.put("additionalCondition", additionalCondition);
+        SqlTemplateData data =
+                new SqlTemplateData()
+                        .setMainTableCol(mainTableFilterColumn)
+                        .setOpt(opt.getOpt())
+                        .setInnerCol(innerColumn)
+                        .setTable(table)
+                        .setProjectIdStr(projectIdStr)
+                        .setDbColumn(dbColumn)
+                        .setAdditionalCondition(additionalCondition);
         if (!isProgram) {
-            dataMap.put("projectCol", "project_id");
+            data.setProjectCol("project_id");
         } else {
-            dataMap.put("projectCol", "program_id");
+            data.setProjectCol("program_id");
         }
         switch (opt) {
             case IN:
             case NOT_IN:
-                dataMap.put("valueStr", StringUtils.join(values, BaseConstants.Symbol.COMMA));
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, LINKED_TABLE_IN_OR_NOT_IN));
+                data.setValueStr(StringUtils.join(values, BaseConstants.Symbol.COMMA));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IN_OR_NOT_IN));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, LINKED_TABLE_IS_NULL_OR_NOT_NULL));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IS_NULL_OR_NOT_NULL));
                 break;
             default:
                 break;
@@ -136,33 +138,78 @@ public class SqlUtil {
         return sqlBuilder.toString();
     }
 
+    //todo 考虑合并
     public static String appendPredefinedSql(String operation,
                                              Pair<String, String> dataPair,
-                                             String column) {
+                                             FieldTableVO fieldTable,
+                                             String alias,
+                                             Set<Long> projectIds,
+                                             String additionalCondition,
+                                             String innerColumn,
+                                             boolean isProgram) {
         StringBuilder sqlBuilder = new StringBuilder();
-        switch (SearchConstant.Operation.valueOf(operation)) {
+        String dbColumn = fieldTable.getField();
+        String primaryKey = DEFAULT_PRIMARY_KEY;
+        if (innerColumn == null) {
+            innerColumn = primaryKey;
+        }
+        String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
+        String table = fieldTable.getTable();
+        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+        SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
+        String fieldCode = fieldTable.getName();
+        String column = SqlUtil.buildColumnByCode(fieldTable.getField(), alias, fieldCode);
+        SqlTemplateData data =
+                new SqlTemplateData()
+                        .setMainTableCol(mainTableFilterColumn)
+                        .setOpt(opt.getOpt())
+                        .setInnerCol(innerColumn)
+                        .setTable(table)
+                        .setProjectIdStr(projectIdStr)
+                        .setDbColumn(dbColumn)
+                        .setColumn(column)
+                        .setAdditionalCondition(additionalCondition);
+        if (!isProgram) {
+            data.setProjectCol("project_id");
+        } else {
+            data.setProjectCol("program_id");
+        }
+        boolean isLinkedTable = !SearchConstant.TABLE_AGILE_ISSUE.equals(table);
+        switch (opt) {
             case BETWEEN:
-                sqlBuilder.append(
-                        String.format(
-                                DATE_BETWEEN,
-                                column,
-                                dataPair.getFirst(),
-                                column,
-                                dataPair.getSecond()));
+                data.setFirstValue(dataPair.getFirst());
+                data.setSecondValue(dataPair.getSecond());
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), DATE_BETWEEN));
                 break;
             case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_IS_NOT_NULL, column));
+                if (isLinkedTable) {
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IS_NULL_OR_NOT_NULL));
+                } else {
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), SELF_TABLE_IS_NOT_NULL));
+                }
                 break;
             case IS_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_IS_NULL, column));
+                if (isLinkedTable) {
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IS_NULL_OR_NOT_NULL));
+                } else {
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), SELF_TABLE_IS_NULL));
+                }
                 break;
             case EQUAL:
-                String value = dataPair.getFirst();
-                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "=", value));
-                break;
             case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                sqlBuilder.append(String.format(SELF_TABLE_EQUAL, column, "like", valueStr));
+                String value;
+                if (opt.equals(SearchConstant.Operation.LIKE)) {
+                    value = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
+                } else {
+                    value = dataPair.getFirst();
+                }
+                if (isLinkedTable) {
+                    data.setOpt(SearchConstant.Operation.IN.getOpt()).setInnerOpt(opt.getOpt()).setValue(value);
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_EQUAL));
+                } else {
+                    data.setValue(value);
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), SELF_TABLE_EQUAL));
+                }
                 break;
             default:
                 // =, >, >=, <, <=

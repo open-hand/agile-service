@@ -1,17 +1,24 @@
 package io.choerodon.agile.infra.enums.search;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.Assert;
 
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
+import io.choerodon.core.exception.CommonException;
 
 import org.hzero.core.base.BaseConstants;
 
@@ -20,6 +27,8 @@ import org.hzero.core.base.BaseConstants;
  * @since 2022-11-02
  */
 public class SearchConstant {
+
+    public static final Logger logger = LoggerFactory.getLogger(SearchConstant.class);
 
     /**
      * 不需要加密的字段
@@ -242,11 +251,12 @@ public class SearchConstant {
          */
         public static final String SELF_TABLE_ID_IS_NOT_NULL = " (%s != 0 and %s is not null) %s ";
 
-        public static final String SELF_TABLE_IS_NULL = " (%s is null) ";
+        public static final String SELF_TABLE_IS_NULL = " (#{column} is null) ";
 
-        public static final String SELF_TABLE_IS_NOT_NULL = " (%s is not null) ";
+        public static final String SELF_TABLE_IS_NOT_NULL = " (#{column} is not null) ";
 
-        public static final String SELF_TABLE_EQUAL = " (%s %s %s) ";
+        public static final String SELF_TABLE_EQUAL = " (#{column} #{opt} #{value}) ";
+
 
         public static final String LIKE_VALUE = " CONCAT(CONCAT('%s' , %s) ,'%s') ";
 
@@ -254,6 +264,8 @@ public class SearchConstant {
          * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )
          */
         public static final String LINKED_TABLE_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} in ( #{valueStr} ) #{additionalCondition}) ";
+
+        public static final String LINKED_TABLE_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} #{innerOpt} #{value}) ";
 
         public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) #{additionalCondition}) ";
 
@@ -283,30 +295,39 @@ public class SearchConstant {
 
         public static final String CUSTOM_FIELD_DATE_BETWEEN = " #{mainTableCol} #{opt} ( select instance_id from fd_field_value where project_id in ( #{projectIdStr} ) and field_id = #{fieldId} and #{columnName} >= #{first} and #{columnName} <= #{second} and scheme_code = '#{schemeCode}') ";
 
-//        public static final String CUSTOM_FIELD_DATE_IS_NULL_OR_NOT_NULL = " %s %s ( select instance_id from fd_field_value where project_id in ( %s ) and field_id = %s and %s %s and scheme_code = '%s') ";
-
-        public static final String DATE_BETWEEN = " ( %s >= %s and %s <= %s ) ";
+        public static final String DATE_BETWEEN = " ( #{column} >= #{firstValue} and #{column} <= #{secondValue} ) ";
 
         public static final String DATE_FORMATTER = "DATE_FORMAT(%s, '%s')";
 
+        public static final String REGEX = "#\\{(.+?)\\}";
 
-        public static String fillInParam(Map<String, String> map,
+        public static String fillInParam(EvaluationContext context,
                                          String sqlTemplate) {
-            Assert.notNull(map, BaseConstants.ErrorCode.DATA_INVALID);
             Assert.notNull(sqlTemplate, BaseConstants.ErrorCode.DATA_INVALID);
+            Pattern pattern = Pattern.compile(REGEX);
+            Matcher matcher = pattern.matcher(sqlTemplate);
+            Set<String> propNames = new HashSet<>();
+            while (matcher.find()) {
+                propNames.add(matcher.group(1));
+            }
+            ExpressionParser parser = new SpelExpressionParser();
             String result = sqlTemplate;
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                String value = entry.getValue();
+            if (propNames.isEmpty()) {
+                return result;
+            }
+            for (String propName : propNames) {
+                Expression exp = parser.parseExpression(propName);
+                String value = (String) exp.getValue(context);
                 if (value == null) {
-                    continue;
+                    logger.error("SqlTemplateData has no value of {}, sqlTemplate: {}", propName, sqlTemplate);
+                    throw new CommonException("error.propName.has.no.value");
                 }
                 StringBuilder builder = new StringBuilder();
-                builder.append("#{").append(entry.getKey()).append("}");
-                result = result.replace(builder.toString(), entry.getValue());
+                builder.append("#{").append(propName).append("}");
+                result = result.replace(builder.toString(), value);
             }
             return result;
         }
 
     }
-
 }
