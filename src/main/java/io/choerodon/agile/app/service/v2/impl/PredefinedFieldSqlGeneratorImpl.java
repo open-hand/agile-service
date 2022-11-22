@@ -18,6 +18,7 @@ import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
+import io.choerodon.agile.domain.entity.SqlTemplateData;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
@@ -98,8 +99,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 sqlBuilder.append(generateContentSql(operation, dataPair, alias, projectIds));
                 break;
             default:
-                String column = SqlUtil.buildColumnByCode(fieldTable.getField(), alias, fieldCode);
-                sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, dataPair, column));
+                sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, dataPair, fieldTable, alias, projectIds, "", null, false));
                 break;
         }
         return sqlBuilder.toString();
@@ -171,12 +171,12 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
 
         sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
         //content == summary和issueNum
-        String summaryCol = SqlUtil.buildColumnByCode(FieldCode.SUMMARY, alias, FieldCode.SUMMARY);
-        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, summaryCol));
+        FieldTableVO summary = SearchConstant.PREDEFINED_FIELD_TABLE_MAP.get(FieldCode.SUMMARY);
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, summary, "ai", projectIds, "", null, false));
         sqlBuilder.append(" or ");
+        FieldTableVO issueNum = SearchConstant.PREDEFINED_FIELD_TABLE_MAP.get(FieldCode.ISSUE_NUM);
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, issueNum, "ai", projectIds, "", null, false));
 
-        String issueNumCol = SqlUtil.buildColumnByCode("issue_num", alias, FieldCode.ISSUE_NUM);
-        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, issueNumCol));
         sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
     }
@@ -220,14 +220,15 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         String conditionSql = conditionBuilder.toString();
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
         String table = fieldTable.getTable();
-        Map<String, String> dataMap = new HashMap<>();
-        dataMap.put("mainTableCol", mainTableFilterColumn);
-        dataMap.put("opt", opt.getOpt());
-        dataMap.put("innerCol", primaryKey);
-        dataMap.put("table", table);
-        dataMap.put("projectIdStr", projectIdStr);
-        dataMap.put("additionalCondition", "");
-        dataMap.put("projectCol", "project_id");
+        SqlTemplateData data =
+                new SqlTemplateData()
+                        .setMainTableCol(mainTableFilterColumn)
+                        .setOpt(opt.getOpt())
+                        .setInnerCol(primaryKey)
+                        .setTable(table)
+                        .setProjectIdStr(projectIdStr)
+                        .setAdditionalCondition("")
+                        .setProjectCol("project_id");
         switch (opt) {
             case IN:
             case NOT_IN:
@@ -243,7 +244,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, LINKED_TABLE_IS_NULL_OR_NOT_NULL));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IS_NULL_OR_NOT_NULL));
                 break;
             default:
                 break;
@@ -288,11 +289,12 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         String valueStr = StringUtils.join(values, BaseConstants.Symbol.COMMA);
         String typeCode = SqlUtil.buildMainTableFilterColumn("type_code", alias);
         String parentIssueId = SqlUtil.buildMainTableFilterColumn("parent_issue_id", alias);
-        Map<String, String> dataMap = new HashMap<>();
-        dataMap.put("epicIdWithAlias", epicIdWithAlias);
-        dataMap.put("valueStr", valueStr);
-        dataMap.put("typeCode", typeCode);
-        dataMap.put("parentIssueId", parentIssueId);
+        SqlTemplateData data =
+                new SqlTemplateData()
+                        .setEpicIdWithAlias(epicIdWithAlias)
+                        .setValue(valueStr)
+                        .setTypeCode(typeCode)
+                        .setParentIssueId(parentIssueId);
         switch (opt) {
             case IN:
             case NOT_IN:
@@ -310,10 +312,10 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                                 typeCode));
                 break;
             case IS_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, EPIC_IS_NULL));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), EPIC_IS_NULL));
                 break;
             case IS_NOT_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(dataMap, EPIC_IS_NOT_NULL));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), EPIC_IS_NOT_NULL));
                 break;
             default:
                 break;
