@@ -40,48 +40,54 @@ public class VersionIssueRelVO implements Serializable {
         return versionId;
     }
 
-    public void setVersionId(Long versionId) {
+    public VersionIssueRelVO setVersionId(Long versionId) {
         this.versionId = versionId;
+        return this;
     }
 
     public Long getIssueId() {
         return issueId;
     }
 
-    public void setIssueId(Long issueId) {
+    public VersionIssueRelVO setIssueId(Long issueId) {
         this.issueId = issueId;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public VersionIssueRelVO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public VersionIssueRelVO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public String getRelationType() {
         return relationType;
     }
 
-    public void setRelationType(String relationType) {
+    public VersionIssueRelVO setRelationType(String relationType) {
         this.relationType = relationType;
+        return this;
     }
 
     public String getStatusCode() {
         return statusCode;
     }
 
-    public void setStatusCode(String statusCode) {
+    public VersionIssueRelVO setStatusCode(String statusCode) {
         this.statusCode = statusCode;
+        return this;
     }
 
     @Override

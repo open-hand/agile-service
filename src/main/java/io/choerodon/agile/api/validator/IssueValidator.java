@@ -6,22 +6,23 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/8/9.
@@ -329,26 +330,26 @@ public class IssueValidator {
         return issueConvertDTO;
     }
 
-    public Boolean existVersionIssueRel(VersionIssueRelDTO versionIssueRelDTO) {
+    public boolean notExistVersionIssueRel(VersionIssueRelDTO versionIssueRelDTO) {
         VersionIssueRelDTO versionIssueRel = new VersionIssueRelDTO();
         versionIssueRel.setVersionId(versionIssueRelDTO.getVersionId());
         versionIssueRel.setIssueId(versionIssueRelDTO.getIssueId());
         versionIssueRel.setRelationType(versionIssueRelDTO.getRelationType());
-        return versionIssueRelMapper.selectOne(versionIssueRel) == null;
+        return versionIssueRelMapper.selectCount(versionIssueRel) == 0;
     }
 
-    public Boolean existComponentIssueRel(ComponentIssueRelDTO componentIssueRelDTO) {
+    public boolean notExistComponentIssueRel(ComponentIssueRelDTO componentIssueRelDTO) {
         ComponentIssueRelDTO componentIssueRel = new ComponentIssueRelDTO();
         componentIssueRel.setIssueId(componentIssueRelDTO.getIssueId());
         componentIssueRel.setComponentId(componentIssueRelDTO.getComponentId());
-        return componentIssueRelMapper.selectOne(componentIssueRel) == null;
+        return componentIssueRelMapper.selectCount(componentIssueRel) == 0;
     }
 
-    public Boolean existLabelIssue(LabelIssueRelDTO labelIssueRelDTO) {
+    public boolean notExistLabelIssue(LabelIssueRelDTO labelIssueRelDTO) {
         LabelIssueRelDTO labelIssueRel = new LabelIssueRelDTO();
         labelIssueRel.setLabelId(labelIssueRelDTO.getLabelId());
         labelIssueRel.setIssueId(labelIssueRelDTO.getIssueId());
-        return labelIssueRelMapper.selectOne(labelIssueRel) == null;
+        return labelIssueRelMapper.selectCount(labelIssueRel) == 0;
     }
 
     public void verifyTransformedSubTask(Long projectId, IssueTransformSubTask issueTransformSubTask) {

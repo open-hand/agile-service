@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.factory;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -153,12 +154,7 @@ public class MachineFactory {
             Long instanceId = inputDTO.getInstanceId();
             //校验transformId是否合法
             List<StatusMachineTransformDTO> transforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
-            StatusMachineTransformDTO transform = null;
-            for (StatusMachineTransformDTO t : transforms) {
-                if (t.getId().equals(transformId)) {
-                    transform = t;
-                }
-            }
+            StatusMachineTransformDTO transform = transforms.stream().filter(t -> Objects.equals(t.getId(), transformId)).findAny().orElse(null);
             if (transform == null) {
                 throw new CommonException("error.executeTransform.transformId.illegal");
             }

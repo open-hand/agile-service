@@ -4,9 +4,6 @@ import java.util.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
-import io.choerodon.agile.infra.enums.InstanceType;
-import io.choerodon.agile.infra.utils.*;
 import com.google.common.collect.Lists;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -31,8 +28,10 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.dto.RankDTO;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -49,6 +48,7 @@ import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineConfigDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineTransformDTO;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
@@ -65,7 +65,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private static final String ERROR_ISSUE_NOT_FOUND = "error.issue.notFound";
     private static final String ERROR_PROJECT_INFO_NOT_FOUND = "error.createIssue.projectInfoNotFound";
     private static final String ERROR_ISSUE_STATUS_NOT_FOUND = "error.createIssue.issueStatusNotFound";
-    private static final String ERROR_PORJECT_ID_ILLEGAL = "error.project.id.illegal";
+    private static final String ERROR_PROJECT_ID_ILLEGAL = "error.project.id.illegal";
     private static final String ERROR_APPLY_TYPE_ILLEGAL = "error.applyType.illegal";
     private static final String RANK = "rank";
     private static final String STATUS_ID = "statusId";
@@ -73,7 +73,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private static final String UPDATE_STATUS = "updateStatus";
     private static final String UPDATE_STATUS_MOVE = "updateStatusMove";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
-    private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
+    private static final String AUTO_TRANSFER_FLAG = "autoTranferFlag";
 
     @Autowired
     private IssueMapper issueMapper;
@@ -351,7 +351,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
         if (!projectId.equals(issue.getProjectId())) {
-            throw new CommonException(ERROR_PORJECT_ID_ILLEGAL);
+            throw new CommonException(ERROR_PROJECT_ID_ILLEGAL);
         }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
@@ -428,7 +428,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
         if (!projectId.equals(issue.getProjectId())) {
-            throw new CommonException(ERROR_PORJECT_ID_ILLEGAL);
+            throw new CommonException(ERROR_PROJECT_ID_ILLEGAL);
         }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
@@ -454,7 +454,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
         if (!projectId.equals(issue.getProjectId())) {
-            throw new CommonException(ERROR_PORJECT_ID_ILLEGAL);
+            throw new CommonException(ERROR_PROJECT_ID_ILLEGAL);
         }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
@@ -513,17 +513,17 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             return;
         }
         Long triggerIssueId = null;
-        Boolean autoTranferFlag = null;
+        Boolean autoTransferFlag = null;
         if (input != null && !Objects.equals(input, "null")) {
             JSONObject jsonObject = JSON.parseObject(input, JSONObject.class);
             triggerIssueId = jsonObject.getLong(TRIGGER_ISSUE_ID);
-            autoTranferFlag = jsonObject.getBoolean(AUTO_TRANFER_FLAG);
+            autoTransferFlag = jsonObject.getBoolean(AUTO_TRANSFER_FLAG);
         }
         IssueUpdateVO issueUpdateVO = issueAssembler.toTarget(issue, IssueUpdateVO.class);
         issueUpdateVO.setStatusId(targetStatusId);
         if (Objects.nonNull(triggerIssueId)) {
             IssueDTO issueDTO = issueMapper.selectByPrimaryKey(triggerIssueId);
-            issueUpdateVO.setAutoTranferFlag(autoTranferFlag);
+            issueUpdateVO.setAutoTranferFlag(autoTransferFlag);
             issueUpdateVO.setAutoTriggerId(triggerIssueId);
             issueUpdateVO.setAutoTriggerNum(projectInfoMapper.selectProjectCodeByProjectId(issueDTO.getProjectId()) + "-" + issueDTO.getIssueNum());
         }

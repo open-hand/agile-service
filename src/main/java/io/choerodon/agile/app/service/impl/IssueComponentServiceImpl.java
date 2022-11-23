@@ -1,27 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.validator.IssueValidator;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.validator.IssueComponentValidator;
-import io.choerodon.agile.api.vo.business.IssueVO;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.agile.infra.dto.ComponentForListDTO;
-import io.choerodon.agile.infra.dto.ComponentIssueRelDTO;
-import io.choerodon.agile.app.service.ComponentIssueRelService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.mapper.ComponentIssueRelMapper;
-
-import io.choerodon.core.domain.Page;
-
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.agile.app.service.IssueComponentService;
-import io.choerodon.agile.infra.dto.IssueComponentDTO;
-import io.choerodon.agile.infra.mapper.IssueComponentMapper;
-
-
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -30,8 +10,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import io.choerodon.agile.api.validator.IssueComponentValidator;
+import io.choerodon.agile.api.validator.IssueValidator;
+import io.choerodon.agile.api.vo.ComponentForListVO;
+import io.choerodon.agile.api.vo.IssueComponentVO;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.UserVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.app.service.ComponentIssueRelService;
+import io.choerodon.agile.app.service.IssueComponentService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.ComponentForListDTO;
+import io.choerodon.agile.infra.dto.ComponentIssueRelDTO;
+import io.choerodon.agile.infra.dto.IssueComponentDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.mapper.ComponentIssueRelMapper;
+import io.choerodon.agile.infra.mapper.IssueComponentMapper;
+import io.choerodon.agile.infra.utils.RedisUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -117,7 +116,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
             relate.setProjectId(projectId);
             relate.setIssueId(componentIssue.getIssueId());
             relate.setComponentId(relateComponentId);
-            if (Boolean.TRUE.equals(issueValidator.existComponentIssueRel(relate))) {
+            if (issueValidator.notExistComponentIssueRel(relate)) {
                 componentIssueRelService.create(relate);
             }
         }
