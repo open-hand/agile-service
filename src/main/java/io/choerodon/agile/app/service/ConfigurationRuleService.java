@@ -1,5 +1,9 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.choerodon.agile.api.vo.NoticeEventVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.business.TriggerCarrierVO;
@@ -7,11 +11,6 @@ import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.springframework.web.context.request.RequestAttributes;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * 服务接口
@@ -82,9 +81,7 @@ public interface ConfigurationRuleService {
                    ConfigurationRuleVO rule,
                    Long projectId,
                    boolean createCustomFieldMember,
-                   Long noticeInstanceId,
-                   String encryptType,
-                   RequestAttributes requestAttributes);
+                   Long noticeInstanceId);
 
     ConfigurationRuleVO filterRuleByCondition(ConfigurationRuleVO rule,
                                               Long instanceId,
@@ -94,12 +91,8 @@ public interface ConfigurationRuleService {
 
     Map<Long, Map<String, String>> selectDataMapByIds(Set<Long> backlogIds);
 
-    void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers,
-                                  String encryptType,
-                                  RequestAttributes requestAttributes);
+    void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers);
 
-    void batchInsertInvokeTrigger(List<TriggerCarrierVO> triggerCarriers,
-                                  String encryptType,
-                                  RequestAttributes requestAttributes);
+    void batchInsertInvokeTrigger(List<TriggerCarrierVO> triggerCarriers);
 }
 
