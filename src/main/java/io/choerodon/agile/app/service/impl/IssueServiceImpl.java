@@ -81,6 +81,8 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
@@ -1060,8 +1062,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
-        String issueIdStr = "issueId";
-        String objectVersionNumberStr = "objectVersionNumber";
         if (agilePluginService != null) {
             agilePluginService.buildFieldList(fieldList, issueUpdateVO);
         }
@@ -1071,9 +1071,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //更新issue表字段，fieldList包含issueId，objectVersionNumber和一个field
         boolean updateRelationField =
                 fieldList.size() == 2
-                        && fieldList.contains(issueIdStr)
-                        && fieldList.contains(objectVersionNumberStr);
-        if (!fieldList.isEmpty()) {
+                        && fieldList.contains(IssueDTO.FIELD_ISSUE_ID)
+                        && fieldList.contains(IssueDTO.FIELD_OBJECT_VERSION_NUMBER);
+        if (CollectionUtils.isNotEmpty(fieldList)) {
             if (updateRelationField) {
                 handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
             } else {
@@ -1456,9 +1456,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
-                                     String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
+                                     String applyType, IssueDTO triggerIssue, boolean autoTransferFlag) {
         Set<Long> influenceIssueIds = new HashSet<>();
-        IssueVO result = this.self().doStateMachineCustomFlowAndRuleNotice(projectId, issueId, applyType, influenceIssueIds, false, transformId, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
+        IssueVO result = this.self().doStateMachineCustomFlowAndRuleNotice(projectId, issueId, applyType, influenceIssueIds, false, transformId, new InputDTO(issueId, "updateStatus", updateTrigger(autoTransferFlag, triggerIssue)));
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
@@ -1793,9 +1793,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    private String updateTrigger(boolean autoTranferFlag, IssueDTO triggerIssue) {
+    private String updateTrigger(boolean autoTransferFlag, IssueDTO triggerIssue) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put(AUTO_TRANSFER_FLAG, autoTranferFlag);
+        jsonObject.put(AUTO_TRANSFER_FLAG, autoTransferFlag);
         if(Objects.nonNull(triggerIssue)){
             jsonObject.put(TRIGGER_ISSUE_ID, triggerIssue.getIssueId());
         }
@@ -1865,7 +1865,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleHistorySprintCompleted(projectId, issueConvertDTO, fieldList, originIssue);
         // 处理预计、实际时间
         handleEstimateTimeAndActualTime(issueConvertDTO);
-        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
+        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[0]));
     }
 
     private void handleHistorySprintCompleted(Long projectId, IssueConvertDTO issueConvertDTO, List<String> fieldList, IssueDTO originIssue) {
@@ -2578,17 +2578,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void handleVersionIssueRel(List<VersionIssueRelDTO> versionIssueRelDTOList, Long projectId, Long issueId) {
-        versionIssueRelDTOList.forEach(versionIssueRel -> {
+        for (VersionIssueRelDTO versionIssueRel : versionIssueRelDTOList) {
             versionIssueRel.setIssueId(issueId);
             versionIssueRel.setProjectId(projectId);
             versionIssueRel.setRelationType(versionIssueRel.getRelationType() == null ? ProductVersionService.VERSION_RELATION_TYPE_FIX : versionIssueRel.getRelationType());
             issueValidator.verifyVersionIssueRelData(versionIssueRel);
             handleVersionIssueRelCreate(versionIssueRel);
-        });
+        }
     }
 
     private void handleVersionIssueRelCreate(VersionIssueRelDTO versionIssueRelDTO) {
-        if (issueValidator.existVersionIssueRel(versionIssueRelDTO)) {
+        if (issueValidator.notExistVersionIssueRel(versionIssueRelDTO)) {
             versionIssueRelService.create(versionIssueRelDTO);
         }
     }
@@ -2626,7 +2626,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 componentIssueRelDTO.setComponentId(issueComponentDTO.getComponentId());
             }
         }
-        if (issueValidator.existComponentIssueRel(componentIssueRelDTO)) {
+        if (issueValidator.notExistComponentIssueRel(componentIssueRelDTO)) {
             componentIssueRelService.create(componentIssueRelDTO);
         }
     }
@@ -2718,7 +2718,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 labelIssueRelDTO.setLabelId(issueLabelDTO.getLabelId());
             }
         }
-        if (issueValidator.existLabelIssue(labelIssueRelDTO)) {
+        if (issueValidator.notExistLabelIssue(labelIssueRelDTO)) {
             labelIssueRelService.create(labelIssueRelDTO);
         }
     }
@@ -4089,33 +4089,83 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
-        if (versionIssueRelVOList != null && versionType != null) {
-            if (!versionIssueRelVOList.isEmpty()) {
-                //归档状态的版本之间的关联不删除
-                List<VersionIssueRelDTO> versionIssueRelDTOS = modelMapper.map(versionIssueRelVOList, new TypeToken<List<VersionIssueRelDTO>>() {
-                }.getType());
-                List<VersionIssueRelDTO> versionIssueRelCreate = versionIssueRelDTOS.stream().filter(versionIssueRel ->
-                        versionIssueRel.getVersionId() != null).collect(Collectors.toList());
-                List<Long> curVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
-                List<Long> createVersionIds = versionIssueRelCreate.stream().map(VersionIssueRelDTO::getVersionId).collect(Collectors.toList());
-                curVersionIds.forEach(id -> {
-                    if (!createVersionIds.contains(id)) {
-                        VersionIssueRelDTO versionIssueRelDTO = new VersionIssueRelDTO();
-                        versionIssueRelDTO.setIssueId(issueId);
-                        versionIssueRelDTO.setVersionId(id);
-                        versionIssueRelDTO.setRelationType(versionType);
-                        versionIssueRelDTO.setProjectId(projectId);
-                        versionIssueRelService.delete(versionIssueRelDTO);
-                    }
-                });
-                versionIssueRelDTOS.forEach(rel -> rel.setRelationType(versionType));
-                handleVersionIssueRel(versionIssueRelDTOS, projectId, issueId);
+    public void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> targetVOList, Long projectId, Long issueId, String versionType) {
+        if(Objects.equals(versionType, ProductVersionService.VERSION_RELATION_TYPE_FIX)) {
+            if (targetVOList == null || versionType == null) {
+                return;
+            }
+            if (CollectionUtils.isNotEmpty(targetVOList)) {
+                // 1. targetList中移除已发布和已归档的，记为realTargetList
+                // 2. 用inDbVersions减去realTarget，记为preDelete
+                // 3. preDelete移除已归档的，记为realDelete
+                // 4. 使用realTarget减去DB，记为realCreate
+                // 5. 删除realDelete, 添加realCreate，得到final
+                List<VersionIssueRelDTO> targetList = modelMapper.map(targetVOList, new TypeToken<List<VersionIssueRelDTO>>() {}.getType());
+                final List<Long> targetVersionIds = targetList.stream()
+                        .map(VersionIssueRelDTO::getVersionId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                List<Long> inDbVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
+                final List<ProductVersionDTO> versions = this.productVersionMapper.selectByCondition(Condition.builder(ProductVersionDTO.class)
+                        .select(ProductVersionDTO.FIELD_VERSION_ID, ProductVersionDTO.FIELD_STATUS_CODE)
+                        .andWhere(Sqls.custom()
+                                .andIn(ProductVersionDTO.FIELD_VERSION_ID, ListUtils.union(targetVersionIds, inDbVersionIds))
+                        ).build());
+                final Map<Long, String> versionIdToStatusMap = versions.stream().collect(Collectors.toMap(ProductVersionDTO::getVersionId, ProductVersionDTO::getStatusCode));
+                final List<Long> realTargetVersionIds = targetVersionIds.stream()
+                        .filter(id -> Objects.equals(versionIdToStatusMap.get(id), ProductVersionService.VERSION_STATUS_CODE_PLANNING))
+                        .collect(Collectors.toList());
+                final List<Long> preDeleteVersionIds = ListUtils.subtract(inDbVersionIds, realTargetVersionIds);
+                final List<Long> realDeleteVersionIds = preDeleteVersionIds.stream()
+                        .filter(id -> !Objects.equals(versionIdToStatusMap.get(id), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED))
+                        .collect(Collectors.toList());
+                final List<Long> realCreateVersionIds = ListUtils.subtract(realTargetVersionIds, inDbVersionIds);
+
+                for (Long realDeleteVersionId : realDeleteVersionIds) {
+                    versionIssueRelService.delete(
+                            new VersionIssueRelDTO()
+                                    .setIssueId(issueId)
+                                    .setVersionId(realDeleteVersionId)
+                                    .setRelationType(versionType)
+                                    .setProjectId(projectId)
+                    );
+                }
+                targetList = targetList.stream()
+                        .filter(rel -> realCreateVersionIds.contains(rel.getVersionId()))
+                        .peek(rel -> rel.setRelationType(versionType))
+                        .collect(Collectors.toList());
+                handleVersionIssueRel(targetList, projectId, issueId);
             } else {
+                // 归档状态的版本之间的关联不删除
                 VersionIssueRelDTO versionIssueRel = new VersionIssueRelDTO();
                 versionIssueRel.createBatchDeleteVersionIssueRel(projectId, issueId, versionType);
                 versionIssueRelService.batchDeleteByIssueIdAndTypeArchivedExceptInfluence(versionIssueRel);
             }
+        } else if(Objects.equals(versionType, ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE)) {
+            List<VersionIssueRelDTO> targetList = modelMapper.map(targetVOList, new TypeToken<List<VersionIssueRelDTO>>() {}.getType());
+            final List<Long> targetVersionIds = targetList.stream()
+                    .map(VersionIssueRelDTO::getVersionId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            List<Long> inDbVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
+            final List<Long> realCreateVersionIds = ListUtils.subtract(targetVersionIds, inDbVersionIds);
+            final List<Long> realDeleteVersionIds = ListUtils.subtract(inDbVersionIds, targetVersionIds);
+            for (Long realDeleteVersionId : realDeleteVersionIds) {
+                versionIssueRelService.delete(
+                        new VersionIssueRelDTO()
+                                .setIssueId(issueId)
+                                .setVersionId(realDeleteVersionId)
+                                .setRelationType(versionType)
+                                .setProjectId(projectId)
+                );
+            }
+            targetList = targetList.stream()
+                    .filter(rel -> realCreateVersionIds.contains(rel.getVersionId()))
+                    .peek(rel -> rel.setRelationType(versionType))
+                    .collect(Collectors.toList());
+            handleVersionIssueRel(targetList, projectId, issueId);
+        } else {
+            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
         }
     }
 
@@ -4171,7 +4221,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, isBatch = true)
     public void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers) {
-        // TODO document why this method is empty
+        // 通过切面触发, 无需方法体
     }
 
     @Override

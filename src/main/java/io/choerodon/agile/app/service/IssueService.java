@@ -469,7 +469,7 @@ public interface IssueService {
 
     void handleUpdateComponentIssueRelWithoutRuleNotice(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId);
 
-    void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType);
+    void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> targetVOList, Long projectId, Long issueId, String versionType);
 
     IssueVO doStateMachineCustomFlowAndRuleNotice(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds, Boolean isDemo, Long transformId, InputDTO inputDTO);
 

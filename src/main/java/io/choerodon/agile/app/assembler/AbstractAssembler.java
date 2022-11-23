@@ -1,10 +1,12 @@
 package io.choerodon.agile.app.assembler;
 
-import io.choerodon.core.exception.CommonException;
-import org.springframework.beans.BeanUtils;
-
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.beans.BeanUtils;
+
+import io.choerodon.core.exception.CommonException;
 
 /**
  * 抽象Assembler转换类,如果需要简单的转换，继承此类即可，要实现自己的，则重写方法
@@ -22,18 +24,15 @@ abstract class AbstractAssembler {
      * @param source source
      * @return target
      */
-    @SuppressWarnings("unchecked")
     public <T, V> V toTarget(T source, Class<V> tClass) {
-        if (source == null) {
+        if (source == null || tClass == null) {
             return null;
         } else {
             try {
-                V target = tClass.newInstance();
-                if (target != null) {
-                    BeanUtils.copyProperties(source, target);
-                }
+                V target = tClass.getConstructor().newInstance();
+                BeanUtils.copyProperties(source, target);
                 return target;
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (NoSuchMethodException | InstantiationException| InvocationTargetException | IllegalAccessException  e) {
                 throw new CommonException(ERROR_CONVERT, e);
             }
         }
