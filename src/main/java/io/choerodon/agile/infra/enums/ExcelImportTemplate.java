@@ -159,8 +159,8 @@ public class ExcelImportTemplate {
         public static final String ISSUE_NUM = "issueNum";
         private static final int INIT_CAPACITY = 50;
         protected static final List<String> HEADER_CODES = new ArrayList<>(INIT_CAPACITY);
-        private static final Map<String, String> CODE_VALUE_MAP = new HashMap(INIT_CAPACITY);
-        private static final Map<String, String> VALUE_CODE_MAP = new HashMap(INIT_CAPACITY);
+        private static final Map<String, String> CODE_VALUE_MAP = new HashMap<>(INIT_CAPACITY);
+        private static final Map<String, String> VALUE_CODE_MAP = new HashMap<>(INIT_CAPACITY);
         private static final Map<String, Integer> VALUE_WIDTH_MAP = new HashMap<>(INIT_CAPACITY);
 
         static {
@@ -176,7 +176,7 @@ public class ExcelImportTemplate {
             HEADERS.add(new Header(FieldCode.DESCRIPTION, "描述", false, null));
             HEADERS.add(new Header(FieldCode.ASSIGNEE, "经办人", false, null));
             HEADERS.add(new Header(FieldCode.REPORTER, "报告人", false, null));
-            HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", false, null));
+            HEADERS.add(new Header(FieldCode.PRIORITY, "优先级*", true, null));
             HEADERS.add(new Header(FieldCode.REMAINING_TIME, "剩余预估时间(小时)", false, null));
             HEADERS.add(new Header(FieldCode.FIX_VERSION, "修复的版本", false, null));
             HEADERS.add(new Header(FieldCode.INFLUENCE_VERSION, "影响的版本", false, null));
