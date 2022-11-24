@@ -5,6 +5,8 @@ import java.util.Set;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -25,6 +27,26 @@ public class SearchParamVO {
     private List<Long> quickFilterIds;
     @Encrypt
     private Set<Long> issueIds;
+    @ApiModelProperty("瀑布项目使用，是否包含空冲刺")
+    private Boolean containsEmptySprint;
+    @ApiModelProperty("展示的字段")
+    private List<ObjectSchemeFieldVO> displayFields;
+
+    public List<ObjectSchemeFieldVO> getDisplayFields() {
+        return displayFields;
+    }
+
+    public void setDisplayFields(List<ObjectSchemeFieldVO> displayFields) {
+        this.displayFields = displayFields;
+    }
+
+    public Boolean getContainsEmptySprint() {
+        return containsEmptySprint;
+    }
+
+    public void setContainsEmptySprint(Boolean containsEmptySprint) {
+        this.containsEmptySprint = containsEmptySprint;
+    }
 
     public Set<Long> getIssueIds() {
         return issueIds;
