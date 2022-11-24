@@ -17,6 +17,7 @@ import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
 import io.choerodon.agile.domain.entity.SqlTemplateData;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
@@ -42,6 +43,8 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
     private ObjectMapper objectMapper;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public String parseSql(FieldTableVO fieldTable,
@@ -64,6 +67,9 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
             case FieldTableVO.TYPE_BACKLOG:
                 break;
             case FieldTableVO.TYPE_WATERFALL:
+                if (agileWaterfallService != null) {
+                    sql = agileWaterfallService.parseWaterfallSql(fieldTable, condition, projectIds, values, dataPair, isSelector);
+                }
                 break;
             case FieldTableVO.TYPE_TRIGGER:
                 break;

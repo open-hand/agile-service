@@ -95,7 +95,8 @@ public class SearchConstant {
             new ObjectSchemeFieldDTO().setCode(Field.CONTENT).setFieldType(FieldTypeCnName.INPUT.getCode()),
             new ObjectSchemeFieldDTO().setCode(Field.MY_STAR).setFieldType(FieldTypeCnName.SINGLE.getCode()),
             new ObjectSchemeFieldDTO().setCode(Field.MY_PARTICIPATE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(FieldCode.FEATURE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            new ObjectSchemeFieldDTO().setCode(FieldCode.FEATURE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
+            new ObjectSchemeFieldDTO().setCode(Field.STAGE).setFieldType(FieldTypeCnName.SINGLE.getCode())
     );
 
     public class Field {
@@ -115,6 +116,11 @@ public class SearchConstant {
          * 我参与的
          */
         public static final String MY_PARTICIPATE = "myParticipate";
+
+        /**
+         * 瀑布阶段
+         */
+        public static final String STAGE = "stage";
     }
 
 
