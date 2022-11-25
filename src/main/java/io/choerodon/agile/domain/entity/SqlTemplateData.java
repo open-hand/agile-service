@@ -29,8 +29,6 @@ public class SqlTemplateData {
 
     private String innerOpt;
 
-    private String valueStr;
-
     private String additionalCondition;
 
     private String schemeCode;
@@ -254,15 +252,6 @@ public class SqlTemplateData {
 
     public SqlTemplateData setInnerOpt(String innerOpt) {
         this.innerOpt = innerOpt;
-        return this;
-    }
-
-    public String getValueStr() {
-        return valueStr;
-    }
-
-    public SqlTemplateData setValueStr(String valueStr) {
-        this.valueStr = valueStr;
         return this;
     }
 
