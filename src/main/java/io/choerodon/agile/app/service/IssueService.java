@@ -62,8 +62,10 @@ public interface IssueService {
      * @param pageRequest pageRequest
      * @return IssueListVO
      */
+    @Deprecated
     Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
+    @Deprecated
     Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
                                     Set<Long> projectIds,
                                     SearchVO searchVO,
