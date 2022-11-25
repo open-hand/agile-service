@@ -299,23 +299,13 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 new SqlTemplateData()
                         .setEpicIdWithAlias(epicIdWithAlias)
                         .setValue(valueStr)
+                        .setOpt(opt.getOpt())
                         .setTypeCode(typeCode)
                         .setParentIssueId(parentIssueId);
         switch (opt) {
             case IN:
             case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                EPIC_IN_OR_NOT_IN,
-                                epicIdWithAlias,
-                                opt.getOpt(),
-                                valueStr,
-                                typeCode,
-                                parentIssueId,
-                                opt.getOpt(),
-                                parentIssueId,
-                                valueStr,
-                                typeCode));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), EPIC_IN_OR_NOT_IN));
                 break;
             case IS_NULL:
                 sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), EPIC_IS_NULL));

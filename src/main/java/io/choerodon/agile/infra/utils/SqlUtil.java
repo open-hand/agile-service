@@ -125,7 +125,7 @@ public class SqlUtil {
         switch (opt) {
             case IN:
             case NOT_IN:
-                data.setValueStr(StringUtils.join(values, BaseConstants.Symbol.COMMA));
+                data.setValue(StringUtils.join(values, BaseConstants.Symbol.COMMA));
                 sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IN_OR_NOT_IN));
                 break;
             case IS_NULL:
