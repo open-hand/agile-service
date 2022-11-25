@@ -179,7 +179,12 @@ public class SqlUtil {
             case BETWEEN:
                 data.setFirstValue(dataPair.getFirst());
                 data.setSecondValue(dataPair.getSecond());
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), DATE_BETWEEN));
+                data.setColumn(fieldTable.getField());
+                if (isLinkedTable) {
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_BETWEEN));
+                } else {
+                    sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), DATE_BETWEEN));
+                }
                 break;
             case IS_NOT_NULL:
                 if (isLinkedTable) {

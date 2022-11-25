@@ -144,7 +144,7 @@ public class SearchConstant {
         LIKE("like"),
         IN("in"),
         NOT_IN("not in"),
-        BETWEEN(" %s >= %s and %s <= %s"),
+        BETWEEN("in"),
         IS_NULL("not in"),
         IS_NOT_NULL("in"),
         /**
@@ -272,6 +272,8 @@ public class SearchConstant {
         public static final String LINKED_TABLE_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} in ( #{value} ) #{additionalCondition}) ";
 
         public static final String LINKED_TABLE_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} #{innerOpt} #{value}) ";
+
+        public static final String LINKED_TABLE_BETWEEN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{column} >= #{firstValue} and #{column} <= #{secondValue}) ";
 
         public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) #{additionalCondition}) ";
 
