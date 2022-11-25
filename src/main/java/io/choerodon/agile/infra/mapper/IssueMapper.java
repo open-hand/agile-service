@@ -480,7 +480,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDTO> listIssueInfoByIssueIds(@Param("projectId") Long projectId,
                                            @Param("issueIds") List<Long> issueIds,
                                            @Param("issueQueryVO") IssueQueryVO issueQueryVO);
-
+    @Deprecated
     List<IssueDTO> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
                                              @Param("projectIds") Set<Long> projectIds,
                                              @Param("searchVO") SearchVO searchVO,

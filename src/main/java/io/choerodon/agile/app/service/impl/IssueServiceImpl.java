@@ -680,6 +680,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    @Deprecated
     public Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
         if (organizationId == null) {
             organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -838,6 +839,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    @Deprecated
     public Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
                                            Set<Long> projectIds,
                                            SearchVO searchVO,

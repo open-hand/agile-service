@@ -170,6 +170,7 @@ public class IssueController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页查询问题列表，包含子任务")
     @PostMapping(value = "/include_sub")
+    @Deprecated
     public ResponseEntity<Page<IssueListFieldKVVO>> listIssueWithSub(@ApiIgnore
                                                                @ApiParam(value = "分页信息", required = true)
                                                                @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
