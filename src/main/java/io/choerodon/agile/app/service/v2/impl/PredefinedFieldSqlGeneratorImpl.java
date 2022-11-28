@@ -238,15 +238,8 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         switch (opt) {
             case IN:
             case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                TAG_IN_OR_NOT_IN,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                primaryKey,
-                                table,
-                                projectIdStr,
-                                conditionSql));
+                data.setAdditionalCondition(conditionSql);
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), TAG_IN_OR_NOT_IN));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
@@ -272,17 +265,16 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         String valueStr = StringUtils.join(values, BaseConstants.Symbol.COMMA);
         String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
         SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
-        sqlBuilder.append(
-                String.format(MY_PARTICIPATE,
-                        assigneeColumn,
-                        valueStr,
-                        mainTableFilterColumn,
-                        opt,
-                        primaryKey,
-                        fieldTable.getTable(),
-                        projectIdStr,
-                        valueStr,
-                        valueStr));
+        SqlTemplateData data =
+                new SqlTemplateData()
+                        .setMainTableCol(mainTableFilterColumn)
+                        .setValue(valueStr)
+                        .setOpt(opt.getOpt())
+                        .setInnerCol(primaryKey)
+                        .setTable(fieldTable.getTable())
+                        .setProjectIdStr(projectIdStr)
+                        .setColumn(assigneeColumn);
+        sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), MY_PARTICIPATE));
         sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
     }

@@ -232,4 +232,32 @@ public class ObjectSchemeFieldVO {
     public void setIssueTypeIds(List<Long> issueTypeIds) {
         this.issueTypeIds = issueTypeIds;
     }
+
+    @Override
+    public String toString() {
+        return "ObjectSchemeFieldVO{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", fieldType='" + fieldType + '\'' +
+                ", fieldTypeName='" + fieldTypeName + '\'' +
+                ", system=" + system +
+                ", required=" + required +
+                ", requiredScope='" + requiredScope + '\'' +
+                ", context='" + context + '\'' +
+                ", contextName='" + contextName + '\'' +
+                ", schemeCode='" + schemeCode + '\'' +
+                ", defaultValue='" + defaultValue + '\'' +
+                ", projectId=" + projectId +
+                ", organizationId=" + organizationId +
+                ", objectVersionNumber=" + objectVersionNumber +
+                ", fieldOptions=" + fieldOptions +
+                ", defaultValueObj=" + defaultValueObj +
+                ", contexts=" + contexts +
+                ", extraConfig=" + extraConfig +
+                ", issueTypeVOList=" + issueTypeVOList +
+                ", issueTypeIds=" + issueTypeIds +
+                '}';
+    }
 }

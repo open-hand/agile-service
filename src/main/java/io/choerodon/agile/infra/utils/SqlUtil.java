@@ -67,22 +67,22 @@ public class SqlUtil {
         StringBuilder sqlBuilder = new StringBuilder();
         SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(fieldTable.getField(), alias);
+        SqlTemplateData data =
+                new SqlTemplateData()
+                        .setMainTableCol(mainTableFilterColumn)
+                        .setOpt(opt.getOpt())
+                        .setValue(StringUtils.join(values, BaseConstants.Symbol.COMMA))
+                        .setAdditionalCondition(additionalCondition);
         switch (opt) {
             case IN:
             case NOT_IN:
-                sqlBuilder.append(
-                        String.format(
-                                SELF_TABLE_IN_OR_NOT_IN,
-                                mainTableFilterColumn,
-                                opt.getOpt(),
-                                StringUtils.join(values, BaseConstants.Symbol.COMMA),
-                                additionalCondition));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), SELF_TABLE_IN_OR_NOT_IN));
                 break;
             case IS_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), SELF_TABLE_ID_IS_NULL));
                 break;
             case IS_NOT_NULL:
-                sqlBuilder.append(String.format(SELF_TABLE_ID_IS_NOT_NULL, mainTableFilterColumn, mainTableFilterColumn, additionalCondition));
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), SELF_TABLE_ID_IS_NOT_NULL));
                 break;
             default:
                 break;

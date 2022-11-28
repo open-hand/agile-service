@@ -81,4 +81,17 @@ public class Condition {
     public void setSubConditions(List<Condition> subConditions) {
         this.subConditions = subConditions;
     }
+
+    @Override
+    public String toString() {
+        return "Condition{" +
+                "field=" + field +
+                ", relationship='" + relationship + '\'' +
+                ", operation='" + operation + '\'' +
+                ", value=" + value +
+                ", betweenValues=" + betweenValues +
+                ", order=" + order +
+                ", subConditions=" + subConditions +
+                '}';
+    }
 }

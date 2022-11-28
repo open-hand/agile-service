@@ -96,4 +96,17 @@ public class SearchParamVO {
         this.advancedConditions = advancedConditions;
     }
 
+    @Override
+    public String toString() {
+        return "SearchParamVO{" +
+                "conditions=" + conditions +
+                ", advancedConditions=" + advancedConditions +
+                ", treeFlag=" + treeFlag +
+                ", countSubIssue=" + countSubIssue +
+                ", quickFilterIds=" + quickFilterIds +
+                ", issueIds=" + issueIds +
+                ", containsEmptySprint=" + containsEmptySprint +
+                ", displayFields=" + displayFields +
+                '}';
+    }
 }
