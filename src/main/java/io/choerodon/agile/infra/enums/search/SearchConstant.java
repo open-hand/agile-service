@@ -144,7 +144,7 @@ public class SearchConstant {
         LIKE("like"),
         IN("in"),
         NOT_IN("not in"),
-        BETWEEN(" %s >= %s and %s <= %s"),
+        BETWEEN("in"),
         IS_NULL("not in"),
         IS_NOT_NULL("in"),
         /**
@@ -247,15 +247,15 @@ public class SearchConstant {
         /**
          * priority_id in (1,2,3)
          */
-        public static final String SELF_TABLE_IN_OR_NOT_IN = " %s %s ( %s ) %s";
+        public static final String SELF_TABLE_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( #{value} ) #{additionalCondition}";
         /**
          * (priority_id = 0 or priority_id is null)
          */
-        public static final String SELF_TABLE_ID_IS_NULL = " (%s = 0 or %s is null) %s ";
+        public static final String SELF_TABLE_ID_IS_NULL = " (#{mainTableCol} = 0 or #{mainTableCol} is null) #{additionalCondition} ";
         /**
          * (priority_id != 0 and priority_id is not null)
          */
-        public static final String SELF_TABLE_ID_IS_NOT_NULL = " (%s != 0 and %s is not null) %s ";
+        public static final String SELF_TABLE_ID_IS_NOT_NULL = " (#{mainTableCol} != 0 and #{mainTableCol} is not null) #{additionalCondition} ";
 
         public static final String SELF_TABLE_IS_NULL = " (#{column} is null) ";
 
@@ -273,14 +273,16 @@ public class SearchConstant {
 
         public static final String LINKED_TABLE_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} #{innerOpt} #{value}) ";
 
+        public static final String LINKED_TABLE_BETWEEN = " #{mainTableCol} #{mainTableCol} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{column} >= #{firstValue} and #{column} <= #{secondValue}) ";
+
         public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) #{additionalCondition}) ";
 
-        public static final String MY_PARTICIPATE = " %s in (%s) or %s %s ( select %s from %s where project_id in (%s) and field = 'assignee' and ( new_value in ( %s ) or old_value in ( %s ))) ";
+        public static final String MY_PARTICIPATE = " #{column} in (#{value}) or #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and field = 'assignee' and ( new_value in ( #{value} ) or old_value in ( #{value} ))) ";
 
 
-        public static final String TAG_IN_OR_NOT_IN = " %s %s ( select %s from %s where project_id in (%s) and (%s) ) ";
+        public static final String TAG_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and (#{additionalCondition}) ) ";
 
-        public static final String YQ_CLOUD_NUM_LIKE_OR_EQUAL = " %s %s ( select %s from %s where project_id in (%s) and source = 'yqcloud' and instance_type = 'issue' and open_instance_num %s %s) ";
+        public static final String YQ_CLOUD_NUM_LIKE_OR_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and source = 'yqcloud' and instance_type = 'issue' and open_instance_num #{innerOpt} #{value}) ";
         /**
          * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
          */

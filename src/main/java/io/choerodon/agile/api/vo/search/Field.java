@@ -60,4 +60,15 @@ public class Field {
     public void setPredefined(Boolean predefined) {
         this.predefined = predefined;
     }
+
+    @Override
+    public String toString() {
+        return "Field{" +
+                "fieldCode='" + fieldCode + '\'' +
+                ", fieldId=" + fieldId +
+                ", fieldType='" + fieldType + '\'' +
+                ", predefined=" + predefined +
+                ", noEncryptFlag=" + noEncryptFlag +
+                '}';
+    }
 }

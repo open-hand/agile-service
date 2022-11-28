@@ -117,4 +117,20 @@ public class Value {
     public void setValueSpecial(String valueSpecial) {
         this.valueSpecial = valueSpecial;
     }
+
+    @Override
+    public String toString() {
+        return "Value{" +
+                "valueStr='" + valueStr + '\'' +
+                ", valueStrList=" + valueStrList +
+                ", valueId=" + valueId +
+                ", valueIdList=" + valueIdList +
+                ", noEncryptId=" + noEncryptId +
+                ", noEncryptIdList=" + noEncryptIdList +
+                ", valueDecimal=" + valueDecimal +
+                ", valueDate=" + valueDate +
+                ", valueSpecial='" + valueSpecial + '\'' +
+                ", objectList=" + objectList +
+                '}';
+    }
 }

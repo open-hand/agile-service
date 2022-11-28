@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     private static final String DEFAULT_PRIMARY_KEY = "issue_id";
     private static final String INSTANCE_ID = "instance_id";
 
+    private static final Logger logger = LoggerFactory.getLogger(AdvancedParamParserServiceImpl.class);
 
     @Override
     public String parse(InstanceType instanceType,
@@ -62,7 +65,11 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         List<Condition> conditions = new ArrayList<>();
         conditions.addAll(searchParamVO.getConditions());
         conditions.addAll(searchParamVO.getAdvancedConditions());
-        return generateSql(instanceType, projectIds, predefinedFieldMap, conditions, searchParamVO.getIssueIds());
+        String sql = generateSql(instanceType, projectIds, predefinedFieldMap, conditions, searchParamVO.getIssueIds());
+        if  (logger.isDebugEnabled())  {
+            logger.debug("高级筛选条件：{}, 生成sql：{}", searchParamVO, sql);
+        }
+        return sql;
     }
 
     private String generateSql(InstanceType instanceType,
