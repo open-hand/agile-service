@@ -273,7 +273,7 @@ public class SearchConstant {
 
         public static final String LINKED_TABLE_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} #{innerOpt} #{value}) ";
 
-        public static final String LINKED_TABLE_BETWEEN = " #{mainTableCol} #{mainTableCol} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{column} >= #{firstValue} and #{column} <= #{secondValue}) ";
+        public static final String LINKED_TABLE_BETWEEN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{column} >= #{firstValue} and #{column} <= #{secondValue}) ";
 
         public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) #{additionalCondition}) ";
 
