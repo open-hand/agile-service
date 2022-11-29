@@ -10,15 +10,15 @@ import io.choerodon.agile.api.vo.PersonalFilterVO;
  */
 public interface PersonalFilterService {
 
-    PersonalFilterVO queryById(Long organizationId, Long projectId, Long filterId);
+    PersonalFilterVO queryById(Long organizationId, Long projectId, Long filterId, String version);
 
-    PersonalFilterVO create(Long organizationId, Long projectId, PersonalFilterVO personalFilterVO);
+    PersonalFilterVO create(Long organizationId, Long projectId, PersonalFilterVO personalFilterVO, String version);
 
-    PersonalFilterVO update(Long organizationId, Long projectId, Long filterId, PersonalFilterVO personalFilterVO);
+    PersonalFilterVO update(Long organizationId, Long projectId, Long filterId, PersonalFilterVO personalFilterVO, String version);
 
     void deleteById(Long organizationId, Long projectId, Long filterId);
 
-    List<PersonalFilterVO> listByUserId(Long organizationId, Long projectId, Long userId, String searchStr, String filterTypeCode);
+    List<PersonalFilterVO> listByUserId(Long organizationId, Long projectId, Long userId, String searchStr, String filterTypeCode, String version);
 
     /**
      * 根据唯一性约束查询数据库中是否存在重复的记录

@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo.search;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
@@ -13,6 +14,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author superlee
  * @since 2022-11-02
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchParamVO {
     @ApiModelProperty("筛选条件")
     private List<Condition> conditions;

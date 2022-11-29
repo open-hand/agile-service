@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -12,8 +13,8 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author superlee
  * @since 2022-11-02
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Value {
-
     @ApiModelProperty("字符串快速搜索值")
     private String valueStr;
     @ApiModelProperty("字符串数组快速搜索值")

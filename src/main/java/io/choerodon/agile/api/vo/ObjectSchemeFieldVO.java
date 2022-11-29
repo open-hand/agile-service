@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/3/29
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ObjectSchemeFieldVO {
     @ApiModelProperty(value = "字段id")
     @Encrypt
