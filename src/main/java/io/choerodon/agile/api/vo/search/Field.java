@@ -20,8 +20,18 @@ public class Field {
     private String fieldType;
     @ApiModelProperty("是否为预定义字段")
     private Boolean predefined;
-
+    @ApiModelProperty("字段名称，前端个人筛选保存使用")
+    private String name;
+    @ApiModelProperty("不加密标记")
     private Boolean noEncryptFlag;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Boolean getNoEncryptFlag() {
         return noEncryptFlag;

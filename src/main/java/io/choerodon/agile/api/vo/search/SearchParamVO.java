@@ -33,6 +33,16 @@ public class SearchParamVO {
     private Boolean containsEmptySprint;
     @ApiModelProperty("展示的字段")
     private List<ObjectSchemeFieldVO> displayFields;
+    @ApiModelProperty("空条件字段，用于个人筛选保存和展示")
+    private EmptyCondition emptyCondition;
+
+    public EmptyCondition getEmptyCondition() {
+        return emptyCondition;
+    }
+
+    public void setEmptyCondition(EmptyCondition emptyCondition) {
+        this.emptyCondition = emptyCondition;
+    }
 
     public List<ObjectSchemeFieldVO> getDisplayFields() {
         return displayFields;
@@ -109,6 +119,7 @@ public class SearchParamVO {
                 ", issueIds=" + issueIds +
                 ", containsEmptySprint=" + containsEmptySprint +
                 ", displayFields=" + displayFields +
+                ", emptyCondition=" + emptyCondition +
                 '}';
     }
 }
