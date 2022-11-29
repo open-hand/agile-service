@@ -2,6 +2,9 @@ package io.choerodon.agile.api.vo;
 
 
 import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.api.vo.search.SearchParamVO;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -38,6 +41,16 @@ public class PersonalFilterVO {
 
     @ApiModelProperty(value = "组织id")
     private Long organizationId;
+    @ApiModelProperty(value = "高级筛选条件")
+    private SearchParamVO searchParamVO;
+
+    public SearchParamVO getSearchParamVO() {
+        return searchParamVO;
+    }
+
+    public void setSearchParamVO(SearchParamVO searchParamVO) {
+        this.searchParamVO = searchParamVO;
+    }
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;

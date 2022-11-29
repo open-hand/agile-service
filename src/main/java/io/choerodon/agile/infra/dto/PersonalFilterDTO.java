@@ -23,6 +23,7 @@ public class PersonalFilterDTO extends AuditDomain {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_FILTER_TYPE_CODE = "filterTypeCode";
     public static final String FIELD_FILTER_ID = "filterId";
+    public static final String FIELD_ADVANCED_FILTER_JSON = "advancedFilterJson";
 
     @Id
     @GeneratedValue
@@ -34,6 +35,16 @@ public class PersonalFilterDTO extends AuditDomain {
     private Boolean isDefault;
     private String filterTypeCode;
     private Long organizationId;
+
+    private String advancedFilterJson;
+
+    public String getAdvancedFilterJson() {
+        return advancedFilterJson;
+    }
+
+    public void setAdvancedFilterJson(String advancedFilterJson) {
+        this.advancedFilterJson = advancedFilterJson;
+    }
 
     public Long getFilterId() {
         return filterId;

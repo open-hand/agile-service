@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo.search;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import org.hzero.core.util.Pair;
@@ -10,6 +11,7 @@ import org.hzero.core.util.Pair;
  * @author superlee
  * @since 2022-11-02
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Condition {
     @ApiModelProperty("字段")
     private Field field;

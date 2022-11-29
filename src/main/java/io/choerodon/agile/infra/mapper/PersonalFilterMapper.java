@@ -15,7 +15,8 @@ public interface PersonalFilterMapper extends BaseMapper<PersonalFilterDTO> {
                                                       @Param("projectId") Long projectId,
                                                       @Param("userId") Long userId,
                                                       @Param("searchStr") String searchStr,
-                                                      @Param("filterTypeCode") String filterTypeCode);
+                                                      @Param("filterTypeCode") String filterTypeCode,
+                                                      @Param("version") String version);
 
     int updateDefault(@Param("organizationId") Long organizationId,
                       @Param("projectId") Long projectId,

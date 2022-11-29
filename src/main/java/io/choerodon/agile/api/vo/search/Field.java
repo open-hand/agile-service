@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo.search;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -8,6 +9,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author superlee
  * @since 2022-11-02
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Field {
     @ApiModelProperty("字段编码，系统字段使用")
     private String fieldCode;
