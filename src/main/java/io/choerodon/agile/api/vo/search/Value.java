@@ -37,86 +37,96 @@ public class Value {
 
     private String valueSpecial;
 
-    private List<Object> objectList;
+    private List<? extends Object> objectList;
 
-    public List<Object> getObjectList() {
+    public List<? extends Object> getObjectList() {
         return objectList;
     }
 
-    public void setObjectList(List<Object> objectList) {
+    public Value setObjectList(List<? extends Object> objectList) {
         this.objectList = objectList;
+        return this;
     }
 
     public String getValueStr() {
         return valueStr;
     }
 
-    public void setValueStr(String valueStr) {
+    public Value setValueStr(String valueStr) {
         this.valueStr = valueStr;
+        return this;
     }
 
     public List<String> getValueStrList() {
         return valueStrList;
     }
 
-    public void setValueStrList(List<String> valueStrList) {
+    public Value setValueStrList(List<String> valueStrList) {
         this.valueStrList = valueStrList;
+        return this;
     }
 
     public Long getValueId() {
         return valueId;
     }
 
-    public void setValueId(Long valueId) {
+    public Value setValueId(Long valueId) {
         this.valueId = valueId;
+        return this;
     }
 
     public List<Long> getValueIdList() {
         return valueIdList;
     }
 
-    public void setValueIdList(List<Long> valueIdList) {
+    public Value setValueIdList(List<Long> valueIdList) {
         this.valueIdList = valueIdList;
+        return this;
     }
 
     public Long getNoEncryptId() {
         return noEncryptId;
     }
 
-    public void setNoEncryptId(Long noEncryptId) {
+    public Value setNoEncryptId(Long noEncryptId) {
         this.noEncryptId = noEncryptId;
+        return this;
     }
 
     public List<Long> getNoEncryptIdList() {
         return noEncryptIdList;
     }
 
-    public void setNoEncryptIdList(List<Long> noEncryptIdList) {
+    public Value setNoEncryptIdList(List<Long> noEncryptIdList) {
         this.noEncryptIdList = noEncryptIdList;
+        return this;
     }
 
     public BigDecimal getValueDecimal() {
         return valueDecimal;
     }
 
-    public void setValueDecimal(BigDecimal valueDecimal) {
+    public Value setValueDecimal(BigDecimal valueDecimal) {
         this.valueDecimal = valueDecimal;
+        return this;
     }
 
     public Date getValueDate() {
         return valueDate;
     }
 
-    public void setValueDate(Date valueDate) {
+    public Value setValueDate(Date valueDate) {
         this.valueDate = valueDate;
+        return this;
     }
 
     public String getValueSpecial() {
         return valueSpecial;
     }
 
-    public void setValueSpecial(String valueSpecial) {
+    public Value setValueSpecial(String valueSpecial) {
         this.valueSpecial = valueSpecial;
+        return this;
     }
 
     @Override

@@ -32,56 +32,63 @@ public class Condition {
         return field;
     }
 
-    public void setField(Field field) {
+    public Condition setField(Field field) {
         this.field = field;
+        return this;
     }
 
     public String getRelationship() {
         return relationship;
     }
 
-    public void setRelationship(String relationship) {
+    public Condition setRelationship(String relationship) {
         this.relationship = relationship;
+        return this;
     }
 
     public String getOperation() {
         return operation;
     }
 
-    public void setOperation(String operation) {
+    public Condition setOperation(String operation) {
         this.operation = operation;
+        return this;
     }
 
     public Value getValue() {
         return value;
     }
 
-    public void setValue(Value value) {
+    public Condition setValue(Value value) {
         this.value = value;
+        return this;
     }
 
     public Pair<Value, Value> getBetweenValues() {
         return betweenValues;
     }
 
-    public void setBetweenValues(Pair<Value, Value> betweenValues) {
+    public Condition setBetweenValues(Pair<Value, Value> betweenValues) {
         this.betweenValues = betweenValues;
+        return this;
     }
 
     public Integer getOrder() {
         return order;
     }
 
-    public void setOrder(Integer order) {
+    public Condition setOrder(Integer order) {
         this.order = order;
+        return this;
     }
 
     public List<Condition> getSubConditions() {
         return subConditions;
     }
 
-    public void setSubConditions(List<Condition> subConditions) {
+    public Condition setSubConditions(List<Condition> subConditions) {
         this.subConditions = subConditions;
+        return this;
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -176,6 +177,14 @@ public class FixDataController {
     @GetMapping("/fix_status_transfer_role_data")
     public ResponseEntity fixStatusTransferRoleData() {
         fixDataService.fixStatusMachineCustomTransferRoleData();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("修复高级筛选个人筛选数据")
+    @PostMapping("/fix_personal_filter")
+    public ResponseEntity fixPersonalFilter(@RequestBody Set<String> typeCodes) {
+        fixDataService.fixPersonalFilter(typeCodes);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

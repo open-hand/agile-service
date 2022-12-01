@@ -29,48 +29,54 @@ public class Field {
         return name;
     }
 
-    public void setName(String name) {
+    public Field setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Boolean getNoEncryptFlag() {
         return noEncryptFlag;
     }
 
-    public void setNoEncryptFlag(Boolean noEncryptFlag) {
+    public Field setNoEncryptFlag(Boolean noEncryptFlag) {
         this.noEncryptFlag = noEncryptFlag;
+        return this;
     }
 
     public Long getFieldId() {
         return fieldId;
     }
 
-    public void setFieldId(Long fieldId) {
+    public Field setFieldId(Long fieldId) {
         this.fieldId = fieldId;
+        return this;
     }
 
     public String getFieldCode() {
         return fieldCode;
     }
 
-    public void setFieldCode(String fieldCode) {
+    public Field setFieldCode(String fieldCode) {
         this.fieldCode = fieldCode;
+        return this;
     }
 
     public String getFieldType() {
         return fieldType;
     }
 
-    public void setFieldType(String fieldType) {
+    public Field setFieldType(String fieldType) {
         this.fieldType = fieldType;
+        return this;
     }
 
     public Boolean getPredefined() {
         return predefined;
     }
 
-    public void setPredefined(Boolean predefined) {
+    public Field setPredefined(Boolean predefined) {
         this.predefined = predefined;
+        return this;
     }
 
     @Override
