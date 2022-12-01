@@ -26,6 +26,7 @@ import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.util.JsonUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 
@@ -110,17 +111,13 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
                                   String version,
                                   PersonalFilterDTO personalFilterDTO) {
         if (V1.equals(version)) {
-            personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterVO.getFilterJson(),false));
+            personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterVO.getFilterJson(), false));
             personalFilterDTO.setAdvancedFilterJson(EMPTY_STRING);
         } else if (V2.equals(version)) {
             SearchParamVO searchParamVO = personalFilterVO.getSearchParamVO();
             String advancedFilterJson = EMPTY_STRING;
             if (searchParamVO != null) {
-                try {
-                    advancedFilterJson = objectMapper.writeValueAsString(searchParamVO);
-                } catch (JsonProcessingException e) {
-                    throw new CommonException("error.parse.searchParamVO.json", e);
-                }
+                advancedFilterJson = JsonUtils.toJson(searchParamVO);
             }
             personalFilterDTO.setAdvancedFilterJson(advancedFilterJson);
             personalFilterDTO.setFilterJson(EMPTY_STRING);
@@ -192,7 +189,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
                                                String version) {
         checkFilterTypeCode(filterTypeCode);
         List<PersonalFilterDTO> personalFilterList = personalFilterMapper.queryByProjectIdAndUserId(organizationId, projectId, userId, searchStr, filterTypeCode, version);
-        List<PersonalFilterVO> result= new ArrayList<>();
+        List<PersonalFilterVO> result = new ArrayList<>();
         for (PersonalFilterDTO dto : personalFilterList) {
             PersonalFilterVO vo = convertPersonFilterDtoToVo(version, dto);
             result.add(vo);
@@ -207,12 +204,8 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         } else if (V2.equals(version)) {
             String json = dto.getAdvancedFilterJson();
             if (!StringUtils.isEmpty(json)) {
-                try {
-                    SearchParamVO searchParamVO = objectMapper.readValue(json, SearchParamVO.class);
-                    vo.setSearchParamVO(searchParamVO);
-                } catch (JsonProcessingException e) {
-                    throw new CommonException("error.parse.searchParamVO.json", e);
-                }
+                SearchParamVO searchParamVO = JsonUtils.fromJson(json, SearchParamVO.class);
+                vo.setSearchParamVO(searchParamVO);
             }
         }
         return vo;
@@ -226,12 +219,13 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
 
     /**
      * 根据唯一性约束查询数据库中重复的记录数量
+     *
      * @param organizationId 组织ID
-     * @param projectId 项目ID
-     * @param userId 用户ID
-     * @param name 个人筛选名称
+     * @param projectId      项目ID
+     * @param userId         用户ID
+     * @param name           个人筛选名称
      * @param filterTypeCode 个人筛选类型
-     * @param filterId 个人筛选ID(用于更新检查时排除自身)
+     * @param filterId       个人筛选ID(用于更新检查时排除自身)
      * @return 重复的记录数量
      */
     private int queryRepeatRecordCount(Long organizationId, Long projectId, Long userId, String name, String filterTypeCode, Long filterId) {
