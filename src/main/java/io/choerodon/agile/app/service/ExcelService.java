@@ -1,6 +1,17 @@
 package io.choerodon.agile.app.service;
 
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import io.choerodon.agile.api.vo.ExcelTemplateVO;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
@@ -8,16 +19,6 @@ import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -49,6 +50,13 @@ public interface ExcelService {
 
     void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId);
 
+    /**
+     * ws发送进度
+     * @param fileOperationHistoryDTO   文件历史DTO
+     * @param userId                    操作用户ID
+     * @param process                   进度, 请传入0~100之间的双精度浮点数!!!
+     * @param websocketKey              websocketKey
+     */
     void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process, String websocketKey);
 
     /**

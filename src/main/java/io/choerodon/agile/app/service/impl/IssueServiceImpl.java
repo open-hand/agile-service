@@ -2775,7 +2775,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error: {0}", e);
         }
-        System.out.println("websocketKey:" + message);
         messageClientC7n.sendByUserId(userId, websocketKey, message);
     }
 
