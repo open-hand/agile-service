@@ -3396,7 +3396,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 startDate = anotherDate;
                 endDate = date;
             }
-            return !startDate.before(endDate);
+            return endDate.before(startDate);
         } else {
             return false;
         }
