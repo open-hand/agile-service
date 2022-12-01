@@ -2014,9 +2014,22 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issueMapper.queryIssueIdsIsNotTest(projectId, issueIds) != issueIds.size()) {
             throw new CommonException(ERROR_ISSUE_TYPE_NOT_ISSUE_TEST);
         }
+        List<IssueDTO> issueDTOList = null;
+        if(agileWaterfallService != null) {
+            issueDTOList = this.issueMapper.selectByIds(
+                    issueIds.stream().map(String::valueOf).collect(Collectors.joining(BaseConstants.Symbol.COMMA))
+            );
+        }
         issueMapper.batchDeleteIssues(projectId, issueIds);
         if (agilePluginService != null) {
             agilePluginService.deleteIssueProductRel(projectId, issueIds);
+        }
+        if (agileWaterfallService != null) {
+            final Map<Long, IssueDTO> idToIssueMap = issueDTOList.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity()));
+            for (Long issueId : issueIds) {
+                IssueDTO issue = idToIssueMap.getOrDefault(issueId, new IssueDTO());
+                agileWaterfallService.deleteIssueForWaterfall(projectId, issueId, this.modelMapper.map(issue, IssueConvertDTO.class));
+            }
         }
         dataLogRedisUtil.deleteByDeleteIssueInfo(projectId);
     }
@@ -2867,7 +2880,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error: {0}", e);
         }
-        System.out.println("websocketKey:" + message);
         messageClientC7n.sendByUserId(userId, websocketKey, message);
     }
 
