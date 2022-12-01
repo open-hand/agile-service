@@ -443,7 +443,10 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     @Override
     public Double getProcess(Integer currentNum, Integer totalNum) {
-        double process = (currentNum + 1.0) / (totalNum + 1.0) * 0.95 * 100;
+        if(currentNum == null || totalNum == null) {
+            return 0d;
+        }
+        double process = (currentNum + 1d) / (totalNum + 1d) * 0.95 * 100;
         BigDecimal b = BigDecimal.valueOf(process);
         process = b.setScale(1, RoundingMode.HALF_UP).doubleValue();
         return process;
@@ -612,11 +615,18 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 throw new CommonException(ERROR_FILE_OPERATION_HISTORY_UPDATE);
             }
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-            sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+            sendProcess(errorImport, history.getUserId(), 0d, websocketKey);
             throw new CommonException("error.sheet.import", e);
         }
     }
 
+    /**
+     * ws发送进度
+     * @param fileOperationHistoryDTO   文件历史DTO
+     * @param userId                    操作用户ID
+     * @param process                   进度, 请传入0~100之间的双精度浮点数!!!
+     * @param websocketKey              websocketKey
+     */
     private void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO,
                              Long userId,
                              Double process,
@@ -629,7 +639,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         try {
             message = objectMapper.writeValueAsString(fileOperationHistoryDTO);
         } catch (JsonProcessingException e) {
-            LOGGER.error("object to json error: {0}", e);
+            LOGGER.error("object to json error");
+            LOGGER.error(e.getMessage(), e);
         }
         messageClientC7n.sendByUserId(userId, websocketKey, message);
     }
@@ -644,7 +655,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             history.setStatus("empty_data_sheet");
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-            sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+            sendProcess(errorImport, history.getUserId(), 0d, websocketKey);
             throw new CommonException("error.sheet.empty");
         }
         return Lists.newArrayList(SheetUtils.getHeaderColumnNames(dataSheet).values());
@@ -711,7 +722,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 status.append(headerName);
                 history.setStatus(status.toString());
                 fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
-                sendProcess(history, history.getUserId(), 0.0, websocketKey);
+                sendProcess(history, history.getUserId(), 0d, websocketKey);
                 throw new CommonException("error.illegal.custom.field.header." + headerName);
             } else {
                 String fieldCode = detail.getCode();
@@ -821,24 +832,35 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                 int parentColIndex, int lastSendCountNum,
                                 String websocketKey) {
         setErrorMsgToParentSonRow(rowNum, sheetData, sonSet, parentColIndex);
-        return calcLastSendCountNum(userId, history, dataRowCount, progress, sonSet, lastSendCountNum, websocketKey);
+        return calcLastSendCountNumWhileError(userId, history, dataRowCount, progress, sonSet, lastSendCountNum, websocketKey);
     }
 
-    private int calcLastSendCountNum(Long userId,
-                                     FileOperationHistoryDTO history,
-                                     Integer dataRowCount,
-                                     ExcelImportTemplate.Progress progress,
-                                     Set<Integer> sonSet,
-                                     int lastSendCountNum,
-                                     String websocketKey) {
+    /**
+     * 出现错误时计算进度
+     * @param userId            操作用户ID
+     * @param history           文件操作历史DTO
+     * @param dataRowCount      错的行号
+     * @param progress          当前进度
+     * @param sonSet            当前行的子行号
+     * @param lastSendCountNum  最后发过消息的行号
+     * @param websocketKey      websocketKey
+     * @return                  新的最后发过消息的行号
+     */
+    private int calcLastSendCountNumWhileError(Long userId,
+                                               FileOperationHistoryDTO history,
+                                               Integer dataRowCount,
+                                               ExcelImportTemplate.Progress progress,
+                                               Set<Integer> sonSet,
+                                               int lastSendCountNum,
+                                               String websocketKey) {
         int errorCount = sonSet.size() + 1;
         Long failCount = progress.getFailCount() + errorCount;
         history.setFailCount(failCount);
         int processNum = progress.getProcessNum() + errorCount;
         progress.setFailCount(failCount);
         progress.addProcessNum(errorCount);
-        if ((processNum - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
-            sendProcess(history, userId, processNum * 1.0 / dataRowCount, websocketKey);
+        if ((double) (processNum - lastSendCountNum) / dataRowCount >= 0.1) {
+            sendProcess(history, userId, ((double)processNum / dataRowCount) * 100, websocketKey);
             lastSendCountNum = processNum;
         }
         return lastSendCountNum;
@@ -856,7 +878,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                                 int parentColIndex, int lastSendCountNum,
                                 String websocketKey) {
         setErrorMsgToParentSonRow(rowNum, dataSheet, errorRowColMap, sonSet, parentColIndex);
-        return calcLastSendCountNum(userId, history, dataRowCount, progress, sonSet, lastSendCountNum, websocketKey);
+        return calcLastSendCountNumWhileError(userId, history, dataRowCount, progress, sonSet, lastSendCountNum, websocketKey);
     }
 
     private void setErrorMsgToParentSonRow(int rowNum,
@@ -1154,7 +1176,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             throw new CommonException(ERROR_FILE_OPERATION_HISTORY_UPDATE);
         }
         FileOperationHistoryDTO result = fileOperationHistoryMapper.selectByPrimaryKey(update.getId());
-        sendProcess(result, result.getUserId(), 1.0, websocketKey);
+        sendProcess(result, result.getUserId(), 100d, websocketKey);
     }
 
     @Override

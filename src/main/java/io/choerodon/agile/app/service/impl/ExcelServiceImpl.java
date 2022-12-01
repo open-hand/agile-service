@@ -490,7 +490,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         if (!objectSchemeFieldExcelService.validExcelTemplate(workbook, history)) {
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-            sendProcess(errorImport, history.getUserId(), 0.0, socketKey);
+            sendProcess(errorImport, history.getUserId(), 0d, socketKey);
             LOGGER.error("导入文件为空，导入失败");
             return;
         }
@@ -539,7 +539,7 @@ public class ExcelServiceImpl implements ExcelService {
             progress.processNumIncrease();
             if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / realRowCount >= 0.1) {
                 lastSendCountNum = progress.getProcessNum();
-                sendProcess(history, userId, (progress.getProcessNum() * 1.0 / realRowCount) * 0.97 * 100, socketKey);
+                sendProcess(history, userId, ((double) progress.getProcessNum() / realRowCount) * 0.97 * 100, socketKey);
             }
         }
         //错误数据生成excel
@@ -562,7 +562,7 @@ public class ExcelServiceImpl implements ExcelService {
         update.setObjectVersionNumber(history.getObjectVersionNumber());
         fileOperationHistoryMapper.updateByPrimaryKeySelective(update);
         FileOperationHistoryDTO result = fileOperationHistoryMapper.selectByPrimaryKey(update.getId());
-        sendProcess(result, result.getUserId(), 100.0, socketKey);
+        sendProcess(result, result.getUserId(), 100d, socketKey);
     }
 
     protected Boolean checkCanceled(Long projectId, Long fileOperationHistoryId, List<Long> importedIssueIds) {
@@ -685,7 +685,7 @@ public class ExcelServiceImpl implements ExcelService {
                 fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
                 FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
                 String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + errorImport.getProjectId();
-                sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+                sendProcess(errorImport, history.getUserId(), 0d, websocketKey);
                 throw new CommonException("error.excel.header.code.repeat." + excelColumnVO.getFieldCode());
             }
             fieldNames.add(excelColumnVO.getFieldCode());
@@ -699,7 +699,7 @@ public class ExcelServiceImpl implements ExcelService {
         history.setFailCount(progress.getFailCount());
         if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
             lastSendCountNum = progress.getProcessNum();
-            sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+            sendProcess(history, userId, (double) progress.getProcessNum() / dataRowCount, websocketKey);
         }
         return lastSendCountNum;
     }
@@ -830,7 +830,7 @@ public class ExcelServiceImpl implements ExcelService {
                                          String exceptionMsg) {
         fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
         FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-        sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+        sendProcess(errorImport, history.getUserId(), 0d, websocketKey);
         if (!ObjectUtils.isEmpty(exceptionMsg)) {
             throw new CommonException("error.sheet.empty");
         }
@@ -852,7 +852,7 @@ public class ExcelServiceImpl implements ExcelService {
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
             String websocketKey = WEBSOCKET_IMPORT_CODE + "-" + errorImport.getProjectId();
-            sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+            sendProcess(errorImport, history.getUserId(), 0d, websocketKey);
             throw e;
         }
     }
@@ -1400,7 +1400,7 @@ public class ExcelServiceImpl implements ExcelService {
             history.setStatus("empty_data_sheet");
             fileOperationHistoryMapper.updateByPrimaryKeySelective(history);
             FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(history.getId());
-            sendProcess(errorImport, history.getUserId(), 0.0, websocketKey);
+            sendProcess(errorImport, history.getUserId(), 0d, websocketKey);
             throw new CommonException("error.sheet.empty");
         }
         List<String> titles = new ArrayList<>();
@@ -1425,7 +1425,7 @@ public class ExcelServiceImpl implements ExcelService {
             throw new CommonException("error.FileOperationHistoryDTO.insert");
         }
         FileOperationHistoryDTO res = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryDTO.getId());
-        sendProcess(res, userId, 0.0, websocketKey);
+        sendProcess(res, userId, 0d, websocketKey);
         return res;
     }
 
@@ -1436,7 +1436,7 @@ public class ExcelServiceImpl implements ExcelService {
             throw new CommonException("error.FileOperationHistoryDTO.insert");
         }
         FileOperationHistoryDTO res = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryDTO.getId());
-        sendProcess(res, userId, 0.0, websocketKey);
+        sendProcess(res, userId, 0d, websocketKey);
         return res;
     }
 
@@ -1895,7 +1895,7 @@ public class ExcelServiceImpl implements ExcelService {
                     default:
                         break;
                 }
-                sendProcess(fileOperationHistoryDTO, userId, 100.0, websocketKey);
+                sendProcess(fileOperationHistoryDTO, userId, 100d, websocketKey);
                 if (workbook instanceof SXSSFWorkbook) {
                     //处理在磁盘上支持本工作簿的临时文件
                     ((SXSSFWorkbook) workbook).dispose();
@@ -2511,7 +2511,8 @@ public class ExcelServiceImpl implements ExcelService {
                     progress.addProcessNum(sonSet.size() + 1);
                     currentRowNum = Collections.max(sonSet);
                 } catch (Exception e) {
-                    LOGGER.error("insert data error when import excel, exception: {}", e);
+                    LOGGER.error("insert data error when import excel");
+                    LOGGER.error(e.getMessage(), e);
                     lastSendCountNum = excelCommonService.processErrorData(userId, history, sheetData, dataRowCount, progress, currentRowNum, sonSet, parentCol, lastSendCountNum, websocketKey);
                     currentRowNum = Collections.max(sonSet);
                     issueService.batchDeleteIssuesAgile(projectId, insertIds);
@@ -2531,7 +2532,7 @@ public class ExcelServiceImpl implements ExcelService {
             history.setSuccessCount(progress.getSuccessCount());
             if ((progress.getProcessNum() - lastSendCountNum) * 1.0 / dataRowCount >= 0.1) {
                 lastSendCountNum = progress.getProcessNum();
-                sendProcess(history, userId, progress.getProcessNum() * 1.0 / dataRowCount, websocketKey);
+                sendProcess(history, userId, (double) progress.getProcessNum() / dataRowCount, websocketKey);
             }
         }
         return false;

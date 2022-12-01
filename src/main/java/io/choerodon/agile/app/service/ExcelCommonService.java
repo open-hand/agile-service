@@ -34,6 +34,12 @@ public interface ExcelCommonService {
 
     int getColByFieldCode(List<String> fieldCodes, String fieldCode);
 
+    /**
+     * 计算进度, (currentNum + 1 / totalNum + 1) * 0.95 * 100
+     * @param currentNum    currentNum
+     * @param totalNum      totalNum
+     * @return              百分百表示的进度
+     */
     Double getProcess(Integer currentNum, Integer totalNum);
 
     void copyGuideSheetFromTemplate(Workbook wb, String path);
