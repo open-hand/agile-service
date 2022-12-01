@@ -100,7 +100,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         personalFilterVO.setProjectId(projectId);
         personalFilterVO.setOrganizationId(organizationId);
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
-        setJsonByVersion(personalFilterVO, version, personalFilterDTO);
+        setJsonByVersion(personalFilterVO, version, personalFilterDTO, true);
         if (personalFilterMapper.insert(personalFilterDTO) != 1) {
             throw new CommonException(INSERT_ERROR);
         }
@@ -109,18 +109,19 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
 
     private void setJsonByVersion(PersonalFilterVO personalFilterVO,
                                   String version,
-                                  PersonalFilterDTO personalFilterDTO) {
+                                  PersonalFilterDTO personalFilterDTO,
+                                  boolean isCreated) {
         if (V1.equals(version)) {
             personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterVO.getFilterJson(), false));
             personalFilterDTO.setAdvancedFilterJson(EMPTY_STRING);
         } else if (V2.equals(version)) {
             SearchParamVO searchParamVO = personalFilterVO.getSearchParamVO();
-            String advancedFilterJson = EMPTY_STRING;
+            String advancedFilterJson = isCreated ? EMPTY_STRING : null;
             if (searchParamVO != null) {
                 advancedFilterJson = JsonUtils.toJson(searchParamVO);
             }
             personalFilterDTO.setAdvancedFilterJson(advancedFilterJson);
-            personalFilterDTO.setFilterJson(EMPTY_STRING);
+            personalFilterDTO.setFilterJson(isCreated ? EMPTY_STRING : null);
         } else {
             throw new CommonException("error.illegal.person.filter.version");
         }
@@ -151,7 +152,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         }
         personalFilterVO.setFilterId(filterId);
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
-        setJsonByVersion(personalFilterVO, version, personalFilterDTO);
+        setJsonByVersion(personalFilterVO, version, personalFilterDTO, false);
         if (!ObjectUtils.isEmpty(personalFilterVO.getDefault()) && Boolean.TRUE.equals(personalFilterVO.getDefault())) {
             personalFilterMapper.updateDefault(organizationId, projectId, userId, false, null, dto.getFilterTypeCode());
         }
