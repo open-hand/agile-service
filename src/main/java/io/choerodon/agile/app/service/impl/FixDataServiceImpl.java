@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.v2.FixPersonalFilterService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
@@ -103,6 +104,8 @@ public class FixDataServiceImpl implements FixDataService {
     private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private FixPersonalFilterService fixPersonalFilterService;
 
     @Override
     public void fixCreateProject() {
@@ -328,6 +331,11 @@ public class FixDataServiceImpl implements FixDataService {
         fixStatusTransferSetting();
         fixStatusNoticeSetting();
         migrateWorkGroupData();
+    }
+
+    @Override
+    public void fixPersonalFilter(Set<String> typeCodes) {
+        fixPersonalFilterService.fix(typeCodes);
     }
 
     private void migrateWorkGroupData() {

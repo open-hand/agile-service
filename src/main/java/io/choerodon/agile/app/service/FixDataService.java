@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service;
 
+import java.util.Set;
+
 public interface FixDataService {
 
     void fixCreateProject();
@@ -22,4 +24,7 @@ public interface FixDataService {
      * 修复状态机自定义流转角色数据
      */
     void fixStatusMachineCustomTransferRoleData();
+
+
+    void fixPersonalFilter(Set<String> typeCodes);
 }
