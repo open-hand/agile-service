@@ -1,5 +1,9 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
+import io.choerodon.agile.api.vo.UserVO;
+import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -7,11 +11,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.List;
 import java.util.Map;
-
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
-import io.choerodon.agile.api.vo.UserVO;
-import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -149,5 +148,6 @@ public interface ObjectSchemeFieldExcelService {
      * @param row 行
      * @return 是否包含值列表
      */
+    // TODO 这个方法改名为hasKeyValue
     boolean isKeyValue(Row row);
 }

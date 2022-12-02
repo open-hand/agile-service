@@ -1,6 +1,26 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
+import io.choerodon.agile.api.vo.UserVO;
+import io.choerodon.agile.app.service.FieldOptionService;
+import io.choerodon.agile.app.service.ObjectSchemeFieldExcelService;
+import io.choerodon.agile.app.service.ObjectSchemeFieldService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.enums.CustomFieldExcelHeader;
+import io.choerodon.agile.infra.enums.FieldType;
+import io.choerodon.agile.infra.enums.FieldTypeCnName;
 import io.choerodon.agile.infra.enums.FileUploadBucket;
+import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
+import io.choerodon.agile.infra.utils.CatalogExcelUtil;
+import io.choerodon.agile.infra.utils.ExcelUtil;
+import io.choerodon.agile.infra.utils.MultipartExcelUtil;
+import io.choerodon.core.exception.CommonException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
@@ -21,27 +41,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
-import io.choerodon.agile.api.vo.UserVO;
-import io.choerodon.agile.app.service.FieldOptionService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldExcelService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
-import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.agile.infra.enums.CustomFieldExcelHeader;
-import io.choerodon.agile.infra.enums.FieldType;
-import io.choerodon.agile.infra.enums.FieldTypeCnName;
-import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
-import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
-import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
-import io.choerodon.agile.infra.utils.CatalogExcelUtil;
-import io.choerodon.agile.infra.utils.ExcelUtil;
-import io.choerodon.agile.infra.utils.MultipartExcelUtil;
-import io.choerodon.core.exception.CommonException;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -460,7 +459,7 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
         validateAndSetName(organizationId, projectId, objectSchemeFieldCreateVO, row, errorRowColMap);
         validateAndSetFieldType(objectSchemeFieldCreateVO, row, errorRowColMap);
         validateAndSetIssueType(objectSchemeFieldCreateVO, row, errorRowColMap, issueTypeNameMap);
-        if (isKeyValue(row)) {
+        if(FieldTypeCnName.isOption(objectSchemeFieldCreateVO.getFieldType()) && isKeyValue(row)) {
             setKeyValue(objectSchemeFieldCreateVO, row);
         }
         return objectSchemeFieldCreateVO;
