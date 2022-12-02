@@ -1,22 +1,20 @@
 package io.choerodon.agile.infra.task;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import io.choerodon.asgard.schedule.QuartzDefinition;
+import io.choerodon.asgard.schedule.annotation.JobTask;
+import io.choerodon.asgard.schedule.annotation.TimedTask;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.hzero.core.base.BaseConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import io.choerodon.asgard.schedule.QuartzDefinition;
-import io.choerodon.asgard.schedule.annotation.JobTask;
-import io.choerodon.asgard.schedule.annotation.TimedTask;
-
-import org.hzero.core.base.BaseConstants;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class AgileDataFixTask {
@@ -68,5 +66,27 @@ public class AgileDataFixTask {
             LOGGER.info("==============================>>>>>>>> no error issue sprint rel found, skip... <<<<<<<<=================================");
         }
         LOGGER.info("==============================>>>>>>>> fixIssueDuplicateUnclosedSprintRel completed <<<<<<<<=================================");
+    }
+
+    @JobTask(maxRetryCount = 1,
+            code = "2.1&2.2-fixIssueSprintRelZeroData",
+            description = "修复工作项详情,清空当前活跃冲刺时,向关系表中插入的脏数据")
+    @TimedTask(name = "2.1&2.2-fixIssueSprintRelZeroData",
+            description = "修复工作项详情,清空当前活跃冲刺时,向关系表中插入的脏数据",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
+    public void fixIssueSprintRelZeroData(Map<String, Object> param) {
+        LOGGER.info("==============================>>>>>>>> fixIssueSprintRelZeroData start <<<<<<<<=================================");
+        this.jdbcTemplate.update(
+                "DELETE \n" +
+                "FROM\n" +
+                "\tagile_issue_sprint_rel \n" +
+                "WHERE\n" +
+                "\tsprint_id = 0"
+        );
+        LOGGER.info("==============================>>>>>>>> fixIssueSprintRelZeroData completed <<<<<<<<=================================");
     }
 }
