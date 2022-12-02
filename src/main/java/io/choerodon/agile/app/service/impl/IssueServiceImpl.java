@@ -1,37 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-
 import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
@@ -71,10 +44,35 @@ import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 敏捷开发Issue
@@ -1739,6 +1737,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (fieldList.contains(SPRINT_ID_FIELD)) {
             final IssueConvertDTO oldIssue = modelMapper.map(originIssue, IssueConvertDTO.class);
             final Long sprintId = issueConvertDTO.getSprintId();
+            // sprintId传入空或0, 说明是执行清空冲刺操作
+            final boolean clearSprint = sprintId == null || sprintId == 0;
 
             // 查询关联的子任务和子缺陷，一并处理
             final List<Long> subTaskIds = issueMapper.querySubIssueIdsByIssueId(projectId, issueConvertDTO.getIssueId());
@@ -1750,10 +1750,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (sprintChanged) {
                 // 如果冲刺有变化
                 // 批量删除父子工作项, 所有未关闭冲刺的关联关系
-                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, sprintId, issueIds);
+                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, null, issueIds);
                 issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
                 // 批量插入父子工作项, 目标冲刺的关联关系
-                issueAccessDataService.issueToDestinationByIds(projectId, sprintId, issueIds, new Date(), customUserDetails.getUserId());
+                if(!clearSprint) {
+                    issueAccessDataService.issueToDestinationByIds(projectId, sprintId, issueIds, new Date(), customUserDetails.getUserId());
+                }
                 // 触发商业版插件逻辑
                 if (agilePluginService != null) {
                     agilePluginService.updateIssueSprintChanged(oldIssue, projectId, sprintId, issueType);
