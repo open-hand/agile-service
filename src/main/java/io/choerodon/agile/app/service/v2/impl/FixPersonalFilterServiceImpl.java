@@ -85,6 +85,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final String STAR_BEACON = "starBeacon";
     private static final String MY_ASSIGNED = "myAssigned";
     private static final String USER_ID = "userId";
+    private static final String TREE = "tree";
 
     private static final String SUFFIX_AGILE_START_DATE = "StartDate";
     private static final String SUFFIX_AGILE_END_DATE = "EndDate";
@@ -213,7 +214,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                 if (StringUtils.isEmpty(json)) {
                     return;
                 }
-                logger.info("id: {}", filter.getFilterId());
+//                logger.info("id: {}", filter.getFilterId());
                 SearchParamVO searchParamVO = new SearchParamVO();
                 try {
                     JsonNode jsonNode = objectMapper.readTree(json);
@@ -317,10 +318,13 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                 processIssueIds(conditionNode, searchParamVO, conditionFieldName);
             } else if (STAR_BEACON.equals(conditionFieldName) || MY_ASSIGNED.equals(conditionFieldName)) {
                 //星标
-                processStarBeacon(conditionNode, conditionFieldName, conditions);
+                processStarBeaconOrMyAssigned(conditionNode, conditionFieldName, conditions);
+            } else if (TREE.equals(conditionFieldName)) {
+                //树形展示
+                processTree(conditionNode, searchParamVO, conditionFieldName);
             } else if (optionMap.keySet().contains(conditionFieldName)) {
                 //下拉框
-                processDropDown(conditionNode, searchParamVO, conditions, conditionFieldName, optionMap);
+                processOption(conditionNode, searchParamVO, conditions, conditionFieldName, optionMap);
             } else if (FieldCode.ACCEPTANCE_CRITERA.equals(conditionFieldName)
                     || FieldCode.BENFIT_HYPOTHESIS.equals(conditionFieldName)) {
                 //特性字符串
@@ -329,6 +333,14 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                 //日期
                 processDate(conditionNode, conditions, dateFieldDoneMap, conditionFieldName, typeCode);
             }
+        }
+    }
+
+    private void processTree(JsonNode conditionNode, SearchParamVO searchParamVO, String conditionFieldName) {
+        JsonNode node = conditionNode.get(conditionFieldName);
+        if (node != null && node.isBoolean()) {
+            boolean isTree = node.booleanValue();
+            searchParamVO.setTreeFlag(isTree);
         }
     }
 
@@ -347,9 +359,9 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         }
     }
 
-    private void processStarBeacon(JsonNode conditionNode,
-                                   String conditionFieldName,
-                                   List<Condition> conditions) {
+    private void processStarBeaconOrMyAssigned(JsonNode conditionNode,
+                                               String conditionFieldName,
+                                               List<Condition> conditions) {
         JsonNode node = conditionNode.get(conditionFieldName);
         if (node != null && node.isBoolean()) {
             boolean star = Boolean.TRUE.equals(node.booleanValue());
@@ -611,11 +623,11 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         return pair;
     }
 
-    private void processDropDown(JsonNode conditionNode,
-                                 SearchParamVO searchParamVO,
-                                 List<Condition> conditions,
-                                 String conditionFieldName,
-                                 Map<String, String> optionMap) {
+    private void processOption(JsonNode conditionNode,
+                               SearchParamVO searchParamVO,
+                               List<Condition> conditions,
+                               String conditionFieldName,
+                               Map<String, String> optionMap) {
         JsonNode option = conditionNode.get(conditionFieldName);
         String fieldCode = optionMap.get(conditionFieldName);
         Assert.notNull(fieldCode, "error.field.code.null");
