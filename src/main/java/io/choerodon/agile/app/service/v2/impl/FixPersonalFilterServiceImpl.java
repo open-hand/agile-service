@@ -58,7 +58,8 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final List<String> PREDEFINED_NUMBER_FIELDS = Arrays.asList(
             FieldCode.STORY_POINTS,
             FieldCode.ESTIMATE_TIME,
-            FieldCode.REMAINING_TIME);
+            FieldCode.REMAINING_TIME,
+            FieldCode.PROGRESS);
 
     private static final String CUSTOM_FIELD = "customField";
     private static final String TAGS = "tags";
@@ -128,6 +129,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
 
 
     static {
+        //敏捷/瀑布字段映射
         AGILE_OPTION_FIELD_MAPPING.put(ISSUE_TYPE_ID, FieldCode.ISSUE_TYPE);
         AGILE_OPTION_FIELD_MAPPING.put(STATUS_ID, FieldCode.STATUS);
         AGILE_OPTION_FIELD_MAPPING.put(REPORTER_IDS, FieldCode.REPORTER);
@@ -146,7 +148,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         AGILE_OPTION_FIELD_MAPPING.put(FieldCode.INFLUENCE_VERSION, FieldCode.INFLUENCE_VERSION);
         AGILE_OPTION_FIELD_MAPPING.put(CREATOR_IDS, FieldCode.CREATOR);
         AGILE_OPTION_FIELD_MAPPING.put(PARTICIPANT_IDS, FieldCode.PARTICIPANT);
-
+        //路线图特性列表字段映射
         FEATURE_OPTION_FIELD_MAPPING.put(STATUS_LIST, FieldCode.STATUS);
         FEATURE_OPTION_FIELD_MAPPING.put(SPRINT_LIST, FieldCode.SPRINT);
         FEATURE_OPTION_FIELD_MAPPING.put(EPIC_LIST, FieldCode.EPIC);
@@ -159,7 +161,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         FEATURE_OPTION_FIELD_MAPPING.put(FieldCode.PROGRAM_VERSION, FieldCode.PROGRAM_VERSION);
         FEATURE_OPTION_FIELD_MAPPING.put(UPDATOR_IDS, FieldCode.UPDATOR);
         FEATURE_OPTION_FIELD_MAPPING.put(TEAM_PROJECT_LIST, FieldCode.SUB_PROJECT);
-
+        //日期范围字段映射
         DATE_FIELD_MAPPING.put(CREATE, FieldCode.CREATION_DATE);
         DATE_FIELD_MAPPING.put(UPDATE, FieldCode.LAST_UPDATE_DATE);
         DATE_FIELD_MAPPING.put(FieldCode.LAST_UPDATE_DATE, FieldCode.LAST_UPDATE_DATE);
@@ -207,10 +209,6 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
             dto.setFilterTypeCode(typeCode);
             List<PersonalFilterDTO> personalFilters = personalFilterMapper.select(dto);
             personalFilters.forEach(filter -> {
-//                //todo delete debug
-//                if (!Long.valueOf("387243946096672768").equals(filter.getFilterId())) {
-//                    return;
-//                }
                 String json = filter.getFilterJson();
                 if (StringUtils.isEmpty(json)) {
                     return;
@@ -240,7 +238,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                 }
                 String advancedFilterJson = JsonUtils.toJson(searchParamVO);
                 filter.setAdvancedFilterJson(advancedFilterJson);
-//                personalFilterMapper.updateByPrimaryKeySelective(filter);
+                personalFilterMapper.updateByPrimaryKeySelective(filter);
             });
         });
     }
@@ -287,6 +285,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         Map<String, String> optionMap = new HashMap<>();
         switch (typeCode) {
             case PersonalFilterTypeCode.AGILE_ISSUE:
+            case PersonalFilterTypeCode.WATERFALL_ISSUE:
                 optionMap = AGILE_OPTION_FIELD_MAPPING;
                 break;
             case PersonalFilterTypeCode.FEATURE_ISSUE:
@@ -408,6 +407,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         String endSuffix = SUFFIX_AGILE_SCOPE_END;
         switch (typeCode) {
             case PersonalFilterTypeCode.AGILE_ISSUE:
+            case PersonalFilterTypeCode.WATERFALL_ISSUE:
                 dateSuffix = AGILE_DATE_SUFFIX;
                 break;
             case PersonalFilterTypeCode.FEATURE_ISSUE:
@@ -429,19 +429,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
             if (ignoredFields.contains(conditionFieldName)) {
                 return;
             }
-//            logger.info("####{}", conditionFieldName);
             throw new CommonException("error.illegal.json.key." + conditionFieldName);
-            //todo 调试代码
-//            if (FieldCode.ISSUE_NUM.equals(conditionFieldName)) {
-//                JsonNode issueNumNode = conditionNode.get(conditionFieldName);
-//                if(issueNumNode !=null && !issueNumNode.isNull()) {
-//                    if (!StringUtils.isEmpty(issueNumNode.asText()))  {
-//                        throw new CommonException("issueNum");
-//                    }
-//                }
-//            } else {
-//
-//            }
         }
         //判断字段是否已经处理过
         boolean done = Boolean.TRUE.equals(dateFieldDoneMap.get(field));
@@ -667,8 +655,12 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                             });
                             valueIds = new ArrayList<>();
                             for (String idStr : valueIdStr) {
-                                String str = iEncryptionService.decrypt(idStr, EncryptionUtils.BLANK_KEY, null, true);
-                                valueIds.add(Long.parseLong(str));
+                                if (StringUtils.isNumeric(idStr)) {
+                                    valueIds.add(Long.parseLong(idStr));
+                                } else {
+                                    String str = iEncryptionService.decrypt(idStr, EncryptionUtils.BLANK_KEY, null, true);
+                                    valueIds.add(Long.parseLong(str));
+                                }
                             }
                         } catch (Exception exception) {
                             logger.warn(ERROR_ILLEGAL_DATA);
