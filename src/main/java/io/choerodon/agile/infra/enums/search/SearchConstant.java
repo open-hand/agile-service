@@ -292,7 +292,7 @@ public class SearchConstant {
 
         public static final String CUSTOM_FIELD_EQUAL_OR_LIKE = " #{mainTableCol} #{opt} ( select instance_id from fd_field_value where project_id in ( #{projectIdStr} ) and field_id = #{fieldId} and #{columnName} #{columnOpt} #{columnValue} and scheme_code = '#{schemeCode}') ";
 
-        public static final String EPIC_IN_OR_NOT_IN = " ((#{epicIdWithAlias} #{opt} (#{value}) and #{typeCode} in ( 'story', 'task', 'bug', 'feature' )) or (#{parentIssueId} #{opt} ( select issue_id from agile_issue where issue_id = #{parentIssueId} and epic_id in (#{value})) and %s = 'sub_task')) ";
+        public static final String EPIC_IN_OR_NOT_IN = " ((#{epicIdWithAlias} #{opt} (#{value}) and #{typeCode} in ( 'story', 'task', 'bug', 'feature' )) or (#{parentIssueId} #{opt} ( select issue_id from agile_issue where issue_id = #{parentIssueId} and epic_id in (#{value})) and #{typeCode} = 'sub_task')) ";
         public static final String EPIC_IS_NULL = " (((#{epicIdWithAlias} = 0 or #{epicIdWithAlias} is null) and #{typeCode} in ( 'story', 'task', 'bug', 'feature' )) or (#{parentIssueId} in (select issue_id from agile_issue where issue_id = #{parentIssueId} and (epic_id = 0 or epic_id is null) ) and #{typeCode} = 'sub_task')) ";
         public static final String EPIC_IS_NOT_NULL = "  (((#{epicIdWithAlias} != 0 and #{epicIdWithAlias} is not null) and #{typeCode} in ( 'story', 'task', 'bug', 'feature' )) or (#{parentIssueId} in (select issue_id from agile_issue where issue_id = #{parentIssueId} and (epic_id != 0 and epic_id is not null) ) and #{typeCode} = 'sub_task')) ";
 
