@@ -6,10 +6,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +21,21 @@ import org.springframework.util.Assert;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.*;
 import io.choerodon.agile.app.service.v2.FixPersonalFilterService;
+import io.choerodon.agile.infra.dto.PersonalFilterDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.PersonalFilterTypeCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
+import io.choerodon.agile.infra.mapper.PersonalFilterMapper;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
 
 import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
 import static io.choerodon.agile.infra.enums.search.SearchConstant.Relationship;
 
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.util.JsonUtils;
 import org.hzero.core.util.Pair;
+import org.hzero.starter.keyencrypt.core.IEncryptionService;
 
 /**
  * @author superlee
@@ -39,23 +47,27 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final Logger logger = LoggerFactory.getLogger(FixPersonalFilterServiceImpl.class);
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private PersonalFilterMapper personalFilterMapper;
+    @Autowired
+    private IEncryptionService iEncryptionService;
 
-    private static final List<String> CONDITION_KEYS = Arrays.asList("advancedSearchArgs", "otherArgs", "searchArgs");
+    private static final List<String> CONDITION_KEYS =
+            Arrays.asList("advancedSearchArgs", "otherArgs", "searchArgs");
 
     private static final List<String> PREDEFINED_NUMBER_FIELDS = Arrays.asList(
             FieldCode.STORY_POINTS,
             FieldCode.ESTIMATE_TIME,
             FieldCode.REMAINING_TIME);
 
-
     private static final String CUSTOM_FIELD = "customField";
-
     private static final String TAGS = "tags";
 
     private static final String YQ_CLOUD_FLAG = "yqCloudFlag";
     private static final String YQ_CLOUD_NUM = "yqCloudNum";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
     private static final String STATUS_ID = "statusId";
+    private static final String STATUS_LIST = "statusList";
     private static final String REPORTER_IDS = "reporterIds";
     private static final String PRIORITY_ID = "priorityId";
     private static final String MAIN_RESPONSIBLE_IDS = "mainResponsibleIds";
@@ -66,17 +78,27 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final String PARTICIPANT_IDS = "participantIds";
     private static final String UPDATE = "update";
     private static final String CREATE = "create";
+    private static final String CONTENTS = "contents";
+    private static final String ISSUE_IDS = "issueIds";
+    private static final String QUICK_FILTER_IDS = "quickFilterIds";
+    private static final String STAR_BEACON = "starBeacon";
+    private static final String MY_ASSIGNED = "myAssigned";
+    private static final String USER_ID = "userId";
 
-    private static final String SUFFIX_START_DATE = "StartDate";
-    private static final String SUFFIX_END_DATE = "EndDate";
-    private static final String SUFFIX_SCOPE_START = "ScopeStart";
-    private static final String SUFFIX_SCOPE_END = "ScopeEnd";
+    private static final String SUFFIX_AGILE_START_DATE = "StartDate";
+    private static final String SUFFIX_AGILE_END_DATE = "EndDate";
+    private static final String SUFFIX_AGILE_SCOPE_START = "ScopeStart";
+    private static final String SUFFIX_AGILE_SCOPE_END = "ScopeEnd";
+    private static final String SUFFIX_FEATURE_FROM = "From";
+    private static final String SUFFIX_FEATURE_TO = "To";
 
     private static final List<String> YQ_CLOUD_FIELDS = Arrays.asList(YQ_CLOUD_FLAG, YQ_CLOUD_NUM);
 
-    private static final List<String> DATE_SUFFIX = Arrays.asList(SUFFIX_START_DATE, SUFFIX_END_DATE, SUFFIX_SCOPE_START, SUFFIX_SCOPE_END);
+    private static final List<String> AGILE_DATE_SUFFIX = Arrays.asList(SUFFIX_AGILE_START_DATE, SUFFIX_AGILE_END_DATE, SUFFIX_AGILE_SCOPE_START, SUFFIX_AGILE_SCOPE_END);
+    private static final List<String> FEATURE_DATE_SUFFIX = Arrays.asList(SUFFIX_AGILE_START_DATE, SUFFIX_AGILE_END_DATE, SUFFIX_FEATURE_FROM, SUFFIX_FEATURE_TO);
 
-    private static final Map<String, String> OPTION_FIELD_MAPPING = new HashMap<>();
+    private static final Map<String, String> AGILE_OPTION_FIELD_MAPPING = new HashMap<>();
+    private static final Map<String, String> FEATURE_OPTION_FIELD_MAPPING = new HashMap<>();
     private static final Map<String, String> DATE_FIELD_MAPPING = new HashMap<>();
 
     private static final String OPTION = "option";
@@ -91,67 +113,190 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final String START_DATE = "startDate";
     private static final String END_DATE = "endDate";
 
+    private static final String ERROR_ILLEGAL_DATA = "存在加密值的非法数据，跳过此数据";
+
+    private static final Map<String, Set<String>> IGNORED_FIELD_BY_TYPE_MAP = new HashMap<>();
+
+    private static final String EPIC_LIST = "epicList";
+    private static final String FEATURE_TYPE_LIST = "featureTypeList";
+    private static final String SPRINT_LIST = "sprintList";
+    private static final String ISSUE_TYPE_LIST = "issueTypeList";
+    private static final String REPORTER_LIST = "reporterList";
+    private static final String PI_LIST = "piList";
+    private static final String TEAM_PROJECT_LIST = "teamProjectList";
+    private static final String ASSIGNEE_IDS = "assigneeIds";
+
 
     static {
-        OPTION_FIELD_MAPPING.put(ISSUE_TYPE_ID, FieldCode.ISSUE_TYPE);
-        OPTION_FIELD_MAPPING.put(STATUS_ID, FieldCode.STATUS);
-        OPTION_FIELD_MAPPING.put(REPORTER_IDS, FieldCode.REPORTER);
-        OPTION_FIELD_MAPPING.put(PRIORITY_ID, FieldCode.PRIORITY);
-        OPTION_FIELD_MAPPING.put(MAIN_RESPONSIBLE_IDS, FieldCode.MAIN_RESPONSIBLE);
-        OPTION_FIELD_MAPPING.put(FieldCode.SPRINT, FieldCode.SPRINT);
-        OPTION_FIELD_MAPPING.put(FieldCode.EPIC, FieldCode.EPIC);
-        OPTION_FIELD_MAPPING.put(FieldCode.LABEL, FieldCode.LABEL);
-        OPTION_FIELD_MAPPING.put(FieldCode.FIX_VERSION, FieldCode.FIX_VERSION);
-        OPTION_FIELD_MAPPING.put(ASSIGNEE_ID, FieldCode.ASSIGNEE);
-        OPTION_FIELD_MAPPING.put(UPDATOR_IDS, FieldCode.UPDATOR);
-        OPTION_FIELD_MAPPING.put(FieldCode.COMPONENT, FieldCode.COMPONENT);
-        OPTION_FIELD_MAPPING.put(FieldCode.ENVIRONMENT, FieldCode.ENVIRONMENT);
-        OPTION_FIELD_MAPPING.put(FieldCode.FEATURE, FieldCode.FEATURE);
-        OPTION_FIELD_MAPPING.put(PRODUCT_IDS, FieldCode.PRODUCT);
-        OPTION_FIELD_MAPPING.put(FieldCode.INFLUENCE_VERSION, FieldCode.INFLUENCE_VERSION);
-        OPTION_FIELD_MAPPING.put(CREATOR_IDS, FieldCode.CREATOR);
-        OPTION_FIELD_MAPPING.put(PARTICIPANT_IDS, FieldCode.PARTICIPANT);
+        AGILE_OPTION_FIELD_MAPPING.put(ISSUE_TYPE_ID, FieldCode.ISSUE_TYPE);
+        AGILE_OPTION_FIELD_MAPPING.put(STATUS_ID, FieldCode.STATUS);
+        AGILE_OPTION_FIELD_MAPPING.put(REPORTER_IDS, FieldCode.REPORTER);
+        AGILE_OPTION_FIELD_MAPPING.put(PRIORITY_ID, FieldCode.PRIORITY);
+        AGILE_OPTION_FIELD_MAPPING.put(MAIN_RESPONSIBLE_IDS, FieldCode.MAIN_RESPONSIBLE);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.SPRINT, FieldCode.SPRINT);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.EPIC, FieldCode.EPIC);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.LABEL, FieldCode.LABEL);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.FIX_VERSION, FieldCode.FIX_VERSION);
+        AGILE_OPTION_FIELD_MAPPING.put(ASSIGNEE_ID, FieldCode.ASSIGNEE);
+        AGILE_OPTION_FIELD_MAPPING.put(UPDATOR_IDS, FieldCode.UPDATOR);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.COMPONENT, FieldCode.COMPONENT);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.ENVIRONMENT, FieldCode.ENVIRONMENT);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.FEATURE, FieldCode.FEATURE);
+        AGILE_OPTION_FIELD_MAPPING.put(PRODUCT_IDS, FieldCode.PRODUCT);
+        AGILE_OPTION_FIELD_MAPPING.put(FieldCode.INFLUENCE_VERSION, FieldCode.INFLUENCE_VERSION);
+        AGILE_OPTION_FIELD_MAPPING.put(CREATOR_IDS, FieldCode.CREATOR);
+        AGILE_OPTION_FIELD_MAPPING.put(PARTICIPANT_IDS, FieldCode.PARTICIPANT);
+
+        FEATURE_OPTION_FIELD_MAPPING.put(STATUS_LIST, FieldCode.STATUS);
+        FEATURE_OPTION_FIELD_MAPPING.put(SPRINT_LIST, FieldCode.SPRINT);
+        FEATURE_OPTION_FIELD_MAPPING.put(EPIC_LIST, FieldCode.EPIC);
+        FEATURE_OPTION_FIELD_MAPPING.put(FEATURE_TYPE_LIST, FieldCode.FEATURE_TYPE);
+        FEATURE_OPTION_FIELD_MAPPING.put(ISSUE_TYPE_LIST, FieldCode.ISSUE_TYPE);
+        FEATURE_OPTION_FIELD_MAPPING.put(REPORTER_LIST, FieldCode.REPORTER);
+        FEATURE_OPTION_FIELD_MAPPING.put(PRODUCT_IDS, FieldCode.PRODUCT);
+        FEATURE_OPTION_FIELD_MAPPING.put(CREATOR_IDS, FieldCode.CREATOR);
+        FEATURE_OPTION_FIELD_MAPPING.put(PI_LIST, FieldCode.PI);
+        FEATURE_OPTION_FIELD_MAPPING.put(FieldCode.PROGRAM_VERSION, FieldCode.PROGRAM_VERSION);
+        FEATURE_OPTION_FIELD_MAPPING.put(UPDATOR_IDS, FieldCode.UPDATOR);
+        FEATURE_OPTION_FIELD_MAPPING.put(TEAM_PROJECT_LIST, FieldCode.SUB_PROJECT);
 
         DATE_FIELD_MAPPING.put(CREATE, FieldCode.CREATION_DATE);
         DATE_FIELD_MAPPING.put(UPDATE, FieldCode.LAST_UPDATE_DATE);
+        DATE_FIELD_MAPPING.put(FieldCode.LAST_UPDATE_DATE, FieldCode.LAST_UPDATE_DATE);
         DATE_FIELD_MAPPING.put(FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_START_TIME);
         DATE_FIELD_MAPPING.put(FieldCode.ACTUAL_END_TIME, FieldCode.ACTUAL_END_TIME);
         DATE_FIELD_MAPPING.put(FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_START_TIME);
         DATE_FIELD_MAPPING.put(FieldCode.ESTIMATED_END_TIME, FieldCode.ESTIMATED_END_TIME);
+
+        //todo teamProjectList reporterList 代明确
+        IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.AGILE_ISSUE,
+                SetUtils.unmodifiableSet(
+                        ASSIGNEE_IDS,
+                        "version",
+                        FieldCode.REPORTER,
+                        FieldCode.SUMMARY,
+                        FieldCode.ASSIGNEE,
+                        FieldCode.ISSUE_NUM,
+                        USER_ID,
+                        TEAM_PROJECT_LIST,
+                        REPORTER_LIST,
+                        SPRINT_LIST,
+                        PI_LIST));
+        IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.FEATURE_ISSUE,
+                SetUtils.unmodifiableSet(
+                        ASSIGNEE_IDS,
+                        FieldCode.REPORTER,
+                        FieldCode.SUMMARY,
+                        FieldCode.ASSIGNEE,
+                        FieldCode.ISSUE_NUM,
+                        ASSIGNEE_ID, REPORTER_IDS,
+                        STATUS_ID,
+                        FieldCode.COMPONENT,
+                        FieldCode.SPRINT,
+                        ISSUE_TYPE_ID,
+                        FieldCode.ENVIRONMENT));
     }
 
 
     @Override
     public void fix(Set<String> typeCodes) {
-        logger.info("");
+        logger.info("修复高级筛选数据，类型有：{}", typeCodes);
         //系统字段
-        String json = "{\"advancedSearchArgs\":{\"storyPoints\":10,\"issueTypeId\":[\"144747088462131200\",\"144747088546017280\",\"144747088520851456\",\"144747088491491328\",\"319873186236702720\",\"306344094946205696\",\"268308777911906304\",\"327132212716625920\",\"144747088424382464\"],\"statusId\":[\"144747088789286912\",\"144747088818647040\",\"261935559202480128\",\"255629154333999104\",\"261936383987195904\",\"327126317152591872\",\"327160308446515200\",\"327164370671886336\",\"327164875976462336\",\"327224168541052928\",\"367974233189539840\",\"367974311799181312\",\"162197083096313856\",\"261935830162898944\",\"322876357745815552\",\"144747088801869824\",\"348121529307877376\"],\"estimateTime\":1,\"reporterIds\":[\"843\",\"1878\",\"3322\",\"4263\",\"11134\",\"144231620675907584\",\"1880\",\"7078\",\"9822\",\"10861\",\"11223\",\"11423\",\"16968\",\"17062\",\"17244\",\"17282\",\"202522563422482432\",\"213298218061824000\",\"250600150459596800\",\"317467668435714048\",\"334499961025118208\",\"372467755460739072\",\"493\",\"249\",\"302\",\"7121\",\"8802\",\"10489\",\"11051\",\"11059\",\"16741\",\"17024\",\"240453067333246976\",\"271320493771751424\",\"281064308296474624\",\"314017460070739968\",\"337210720888860672\",\"337210736365842432\",\"366563746443198464\",\"372862065662423040\",\"373092163510534144\"],\"priorityId\":[\"144747088688623616\",\"144747088717983744\",\"144747088751538176\"],\"remainingTime\":1},\"otherArgs\":{\"yqCloudFlag\":true,\"mainResponsibleIds\":[\"843\",\"3322\",\"1878\"],\"sprint\":[\"0\",\"359654690234966016\",\"359654690230771712\",\"359654690226577408\",\"346964447175106560\",\"346964447103803392\",\"346964447040888832\",\"334274908199526400\",\"334274908191137792\",\"334274908186943488\",\"332533145868861440\",\"332533145864667136\",\"332533145860472832\",\"317341593890684928\",\"317341593886490624\",\"317341593882296320\",\"305660095722586113\",\"305660095722586112\",\"293782479902232576\",\"293782479872872448\",\"293782479596048384\",\"279565953955512320\",\"279565953917763584\",\"279565953586413568\",\"266141498247921664\",\"266141498231144448\",\"266141498218561536\"],\"epic\":[\"0\",\"332620543814438912\",\"332620195729149952\",\"319932779696463872\"],\"label\":[\"385475252836245504\",\"385475282016018432\",\"385475301569863680\",\"385475324038750208\"],\"fixVersion\":[\"0\",\"344235909577687040\",\"329692791369097216\",\"319834264135770112\"],\"assigneeId\":[\"0\",\"843\",\"1878\",\"3322\",\"4263\",\"11134\",\"144231620675907584\",\"1880\",\"7078\",\"9822\",\"10489\",\"10861\",\"11051\",\"11223\",\"11423\",\"16968\",\"17062\",\"17244\",\"17282\",\"22488\",\"202522563422482432\",\"213298218061824000\",\"250600150459596800\",\"317467668435714048\",\"334499961025118208\",\"372467755460739072\",\"249\",\"302\",\"493\",\"7121\",\"8802\",\"11059\",\"16741\",\"17024\",\"17227\",\"240453067333246976\",\"271320493771751424\",\"281064308296474624\",\"314017460070739968\",\"337210720888860672\",\"337210736365842432\",\"366563746443198464\",\"372862065662423040\",\"373092163510534144\",\"3356\",\"12960\",\"211288352619266048\",\"248252140350189568\",\"291549888402751488\"],\"yqCloudNum\":\"asd\",\"customField\":{\"date\":[],\"number\":[],\"string\":[{\"value\":null,\"fieldId\":\"260776720293847040\"}],\"text\":[],\"date_hms\":[],\"option\":[{\"value\":null,\"fieldId\":\"343322379194183680\"},{\"value\":null,\"fieldId\":\"334708880255688704\"},{\"value\":null,\"fieldId\":\"333271704418570240\"},{\"value\":null,\"fieldId\":\"326651945564491776\"},{\"value\":null,\"fieldId\":\"302025667414745088\"},{\"value\":null,\"fieldId\":\"286912509234782208\"},{\"value\":null,\"fieldId\":\"282455734817263616\"},{\"value\":null,\"fieldId\":\"258695528425861120\"}]},\"updatorIds\":[\"843\",\"1878\"],\"tags\":null,\"component\":[\"357465906421321728\",\"359632479130361856\",\"357466008837832704\",\"357466190333759488\",\"357466147748990976\",\"359632416723308544\",\"359632534847492096\",\"361145026161545216\",\"359632716746072064\",\"358354456935288832\",\"329696945986592768\"],\"environment\":[\"pro\",\"other\"],\"feature\":[\"261850794243825664\",\"261852035069943808\"],\"productIds\":[\"344886758586957824\"],\"influenceVersion\":[\"0\",\"344235909577687040\"],\"creatorIds\":[\"843\",\"3322\"],\"participantIds\":[\"843\",\"1878\"]},\"searchArgs\":{\"estimatedStartTimeScopeStart\":\"2022-11-01 00:00:00\",\"estimatedStartTimeScopeEnd\":\"2022-11-23 00:00:00\",\"estimatedEndTimeScopeStart\":\"2022-11-15 00:00:00\",\"estimatedEndTimeScopeEnd\":\"2022-11-17 00:00:00\",\"actualStartTimeScopeStart\":\"2022-11-08 00:00:00\",\"actualStartTimeScopeEnd\":\"2022-11-18 00:00:00\",\"actualEndTimeScopeStart\":\"2022-11-08 00:00:00\",\"actualEndTimeScopeEnd\":\"2022-11-18 00:00:00\",\"createStartDate\":\"2022-11-08 00:00:00\",\"createEndDate\":\"2022-11-17 00:00:00\",\"updateStartDate\":\"2022-11-01 00:00:00\",\"updateEndDate\":\"2022-11-04 00:00:00\"}}";
-        SearchParamVO searchParamVO = new SearchParamVO();
-        try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            Iterator<String> fieldNameIterator = jsonNode.fieldNames();
-            while (fieldNameIterator.hasNext()) {
-                String fieldName = fieldNameIterator.next();
-                JsonNode conditionNode = jsonNode.get(fieldName);
-                if (CONDITION_KEYS.contains(fieldName)) {
-                    processConditionDetails(conditionNode, searchParamVO);
-                } else {
-                    logger.info("error");
+        typeCodes.forEach(typeCode -> {
+            PersonalFilterDTO dto = new PersonalFilterDTO();
+            dto.setFilterTypeCode(typeCode);
+            List<PersonalFilterDTO> personalFilters = personalFilterMapper.select(dto);
+            personalFilters.forEach(filter -> {
+//                //todo delete debug
+//                if (!Long.valueOf("387243946096672768").equals(filter.getFilterId())) {
+//                    return;
+//                }
+                String json = filter.getFilterJson();
+                if (StringUtils.isEmpty(json)) {
+                    return;
                 }
-            }
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+                logger.info("id: {}", filter.getFilterId());
+                SearchParamVO searchParamVO = new SearchParamVO();
+                try {
+                    JsonNode jsonNode = objectMapper.readTree(json);
+                    Iterator<String> fieldNameIterator = jsonNode.fieldNames();
+                    while (fieldNameIterator.hasNext()) {
+                        String fieldName = fieldNameIterator.next();
+                        JsonNode conditionNode = jsonNode.get(fieldName);
+                        if (CONDITION_KEYS.contains(fieldName)) {
+                            processConditionDetails(conditionNode, searchParamVO, typeCode);
+                        } else if (CONTENTS.equals(fieldName)) {
+                            processContents(searchParamVO, conditionNode);
+                        } else if (QUICK_FILTER_IDS.equals(fieldName)) {
+                            //快速筛选
+                            parseQuickFilterIds(searchParamVO, fieldName, conditionNode);
+                        } else {
+                            //todo
+                            throw new CommonException("error." + fieldName);
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new CommonException("error", e);
+                }
+                String advancedFilterJson = JsonUtils.toJson(searchParamVO);
+                filter.setAdvancedFilterJson(advancedFilterJson);
+//                personalFilterMapper.updateByPrimaryKeySelective(filter);
+            });
+        });
+    }
+
+    private void parseQuickFilterIds(SearchParamVO searchParamVO, String fieldName, JsonNode conditionNode) throws IOException {
+        JsonNode option = conditionNode.get(fieldName);
+        if (option != null && !option.isNull() && !option.isEmpty()) {
+            List<Long> valueIds = objectMapper.readValue(option.traverse(), new TypeReference<List<Long>>() {
+            });
+            searchParamVO.setQuickFilterIds(valueIds);
         }
-        logger.info("result:{}", searchParamVO);
+    }
+
+    private void processContents(SearchParamVO searchParamVO, JsonNode conditionNode) {
+        Iterator<JsonNode> contentIterator = conditionNode.iterator();
+        //只取第一个content
+        String content = null;
+        while (contentIterator.hasNext()) {
+            content = contentIterator.next().asText();
+            if (content != null) {
+                break;
+            }
+        }
+        if (content != null) {
+            List<Condition> conditions = Optional.ofNullable(searchParamVO.getConditions()).orElse(new ArrayList<>());
+            searchParamVO.setConditions(conditions);
+            conditions.add(
+                    new Condition()
+                            .setField(new Field().setFieldCode(SearchConstant.Field.CONTENT).setPredefined(true))
+                            .setRelationship(Relationship.AND.toString())
+                            .setOperation(Operation.LIKE.toString())
+                            .setValue(new Value().setValueStr(content)));
+        }
     }
 
     private void processConditionDetails(JsonNode conditionNode,
-                                         SearchParamVO searchParamVO) {
+                                         SearchParamVO searchParamVO,
+                                         String typeCode) throws IOException {
         List<Condition> conditions = Optional.ofNullable(searchParamVO.getConditions()).orElse(new ArrayList<>());
         searchParamVO.setConditions(conditions);
         Iterator<String> conditionFieldNameIterator = conditionNode.fieldNames();
         boolean yqCloudFieldDone = false;
         Map<String, Boolean> dateFieldDoneMap = new HashMap<>();
+        Map<String, String> optionMap = new HashMap<>();
+        switch (typeCode) {
+            case PersonalFilterTypeCode.AGILE_ISSUE:
+                optionMap = AGILE_OPTION_FIELD_MAPPING;
+                break;
+            case PersonalFilterTypeCode.FEATURE_ISSUE:
+                optionMap = FEATURE_OPTION_FIELD_MAPPING;
+                break;
+            default:
+                break;
+        }
+
+
         while (conditionFieldNameIterator.hasNext()) {
             String conditionFieldName = conditionFieldNameIterator.next();
             if (PREDEFINED_NUMBER_FIELDS.contains(conditionFieldName)) {
@@ -169,19 +314,111 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
             } else if (TAGS.equals(conditionFieldName)) {
                 //tag需要特殊处理
                 processTagField(conditionNode, searchParamVO, conditions, conditionFieldName);
-            } else if (OPTION_FIELD_MAPPING.keySet().contains(conditionFieldName)) {
+            } else if (ISSUE_IDS.equals(conditionFieldName)) {
+                processIssueIds(conditionNode, searchParamVO, conditionFieldName);
+            } else if (STAR_BEACON.equals(conditionFieldName) || MY_ASSIGNED.equals(conditionFieldName)) {
+                //星标
+                processStarBeacon(conditionNode, conditionFieldName, conditions);
+            } else if (optionMap.keySet().contains(conditionFieldName)) {
                 //下拉框
-                processDropDown(conditionNode, searchParamVO, conditions, conditionFieldName);
+                processDropDown(conditionNode, searchParamVO, conditions, conditionFieldName, optionMap);
+            } else if (FieldCode.ACCEPTANCE_CRITERA.equals(conditionFieldName)
+                    || FieldCode.BENFIT_HYPOTHESIS.equals(conditionFieldName)) {
+                //特性字符串
+                processFeatureStringField(conditionNode, conditions, conditionFieldName);
             } else {
                 //日期
-                processDate(conditionNode, conditions, dateFieldDoneMap, conditionFieldName);
+                processDate(conditionNode, conditions, dateFieldDoneMap, conditionFieldName, typeCode);
             }
         }
     }
 
-    private void processDate(JsonNode conditionNode, List<Condition> conditions, Map<String, Boolean> dateFieldDoneMap, String conditionFieldName) {
+    private void processFeatureStringField(JsonNode conditionNode,
+                                           List<Condition> conditions,
+                                           String conditionFieldName) {
+        JsonNode node = conditionNode.get(conditionFieldName);
+        if (node != null && !node.isNull()) {
+            String value = node.asText();
+            Condition condition =
+                    new Condition()
+                            .setField(new Field().setFieldCode(conditionFieldName).setPredefined(true))
+                            .setRelationship(Relationship.AND.toString())
+                            .setOperation(Operation.LIKE.toString()).setValue(new Value().setValueStr(value));
+            conditions.add(condition);
+        }
+    }
+
+    private void processStarBeacon(JsonNode conditionNode,
+                                   String conditionFieldName,
+                                   List<Condition> conditions) {
+        JsonNode node = conditionNode.get(conditionFieldName);
+        if (node != null && node.isBoolean()) {
+            boolean star = Boolean.TRUE.equals(node.booleanValue());
+            if (star) {
+                JsonNode userIdNode = conditionNode.get(USER_ID);
+                if (userIdNode != null && !userIdNode.isNull()) {
+                    String userIdStr = userIdNode.asText();
+                    Long userId;
+                    String fieldCode = SearchConstant.Field.MY_STAR;
+                    if (MY_ASSIGNED.equals(conditionFieldName)) {
+                        fieldCode = SearchConstant.Field.MY_PARTICIPATE;
+                    }
+                    if (StringUtils.isNumeric(userIdStr)) {
+                        userId = Long.parseLong(userIdStr);
+                    } else {
+                        try {
+                            //非法加密值，尝试解密
+                            String str = iEncryptionService.decrypt(userIdStr, EncryptionUtils.BLANK_KEY, null, true);
+                            userId = Long.parseLong(str);
+                        } catch (Exception e) {
+                            logger.warn(ERROR_ILLEGAL_DATA);
+                            return;
+                        }
+                    }
+                    Condition condition =
+                            new Condition()
+                                    .setField(new Field().setFieldCode(fieldCode).setPredefined(true))
+                                    .setRelationship(Relationship.AND.toString())
+                                    .setOperation(Operation.IN.toString())
+                                    .setValue(new Value().setValueIdList(Arrays.asList(userId)));
+                    conditions.add(condition);
+                }
+            }
+        }
+    }
+
+    private void processIssueIds(JsonNode conditionNode, SearchParamVO searchParamVO, String conditionFieldName) throws IOException {
+        JsonNode option = conditionNode.get(conditionFieldName);
+        if (option != null && !option.isNull() && !option.isEmpty()) {
+            Set<Long> issueIds = objectMapper.readValue(option.traverse(), new TypeReference<Set<Long>>() {
+            });
+            searchParamVO.setIssueIds(issueIds);
+        }
+    }
+
+    private void processDate(JsonNode conditionNode,
+                             List<Condition> conditions,
+                             Map<String, Boolean> dateFieldDoneMap,
+                             String conditionFieldName,
+                             String typeCode) {
+        Set<String> ignoredFields = Optional.ofNullable(IGNORED_FIELD_BY_TYPE_MAP.get(typeCode)).orElse(new HashSet<>());
         String field = null;
-        for (String suffix : DATE_SUFFIX) {
+        List<String> dateSuffix = new ArrayList<>();
+        String startSuffix = SUFFIX_AGILE_SCOPE_START;
+        String endSuffix = SUFFIX_AGILE_SCOPE_END;
+        switch (typeCode) {
+            case PersonalFilterTypeCode.AGILE_ISSUE:
+                dateSuffix = AGILE_DATE_SUFFIX;
+                break;
+            case PersonalFilterTypeCode.FEATURE_ISSUE:
+                dateSuffix = FEATURE_DATE_SUFFIX;
+                startSuffix = SUFFIX_FEATURE_FROM;
+                endSuffix = SUFFIX_FEATURE_TO;
+                break;
+            default:
+                break;
+        }
+        for (String suffix : dateSuffix) {
             if (conditionFieldName.endsWith(suffix)) {
                 field = conditionFieldName.substring(0, conditionFieldName.length() - suffix.length());
                 break;
@@ -189,7 +426,22 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         }
         if (field == null) {
             //非日期字段，抛异常
-            throw new CommonException("error.illegal.json.key");
+            if (ignoredFields.contains(conditionFieldName)) {
+                return;
+            }
+//            logger.info("####{}", conditionFieldName);
+            throw new CommonException("error.illegal.json.key." + conditionFieldName);
+            //todo 调试代码
+//            if (FieldCode.ISSUE_NUM.equals(conditionFieldName)) {
+//                JsonNode issueNumNode = conditionNode.get(conditionFieldName);
+//                if(issueNumNode !=null && !issueNumNode.isNull()) {
+//                    if (!StringUtils.isEmpty(issueNumNode.asText()))  {
+//                        throw new CommonException("issueNum");
+//                    }
+//                }
+//            } else {
+//
+//            }
         }
         //判断字段是否已经处理过
         boolean done = Boolean.TRUE.equals(dateFieldDoneMap.get(field));
@@ -198,14 +450,14 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
             Pair<Value, Value> pair = null;
             String pattern = BaseConstants.Pattern.DATETIME;
             if (CREATE.equals(field) || UPDATE.equals(field)) {
-                JsonNode start = conditionNode.get(field + SUFFIX_START_DATE);
-                JsonNode end = conditionNode.get(field + SUFFIX_END_DATE);
-                if (start != null && !start.isNull() && end != null && !end.isNull()) {
+                JsonNode start = conditionNode.get(field + SUFFIX_AGILE_START_DATE);
+                JsonNode end = conditionNode.get(field + SUFFIX_AGILE_END_DATE);
+                if (!isDateRangeIllegal(start, end)) {
                     pair = generatePairDate(start, end, pattern);
                 }
             } else {
-                JsonNode start = conditionNode.get(field + SUFFIX_SCOPE_START);
-                JsonNode end = conditionNode.get(field + SUFFIX_SCOPE_END);
+                JsonNode start = conditionNode.get(field + startSuffix);
+                JsonNode end = conditionNode.get(field + endSuffix);
                 if (start != null && !start.isNull() && end != null && !end.isNull()) {
                     pair = generatePairDate(start, end, pattern);
                 }
@@ -235,7 +487,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         while (iterator.hasNext()) {
             String prop = iterator.next();
             JsonNode valueList = node.get(prop);
-            if (valueList == null || valueList.isNull()) {
+            if (valueList == null || valueList.isNull() || valueList.isEmpty()) {
                 continue;
             }
             Iterator<JsonNode> valueNodeIterator = valueList.iterator();
@@ -297,10 +549,16 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         }
     }
 
+    private boolean isDateRangeIllegal(JsonNode start,
+                                       JsonNode end) {
+        return start == null || start.isNull() || StringUtils.isEmpty(start.asText()) ||
+                end == null || end.isNull() || StringUtils.isEmpty(end.asText());
+    }
+
     private Pair<Value, Value> readCustomFieldDateValue(String prop, JsonNode valueNode, Pair<Value, Value> pair) {
         JsonNode start = valueNode.get(START_DATE);
         JsonNode end = valueNode.get(END_DATE);
-        if (start != null && !start.isNull() && end != null && !end.isNull()) {
+        if (!isDateRangeIllegal(start, end)) {
             String pattern = BaseConstants.Pattern.DATETIME;
             if (DATE_HMS.equals(prop)) {
                 pattern = BaseConstants.Pattern.TIME_SS;
@@ -314,13 +572,25 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         Pair<Value, Value> pair;
         SimpleDateFormat formatter = new SimpleDateFormat(pattern);
         try {
-            Date startDate = formatter.parse(start.asText());
-            Date endDate = formatter.parse(end.asText());
+            Date startDate = parseDateFromString(start, formatter);
+            Date endDate = parseDateFromString(end, formatter);
             pair = Pair.of(new Value().setValueDate(startDate), new Value().setValueDate(endDate));
         } catch (ParseException e) {
-            throw new CommonException("error.parse.custom.field.date");
+            throw new CommonException("error.parse.custom.field.date", e);
         }
         return pair;
+    }
+
+    private Date parseDateFromString(JsonNode node, SimpleDateFormat formatter) throws ParseException {
+        Date startDate;
+        String startStr = node.asText();
+        if (StringUtils.isNumeric(startStr)) {
+            //处理脏数据
+            startDate = new Date(Long.parseLong(startStr));
+        } else {
+            startDate = formatter.parse(node.asText());
+        }
+        return startDate;
     }
 
     private Pair<Value, Value> readCustomFieldStringValue(Pair<Value, Value> pair, JsonNode value) {
@@ -340,7 +610,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     }
 
     private Pair<Value, Value> readCustomFieldOptionValue(Pair<Value, Value> pair, JsonNode value) {
-        if (value != null && !value.isNull()) {
+        if (value != null && !value.isNull() && !value.isEmpty()) {
             List<Long> valueIdList = null;
             try {
                 valueIdList = objectMapper.readValue(value.traverse(), new TypeReference<List<Long>>() {
@@ -356,16 +626,17 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private void processDropDown(JsonNode conditionNode,
                                  SearchParamVO searchParamVO,
                                  List<Condition> conditions,
-                                 String conditionFieldName) {
+                                 String conditionFieldName,
+                                 Map<String, String> optionMap) {
         JsonNode option = conditionNode.get(conditionFieldName);
-        String fieldCode = OPTION_FIELD_MAPPING.get(conditionFieldName);
+        String fieldCode = optionMap.get(conditionFieldName);
         Assert.notNull(fieldCode, "error.field.code.null");
-        if (option == null || option.isNull()) {
+        if (option == null || option.isNull() || option.isEmpty()) {
             addEmptyCondition(searchParamVO, fieldCode, null);
         } else {
             Condition condition;
             try {
-                if (FieldCode.ENVIRONMENT.equals(fieldCode)) {
+                if (FieldCode.ENVIRONMENT.equals(fieldCode) || FieldCode.FEATURE_TYPE.equals(fieldCode)) {
                     //环境，字符串类型数据
                     List<String> valueStrList = objectMapper.readValue(option.traverse(), new TypeReference<List<String>>() {
                     });
@@ -375,10 +646,35 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                                     .setRelationship(Relationship.AND.toString())
                                     .setOperation(Operation.IN.toString())
                                     .setValue(new Value().setValueStrList(valueStrList));
-
-                } else {
+                } else if (FieldCode.SUB_PROJECT.equals(fieldCode)) {
                     List<Long> valueIds = objectMapper.readValue(option.traverse(), new TypeReference<List<Long>>() {
                     });
+                    condition =
+                            new Condition()
+                                    .setField(new Field().setFieldCode(fieldCode).setPredefined(true))
+                                    .setRelationship(Relationship.AND.toString())
+                                    .setOperation(Operation.IN.toString())
+                                    .setValue(new Value().setNoEncryptIdList(valueIds));
+                } else {
+                    List<Long> valueIds;
+                    try {
+                        valueIds = objectMapper.readValue(option.traverse(), new TypeReference<List<Long>>() {
+                        });
+                    } catch (InvalidFormatException e) {
+                        //非法加密值，尝试解密
+                        try {
+                            List<String> valueIdStr = objectMapper.readValue(option.traverse(), new TypeReference<List<String>>() {
+                            });
+                            valueIds = new ArrayList<>();
+                            for (String idStr : valueIdStr) {
+                                String str = iEncryptionService.decrypt(idStr, EncryptionUtils.BLANK_KEY, null, true);
+                                valueIds.add(Long.parseLong(str));
+                            }
+                        } catch (Exception exception) {
+                            logger.warn(ERROR_ILLEGAL_DATA);
+                            return;
+                        }
+                    }
                     boolean containsNull = valueIds.contains(0L);
                     valueIds.remove(0L);
                     if (!valueIds.isEmpty()) {
