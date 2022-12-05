@@ -1824,6 +1824,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (fieldList.contains(SPRINT_ID_FIELD)) {
             final IssueConvertDTO oldIssue = modelMapper.map(originIssue, IssueConvertDTO.class);
             final Long sprintId = issueConvertDTO.getSprintId();
+            // sprintId传入空或0, 说明是执行清空冲刺操作
+            final boolean clearSprint = sprintId == null || sprintId == 0;
 
             // 查询关联的子任务和子缺陷，一并处理
             final List<Long> subTaskIds = issueMapper.querySubIssueIdsByIssueId(projectId, issueConvertDTO.getIssueId());
@@ -1835,10 +1837,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (sprintChanged) {
                 // 如果冲刺有变化
                 // 批量删除父子工作项, 所有未关闭冲刺的关联关系
-                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, sprintId, issueIds);
+                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, null, issueIds);
                 issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
                 // 批量插入父子工作项, 目标冲刺的关联关系
-                issueAccessDataService.issueToDestinationByIds(projectId, sprintId, issueIds, new Date(), customUserDetails.getUserId());
+                if(!clearSprint) {
+                    issueAccessDataService.issueToDestinationByIds(projectId, sprintId, issueIds, new Date(), customUserDetails.getUserId());
+                }
                 // 触发商业版插件逻辑
                 if (agilePluginService != null) {
                     agilePluginService.updateIssueSprintChanged(oldIssue, projectId, sprintId, issueType);

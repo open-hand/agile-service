@@ -1,43 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monitorjbl.xlsx.StreamingReader;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.multipart.MultipartFile;
-
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
@@ -58,10 +25,41 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.excel.config.ExcelConfig;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -507,9 +505,10 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, UserVO> userNameMap = objectSchemeFieldExcelService.getUserNameMap(organizationId, projectId);
         for (int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) {
             Row row = sheet.getRow(r);
-            if (objectSchemeFieldExcelService.isSkip(row)
-                    || (r > 1 && objectSchemeFieldExcelService.isKeyValue(sheet.getRow(r - 1))
-                    && objectSchemeFieldExcelService.isExtendKeyValue(row))) {
+            if (objectSchemeFieldExcelService.isSkip(row)) {
+                continue;
+            }
+            if(objectSchemeFieldExcelService.isExtendKeyValue(row)) {
                 continue;
             }
             if (objectSchemeFieldExcelService.checkCanceled(
@@ -519,14 +518,16 @@ public class ExcelServiceImpl implements ExcelService {
                     importedFieldIds)) {
                 return;
             }
-            ObjectSchemeFieldCreateVO objectSchemeFieldCreate =
-                    objectSchemeFieldExcelService.generateObjectSchemeField(organizationId, projectId, row, errorRowColMap, issueTypeNameMap);
-            int keyRowNum = r + 1;
-            while (objectSchemeFieldExcelService.isExtendKeyValue(sheet.getRow(keyRowNum))) {
-                objectSchemeFieldExcelService.setKeyValue(objectSchemeFieldCreate, sheet.getRow(keyRowNum));
-                keyRowNum++;
+            ObjectSchemeFieldCreateVO objectSchemeFieldCreate = objectSchemeFieldExcelService.generateObjectSchemeField(organizationId, projectId, row, errorRowColMap, issueTypeNameMap);
+            Map<String, Integer> keyRowMap = null;
+            if(FieldTypeCnName.isOption(objectSchemeFieldCreate.getFieldType())) {
+                int keyRowNum = r + 1;
+                while (objectSchemeFieldExcelService.isExtendKeyValue(sheet.getRow(keyRowNum))) {
+                    objectSchemeFieldExcelService.setKeyValue(objectSchemeFieldCreate, sheet.getRow(keyRowNum));
+                    keyRowNum++;
+                }
+                keyRowMap = objectSchemeFieldExcelService.validKeyValue(objectSchemeFieldCreate, sheet, r, errorRowColMap);
             }
-            Map<String, Integer> keyRowMap = objectSchemeFieldExcelService.validKeyValue(objectSchemeFieldCreate, sheet, r, errorRowColMap);
             objectSchemeFieldExcelService.validAndSetDefaultValue(objectSchemeFieldCreate, keyRowMap, row, userNameMap, errorRowColMap);
             if (ObjectUtils.isEmpty(errorRowColMap.get(r))) {
                 objectSchemeFieldExcelService.createObjectSchemeField(projectId, organizationId, objectSchemeFieldCreate, issueTypes);

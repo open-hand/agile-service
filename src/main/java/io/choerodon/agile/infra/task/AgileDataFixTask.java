@@ -93,4 +93,26 @@ public class AgileDataFixTask {
         }
         LOGGER.info("==============================>>>>>>>> fixIssueDuplicateUnclosedSprintRel completed <<<<<<<<=================================");
     }
+
+    @JobTask(maxRetryCount = 1,
+            code = "2.1&2.2-fixIssueSprintRelZeroData",
+            description = "修复工作项详情,清空当前活跃冲刺时,向关系表中插入的脏数据")
+    @TimedTask(name = "2.1&2.2-fixIssueSprintRelZeroData",
+            description = "修复工作项详情,清空当前活跃冲刺时,向关系表中插入的脏数据",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
+    public void fixIssueSprintRelZeroData(Map<String, Object> param) {
+        LOGGER.info("==============================>>>>>>>> fixIssueSprintRelZeroData start <<<<<<<<=================================");
+        this.jdbcTemplate.update(
+                "DELETE \n" +
+                "FROM\n" +
+                "\tagile_issue_sprint_rel \n" +
+                "WHERE\n" +
+                "\tsprint_id = 0"
+        );
+        LOGGER.info("==============================>>>>>>>> fixIssueSprintRelZeroData completed <<<<<<<<=================================");
+    }
 }
