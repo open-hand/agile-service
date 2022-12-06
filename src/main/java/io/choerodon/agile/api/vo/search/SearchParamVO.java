@@ -1,12 +1,15 @@
 package io.choerodon.agile.api.vo.search;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.ObjectUtils;
 
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
+import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
+import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -24,7 +27,6 @@ public class SearchParamVO {
     private Boolean treeFlag;
     @ApiModelProperty("是否统计子问题的数量")
     private Boolean countSubIssue;
-
     @Encrypt
     private List<Long> quickFilterIds;
     @Encrypt
@@ -35,6 +37,16 @@ public class SearchParamVO {
     private List<ObjectSchemeFieldVO> displayFields;
     @ApiModelProperty("空条件字段，用于个人筛选保存和展示")
     private EmptyCondition emptyCondition;
+    @ApiModelProperty("甘特图使用，纬度")
+    private String dimension;
+
+    public String getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(String dimension) {
+        this.dimension = dimension;
+    }
 
     public EmptyCondition getEmptyCondition() {
         return emptyCondition;
@@ -108,6 +120,46 @@ public class SearchParamVO {
         this.advancedConditions = advancedConditions;
     }
 
+    public boolean isSprintEmpty() {
+        List<Condition> conditions = Optional.ofNullable(getConditions()).orElse(new ArrayList<>());
+        conditions.addAll(Optional.ofNullable(getAdvancedConditions()).orElse(Collections.emptyList()));
+        boolean isSprintEmpty = true;
+        for (Condition condition : conditions) {
+            Field field = condition.getField();
+            if (field == null) {
+                continue;
+            }
+            if (FieldCode.SPRINT.equals(field.getFieldCode())) {
+                String operation = condition.getOperation();
+                //sprint is null or sprint in
+                if (SearchConstant.Operation.isNull(operation)) {
+                    isSprintEmpty = false;
+                    break;
+                }
+                if (SearchConstant.Operation.isIn(operation)) {
+                    Value value = condition.getValue();
+                    if (value != null) {
+                        isSprintEmpty = ObjectUtils.isEmpty(value.getValueIdList());
+                    }
+                }
+            }
+        }
+        return isSprintEmpty;
+    }
+
+    public void validateAndSetDisplayFields() {
+        List<ObjectSchemeFieldVO> result = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(getDisplayFields())) {
+            getDisplayFields().forEach(field -> {
+                        AssertUtilsForCommonException.notNull(field.getCode(), "error.display.field.code.null");
+                        result.add(field);
+                    }
+            );
+        }
+        setDisplayFields(result);
+    }
+
+
     @Override
     public String toString() {
         return "SearchParamVO{" +
@@ -121,5 +173,25 @@ public class SearchParamVO {
                 ", displayFields=" + displayFields +
                 ", emptyCondition=" + emptyCondition +
                 '}';
+    }
+
+    public void addCondition(Condition condition) {
+        if (condition == null) {
+            return;
+        }
+        List<Condition> conditions = Optional.ofNullable(getConditions()).orElse(new ArrayList<>());
+        setConditions(conditions);
+        conditions.add(condition);
+    }
+
+    public void addGanttTypeCodes(List<String> typeCodes) {
+        addCondition(
+                new Condition()
+                        .setField(new Field().setFieldCode(SearchConstant.Field.TYPE_CODE).setPredefined(true))
+                        .setRelationship(SearchConstant.Relationship.AND.toString())
+                        .setOperation(SearchConstant.Operation.IN.toString())
+                        .setValue(new Value().setValueStrList(typeCodes
+
+                                )));
     }
 }

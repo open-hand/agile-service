@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo.search;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -10,7 +12,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @since 2022-11-02
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Field {
+public class Field implements Serializable {
     @ApiModelProperty("字段编码，系统字段使用")
     private String fieldCode;
     @ApiModelProperty("字段编码，自定义字段使用，解决多项目code重复问题")

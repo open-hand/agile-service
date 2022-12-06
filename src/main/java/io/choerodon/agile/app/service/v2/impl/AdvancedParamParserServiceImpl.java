@@ -66,7 +66,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         conditions.addAll(searchParamVO.getConditions());
         conditions.addAll(searchParamVO.getAdvancedConditions());
         String sql = generateSql(instanceType, projectIds, predefinedFieldMap, conditions, searchParamVO.getIssueIds());
-        if  (logger.isDebugEnabled())  {
+        if (logger.isDebugEnabled()) {
             logger.debug("高级筛选条件：{}, 生成sql：{}", searchParamVO, sql);
         }
         return sql;
@@ -379,6 +379,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         switch (fieldCode) {
             case FieldCode.ENVIRONMENT:
             case FieldCode.FEATURE_TYPE:
+            case SearchConstant.Field.TYPE_CODE:
                 List<String> valueStrList = value.getValueStrList();
                 List<String> result = new ArrayList<>();
                 if (!ObjectUtils.isEmpty(valueStrList)) {

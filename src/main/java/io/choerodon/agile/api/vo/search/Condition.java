@@ -1,9 +1,12 @@
 package io.choerodon.agile.api.vo.search;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.util.ObjectUtils;
 
 import org.hzero.core.util.Pair;
 
@@ -12,7 +15,7 @@ import org.hzero.core.util.Pair;
  * @since 2022-11-02
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Condition {
+public class Condition implements Serializable {
     @ApiModelProperty("字段")
     private Field field;
     @ApiModelProperty("条件之间关系")
@@ -89,6 +92,23 @@ public class Condition {
     public Condition setSubConditions(List<Condition> subConditions) {
         this.subConditions = subConditions;
         return this;
+    }
+
+    public static Condition filterByFieldCode(String fieldCode,
+                                              List<Condition> conditions) {
+
+        if (ObjectUtils.isEmpty(conditions)) {
+            return null;
+        }
+        Condition result = null;
+        for (Condition condition : conditions) {
+            Field field = condition.getField();
+            if (Objects.equals(fieldCode, field.getFieldCode())) {
+                result = condition;
+                break;
+            }
+        }
+        return result;
     }
 
     @Override

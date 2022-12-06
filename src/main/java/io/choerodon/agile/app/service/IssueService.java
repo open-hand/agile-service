@@ -65,6 +65,16 @@ public interface IssueService {
     @Deprecated
     Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
+    /**
+     * @see IssueService#pagedQueryRoot(PageRequest, Long, String, String, Long, boolean, boolean, String)
+     * @param pageRequest
+     * @param projectIds
+     * @param searchVO
+     * @param searchSql
+     * @param sortMap
+     * @param isTreeView
+     * @return
+     */
     @Deprecated
     Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
                                     Set<Long> projectIds,
@@ -73,11 +83,29 @@ public interface IssueService {
                                     Map<String, Object> sortMap,
                                     boolean isTreeView);
 
+    /**
+     * @see IssueService#listByTreeViewV2(Set, String, String, Map, boolean, boolean, String)
+     * @param projectIds
+     * @param searchVO
+     * @param searchSql
+     * @param sortMap
+     * @param isTreeView
+     * @return
+     */
+    @Deprecated
     List<Long> listByTreeView(Set<Long> projectIds,
                               SearchVO searchVO,
                               String searchSql,
                               Map<String, Object> sortMap,
                               boolean isTreeView);
+
+    List<Long> listByTreeViewV2(Set<Long> projectIds,
+                                String quickFilterSql,
+                                String advancedSql,
+                                Map<String, Object> sortMap,
+                                boolean isTreeView,
+                                boolean ganttDefaultOrder,
+                                String dimension);
 
     List<EpicDataVO> listEpic(Long projectId);
 
@@ -534,4 +562,13 @@ public interface IssueService {
                                                 SearchParamVO searchParamVO,
                                                 PageRequest pageRequest,
                                                 Long organizationId);
+
+    Page<Long> pagedQueryRoot(PageRequest pageRequest,
+                              Long projectId,
+                              String quickFilterSql,
+                              String advancedSql,
+                              Long organizationId,
+                              boolean isTreeView,
+                              boolean ganttDefaultOrder,
+                              String dimension);
 }

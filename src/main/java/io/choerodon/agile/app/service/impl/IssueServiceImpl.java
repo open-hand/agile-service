@@ -753,7 +753,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (organizationId == null) {
             organizationId = ConvertUtil.getOrganizationId(projectId);
         }
-        boolean isTreeView = Boolean.TRUE.equals(searchParamVO.getTreeFlag());
+        //默认为true
+        boolean isTreeView = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getTreeFlag()).orElse(true));
         String quickFilterSql = getQuickFilter(searchParamVO.getQuickFilterIds());
         Set<Long> projectIds = SetUtils.unmodifiableSet(projectId);
         Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
@@ -761,7 +762,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
         }
         String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
-        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, organizationId, isTreeView);
+        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, organizationId, isTreeView, false, null);
         Page<IssueListFieldKVVO> issueListDTOPage = new Page<>();
         if (!CollectionUtils.isEmpty(issueIdPage.getContent())) {
             List<Long> issueIds = issueIdPage.getContent();
@@ -797,20 +798,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return issueListDTOPage;
     }
 
-    private Page<Long> pagedQueryRoot(PageRequest pageRequest,
+    @Override
+    public Page<Long> pagedQueryRoot(PageRequest pageRequest,
                                       Long projectId,
                                       String quickFilterSql,
                                       String advancedSql,
                                       Long organizationId,
-                                      boolean isTreeView) {
+                                      boolean isTreeView,
+                                      boolean ganttDefaultOrder,
+                                      String dimension) {
         Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         Page<IssueDTO> issuePage;
         if (isTreeView) {
             issuePage =
-                    PageHelper.doPage(pageRequest, () -> issueMapper.queryRootList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap));
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryRootList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension));
         } else {
             issuePage =
-                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap));
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension));
         }
         List<Long> issueIds = issuePage.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         return PageUtil.buildPageInfoWithPageInfoList(issuePage, issueIds);
@@ -873,6 +877,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         } else {
             return issueMapper.queryIssueIdsList(projectIds, searchVO, searchSql, searchVO.getAssigneeFilterIds(), sortMap)
+                    .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public List<Long> listByTreeViewV2(Set<Long> projectIds,
+                                       String quickFilterSql,
+                                       String advancedSql,
+                                       Map<String, Object> sortMap,
+                                       boolean isTreeView,
+                                       boolean ganttDefaultOrder,
+                                       String dimension) {
+        if (isTreeView) {
+            return issueMapper.queryRootList(projectIds, quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension)
+                    .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        } else {
+            return issueMapper.queryIssueList(projectIds, quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension)
                     .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         }
     }
