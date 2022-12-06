@@ -830,8 +830,16 @@
         select
         ai.issue_id,
         ai.project_id,
+        <if test="ganttDefaultOrder">
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
+        </if>
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         from agile_issue ai
+        <if test="ganttDefaultOrder">
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
+        </if>
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
             (
@@ -980,6 +988,11 @@
         select
         ai.issue_id,
         ai.project_id,
+        <if test="ganttDefaultOrder">
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
+        </if>
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         from (
         select temp.issue_id
@@ -1014,6 +1027,9 @@
             and ai.apply_type = 'agile'
             and ai1.issue_id = ai.issue_id
         )
+        <if test="ganttDefaultOrder">
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
+        </if>
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
             (
@@ -5749,6 +5765,25 @@
         </if>
     </select>
 
+    <select id="queryAssigneeIdsBySearchParamVO" resultType="java.lang.Long">
+        SELECT
+        ai.assignee_id
+        FROM agile_issue ai
+        WHERE ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        AND ai.apply_type = 'agile'
+        and ai.assignee_id is not null
+        and ai.assignee_id != 0
+        <if test="quickFilterSql != null">
+            AND ai.issue_id IN (${quickFilterSql})
+        </if>
+        <if test="advancedSql != null and advancedSql.length() > 0">
+            and ${advancedSql}
+        </if>
+    </select>
+
 
     <select id="selectConflictEstimatedTime" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
@@ -5757,6 +5792,21 @@
         from (
             <include refid="listConflictEstimatedTime"/>
         ) ai
+    </select>
+
+    <select id="selectConflictEstimatedTimeV2" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
+        select
+        ai.issue_id,
+        ai.assignee_id
+        from (
+        <include refid="listConflictEstimatedTimeV2"/>
+        ) ai
+    </select>
+
+    <select id="selectConflictEstimatedTimeV2_COUNT" resultType="java.lang.Long">
+        select
+        count(ai.issue_id)
+        from (<include refid="listConflictEstimatedTimeV2"/>) ai
     </select>
 
     <select id="selectConflictEstimatedTime_COUNT" resultType="java.lang.Long">
@@ -5881,6 +5931,117 @@
                     )
                 </foreach>
             </if>
+        </if>
+        <if test="sortMap != null and sortMap.orderStr != null">
+            ORDER BY ${sortMap.orderStr}
+        </if>
+    </sql>
+
+    <sql id="listConflictEstimatedTimeV2">
+        select
+        ai.issue_id,
+        ai.assignee_id,
+        CONVERT(ai.issue_num,SIGNED) as issue_num_convert
+        from agile_issue ai
+        join (
+            select
+            temp.issue_id,
+            temp.assignee_id
+            from
+            (
+                select t1.* from (
+                    select
+                    ai.issue_id,
+                    ai.assignee_id,
+                    CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+                    if(
+                        @lastAssigneeId = ai.assignee_id,
+                        ai.estimated_start_time &gt;= @lastStartDate and ai.estimated_start_time &lt; @lastEndDate,
+                        0
+                    ) as overlap,
+                    @lastAssigneeId := ai.assignee_id as last_assignee,
+                    case
+                    when ai.estimated_end_time &lt; @lastEndDate
+                    then @lastStartDate := @lastStartDate
+                    else @lastStartDate := ai.estimated_start_time
+                    end as last_start,
+                    case
+                    when ai.estimated_end_time &lt; @lastEndDate
+                    then @lastEndDate := @lastEndDate
+                    else @lastEndDate := ai.estimated_end_time
+                    end as last_end
+                    from agile_issue ai,
+                    (
+                        select
+                        @lastAssigneeId := 0,
+                        @lastStartDate := '1000-01-01 00:00:00',
+                        @lastEndDate := '1000-01-01 00:00:00'
+                    ) sqlVars
+                    where ai.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
+                    and ai.assignee_id in
+                    <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
+                        #{assigneeId}
+                    </foreach>
+                    and ai.type_code in ('story', 'bug', 'task', 'sub_task')
+                    and ai.estimated_start_time is not null
+                    and ai.estimated_end_time is not null
+                    order by ai.assignee_id asc, ai.estimated_start_time asc, ai.issue_id asc
+                ) t1
+                union
+                select t2.* from (
+                    select
+                    ai.issue_id,
+                    ai.assignee_id,
+                    CONVERT(ai.issue_num,SIGNED) as issue_num_convert,
+                    if(
+                        @descLastAssigneeId = ai.assignee_id,
+                        @descLastStartDate &gt;= ai.estimated_start_time and @descLastStartDate &lt; ai.estimated_end_time,
+                        0
+                    ) as overlap,
+                    @descLastAssigneeId := ai.assignee_id as last_assignee,
+                    @descLastStartDate := ai.estimated_start_time as last_start,
+                    @descLastEndDate := ai.estimated_end_time as last_end
+                    from agile_issue ai,
+                    (
+                        select
+                        @descLastAssigneeId := 0,
+                        @descLastStartDate := '1000-01-01 00:00:00',
+                        @descLastEndDate := '1000-01-01 00:00:00'
+                    ) sqlVars
+                    where ai.project_id in
+                    <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                        #{projectId}
+                    </foreach>
+                    and ai.assignee_id in
+                    <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
+                        #{assigneeId}
+                    </foreach>
+                    and ai.type_code in ('story', 'bug', 'task', 'sub_task')
+                    and ai.estimated_start_time is not null
+                    and ai.estimated_end_time is not null
+                    order by ai.assignee_id asc, ai.estimated_start_time desc, ai.issue_id desc
+                ) t2
+            ) temp
+            where temp.overlap = 1
+            group by temp.issue_id, temp.assignee_id
+        ) conflict_table on conflict_table.issue_id = ai.issue_id
+        where 1=1
+        and ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        and ai.assignee_id in
+        <foreach collection="assigneeIds" item="assigneeId" open="(" separator="," close=")">
+            #{assigneeId}
+        </foreach>
+        <if test="quickFilterSql != null">
+            AND ai.issue_id IN (${quickFilterSql})
+        </if>
+        <if test="advancedSql != null and advancedSql.length() > 0">
+            and ${advancedSql}
         </if>
         <if test="sortMap != null and sortMap.orderStr != null">
             ORDER BY ${sortMap.orderStr}

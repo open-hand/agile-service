@@ -6,6 +6,8 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import io.choerodon.agile.api.vo.search.SearchParamVO;
+
 /**
  * @author superlee
  * @since 2021-10-09
@@ -25,9 +27,18 @@ public class GanttDimensionMoveVO {
     @NotNull(message = "error.gantt.currentId.null")
     @ApiModelProperty(value = "当前id")
     private Long currentId;
-    @NotNull(message = "error.gantt.searchVO.null")
     @ApiModelProperty(value = "筛选条件")
     private SearchVO searchVO;
+
+    private SearchParamVO searchParamVO;
+
+    public SearchParamVO getSearchParamVO() {
+        return searchParamVO;
+    }
+
+    public void setSearchParamVO(SearchParamVO searchParamVO) {
+        this.searchParamVO = searchParamVO;
+    }
 
     public String getDimension() {
         return dimension;

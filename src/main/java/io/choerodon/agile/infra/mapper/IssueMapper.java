@@ -341,12 +341,12 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 性能不好，不要用
      *
-     * @param projectId projectId
-     * @param searchVO searchVO
-     * @param filterSql filterSql
+     * @param projectId         projectId
+     * @param searchVO          searchVO
+     * @param filterSql         filterSql
      * @param assigneeFilterIds assigneeFilterIds
-     * @param sortMap sortMap
-     * @param isTreeView isTreeView
+     * @param sortMap           sortMap
+     * @param isTreeView        isTreeView
      * @return result
      */
     @Deprecated
@@ -369,8 +369,19 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDTO> queryIssueList(@Param("projectIds") Set<Long> projectIds,
                                   @Param("quickFilterSql") String quickFilterSql,
                                   @Param("advancedSql") String advancedSql,
-                                  @Param("sortMap") Map<String, Object> sortMap);
+                                  @Param("sortMap") Map<String, Object> sortMap,
+                                  @Param("ganttDefaultOrder") boolean ganttDefaultOrder,
+                                  @Param("dimension") String dimension);
 
+    /**
+     * @param projectIds
+     * @param searchVO
+     * @param filterSql
+     * @param assigneeFilterIds
+     * @param sortMap
+     * @return
+     * @see IssueMapper#queryRootList(Set, String, String, Map, boolean, String)
+     */
     @Deprecated
     List<IssueDTO> queryParentIssueIdsList(@Param("projectIds") Set<Long> projectIds,
                                            @Param("searchVO") SearchVO searchVO,
@@ -381,7 +392,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDTO> queryRootList(@Param("projectIds") Set<Long> projectIds,
                                  @Param("quickFilterSql") String quickFilterSql,
                                  @Param("advancedSql") String advancedSql,
-                                 @Param("sortMap") Map<String, Object> sortMap);
+                                 @Param("sortMap") Map<String, Object> sortMap,
+                                 @Param("ganttDefaultOrder") boolean ganttDefaultOrder,
+                                 @Param("dimension") String dimension);
 
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
@@ -418,7 +431,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      *
      * @param projectId projectId
      * @param applyType applyType
-     * @param statusId statusId
+     * @param statusId  statusId
      * @return result
      */
     Long querySizeByApplyTypeAndStatusId(@Param("projectId") Long projectId, @Param("applyType") String applyType, @Param("statusId") Long statusId);
@@ -426,8 +439,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 【内部接口】查询某个项目下某些问题类型下某应用类型的issue有几个
      *
-     * @param projectId projectId
-     * @param applyType applyType
+     * @param projectId    projectId
+     * @param applyType    applyType
      * @param issueTypeIds issueTypeIds
      * @return result
      */
@@ -436,8 +449,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 【内部调用】状态机方案变更后批量更新issue的状态匹配
      *
-     * @param projectId projectId
-     * @param applyType applyType
+     * @param projectId   projectId
+     * @param applyType   applyType
      * @param issueTypeId issueTypeId
      * @param oldStatusId oldStatusId
      * @param newStatusId newStatusId
@@ -480,6 +493,17 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDTO> listIssueInfoByIssueIds(@Param("projectId") Long projectId,
                                            @Param("issueIds") List<Long> issueIds,
                                            @Param("issueQueryVO") IssueQueryVO issueQueryVO);
+
+    /**
+     * @param issueIds
+     * @param projectIds
+     * @param searchVO
+     * @param filterSql
+     * @param assigneeFilterIds
+     * @param sortMap
+     * @return
+     * @see IssueMapper#queryChildrenList(List, Set, String, String, Map)
+     */
     @Deprecated
     List<IssueDTO> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
                                              @Param("projectIds") Set<Long> projectIds,
@@ -516,8 +540,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     /**
      * 查询个人未完成故事，任务和bug
+     *
      * @param projectIds projectIds
-     * @param userId userId
+     * @param userId     userId
      * @param searchType searchType
      * @return result
      */
@@ -532,8 +557,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * 工作台查我的待办
      *
      * @param projectIds projectIds
-     * @param userId userId
-     * @param searchVO searchVO
+     * @param userId     userId
+     * @param searchVO   searchVO
      * @return result
      */
     List<IssueDTO> selectMyTodoIssues(@Param("projectIds") List<Long> projectIds,
@@ -544,9 +569,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 工作台查我的缺陷
      *
-     * @param projectIds projectIds
-     * @param userId userId
-     * @param searchVO searchVO
+     * @param projectIds      projectIds
+     * @param userId          userId
+     * @param searchVO        searchVO
      * @param activeSprintIds activeSprintIds
      * @return result
      */
@@ -559,8 +584,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * 工作台查我的星标工作项
      *
      * @param projectIds projectIds
-     * @param userId userId
-     * @param searchVO searchVO
+     * @param userId     userId
+     * @param searchVO   searchVO
      * @return result
      */
     List<IssueDTO> selectMyStarBeacon(@Param("projectIds") List<Long> projectIds,
@@ -570,9 +595,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 工作台查我报告的
      *
-     * @param projectIds projectIds
-     * @param userId userId
-     * @param searchVO searchVO
+     * @param projectIds      projectIds
+     * @param userId          userId
+     * @param searchVO        searchVO
      * @param activeSprintIds activeSprintIds
      * @return result
      */
@@ -585,9 +610,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 工作台查我分配的
      *
-     * @param projectIds projectIds
-     * @param userId userId
-     * @param searchVO searchVO
+     * @param projectIds      projectIds
+     * @param userId          userId
+     * @param searchVO        searchVO
      * @param activeSprintIds activeSprintIds
      * @return result
      */
@@ -599,9 +624,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 工作台查我报告的bug
      *
-     * @param projectIds projectIds
-     * @param userId userId
-     * @param searchVO searchVO
+     * @param projectIds      projectIds
+     * @param userId          userId
+     * @param searchVO        searchVO
      * @param activeSprintIds activeSprintIds
      * @return result
      */
@@ -633,7 +658,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      *
      * @param projectId projectId
      * @param issueType issueType
-     * @param param param
+     * @param param     param
      * @return result
      */
     List<IssueVO> listAvailableParents(@Param("projectId") Long projectId,
@@ -689,7 +714,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * 根据项目id和日期查询活跃冲刺中的延期的问题
      *
      * @param projectIds projectIds
-     * @param date date
+     * @param date       date
      */
     List<IssueDTO> selectDelayIssues(@Param("projectIds") Set<Long> projectIds,
                                      @Param("date") Date date);
@@ -697,14 +722,14 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 查询自定义报表数据点
      *
-     * @param projectIds            项目id
-     * @param searchVO             问题id
-     * @param extendSearchVO extendSearchVO
-     * @param filterSql            filterSql
-     * @param assigneeFilterIds    assigneeFilterIds
-     * @param selectSql            查询sql
-     * @param groupSql             分组sql
-     * @param linkSql              表连接sql
+     * @param projectIds        项目id
+     * @param searchVO          问题id
+     * @param extendSearchVO    extendSearchVO
+     * @param filterSql         filterSql
+     * @param assigneeFilterIds assigneeFilterIds
+     * @param selectSql         查询sql
+     * @param groupSql          分组sql
+     * @param linkSql           表连接sql
      * @return 自定义报表数据点
      */
     List<CustomChartPointVO> selectCustomChartPointVO(
@@ -719,13 +744,14 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     /**
      * 查询代办的问题
-     * @param projectId projectId
+     *
+     * @param projectId          projectId
      * @param advancedSearchArgs advancedSearchArgs
      * @return result
      */
     List<Long> queryUnDoneIssues(@Param("projectId") Long projectId, @Param("statusIds") List<Long> statusIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 
-    Set<Long> queryChildrenIds(@Param("projectId") Long projectId, @Param("statusIds") List<Long> statusIds , @Param("parentIssueIds") List<Long> parentIssueIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
+    Set<Long> queryChildrenIds(@Param("projectId") Long projectId, @Param("statusIds") List<Long> statusIds, @Param("parentIssueIds") List<Long> parentIssueIds, @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs);
 
     List<IssueDailyWorkVO> selectDailyWorkIssues(@Param("projectIds") Set<Long> projectIds);
 
@@ -733,7 +759,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     IssueCountDTO querySubIssueCount(@Param("projectId") Long projectId, @Param("parentIssueId") Long parentIssueId);
 
-    List<IssueEpicVO> queryIssueEpicByIds(@Param("projectId")Long projectId, @Param("epicIds") List<Long> epicIds);
+    List<IssueEpicVO> queryIssueEpicByIds(@Param("projectId") Long projectId, @Param("epicIds") List<Long> epicIds);
 
     List<IssueDTO> listIssueWithEpicId(@Param("projectIds") Set<Long> projectIds,
                                        @Param("issueIds") List<Long> issueIds);
@@ -750,11 +776,34 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<WorkItemVO> queryAssigneeIssueList(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId, @Param("workItemSearchVO") WorkItemSearchVO workItemSearchVO);
 
+    /**
+     * @param projectIds
+     * @param searchVO
+     * @param filterSql
+     * @param assigneeFilterIds
+     * @return
+     * @see IssueMapper#queryAssigneeIdsBySearchParamVO(Set, String, String)
+     */
+    @Deprecated
     Set<Long> queryAssigneeIdsBySearchVO(@Param("projectIds") Set<Long> projectIds,
                                          @Param("searchVO") SearchVO searchVO,
                                          @Param("filterSql") String filterSql,
                                          @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
 
+    Set<Long> queryAssigneeIdsBySearchParamVO(@Param("projectIds") Set<Long> projectIds,
+                                              @Param("quickFilterSql") String quickFilterSql,
+                                              @Param("advancedSql") String advancedSql);
+
+    /**
+     * @param projectIds
+     * @param assigneeIds
+     * @param searchVO
+     * @param filterSql
+     * @param assigneeFilterIds
+     * @param sortMap
+     * @return
+     * @see IssueMapper#selectConflictEstimatedTimeV2(Set, Set, String, String, Map)
+     */
     List<IssueDTO> selectConflictEstimatedTime(@Param("projectIds") Set<Long> projectIds,
                                                @Param("assigneeIds") Set<Long> assigneeIds,
                                                @Param("searchVO") SearchVO searchVO,
@@ -762,14 +811,21 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
                                                @Param("sortMap") Map<String, Object> sortMap);
 
+    List<IssueDTO> selectConflictEstimatedTimeV2(@Param("projectIds") Set<Long> projectIds,
+                                                 @Param("assigneeIds") Set<Long> assigneeIds,
+                                                 @Param("quickFilterSql") String quickFilterSql,
+                                                 @Param("advancedSql") String advancedSql,
+                                                 @Param("sortMap") Map<String, Object> sortMap);
+
     List<Long> selectCompletedSubIssue(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     void updateSubIssueHistoryCompleted(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
     /**
      * 查询issueIds中的子任务和子Bug
+     *
      * @param projectId projectId
-     * @param issueIds issueIds
+     * @param issueIds  issueIds
      * @return result
      */
     List<IssueDTO> queryChildrenIssue(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);

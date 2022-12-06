@@ -12,11 +12,14 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+
+import org.hzero.core.base.BaseConstants;
 
 
 /**
@@ -63,6 +66,7 @@ public class GanttChartController {
                                @PathVariable(name = "project_id") Long projectId,
                                @ApiParam(value = "移动的甘特图对象", required = true)
                                @RequestBody @Validated GanttMoveVO ganttMoveVO) {
+        Assert.notNull(ganttMoveVO.getSearchVO(), BaseConstants.ErrorCode.NOT_NULL);
         EncryptionUtils.decryptSearchVO(ganttMoveVO.getSearchVO());
         ganttChartService.move(projectId, ganttMoveVO);
         return new ResponseEntity(HttpStatus.OK);
@@ -87,6 +91,7 @@ public class GanttChartController {
                                         @PathVariable(name = "project_id") Long projectId,
                                         @ApiParam(value = "移动的冲刺/经办人对象", required = true)
                                         @RequestBody @Validated GanttDimensionMoveVO ganttDimensionMoveVO) {
+        Assert.notNull(ganttDimensionMoveVO.getSearchVO(), BaseConstants.ErrorCode.NOT_NULL);
         EncryptionUtils.decryptSearchVO(ganttDimensionMoveVO.getSearchVO());
         ganttChartService.moveDimension(projectId, ganttDimensionMoveVO);
         return new ResponseEntity(HttpStatus.OK);
