@@ -120,7 +120,7 @@ public class SearchParamVO {
         this.advancedConditions = advancedConditions;
     }
 
-    public boolean isSprintEmpty() {
+    public boolean sprintEmpty() {
         List<Condition> conditions = queryAllConditions();
         return isSprintEmptyByConditions(conditions);
     }

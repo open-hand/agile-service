@@ -260,7 +260,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                         IssueTypeCode.BUG.value(),
                         IssueTypeCode.TASK.value(),
                         IssueTypeCode.SUB_TASK.value()));
-        if (searchParamVO.isSprintEmpty()) {
+        if (searchParamVO.sprintEmpty()) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         SearchParamVO searchWithRequiredFilter = copyRequiredFilterV2(searchParamVO);
@@ -359,7 +359,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                         IssueTypeCode.BUG.value(),
                         IssueTypeCode.TASK.value(),
                         IssueTypeCode.SUB_TASK.value()));
-        if (searchParamVO.isSprintEmpty()) {
+        if (searchParamVO.sprintEmpty()) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         SearchParamVO searchWithRequiredFilter = copyRequiredFilterV2(searchParamVO);
@@ -453,7 +453,7 @@ public class GanttChartServiceImpl implements GanttChartService {
 
     @Override
     public GanttDimensionListVO ganttDimensionListV2(Long projectId, SearchParamVO searchParamVO) {
-        if (searchParamVO.isSprintEmpty()) {
+        if (searchParamVO.sprintEmpty()) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         String dimension = searchParamVO.getDimension();
@@ -1276,7 +1276,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                          PageRequest pageRequest,
                                                          Long organizationId,
                                                          boolean orderByRank) {
-        if (searchParamVO.isSprintEmpty()) {
+        if (searchParamVO.sprintEmpty()) {
             throw new CommonException(ERROR_SPRINT_EMPTY);
         }
         if (ObjectUtils.isEmpty(projectMap)) {
