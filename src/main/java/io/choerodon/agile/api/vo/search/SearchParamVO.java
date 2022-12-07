@@ -121,9 +121,15 @@ public class SearchParamVO {
     }
 
     public boolean isSprintEmpty() {
-        List<Condition> conditions = Optional.ofNullable(getConditions()).orElse(new ArrayList<>());
-        conditions.addAll(Optional.ofNullable(getAdvancedConditions()).orElse(Collections.emptyList()));
+        List<Condition> conditions = queryAllConditions();
+        return isSprintEmptyByConditions(conditions);
+    }
+
+    private boolean isSprintEmptyByConditions(List<Condition> conditions) {
         boolean isSprintEmpty = true;
+        if (ObjectUtils.isEmpty(conditions)) {
+            return true;
+        }
         for (Condition condition : conditions) {
             Field field = condition.getField();
             if (field == null) {
@@ -135,11 +141,13 @@ public class SearchParamVO {
                 if (SearchConstant.Operation.isNull(operation)) {
                     isSprintEmpty = false;
                     break;
-                }
-                if (SearchConstant.Operation.isIn(operation)) {
+                } else if (SearchConstant.Operation.isBracket(operation)) {
+                    isSprintEmpty = isSprintEmptyByConditions(condition.getSubConditions());
+                } else if (SearchConstant.Operation.isIn(operation)) {
                     Value value = condition.getValue();
                     if (value != null) {
                         isSprintEmpty = ObjectUtils.isEmpty(value.getValueIdList());
+                        break;
                     }
                 }
             }
@@ -175,9 +183,7 @@ public class SearchParamVO {
                         .setField(new Field().setFieldCode(SearchConstant.Field.TYPE_CODE).setPredefined(true))
                         .setRelationship(SearchConstant.Relationship.AND.toString())
                         .setOperation(SearchConstant.Operation.IN.toString())
-                        .setValue(new Value().setValueStrList(typeCodes
-
-                                )));
+                        .setValue(new Value().setValueStrList(typeCodes)));
     }
 
     public List<Condition> queryAllConditions() {
@@ -187,17 +193,28 @@ public class SearchParamVO {
     }
 
     public List<Long> queryOptionIds(String fieldCode) {
-        List<Long> ids = new ArrayList<>();
         List<Condition> conditions = queryAllConditions();
+        return queryOptionIdsByConditions(fieldCode, conditions);
+    }
+
+    private List<Long> queryOptionIdsByConditions(String fieldCode, List<Condition> conditions) {
+        if (ObjectUtils.isEmpty(conditions)) {
+            return Collections.emptyList();
+        }
+        List<Long> ids = new ArrayList<>();
         for (Condition condition : conditions) {
             Field field = condition.getField();
             String thisFieldCode = Optional.ofNullable(field).map(Field::getFieldCode).orElse(null);
             if (Objects.equals(fieldCode, thisFieldCode)) {
                 Value value = condition.getValue();
-                if (FieldCode.SUB_PROJECT.equals(fieldCode)) {
-                    ids = Optional.ofNullable(value).map(Value::getNoEncryptIdList).orElse(Collections.emptyList());
+                if (SearchConstant.Operation.isBracket(condition.getOperation())) {
+                    ids.addAll(queryOptionIdsByConditions(fieldCode, condition.getSubConditions()));
                 } else {
-                    ids = Optional.ofNullable(value).map(Value::getValueIdList).orElse(Collections.emptyList());
+                    if (FieldCode.SUB_PROJECT.equals(fieldCode)) {
+                        ids = Optional.ofNullable(value).map(Value::getNoEncryptIdList).orElse(Collections.emptyList());
+                    } else {
+                        ids = Optional.ofNullable(value).map(Value::getValueIdList).orElse(Collections.emptyList());
+                    }
                 }
             }
         }
