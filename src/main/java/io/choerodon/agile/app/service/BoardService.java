@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.infra.dto.BoardDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -24,7 +25,20 @@ public interface BoardService {
 
     BoardVO queryScrumBoardById(Long projectId, Long boardId);
 
+    /**
+     * @param projectId
+     * @param boardId
+     * @param organizationId
+     * @param searchVO
+     * @return
+     *
+     * @see BoardService#queryAllDataV2(Long, Long, Long, SearchParamVO)
+     */
+    @Deprecated
     JSONObject queryAllData(Long projectId, Long boardId, Long organizationId, SearchVO searchVO);
+
+    JSONObject queryAllDataV2(Long projectId, Long boardId, Long organizationId, SearchParamVO searchParamVO);
+
 
     void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads, String applyType);
 

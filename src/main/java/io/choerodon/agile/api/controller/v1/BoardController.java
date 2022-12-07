@@ -160,7 +160,7 @@ public class BoardController {
     @PostMapping(value = "/{boardId}/all_data/{organization_id}")
     public ResponseEntity<JSONObject> queryByOptions(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
-                                                     @ApiParam(value = "agile board id", required = true)
+                                                      @ApiParam(value = "agile board id", required = true)
                                                      @PathVariable @Encrypt Long boardId,
                                                      @ApiParam(value = "组织id", required = true)
                                                      @PathVariable(name = "organization_id") Long organizationId,
