@@ -82,7 +82,8 @@ public class SearchConstant {
                 new FieldTableVO(FieldCode.ISSUE_NUM, "issue_num", TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE),
                 new FieldTableVO(Field.MY_STAR, "user_id", TABLE_FD_STAR_BEACON, FieldTableVO.TYPE_BASE),
                 new FieldTableVO(Field.MY_PARTICIPATE, null, TABLE_AGILE_DATA_LOG, FieldTableVO.TYPE_BASE),
-                new FieldTableVO(Field.TYPE_CODE, "type_code", TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE)
+                new FieldTableVO(Field.TYPE_CODE, "type_code", TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE),
+                new FieldTableVO(FieldCode.SUB_PROJECT, "project_id", TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE)
         );
         PREDEFINED_FIELD_TABLE_MAP =
                 fieldTableList.stream().collect(Collectors.toMap(FieldTableVO::getName, Function.identity()));
