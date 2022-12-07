@@ -523,6 +523,62 @@
         </if>
     </select>
 
+    <select id="selectBoardIssueV2" resultType="io.choerodon.agile.infra.dto.IssueForBoardDO">
+        SELECT
+        ai.status_id,
+        ai.issue_id,
+        IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) AS issue_num,
+        ai.summary,
+        ai.assignee_id,
+        ai.priority_id,
+        ai.issue_type_id,
+        ai.parent_issue_id,
+        ai.type_code,
+        ai.rank,
+        ai.epic_id,
+        ai.stay_date,
+        ai.estimated_start_time,
+        ai.estimated_end_time,
+        ai.object_version_number,
+        ai.relate_issue_id,
+        IF(fsb.instance_id IS NULL, NULL, TRUE) AS starBeacon
+        FROM
+        agile_issue ai
+        LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
+        LEFT JOIN agile_issue_sprint_rel aisr ON ai.issue_id = aisr.issue_id AND aisr.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        LEFT JOIN fd_star_beacon fsb ON fsb.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        AND fsb.type = 'issue' AND fsb.user_id = #{userId} AND ai.issue_id = fsb.instance_id
+        WHERE
+        ai.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator="," >
+            #{projectId}
+        </foreach>
+        AND aisr.sprint_id = #{sprintId}
+        AND ai.type_code in ('story', 'task', 'bug', 'sub_task')
+        <if test="statusIds != null and statusIds.size() != 0">
+            AND ai.status_id IN
+            <foreach collection="statusIds" item="statusId" open="(" separator=","
+                     close=")">
+                #{statusId}
+            </foreach>
+        </if>
+        <if test="quickFilterSql != null">
+            AND ai.issue_id IN (${quickFilterSql})
+        </if>
+        <if test="advancedSql != null and advancedSql.length() > 0">
+            and ${advancedSql}
+        </if>
+        <if test="isHidePreSprintDoneSubissue">
+            and (ai.is_pre_sprint_done = 0  or ai.is_pre_sprint_done IS NULL)
+        </if>
+    </select>
+
     <select id="getColumnNumByStatus" resultType="io.choerodon.agile.api.vo.IssueCountStatusVO">
         select
         ai.status_id,

@@ -4,9 +4,20 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.choerodon.agile.api.vo.search.Condition;
+import io.choerodon.agile.api.vo.search.Field;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
+import io.choerodon.agile.api.vo.search.Value;
+import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
+import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.InstanceType;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
@@ -78,8 +89,6 @@ public class BoardServiceImpl implements BoardService {
     @Autowired
     private WorkCalendarRefMapper workCalendarRefMapper;
     @Autowired
-    private StateMachineClientService stateMachineClientService;
-    @Autowired
     private SprintMapper sprintMapper;
     @Autowired
     private SendMsgUtil sendMsgUtil;
@@ -98,17 +107,11 @@ public class BoardServiceImpl implements BoardService {
     @Autowired
     private BoardAssembler boardAssembler;
     @Autowired
-    private StatusFieldSettingService statusFieldSettingService;
-    @Autowired
     private StatusLinkageService statusLinkageService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
     @Autowired
-    private StarBeaconMapper starBeaconMapper;
-    @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
     @Autowired
     private IssueService issueService;
     @Autowired
@@ -119,6 +122,14 @@ public class BoardServiceImpl implements BoardService {
     private QuickFilterService quickFilterService;
     @Autowired
     private BoardQuickFilterRelMapper boardQuickFilterRelMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired
+    private AdvancedParamParserService advancedParamParserService;
+
+
 
     @Override
     public void create(Long projectId, String boardName, String type) {
@@ -408,23 +419,74 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public JSONObject queryAllData(Long projectId, Long boardId, Long organizationId, SearchVO searchVO) {
-        JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用活跃的冲刺
         SprintDTO currentSprint = handlerCurrentSprint(projectId, searchVO);
-        String filterSql = getFilterSqlFromSearchVO(searchVO, boardId, projectId);
+        String filterSql = getFilterSqlFromSearchVO(searchVO.getQuickFilterIds(), boardId, projectId);
         boardAssembler.handleOtherArgs(searchVO);
-        List<Long> assigneeIds = new ArrayList<>();
-        List<Long> parentIds = new ArrayList<>();
-        List<Long> epicIds = new ArrayList<>();
         List<Long> participantIds = new ArrayList<>();
-        Long userId = DetailsHelper.getUserDetails().getUserId();
         List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnInfoByBoardId(projectId, boardId);
-        setColumnIssue(columns, projectId, currentSprint.getSprintId(), filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId, participantIds);
+        if (!CollectionUtils.isEmpty(columns)){
+            Long sprintId = currentSprint.getSprintId();
+            // 项目是否设置隐藏历史迭代中已完成的子任务
+            addSearchParam(projectId, sprintId, searchVO);
+            Map<Long, List<IssueForBoardDO>> issueStatusMap = new HashMap<>(columns.size() * 2);
+            Set<Long> statusIds = new HashSet<>();
+            processStatusIdAndMap(columns, issueStatusMap, statusIds);
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            List<IssueForBoardDO> issueList = boardColumnMapper.selectBoardIssue(new HashSet<>(Arrays.asList(projectId)), sprintId, filterSql, searchVO, searchVO.getAssigneeFilterIds(), userId, statusIds);
+            setColumnIssue(projectId, participantIds, issueList, issueStatusMap);
+        }
         Boolean condition = handlerAssigneeAndStory(searchVO);
+        return postProcess(projectId, boardId, organizationId, currentSprint, participantIds, columns, condition);
+    }
+
+    @Override
+    public JSONObject queryAllDataV2(Long projectId,
+                                     Long boardId,
+                                     Long organizationId,
+                                     SearchParamVO searchParamVO) {
+        //没有传冲刺id，则使用活跃的冲刺
+        SprintDTO currentSprint = queryCurrentSprint(projectId, searchParamVO);
+        String quickFilterSql = getFilterSqlFromSearchVO(searchParamVO.getQuickFilterIds(), boardId, projectId);
+        List<Long> participantIds = new ArrayList<>();
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnInfoByBoardId(projectId, boardId);
+        if (!CollectionUtils.isEmpty(columns)) {
+            Long sprintId = currentSprint.getSprintId();
+            // 项目是否设置隐藏历史迭代中已完成的子任务
+            ProjectInfoDTO projectInfoDTO = projectInfoMapper.queryByProjectId(projectId);
+            boolean isHidePreSprintDoneSubissue = Boolean.TRUE.equals(projectInfoDTO.getHidePreSprintDoneSubissue());
+            Map<Long, List<IssueForBoardDO>> issueStatusMap = new HashMap<>(columns.size() * 2);
+            Set<Long> statusIds = new HashSet<>();
+            processStatusIdAndMap(columns, issueStatusMap, statusIds);
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
+            if (agilePluginService != null) {
+                predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
+            }
+            Set<Long> projectIds = SetUtils.unmodifiableSet(projectId);
+            String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
+            List<IssueForBoardDO> issueList = boardColumnMapper.selectBoardIssueV2(projectIds, sprintId, quickFilterSql, advancedSql, userId, statusIds, isHidePreSprintDoneSubissue);
+            setColumnIssue(projectId, participantIds, issueList, issueStatusMap);
+        }
+        Boolean condition = handlerAssigneeAndStoryV2(searchParamVO);
+        return postProcess(projectId, boardId, organizationId, currentSprint, participantIds, columns, condition);
+    }
+
+    private JSONObject postProcess(Long projectId,
+                                   Long boardId,
+                                   Long organizationId,
+                                   SprintDTO currentSprint,
+                                   List<Long> participantIds,
+                                   List<ColumnAndIssueDTO> columns,
+                                   Boolean condition) {
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+        List<Long> assigneeIds = new ArrayList<>();
+        List<Long> parentIds = new ArrayList<>();
+        List<Long> epicIds = new ArrayList<>();
         putDatasAndSort(columns, parentIds, assigneeIds, boardId, epicIds, condition, organizationId, parentWithSubs, statusMap, issueTypeDTOMap);
+        JSONObject jsonObject = new JSONObject(true);
         jsonObject.put("parentIds", EncryptionUtils.encryptList(parentIds));
         jsonObject.put("parentIssues", getParentIssues(projectId, parentIds, statusMap, issueTypeDTOMap));
         jsonObject.put("assigneeIds", EncryptionUtils.encryptList(assigneeIds));
@@ -436,26 +498,26 @@ public class BoardServiceImpl implements BoardService {
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->
-            columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
-                subStatusDTO.getIssues().forEach(issueForBoardDO -> {
-                    UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
-                    if(userMessageDTO != null){
-                        String assigneeName = userMessageDTO.getName();
-                        String assigneeLoginName =  userMessageDTO.getLoginName();
-                        String assigneeRealName = userMessageDTO.getRealName();
-                        String imageUrl = userMessageDTO.getImageUrl();
-                        String email = userMessageDTO.getEmail();
-                        boolean ldap = userMessageDTO.getLdap();
-                        issueForBoardDO.setAssigneeName(assigneeName);
-                        issueForBoardDO.setAssigneeLoginName(assigneeLoginName);
-                        issueForBoardDO.setAssigneeRealName(assigneeRealName);
-                        issueForBoardDO.setImageUrl(imageUrl);
-                        issueForBoardDO.setEmail(email);
-                        issueForBoardDO.setLdap(ldap);
-                    }
-                });
-                subStatusDTO.getIssues().sort(comparator);
-            }));
+                columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
+                    subStatusDTO.getIssues().forEach(issueForBoardDO -> {
+                        UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
+                        if (userMessageDTO != null) {
+                            String assigneeName = userMessageDTO.getName();
+                            String assigneeLoginName = userMessageDTO.getLoginName();
+                            String assigneeRealName = userMessageDTO.getRealName();
+                            String imageUrl = userMessageDTO.getImageUrl();
+                            String email = userMessageDTO.getEmail();
+                            boolean ldap = userMessageDTO.getLdap();
+                            issueForBoardDO.setAssigneeName(assigneeName);
+                            issueForBoardDO.setAssigneeLoginName(assigneeLoginName);
+                            issueForBoardDO.setAssigneeRealName(assigneeRealName);
+                            issueForBoardDO.setImageUrl(imageUrl);
+                            issueForBoardDO.setEmail(email);
+                            issueForBoardDO.setLdap(ldap);
+                        }
+                    });
+                    subStatusDTO.getIssues().sort(comparator);
+                }));
         jsonObject.put("columnsData", putColumnData(columns));
         jsonObject.put("currentSprint", putCurrentSprint(currentSprint, organizationId));
         //处理用户默认看板设置，保存最近一次的浏览
@@ -463,10 +525,9 @@ public class BoardServiceImpl implements BoardService {
         return jsonObject;
     }
 
-    private String getFilterSqlFromSearchVO(SearchVO searchVO,
+    private String getFilterSqlFromSearchVO(List<Long> quickFilterIds,
                                             Long boardId,
                                             Long projectId) {
-        List<Long> quickFilterIds = searchVO.getQuickFilterIds();
         Set<Long> defaultQuickFilterIds =
                 listQuickFiltersByBoardId(projectId, boardId)
                         .stream()
@@ -482,27 +543,10 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    private void setColumnIssue(List<ColumnAndIssueDTO> columns, Long projectId, Long sprintId, String filterSql, SearchVO searchVO, List<Long> assigneeFilterIds, Long userId, List<Long> participantIds) {
-        if (CollectionUtils.isEmpty(columns)){
-            return;
-        }
-        Map<Long, List<IssueForBoardDO>> issueStatusMap = new HashMap<>(columns.size() * 2);
-        Set<Long> statusIds = new HashSet<>();
-        columns.forEach(column -> {
-            if (!CollectionUtils.isEmpty(column.getSubStatusDTOS())){
-                column.getSubStatusDTOS().forEach(status -> {
-                    status.setIssues(new ArrayList<>());
-                    if (status.getStatusId() == null) {
-                        return;
-                    }
-                    statusIds.add(status.getStatusId());
-                    issueStatusMap.put(status.getStatusId(), status.getIssues());
-                });
-            }
-        });
-        // 项目是否设置隐藏历史迭代中已完成的子任务
-        addSearchParam(projectId, sprintId, searchVO);
-        List<IssueForBoardDO> issueList = boardColumnMapper.selectBoardIssue(new HashSet<>(Arrays.asList(projectId)), sprintId, filterSql, searchVO, assigneeFilterIds, userId, statusIds);
+    private void setColumnIssue(Long projectId,
+                                List<Long> participantIds,
+                                List<IssueForBoardDO> issueList,
+                                Map<Long, List<IssueForBoardDO>> issueStatusMap) {
         if (CollectionUtils.isEmpty(issueList)){
             return;
         }
@@ -529,6 +573,23 @@ public class BoardServiceImpl implements BoardService {
         Collections.sort(participantIds);
     }
 
+    private void processStatusIdAndMap(List<ColumnAndIssueDTO> columns,
+                                       Map<Long, List<IssueForBoardDO>> issueStatusMap,
+                                       Set<Long> statusIds) {
+        columns.forEach(column -> {
+            if (!CollectionUtils.isEmpty(column.getSubStatusDTOS())){
+                column.getSubStatusDTOS().forEach(status -> {
+                    status.setIssues(new ArrayList<>());
+                    if (status.getStatusId() == null) {
+                        return;
+                    }
+                    statusIds.add(status.getStatusId());
+                    issueStatusMap.put(status.getStatusId(), status.getIssues());
+                });
+            }
+        });
+    }
+
     private void addSearchParam(Long projectId, Long sprintId,SearchVO searchVO) {
         ProjectInfoDTO projectInfoDTO = projectInfoMapper.queryByProjectId(projectId);
         if (Boolean.TRUE.equals(projectInfoDTO.getHidePreSprintDoneSubissue())) {
@@ -541,6 +602,14 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    /**
+     *
+     * @param projectId
+     * @param searchVO
+     * @return
+     * @see BoardServiceImpl#queryCurrentSprint(Long, SearchParamVO)
+     */
+    @Deprecated
     private SprintDTO handlerCurrentSprint(Long projectId, SearchVO searchVO) {
         Long sprintId = null;
         if (searchVO.getOtherArgs() != null && searchVO.getOtherArgs().get(SPRINT_FIELD) != null) {
@@ -563,6 +632,34 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    private SprintDTO queryCurrentSprint(Long projectId,
+                                         SearchParamVO searchParamVO) {
+        List<Long> sprintIds = searchParamVO.queryOptionIds(FieldCode.SPRINT);
+        if (!ObjectUtils.isEmpty(sprintIds)) {
+            Long sprintId = sprintIds.get(0);
+            return sprintMapper.selectByPrimaryKey(sprintId);
+        } else {
+            SprintDTO activeSprint = getActiveSprint(projectId);
+            if (ObjectUtils.isEmpty(activeSprint)) {
+                return new SprintDTO();
+            }
+            searchParamVO.addCondition(
+                    new Condition()
+                            .setField(new Field().setFieldCode(FieldCode.SPRINT).setPredefined(true))
+                            .setRelationship(SearchConstant.Relationship.AND.toString())
+                            .setOperation(SearchConstant.Operation.IN.toString())
+                            .setValue(new Value().setValueIdList(Arrays.asList(activeSprint.getSprintId()))));
+            return activeSprint;
+        }
+    }
+
+
+    /**
+     *
+     * @param searchVO
+     * @return
+     * @see BoardServiceImpl#handlerAssigneeAndStoryV2(SearchParamVO)
+     */
     private Boolean handlerAssigneeAndStory(SearchVO searchVO) {
         if (ObjectUtils.isEmpty(searchVO)) {
             return false;
@@ -590,6 +687,23 @@ public class BoardServiceImpl implements BoardService {
                     break;
                 }
             }
+        }
+        return isAssignee && onlyStory;
+    }
+
+    private Boolean handlerAssigneeAndStoryV2(SearchParamVO searchParamVO) {
+        if (ObjectUtils.isEmpty(searchParamVO)) {
+            return false;
+        }
+        List<Long> assigneeIds = searchParamVO.queryOptionIds(FieldCode.ASSIGNEE);
+        Long currentUserId = DetailsHelper.getUserDetails().getUserId();
+        Boolean isAssignee  =assigneeIds.contains(currentUserId);
+        List<Long> issueTypeIds = searchParamVO.queryOptionIds(FieldCode.ISSUE_TYPE);
+        Boolean onlyStory = true;
+        if (!ObjectUtils.isEmpty(issueTypeIds)) {
+            Set<String> typeCodes =
+                    issueTypeMapper.selectByIds(StringUtils.join(issueTypeIds, BaseConstants.Symbol.COMMA)).stream().map(IssueTypeDTO::getTypeCode).collect(Collectors.toSet());
+            onlyStory = (typeCodes.size() == 1 && typeCodes.contains(IssueTypeCode.STORY.value()));
         }
         return isAssignee && onlyStory;
     }

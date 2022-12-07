@@ -118,8 +118,18 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
      * @param userId 用户id
      * @param statusIds 状态id
      * @return 看板issue
+     * @see BoardColumnMapper#selectBoardIssueV2(Set, Long, String, String, Long, Set, boolean)
      */
+    @Deprecated
     List<IssueForBoardDO> selectBoardIssue(@Param("projectIds") Set<Long> projectIds, @Param("sprintId") Long sprintId, @Param("filterSql") String filterSql, @Param("searchVO") SearchVO searchVO, @Param("assigneeFilterIds") List<Long> assigneeFilterIds, @Param("userId") Long userId, @Param("statusIds") Set<Long> statusIds);
+
+    List<IssueForBoardDO> selectBoardIssueV2(@Param("projectIds") Set<Long> projectIds,
+                                             @Param("sprintId") Long sprintId,
+                                             @Param("quickFilterSql") String quickFilterSql,
+                                             @Param("advancedSql") String advancedSql,
+                                             @Param("userId") Long userId,
+                                             @Param("statusIds") Set<Long> statusIds,
+                                             @Param("isHidePreSprintDoneSubissue") boolean isHidePreSprintDoneSubissue);
 
     /**
      * 查询看板issue数量

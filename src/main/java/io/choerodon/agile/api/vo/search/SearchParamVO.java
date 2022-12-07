@@ -160,21 +160,6 @@ public class SearchParamVO {
     }
 
 
-    @Override
-    public String toString() {
-        return "SearchParamVO{" +
-                "conditions=" + conditions +
-                ", advancedConditions=" + advancedConditions +
-                ", treeFlag=" + treeFlag +
-                ", countSubIssue=" + countSubIssue +
-                ", quickFilterIds=" + quickFilterIds +
-                ", issueIds=" + issueIds +
-                ", containsEmptySprint=" + containsEmptySprint +
-                ", displayFields=" + displayFields +
-                ", emptyCondition=" + emptyCondition +
-                '}';
-    }
-
     public void addCondition(Condition condition) {
         if (condition == null) {
             return;
@@ -193,5 +178,45 @@ public class SearchParamVO {
                         .setValue(new Value().setValueStrList(typeCodes
 
                                 )));
+    }
+
+    public List<Condition> queryAllConditions() {
+        List<Condition> conditions = Optional.ofNullable(getConditions()).orElse(new ArrayList<>());
+        conditions.addAll(Optional.ofNullable(getAdvancedConditions()).orElse(Collections.emptyList()));
+        return conditions;
+    }
+
+    public List<Long> queryOptionIds(String fieldCode) {
+        List<Long> ids = new ArrayList<>();
+        List<Condition> conditions = queryAllConditions();
+        for (Condition condition : conditions) {
+            Field field = condition.getField();
+            String thisFieldCode = Optional.ofNullable(field).map(Field::getFieldCode).orElse(null);
+            if (Objects.equals(fieldCode, thisFieldCode)) {
+                Value value = condition.getValue();
+                if (FieldCode.SUB_PROJECT.equals(fieldCode)) {
+                    ids = Optional.ofNullable(value).map(Value::getNoEncryptIdList).orElse(Collections.emptyList());
+                } else {
+                    ids = Optional.ofNullable(value).map(Value::getValueIdList).orElse(Collections.emptyList());
+                }
+            }
+        }
+        return ids;
+    }
+
+    @Override
+    public String toString() {
+        return "SearchParamVO{" +
+                "conditions=" + conditions +
+                ", advancedConditions=" + advancedConditions +
+                ", treeFlag=" + treeFlag +
+                ", countSubIssue=" + countSubIssue +
+                ", quickFilterIds=" + quickFilterIds +
+                ", issueIds=" + issueIds +
+                ", containsEmptySprint=" + containsEmptySprint +
+                ", displayFields=" + displayFields +
+                ", emptyCondition=" + emptyCondition +
+                ", dimension='" + dimension + '\'' +
+                '}';
     }
 }
