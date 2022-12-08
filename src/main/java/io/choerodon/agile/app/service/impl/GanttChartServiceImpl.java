@@ -1082,63 +1082,25 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                     String instanceType,
                                                     Long instanceId) {
         GanttDimension ganttDimension = GanttDimension.valueOf(instanceType.toUpperCase());
+        List<Long> instanceIds = Arrays.asList(instanceId);
         switch (ganttDimension) {
             case EPIC:
-                addConditionByFieldCode(searchParamVO, FieldCode.EPIC, instanceId);
+                searchParamVO.addConditionByFieldCode(FieldCode.EPIC, instanceIds);
                 break;
             case FEATURE:
-                addConditionByFieldCode(searchParamVO, FieldCode.FEATURE, instanceId);
+                searchParamVO.addConditionByFieldCode(FieldCode.FEATURE, instanceIds);
                 break;
             case SPRINT:
-                addConditionByFieldCode(searchParamVO, FieldCode.SPRINT, instanceId);
+                searchParamVO.addConditionByFieldCode(FieldCode.SPRINT, instanceIds);
                 break;
             case ASSIGNEE:
-                addConditionByFieldCode(searchParamVO, FieldCode.ASSIGNEE, instanceId);
+                searchParamVO.addConditionByFieldCode(FieldCode.ASSIGNEE, instanceIds);
                 break;
             case TASK:
                 break;
             default:
                 break;
         }
-    }
-
-    private void addConditionByFieldCode(SearchParamVO searchParamVO,
-                                         String fieldCode,
-                                         Long instanceId) {
-        List<Condition> conditions = Optional.ofNullable(searchParamVO.getConditions()).orElse(new ArrayList<>());
-        searchParamVO.setConditions(conditions);
-        List<Condition> advancedConditions = Optional.ofNullable(searchParamVO.getAdvancedConditions()).orElse(new ArrayList<>());
-        searchParamVO.setAdvancedConditions(advancedConditions);
-        Condition condition = Condition.filterByFieldCode(fieldCode, conditions);
-        if (condition == null) {
-            condition = Condition.filterByFieldCode(fieldCode, advancedConditions);
-        }
-        if (condition == null) {
-            condition = buildInCondition(fieldCode, instanceId);
-            searchParamVO.addCondition(condition);
-        } else {
-            String opt = condition.getOperation();
-            String deepCopyRelationship = SearchConstant.Relationship.AND.toString();
-            //深拷贝
-            Condition deepCopyCondition = SerializationUtils.clone(condition);
-            if (SearchConstant.Operation.isNull(opt) || SearchConstant.Operation.isNotNull(opt)) {
-                deepCopyRelationship = SearchConstant.Relationship.OR.toString();
-            }
-            condition
-                    .setOperation(SearchConstant.Operation.BRACKET.toString())
-                    .setSubConditions(Arrays.asList(buildInCondition(fieldCode, instanceId),
-                            deepCopyCondition.setRelationship(deepCopyRelationship)));
-        }
-    }
-
-    private Condition buildInCondition(String fieldCode, Long instanceId) {
-        Condition condition;
-        condition = new Condition()
-                .setField(new Field().setFieldCode(fieldCode).setPredefined(true))
-                .setRelationship(SearchConstant.Relationship.AND.toString())
-                .setOperation(SearchConstant.Operation.IN.toString())
-                .setValue(new Value().setValueIdList(Arrays.asList(instanceId)));
-        return condition;
     }
 
     private void setOtherArgsValueByKey(SearchVO searchVO, String key, Object value) {

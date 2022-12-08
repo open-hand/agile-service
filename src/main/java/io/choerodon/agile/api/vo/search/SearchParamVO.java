@@ -5,6 +5,7 @@ import java.util.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.infra.enums.FieldCode;
@@ -196,6 +197,45 @@ public class SearchParamVO {
         List<Condition> conditions = queryAllConditions();
         return queryOptionIdsByConditions(fieldCode, conditions);
     }
+
+    public void addConditionByFieldCode(String fieldCode,
+                                        List<Long> instanceIds) {
+        List<Condition> conditions = Optional.ofNullable(getConditions()).orElse(new ArrayList<>());
+        setConditions(conditions);
+        List<Condition> advancedConditions = Optional.ofNullable(getAdvancedConditions()).orElse(new ArrayList<>());
+        setAdvancedConditions(advancedConditions);
+        Condition condition = Condition.filterByFieldCode(fieldCode, conditions);
+        if (condition == null) {
+            condition = Condition.filterByFieldCode(fieldCode, advancedConditions);
+        }
+        if (condition == null) {
+            condition = buildInCondition(fieldCode, instanceIds);
+            addCondition(condition);
+        } else {
+            String opt = condition.getOperation();
+            String deepCopyRelationship = SearchConstant.Relationship.AND.toString();
+            //深拷贝
+            Condition deepCopyCondition = SerializationUtils.clone(condition);
+            if (SearchConstant.Operation.isNull(opt) || SearchConstant.Operation.isNotNull(opt)) {
+                deepCopyRelationship = SearchConstant.Relationship.OR.toString();
+            }
+            condition
+                    .setOperation(SearchConstant.Operation.BRACKET.toString())
+                    .setSubConditions(Arrays.asList(buildInCondition(fieldCode, instanceIds),
+                            deepCopyCondition.setRelationship(deepCopyRelationship)));
+        }
+    }
+
+    private Condition buildInCondition(String fieldCode, List<Long> instanceIds) {
+        Condition condition;
+        condition = new Condition()
+                .setField(new Field().setFieldCode(fieldCode).setPredefined(true))
+                .setRelationship(SearchConstant.Relationship.AND.toString())
+                .setOperation(SearchConstant.Operation.IN.toString())
+                .setValue(new Value().setValueIdList(instanceIds));
+        return condition;
+    }
+
 
     private List<Long> queryOptionIdsByConditions(String fieldCode, List<Condition> conditions) {
         if (ObjectUtils.isEmpty(conditions)) {
