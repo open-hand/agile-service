@@ -178,6 +178,35 @@ public class SearchParamVO {
         conditions.add(condition);
     }
 
+    public void overrideCondition(Condition condition) {
+        if (condition == null) {
+            return;
+        }
+        String targetFieldCode = Optional.ofNullable(condition.getField()).map(Field::getFieldCode).orElse(null);
+        if (targetFieldCode == null) {
+            return;
+        }
+        overrideCondition(condition, targetFieldCode, getConditions());
+        overrideCondition(condition, targetFieldCode, getAdvancedConditions());
+    }
+
+    private void overrideCondition(Condition condition,
+                                   String targetFieldCode,
+                                   List<Condition> conditions) {
+        List<Condition> newConditions = new ArrayList<>();
+        if (conditions != null) {
+            for (Condition c : conditions) {
+                String fieldCode = Optional.ofNullable(c.getField()).map(Field::getFieldCode).orElse(null);
+                if (targetFieldCode.equals(fieldCode)) {
+                    newConditions.add(condition);
+                } else {
+                    newConditions.add(c);
+                }
+            }
+        }
+        setConditions(newConditions);
+    }
+
     public void addGanttTypeCodes(List<String> typeCodes) {
         addCondition(
                 new Condition()
