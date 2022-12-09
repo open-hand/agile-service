@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.choerodon.agile.infra.feign.fallback.CustomFileRemoteFallbackFactory;
+
+import org.hzero.common.HZeroService;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author superlee
  * @since 2020-05-22
  */
-@FeignClient(value = "choerodon-file", fallbackFactory = CustomFileRemoteFallbackFactory.class)
+@FeignClient(value =  HZeroService.File.NAME, fallbackFactory = CustomFileRemoteFallbackFactory.class)
 public interface CustomFileFeignClient {
 
     @PostMapping({"/choerodon/v1/{organizationId}/delete-by-url"})

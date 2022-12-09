@@ -6,16 +6,16 @@ import java.util.Set;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.springframework.stereotype.Component;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.IamFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
-
-import org.hzero.core.util.ResponseUtils;
 
 /**
  * Copyright (c) 2022. Hand Enterprise Solution Company. All right reserved.
@@ -27,9 +27,12 @@ import org.hzero.core.util.ResponseUtils;
 public class RemoteIamOperator {
 
     private final IamFeignClient iamFeignClient;
+    private final BaseFeignClient baseFeignClient;
 
-    public RemoteIamOperator(IamFeignClient iamFeignClient) {
+    public RemoteIamOperator(IamFeignClient iamFeignClient,
+                             BaseFeignClient baseFeignClient) {
         this.iamFeignClient = iamFeignClient;
+        this.baseFeignClient = baseFeignClient;
     }
 
     /**
@@ -66,7 +69,7 @@ public class RemoteIamOperator {
     }
 
     public List<ProjectVO> queryProjectByIds(Set<Long> ids) {
-        return ResponseUtils.getResponse(iamFeignClient.queryProjectByIds(ids),
+        return ResponseUtils.getResponse(baseFeignClient.queryProjectByIds(ids),
                 new TypeReference<List<ProjectVO>>() {
                 });
     }
@@ -88,7 +91,7 @@ public class RemoteIamOperator {
      * @return 查询到的项目
      */
     public ProjectVO queryProject(Long id) {
-        return ResponseUtils.getResponse(iamFeignClient.queryProject(id), ProjectVO.class);
+        return ResponseUtils.getResponse(baseFeignClient.queryProject(id), ProjectVO.class);
     }
 
     /**
@@ -98,18 +101,18 @@ public class RemoteIamOperator {
      * @return 查询到的项目
      */
     public ProjectVO queryProject(Long id, Boolean withAgileInfo) {
-        return ResponseUtils.getResponse(iamFeignClient.queryProject(id, withAgileInfo), ProjectVO.class);
+        return ResponseUtils.getResponse(baseFeignClient.queryProject(id, withAgileInfo), ProjectVO.class);
     }
 
     public Page<UserDTO> listUsersByProjectId(Long id, int page, int size, String param) {
-        return ResponseUtils.getResponse(iamFeignClient.listUsersByProjectId(id, page, size, param),
+        return ResponseUtils.getResponse(baseFeignClient.listUsersByProjectId(id, page, size, param),
                 new TypeReference<Page<UserDTO>>() {
                 });
     }
 
 
     public Page<UserDTO> agileUsers(Long projectId, int page, int size, AgileUserVO agileUserVO) {
-        return ResponseUtils.getResponse(iamFeignClient.agileUsers(projectId, page, size, agileUserVO),
+        return ResponseUtils.getResponse(baseFeignClient.agileUsers(projectId, page, size, agileUserVO),
                 new TypeReference<Page<UserDTO>>() {
                 });
     }
@@ -122,13 +125,13 @@ public class RemoteIamOperator {
      * @return UserVO
      */
     public Page<UserVO> list(Long id, String param) {
-        return ResponseUtils.getResponse(iamFeignClient.list(id, param),
+        return ResponseUtils.getResponse(baseFeignClient.list(id, param),
                 new TypeReference<Page<UserVO>>() {
                 });
     }
 
     public List<RoleVO> listRolesWithUserCountOnProjectLevel(Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
-        return ResponseUtils.getResponse(iamFeignClient.listRolesWithUserCountOnProjectLevel(sourceId, roleAssignmentSearchVO),
+        return ResponseUtils.getResponse(baseFeignClient.listRolesWithUserCountOnProjectLevel(sourceId, roleAssignmentSearchVO),
                 new TypeReference<List<RoleVO>>() {
                 });
     }
@@ -138,7 +141,7 @@ public class RemoteIamOperator {
                                                                Boolean doPage,
                                                                Long sourceId,
                                                                RoleAssignmentSearchVO roleAssignmentSearchVO) {
-        return ResponseUtils.getResponse(iamFeignClient.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, doPage, sourceId, roleAssignmentSearchVO),
+        return ResponseUtils.getResponse(baseFeignClient.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, doPage, sourceId, roleAssignmentSearchVO),
                 new TypeReference<Page<UserVO>>() {
                 });
     }
@@ -147,7 +150,7 @@ public class RemoteIamOperator {
                                                                       Long sourceId,
                                                                       RoleAssignmentSearchVO roleAssignmentSearchVO,
                                                                       boolean doPage) {
-        return ResponseUtils.getResponse(iamFeignClient.pagingQueryUsersWithProjectLevelRoles(page, size, sourceId, roleAssignmentSearchVO, doPage),
+        return ResponseUtils.getResponse(baseFeignClient.pagingQueryUsersWithProjectLevelRoles(page, size, sourceId, roleAssignmentSearchVO, doPage),
                 new TypeReference<Page<UserWithRoleVO>>() {
                 });
     }
@@ -159,7 +162,7 @@ public class RemoteIamOperator {
      * @return result
      */
     public List<ProjectVO> listProjectsByOrgId(Long organizationId) {
-        return ResponseUtils.getResponse(iamFeignClient.listProjectsByOrgId(organizationId),
+        return ResponseUtils.getResponse(baseFeignClient.listProjectsByOrgId(organizationId),
                 new TypeReference<List<ProjectVO>>() {
                 });
     }
@@ -168,7 +171,7 @@ public class RemoteIamOperator {
                                                       ProjectSearchVO projectSearchVO,
                                                       Integer page,
                                                       Integer size) {
-        return ResponseUtils.getResponse(iamFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, page, size),
+        return ResponseUtils.getResponse(baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, page, size),
                 new TypeReference<Page<ProjectVO>>() {
                 });
     }
@@ -181,7 +184,7 @@ public class RemoteIamOperator {
      * @return 时区日历dto
      */
     public TimeZoneWorkCalendarDTO queryTimeZoneDetailByOrganizationId(Long organizationId) {
-        return ResponseUtils.getResponse(iamFeignClient.queryTimeZoneDetailByOrganizationId(organizationId), TimeZoneWorkCalendarDTO.class);
+        return ResponseUtils.getResponse(baseFeignClient.queryTimeZoneDetailByOrganizationId(organizationId), TimeZoneWorkCalendarDTO.class);
     }
 
     /**
@@ -192,7 +195,7 @@ public class RemoteIamOperator {
      * @return 日历假期信息
      */
     public List<WorkCalendarHolidayRefVO> queryWorkCalendarHolidayRelByYear(Long organizationId, Integer year) {
-        return ResponseUtils.getResponse(iamFeignClient.queryWorkCalendarHolidayRelByYear(organizationId, year),
+        return ResponseUtils.getResponse(baseFeignClient.queryWorkCalendarHolidayRelByYear(organizationId, year),
                 new TypeReference<List<WorkCalendarHolidayRefVO>>() {
                 });
     }
@@ -205,14 +208,14 @@ public class RemoteIamOperator {
      * @return 日历假期信息
      */
     public List<WorkCalendarHolidayRefVO> queryByYearIncludeLastAndNext(Long organizationId, Integer year) {
-        return ResponseUtils.getResponse(iamFeignClient.queryByYearIncludeLastAndNext(organizationId, year),
+        return ResponseUtils.getResponse(baseFeignClient.queryByYearIncludeLastAndNext(organizationId, year),
                 new TypeReference<List<WorkCalendarHolidayRefVO>>() {
                 });
     }
 
 
     public List<RoleVO> getUserWithProjLevelRolesByUserId(Long projectId, Long userId) {
-        return ResponseUtils.getResponse(iamFeignClient.getUserWithProjLevelRolesByUserId(projectId, userId),
+        return ResponseUtils.getResponse(baseFeignClient.getUserWithProjLevelRolesByUserId(projectId, userId),
                 new TypeReference<List<RoleVO>>() {
                 });
     }
@@ -224,53 +227,53 @@ public class RemoteIamOperator {
     }
 
     public List<UserVO> listProjectOwnerById(Long projectId) {
-        return ResponseUtils.getResponse(iamFeignClient.listProjectOwnerById(projectId),
+        return ResponseUtils.getResponse(baseFeignClient.listProjectOwnerById(projectId),
                 new TypeReference<List<UserVO>>() {
                 });
     }
 
     public List<ProjectWithUserVO> listProjectOwnerByIds(Set<Long> projectIds) {
-        return ResponseUtils.getResponse(iamFeignClient.listProjectOwnerByIds(projectIds),
+        return ResponseUtils.getResponse(baseFeignClient.listProjectOwnerByIds(projectIds),
                 new TypeReference<List<ProjectWithUserVO>>() {
                 });
     }
 
     public List<UserVO> listUsersUnderRoleByIds(Long projectId, String roleIdString) {
-        return ResponseUtils.getResponse(iamFeignClient.listUsersUnderRoleByIds(projectId, roleIdString),
+        return ResponseUtils.getResponse(baseFeignClient.listUsersUnderRoleByIds(projectId, roleIdString),
                 new TypeReference<List<UserVO>>() {
                 });
     }
 
     public Boolean checkIsProjectOwner(Long id, Long projectId) {
-        return ResponseUtils.getResponse(iamFeignClient.checkIsProjectOwner(id, projectId), Boolean.class);
+        return ResponseUtils.getResponse(baseFeignClient.checkIsProjectOwner(id, projectId), Boolean.class);
     }
 
     public List<ProjectVO> queryProjects(Long id, boolean includedDisabled) {
-        return ResponseUtils.getResponse(iamFeignClient.queryProjects(id, includedDisabled),
+        return ResponseUtils.getResponse(baseFeignClient.queryProjects(id, includedDisabled),
                 new TypeReference<List<ProjectVO>>() {
                 });
     }
 
     public List<ProjectVO> queryOrgProjects(Long organizationId, Long userId) {
-        return ResponseUtils.getResponse(iamFeignClient.queryOrgProjects(organizationId, userId),
+        return ResponseUtils.getResponse(baseFeignClient.queryOrgProjects(organizationId, userId),
                 new TypeReference<List<ProjectVO>>() {
                 });
     }
 
     public List<RoleVO> listProjectRoles(Long projectId, Boolean onlySelectEnable, String roleName) {
-        return ResponseUtils.getResponse(iamFeignClient.listProjectRoles(projectId, onlySelectEnable, roleName),
+        return ResponseUtils.getResponse(baseFeignClient.listProjectRoles(projectId, onlySelectEnable, roleName),
                 new TypeReference<List<RoleVO>>() {
                 });
     }
 
     public Page<RoleVO> listOrganizationRoles(Integer page, Integer size, String name, String code, String roleLevel, Long tenantId, Boolean builtIn, Boolean enabled, String params) {
-        return ResponseUtils.getResponse(iamFeignClient.listOrganizationRoles(page, size, name, code, roleLevel, tenantId, builtIn, enabled, params),
+        return ResponseUtils.getResponse(baseFeignClient.listOrganizationRoles(page, size, name, code, roleLevel, tenantId, builtIn, enabled, params),
                 new TypeReference<Page<RoleVO>>() {
                 });
     }
 
     public Page<UserVO> queryUsersByProject(Long projectId, String param, int page, int size) {
-        return ResponseUtils.getResponse(iamFeignClient.queryUsersByProject(projectId, param, page, size),
+        return ResponseUtils.getResponse(baseFeignClient.queryUsersByProject(projectId, param, page, size),
                 new TypeReference<Page<UserVO>>() {
                 });
     }
@@ -292,13 +295,13 @@ public class RemoteIamOperator {
     }
 
     public Page<UserDTO> agileUsersByProjectIds(Long projectId, int page, int size, AgileUserVO agileUserVO) {
-        return ResponseUtils.getResponse(iamFeignClient.agileUsersByProjectIds(projectId, page, size, agileUserVO),
+        return ResponseUtils.getResponse(baseFeignClient.agileUsersByProjectIds(projectId, page, size, agileUserVO),
                 new TypeReference<Page<UserDTO>>() {
                 });
     }
 
     public List<RoleVO> listRolesByIds(Long tenantId, List<Long> roleIds) {
-        return ResponseUtils.getResponse(iamFeignClient.listRolesByIds(tenantId, roleIds),
+        return ResponseUtils.getResponse(baseFeignClient.listRolesByIds(tenantId, roleIds),
                 new TypeReference<List<RoleVO>>() {
                 });
     }
@@ -315,7 +318,7 @@ public class RemoteIamOperator {
      * @return result
      */
     public Page<ProjectVO> pagedQueryProjects(Long organizationId, int page, int size, String name, String code, Boolean enabled, Boolean withAdditionInfo, String params) {
-        return ResponseUtils.getResponse(iamFeignClient.pagedQueryProjects(organizationId, page, size, name, code, enabled, withAdditionInfo, params),
+        return ResponseUtils.getResponse(baseFeignClient.pagedQueryProjects(organizationId, page, size, name, code, enabled, withAdditionInfo, params),
                 new TypeReference<Page<ProjectVO>>() {
                 });
     }
@@ -327,17 +330,17 @@ public class RemoteIamOperator {
     }
 
     public TimeZoneWorkCalendarRefDetailVO queryTimeZoneWorkCalendarDetail(Long organizationId, Integer year) {
-        return ResponseUtils.getResponse(iamFeignClient.queryTimeZoneWorkCalendarDetail(organizationId, year), TimeZoneWorkCalendarRefDetailVO.class);
+        return ResponseUtils.getResponse(baseFeignClient.queryTimeZoneWorkCalendarDetail(organizationId, year), TimeZoneWorkCalendarRefDetailVO.class);
     }
 
     public List<ProjectVO> listProjectsByUserIdForSimple(Long organizationId, Long userId, String category, Boolean enabled) {
-        return ResponseUtils.getResponse(iamFeignClient.listProjectsByUserIdForSimple(organizationId, userId, category, enabled),
+        return ResponseUtils.getResponse(baseFeignClient.listProjectsByUserIdForSimple(organizationId, userId, category, enabled),
                 new TypeReference<List<ProjectVO>>() {
                 });
     }
 
     public Page<ProjectVO> pagingQueryProjectsByUserId(Long organizationId, Long userId, Integer page, Integer size, ProjectVO projectVO) {
-        return ResponseUtils.getResponse(iamFeignClient.pagingQueryProjectsByUserId(organizationId, userId, page, size, projectVO),
+        return ResponseUtils.getResponse(baseFeignClient.pagingQueryProjectsByUserId(organizationId, userId, page, size, projectVO),
                 new TypeReference<Page<ProjectVO>>() {
                 });
     }
