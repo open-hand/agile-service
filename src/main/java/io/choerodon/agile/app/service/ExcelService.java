@@ -16,6 +16,7 @@ import io.choerodon.agile.api.vo.ExcelTemplateVO;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -34,8 +35,28 @@ public interface ExcelService {
 
     FileOperationHistoryVO queryLatestRecode(Long projectId, String action);
 
+    /**
+     *
+     * @param projectId
+     * @param searchVO
+     * @param request
+     * @param response
+     * @param organizationId
+     * @param sort
+     * @param requestAttributes
+     * @see ExcelService#asyncExportIssuesV2(Long, SearchParamVO, HttpServletRequest, HttpServletResponse, Long, Sort, ServletRequestAttributes)
+     */
+    @Deprecated
     void asyncExportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
                            HttpServletResponse response, Long organizationId, Sort sort, ServletRequestAttributes requestAttributes);
+
+    void asyncExportIssuesV2(Long projectId,
+                             SearchParamVO searchParamVO,
+                             HttpServletRequest request,
+                             HttpServletResponse response,
+                             Long organizationId,
+                             Sort sort,
+                             ServletRequestAttributes requestAttributes);
 
     FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action, String websocketKey);
 

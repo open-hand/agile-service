@@ -762,7 +762,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
         }
         String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
-        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, organizationId, isTreeView, false, null);
+        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
+        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, sortMap, isTreeView, false, null);
         Page<IssueListFieldKVVO> issueListDTOPage = new Page<>();
         if (!CollectionUtils.isEmpty(issueIdPage.getContent())) {
             List<Long> issueIds = issueIdPage.getContent();
@@ -770,11 +771,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (isTreeView) {
                 List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null);
                 //todo 支持第三方调用，筛选出父级时同时把所有子级返回
-                boolean withSubIssues = false;
-//                        !Boolean.FALSE.equals(
-//                                Optional.ofNullable(searchVO.getSearchArgs())
-//                                        .map(x -> x.get("withSubIssues"))
-//                                        .orElse(false));
+                boolean withSubIssues = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getWithSubIssues()).orElse(false));
                 // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
                 if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
                     childrenIds.add(0L);
@@ -800,14 +797,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<Long> pagedQueryRoot(PageRequest pageRequest,
-                                      Long projectId,
-                                      String quickFilterSql,
-                                      String advancedSql,
-                                      Long organizationId,
-                                      boolean isTreeView,
-                                      boolean ganttDefaultOrder,
-                                      String dimension) {
-        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
+                                     Long projectId,
+                                     String quickFilterSql,
+                                     String advancedSql,
+                                     Map<String, Object> sortMap,
+                                     boolean isTreeView,
+                                     boolean ganttDefaultOrder,
+                                     String dimension) {
         Page<IssueDTO> issuePage;
         if (isTreeView) {
             issuePage =

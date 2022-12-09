@@ -8,12 +8,15 @@ import com.monitorjbl.xlsx.StreamingReader;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.domain.entity.ExcelSheetData;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
@@ -27,6 +30,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
@@ -214,6 +218,8 @@ public class ExcelServiceImpl implements ExcelService {
     private IssueValidator issueValidator;
     @Autowired
     private FieldValueService fieldValueService;
+    @Autowired
+    private AdvancedParamParserService advancedParamParserService;
 
     private static final String[] FIELDS_NAMES;
 
@@ -1644,6 +1650,186 @@ public class ExcelServiceImpl implements ExcelService {
                 //查询后页数增1
                 cursor.increasePage();
             }
+        }
+        String fileName = project.getName() + FILESUFFIX;
+        //把workbook上传到对象存储服务中
+        downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
+    }
+
+    @Override
+    @Async
+    public void asyncExportIssuesV2(Long projectId,
+                                    SearchParamVO searchParamVO,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    Long organizationId,
+                                    Sort sort,
+                                    ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        String websocketKey = WEBSOCKET_EXPORT_CODE + BaseConstants.Symbol.MIDDLE_LINE + projectId;
+        FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE, websocketKey);
+        //处理根据界面筛选结果导出的字段
+        Map<String, String[]> fieldMap =
+                handleExportFields(searchParamVO.getExportFieldCodes(), projectId, organizationId, FIELDS_NAMES, FIELDS);
+        String[] fieldCodes = sortFieldCodes(fieldMap.get(FIELD_CODES));
+        String[] fieldNames = sortFieldNames(fieldMap.get(FIELD_NAMES));
+        ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
+        projectInfoDTO.setProjectId(projectId);
+        projectInfoDTO = projectInfoMapper.selectOne(projectInfoDTO);
+        ProjectVO project = userService.queryProject(projectId);
+        if (project == null) {
+            throw new CommonException(PROJECT_ERROR);
+        }
+        project.setCode(projectInfoDTO.getProjectCode());
+        boolean isTreeView = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getTreeFlag()).orElse(false));
+
+        String sheetName = COMMON_SHEET_NAME;
+        Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
+        // 复制要求sheet并调整sheet1的顺序到最后一个
+        excelCommonService.copyGuideSheetFromTemplate(workbook, "/templates/IssueImportGuideTemplate.xlsx");
+        workbook.setSheetOrder(sheetName, workbook.getNumberOfSheets() - 1);
+
+        ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
+        String quickFilterSql = issueService.getQuickFilter(searchParamVO.getQuickFilterIds());
+        Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
+        if (agilePluginService != null) {
+            predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
+        }
+        Set<Long> projectIds = SetUtils.unmodifiableSet(projectId);
+        String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
+        double lastProcess = 0D;
+        PageRequest sourcePage = new PageRequest(0, 1, sort);
+        Map<String, Object> sortMap = issueService.processSortMap(sourcePage, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
+        while (true) {
+            //查询所有父节点问题
+            PageRequest pageRequest = new PageRequest(cursor.getPage(), cursor.getSize());
+            Page<Long> page = issueService.pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, sortMap, isTreeView, false, null);
+            if (CollectionUtils.isEmpty(page.getContent())) {
+                break;
+            }
+            List<Long> parentIds = page.getContent();
+            List<Long> issueIds = new ArrayList<>();
+            Map<Long, Set<Long>> parentSonMap = new HashMap<>();
+            List<IssueDTO> issues = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(parentIds)) {
+                Set<Long> childrenIds = new HashSet<>();
+                if (isTreeView) {
+                    List<IssueDTO> childIssues = issueMapper.queryChildrenList(parentIds, projectIds, quickFilterSql, advancedSql, null);
+                    //支持第三方调用，筛选出父级时同时把所有子级返回
+                    boolean withSubIssues = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getWithSubIssues()).orElse(false));
+                    // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                    if (!withSubIssues && CollectionUtils.isEmpty(childIssues)) {
+                        childrenIds.add(0L);
+                    }
+                    childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
+                }
+                cursor.addCollections(childrenIds);
+                issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true, isTreeView);
+            }
+            Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
+            cursor
+                    .addCollections(page.getContent())
+                    .addCollections(parentIds)
+                    .addCollections(issueIds)
+                    .addCollections(parentSonMap)
+                    .addCollections(issueMap)
+                    .addCollections(issues);
+            if (!ObjectUtils.isEmpty(issues)) {
+                Set<Long> userIds = new HashSet<>();
+                Map<Long, IssueDTO> issueDTOMap = new HashMap<>();
+                issues.forEach(i -> {
+                    issueIds.add(i.getIssueId());
+                    issueDTOMap.put(i.getIssueId(), i);
+                    Long assigneeId = i.getAssigneeId();
+                    Long reporterId = i.getReporterId();
+                    Long createdUser = i.getCreatedBy();
+                    Long updatedUser = i.getLastUpdatedBy();
+                    Long mainResponsibleId = i.getMainResponsibleId();
+                    if (!ObjectUtils.isEmpty(assigneeId) && !Objects.equals(assigneeId, 0L)) {
+                        userIds.add(assigneeId);
+                    }
+                    if (!ObjectUtils.isEmpty(reporterId) && !Objects.equals(reporterId, 0L)) {
+                        userIds.add(reporterId);
+                    }
+                    if (!ObjectUtils.isEmpty(createdUser) && !Objects.equals(createdUser, 0L)) {
+                        userIds.add(createdUser);
+                    }
+                    if (!ObjectUtils.isEmpty(updatedUser) && !Objects.equals(updatedUser, 0L)) {
+                        userIds.add(updatedUser);
+                    }
+                    if (!ObjectUtils.isEmpty(mainResponsibleId) && !Objects.equals(mainResponsibleId, 0L)) {
+                        userIds.add(mainResponsibleId);
+                    }
+                    if (CollectionUtils.isNotEmpty(i.getParticipantIds())) {
+                        userIds.addAll(i.getParticipantIds());
+                    }
+                });
+                Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(ListUtil.filterByKey(new ArrayList<>(userIds), 0L), true);
+                Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
+                Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
+                Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
+                Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
+                Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, ProductVersionService.VERSION_RELATION_TYPE_FIX).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Collections.singletonList(projectId), issueIds, ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
+                Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
+                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Collections.singletonList(projectId), issueIds, true);
+                Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), issueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
+                Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
+                Map<Long, Set<TagVO>> tagMap = new HashMap<>();
+                Map<Long, List<ProductVO>> productMap = new HashMap<>();
+                if (agilePluginService != null) {
+                    tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Collections.singletonList(projectId)), issueIds));
+                    productMap.putAll(agilePluginService.listProductMap(ConvertUtil.getOrganizationId(projectId), Collections.singletonList(projectId), issueIds));
+                }
+                Map<Long, List<IssueLinkDTO>> relatedIssueMap =
+                        issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Collections.singletonList(projectId)), false)
+                                .stream()
+                                .collect(Collectors.groupingBy(IssueLinkDTO::getKeyIssueId));
+                cursor.addCollections(userIds);
+                Map<String, Object> issueValueMap = new HashMap<>();
+                issueValueMap.put(USER_MAP, usersMap);
+                issueValueMap.put(ISSUE_TYPE_MAP, issueTypeDTOMap);
+                issueValueMap.put(STATUS_MAP, statusMapDTOMap);
+                issueValueMap.put(PRIORITY_MAP, priorityDTOMap);
+                issueValueMap.put(CLOSE_SPRINT_MAP, closeSprintNames);
+                issueValueMap.put(FIX_VERSION_MAP, fixVersionNames);
+                issueValueMap.put(INFLUENCE_VERSION_MAP, influenceVersionNames);
+                issueValueMap.put(LABEL_MAP, labelNames);
+                issueValueMap.put(COMPONENT_MAP, componentMap);
+                issueValueMap.put(FOUNDATION_CODE_VALUE_MAP, foundationCodeValue);
+                issueValueMap.put(ENV_MAP, envMap);
+                issueValueMap.put(WORK_LOG_MAP, workLogVOMap);
+                issueValueMap.put(TAG_MAP, tagMap);
+                issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
+                issueValueMap.put(PRODUCT_MAP, productMap);
+                issueValueMap.put(ISSUEDTO_MAP, issueDTOMap);
+                issueValueMap.forEach((k, v) -> cursor.addCollections(v));
+                issues.forEach(issue ->
+                        buildExcelIssueFromIssue(
+                                project.getName(),
+                                parentSonMap,
+                                issueMap,
+                                issueValueMap,
+                                issue));
+            }
+            if (!isTreeView) {
+                parentSonMap.clear();
+            }
+            ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
+            boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
+            cursor.clean();
+            double process = excelCommonService.getProcess(cursor.getPage(), page.getTotalPages());
+            if (process - lastProcess >= 0.1) {
+                sendProcess(fileOperationHistoryDTO, userId, process, websocketKey);
+                lastProcess = process;
+            }
+            if (!hasNextPage) {
+                break;
+            }
+            //查询后页数增1
+            cursor.increasePage();
         }
         String fileName = project.getName() + FILESUFFIX;
         //把workbook上传到对象存储服务中

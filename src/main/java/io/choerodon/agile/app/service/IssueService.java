@@ -567,7 +567,7 @@ public interface IssueService {
                               Long projectId,
                               String quickFilterSql,
                               String advancedSql,
-                              Long organizationId,
+                              Map<String, Object> sortMap,
                               boolean isTreeView,
                               boolean ganttDefaultOrder,
                               String dimension);

@@ -40,6 +40,26 @@ public class SearchParamVO {
     private EmptyCondition emptyCondition;
     @ApiModelProperty("甘特图使用，纬度")
     private String dimension;
+    @ApiModelProperty("导出issue使用字段")
+    private List<String> exportFieldCodes;
+    @ApiModelProperty("导出issue使用字段")
+    private Boolean withSubIssues;
+
+    public Boolean getWithSubIssues() {
+        return withSubIssues;
+    }
+
+    public void setWithSubIssues(Boolean withSubIssues) {
+        this.withSubIssues = withSubIssues;
+    }
+
+    public List<String> getExportFieldCodes() {
+        return exportFieldCodes;
+    }
+
+    public void setExportFieldCodes(List<String> exportFieldCodes) {
+        this.exportFieldCodes = exportFieldCodes;
+    }
 
     public String getDimension() {
         return dimension;
