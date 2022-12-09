@@ -518,7 +518,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
         }
         String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, SetUtils.unmodifiableSet(projectId), predefinedFieldMap);
-        Page<Long> page = issueService.pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, ConvertUtil.getOrganizationId(projectId), isTreeView, false, dimension);
+        Page<Long> page = issueService.pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, null, isTreeView, false, dimension);
         List<Long> issueIds = page.getContent();
         if (issueIds.isEmpty()) {
             return new LinkedHashMap<>();
@@ -1272,7 +1272,7 @@ public class GanttChartServiceImpl implements GanttChartService {
             predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
         }
         String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
-        Page<Long> page = issueService.pagedQueryRoot(pageRequest, projectId, filterSql, advancedSql, organizationId, isTreeView, ganttDefaultOrder, dimension);
+        Page<Long> page = issueService.pagedQueryRoot(pageRequest, projectId, filterSql, advancedSql, sortMap, isTreeView, ganttDefaultOrder, dimension);
         List<Long> issueIds = page.getContent();
         Map<Long, Long> issueEpicMap = new HashMap<>();
         Map<Long, IssueDTO> issueFeatureMap = new HashMap<>();
