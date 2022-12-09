@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>agile-service</artifactId>
-    <version>2.3.0-SNAPSHOT</version>
+    <version>2.3.0.if-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
