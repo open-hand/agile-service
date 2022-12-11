@@ -42,7 +42,7 @@ public class SearchParamVO {
     private String dimension;
     @ApiModelProperty("导出issue使用字段")
     private List<String> exportFieldCodes;
-    @ApiModelProperty("导出issue使用字段")
+    @ApiModelProperty("查父级的时候同时带出所有子级，甄云用")
     private Boolean withSubIssues;
 
     public Boolean getWithSubIssues() {
@@ -238,7 +238,7 @@ public class SearchParamVO {
 
     public List<Condition> queryAllConditions() {
         List<Condition> conditions = Optional.ofNullable(getConditions()).orElse(new ArrayList<>());
-        conditions.addAll(Optional.ofNullable(getAdvancedConditions()).orElse(Collections.emptyList()));
+        conditions.addAll(Optional.ofNullable(getAdvancedConditions()).orElse(new ArrayList<>()));
         return conditions;
     }
 
@@ -288,7 +288,7 @@ public class SearchParamVO {
 
     private List<Long> queryOptionIdsByConditions(String fieldCode, List<Condition> conditions) {
         if (ObjectUtils.isEmpty(conditions)) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         List<Long> ids = new ArrayList<>();
         for (Condition condition : conditions) {
@@ -300,9 +300,9 @@ public class SearchParamVO {
                     ids.addAll(queryOptionIdsByConditions(fieldCode, condition.getSubConditions()));
                 } else {
                     if (FieldCode.SUB_PROJECT.equals(fieldCode)) {
-                        ids = Optional.ofNullable(value).map(Value::getNoEncryptIdList).orElse(Collections.emptyList());
+                        ids = Optional.ofNullable(value).map(Value::getNoEncryptIdList).orElse(new ArrayList<>());
                     } else {
-                        ids = Optional.ofNullable(value).map(Value::getValueIdList).orElse(Collections.emptyList());
+                        ids = Optional.ofNullable(value).map(Value::getValueIdList).orElse(new ArrayList<>());
                     }
                 }
             }
