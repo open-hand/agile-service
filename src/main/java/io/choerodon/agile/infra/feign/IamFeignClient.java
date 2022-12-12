@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.feign;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
@@ -128,6 +129,18 @@ public interface IamFeignClient {
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all")
     ResponseEntity<String> listProjectsByOrgId(@PathVariable("organization_id") Long organizationId);
+
+    /**
+     * 查询组织下所有项目
+     * @param organizationId 组织ID
+     * @param projectCodes   过滤条件--项目编码
+     * @param enabledFlag    过滤条件--是否启用
+     * @return               查询结果
+     */
+    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all")
+    ResponseEntity<String> listProjectsByOrgId(@PathVariable("organization_id") Long organizationId,
+                                               @RequestParam(required = false) Collection<String> projectCodes,
+                                               @RequestParam(required = false) Boolean enabledFlag);
 
     /**
      * @param organizationId organizationId
