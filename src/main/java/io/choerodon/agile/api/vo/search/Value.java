@@ -35,10 +35,20 @@ public class Value implements Serializable {
     private BigDecimal valueDecimal;
     @ApiModelProperty("时间快速搜索值")
     private Date valueDate;
-
+    @ApiModelProperty("特殊值")
     private String valueSpecial;
-
+    @ApiModelProperty("对象列表")
     private List<? extends Object> objectList;
+    @ApiModelProperty("工作台筛选项目下的工作类型")
+    private List<IssueTypeProject> issueTypeProjectList;
+
+    public List<IssueTypeProject> getIssueTypeProjectList() {
+        return issueTypeProjectList;
+    }
+
+    public void setIssueTypeProjectList(List<IssueTypeProject> issueTypeProjectList) {
+        this.issueTypeProjectList = issueTypeProjectList;
+    }
 
     public List<? extends Object> getObjectList() {
         return objectList;
@@ -130,6 +140,36 @@ public class Value implements Serializable {
         return this;
     }
 
+    public static class IssueTypeProject {
+        private Long projectId;
+        @Encrypt
+        private Long issueTypeId;
+
+        public Long getProjectId() {
+            return projectId;
+        }
+
+        public void setProjectId(Long projectId) {
+            this.projectId = projectId;
+        }
+
+        public Long getIssueTypeId() {
+            return issueTypeId;
+        }
+
+        public void setIssueTypeId(Long issueTypeId) {
+            this.issueTypeId = issueTypeId;
+        }
+
+        @Override
+        public String toString() {
+            return "IssueTypeProject{" +
+                    "projectId=" + projectId +
+                    ", issueTypeId=" + issueTypeId +
+                    '}';
+        }
+    }
+
     @Override
     public String toString() {
         return "Value{" +
@@ -143,6 +183,7 @@ public class Value implements Serializable {
                 ", valueDate=" + valueDate +
                 ", valueSpecial='" + valueSpecial + '\'' +
                 ", objectList=" + objectList +
+                ", issueTypeProjectList=" + issueTypeProjectList +
                 '}';
     }
 }
