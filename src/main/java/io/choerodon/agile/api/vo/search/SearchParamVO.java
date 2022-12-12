@@ -206,13 +206,18 @@ public class SearchParamVO {
         if (targetFieldCode == null) {
             return;
         }
-        overrideCondition(condition, targetFieldCode, getConditions());
-        overrideCondition(condition, targetFieldCode, getAdvancedConditions());
+        List<Condition> conditions = overrideConditionIfExisted(condition, targetFieldCode, getConditions());
+        List<Condition> advancedConditions = overrideConditionIfExisted(condition, targetFieldCode, getAdvancedConditions());
+        if (conditions.isEmpty() && advancedConditions.isEmpty()) {
+            conditions.add(condition);
+        }
+        setConditions(conditions);
+        setAdvancedConditions(advancedConditions);
     }
 
-    private void overrideCondition(Condition condition,
-                                   String targetFieldCode,
-                                   List<Condition> conditions) {
+    private List<Condition> overrideConditionIfExisted(Condition condition,
+                                                       String targetFieldCode,
+                                                       List<Condition> conditions) {
         List<Condition> newConditions = new ArrayList<>();
         if (conditions != null) {
             for (Condition c : conditions) {
@@ -224,7 +229,7 @@ public class SearchParamVO {
                 }
             }
         }
-        setConditions(newConditions);
+        return newConditions;
     }
 
     public void addGanttTypeCodes(List<String> typeCodes) {
