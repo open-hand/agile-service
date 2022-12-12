@@ -16,6 +16,7 @@ import org.springframework.util.ObjectUtils;
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.Condition;
+import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
@@ -28,6 +29,7 @@ import io.choerodon.agile.infra.utils.SqlUtil;
 import io.choerodon.core.exception.CommonException;
 
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.util.JsonUtils;
 import org.hzero.core.util.Pair;
 
 /**
@@ -136,6 +138,9 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
             case FieldCode.EPIC:
                 sqlBuilder.append(generateEpicSql(operation, values, alias, fieldTable));
                 break;
+            case SearchConstant.Field.ISSUE_TYPE_PROJECT:
+                sqlBuilder.append(generateIssueTypeProjectSql(values));
+                break;
             default:
                 if (!isLinkedTable) {
                     //主表字段
@@ -147,6 +152,46 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 break;
         }
         return sqlBuilder.toString();
+    }
+
+    private String generateIssueTypeProjectSql(List<?> values) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        List<Value.IssueTypeProject> issueTypeProjects =
+                JsonUtils.fromJson(JsonUtils.toJson(values), new TypeReference<List<Value.IssueTypeProject>>() {
+                });
+        if (ObjectUtils.isEmpty(issueTypeProjects)) {
+            return sqlBuilder.toString();
+        }
+        Iterator<Value.IssueTypeProject> iterator = issueTypeProjects.iterator();
+        while (iterator.hasNext()) {
+            Value.IssueTypeProject issueTypeProject = iterator.next();
+            Long issueTypeId = issueTypeProject.getIssueTypeId();
+            Long projectId = issueTypeProject.getProjectId();
+            if (ObjectUtils.isEmpty(issueTypeId) || ObjectUtils.isEmpty(projectId)) {
+                continue;
+            }
+            sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE).append("ai.issue_type_id = ")
+                    .append(issueTypeId)
+                    .append(" and ai.project_id ");
+            if (Objects.equals(0L, projectId)) {
+                //产品要求, 只有修改过名称/图标/颜色的项目客制化工作项才记入“客制化工作项”
+                //see https://choerodon.com.cn/#/agile/work-list/issue?type=project&id=261445508798373888&name=%E6%95%8F%E6%8D%B7%E5%8D%8F%E4%BD%9C%E7%BB%84&category=AGILE&organizationId=1128&paramIssueId=358361939208716288&paramName=yq-pm-3598
+                sqlBuilder.append("not in (select ite.project_id from fd_issue_type_extend ite where ite.issue_type_id = ")
+                        .append(issueTypeId).append(
+                        " and ( ite.name is not null or ite.icon is not null or ite.colour is not null ) )");
+            } else {
+                sqlBuilder.append(" = ").append(projectId);
+            }
+            sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
+            if (iterator.hasNext()) {
+                sqlBuilder.append(" or ");
+            }
+        }
+        if (sqlBuilder.length() > 0) {
+            return new StringBuilder().append(BaseConstants.Symbol.LEFT_BRACE).append(sqlBuilder).append(BaseConstants.Symbol.RIGHT_BRACE).toString();
+        } else {
+            return sqlBuilder.toString();
+        }
     }
 
     private String generateContentSql(String operation,

@@ -390,6 +390,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case FieldCode.TAG:
                 values = value.getObjectList();
                 break;
+            case SearchConstant.Field.ISSUE_TYPE_PROJECT:
+                values = value.getIssueTypeProjectList();
+                break;
             default:
                 if (noEncryptFlag) {
                     values = value.getNoEncryptIdList();

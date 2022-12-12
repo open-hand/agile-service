@@ -83,7 +83,8 @@ public class SearchConstant {
                 new FieldTableVO(Field.MY_STAR, "user_id", TABLE_FD_STAR_BEACON, FieldTableVO.TYPE_BASE),
                 new FieldTableVO(Field.MY_PARTICIPATE, null, TABLE_AGILE_DATA_LOG, FieldTableVO.TYPE_BASE),
                 new FieldTableVO(Field.TYPE_CODE, "type_code", TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE),
-                new FieldTableVO(FieldCode.SUB_PROJECT, "project_id", TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE)
+                new FieldTableVO(FieldCode.SUB_PROJECT, "project_id", TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE),
+                new FieldTableVO(Field.ISSUE_TYPE_PROJECT, null, TABLE_AGILE_ISSUE, FieldTableVO.TYPE_BASE)
         );
         PREDEFINED_FIELD_TABLE_MAP =
                 fieldTableList.stream().collect(Collectors.toMap(FieldTableVO::getName, Function.identity()));
@@ -99,7 +100,8 @@ public class SearchConstant {
             new ObjectSchemeFieldDTO().setCode(Field.MY_PARTICIPATE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
             new ObjectSchemeFieldDTO().setCode(FieldCode.FEATURE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
             new ObjectSchemeFieldDTO().setCode(Field.STAGE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.TYPE_CODE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            new ObjectSchemeFieldDTO().setCode(Field.TYPE_CODE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
+            new ObjectSchemeFieldDTO().setCode(Field.ISSUE_TYPE_PROJECT).setFieldType(FieldTypeCnName.SINGLE.getCode())
     );
 
     public class Field {
@@ -128,6 +130,11 @@ public class SearchConstant {
          * 问题类型编码
          */
         public static final String TYPE_CODE = "typeCode";
+
+        /**
+         * 项目下的问题类型筛选
+         */
+        public static final String ISSUE_TYPE_PROJECT = "issueTypeProject";
     }
 
 
