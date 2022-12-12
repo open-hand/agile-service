@@ -124,7 +124,7 @@ public class ExcelServiceImpl implements ExcelService {
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
     private static final String INSERT = "insert";
-    private static final String COMMON_SHEET_NAME = "sheet1";
+    protected static final String COMMON_SHEET_NAME = "sheet1";
     private static final String FORMAT_YYYY_MM_DD_HH_MM_SS_TIME = "^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29) (20|21|22|23|[0-1][0-9]):[0-5][0-9]:[0-5][0-9]$";
     private static final String FORMAT_YYYY_MM_DD_HH_MM_TIME = "^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29) (20|21|22|23|[0-1][0-9]):[0-5][0-9]$";
     private static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
@@ -197,7 +197,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     protected PageFieldService pageFieldService;
     @Autowired(required = false)
-    private AgilePluginService agilePluginService;
+    protected AgilePluginService agilePluginService;
     @Autowired
     private IssueLinkService issueLinkService;
     @Autowired
