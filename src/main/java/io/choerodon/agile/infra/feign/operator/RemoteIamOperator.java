@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.feign.operator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -160,6 +161,18 @@ public class RemoteIamOperator {
      */
     public List<ProjectVO> listProjectsByOrgId(Long organizationId) {
         return ResponseUtils.getResponse(iamFeignClient.listProjectsByOrgId(organizationId),
+                new TypeReference<List<ProjectVO>>() {
+                });
+    }
+    /**
+     * 查询组织下所有项目
+     * @param organizationId 组织ID
+     * @param projectCodes   过滤条件--项目编码
+     * @param enabledFlag    过滤条件--是否启用
+     * @return               查询结果
+     */
+    public List<ProjectVO> listProjectsByOrgId(Long organizationId, Collection<String> projectCodes, Boolean enabledFlag) {
+        return ResponseUtils.getResponse(iamFeignClient.listProjectsByOrgId(organizationId, projectCodes, enabledFlag),
                 new TypeReference<List<ProjectVO>>() {
                 });
     }
