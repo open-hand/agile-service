@@ -205,12 +205,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 break;
             case EQUAL:
                 String value = dataPair.getFirst();
-                data.setColumnOpt(Operation.EQUAL.getOpt()).setColumnValue(value);
+                data.setOpt(Operation.IN.getOpt()).setColumnOpt(Operation.EQUAL.getOpt()).setColumnValue(value);
                 sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
             case LIKE:
                 String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
-                data.setColumnOpt(Operation.LIKE.getOpt()).setColumnValue(valueStr);
+                data.setOpt(Operation.IN.getOpt()).setColumnOpt(Operation.LIKE.getOpt()).setColumnValue(valueStr);
                 sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
             default:
