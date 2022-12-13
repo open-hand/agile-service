@@ -11,7 +11,9 @@ import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
+import io.choerodon.core.exception.CommonException;
 
+import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -20,6 +22,9 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchParamVO {
+
+    public static final String FIELD_CONDITIONS = "conditions";
+    public static final String FIELD_ADVANCED_CONDITIONS = "advancedConditions";
     @ApiModelProperty("筛选条件")
     private List<Condition> conditions;
     @ApiModelProperty("高级筛选条件")
@@ -206,30 +211,41 @@ public class SearchParamVO {
         if (targetFieldCode == null) {
             return;
         }
-        List<Condition> conditions = overrideConditionIfExisted(condition, targetFieldCode, getConditions());
-        List<Condition> advancedConditions = overrideConditionIfExisted(condition, targetFieldCode, getAdvancedConditions());
-        if (conditions.isEmpty() && advancedConditions.isEmpty()) {
-            conditions.add(condition);
+        boolean conditionsAdded = overrideConditionIfExisted(condition, targetFieldCode, getConditions(), FIELD_CONDITIONS);
+        boolean advancedConditionsAdded = overrideConditionIfExisted(condition, targetFieldCode, getAdvancedConditions(), FIELD_ADVANCED_CONDITIONS);
+        if (Boolean.FALSE.equals(conditionsAdded) && Boolean.FALSE.equals(advancedConditionsAdded)) {
+            addCondition(condition);
         }
-        setConditions(conditions);
-        setAdvancedConditions(advancedConditions);
     }
 
-    private List<Condition> overrideConditionIfExisted(Condition condition,
-                                                       String targetFieldCode,
-                                                       List<Condition> conditions) {
+    private boolean overrideConditionIfExisted(Condition condition,
+                                               String targetFieldCode,
+                                               List<Condition> conditions,
+                                               String prop) {
         List<Condition> newConditions = new ArrayList<>();
+        boolean added = false;
         if (conditions != null) {
             for (Condition c : conditions) {
                 String fieldCode = Optional.ofNullable(c.getField()).map(Field::getFieldCode).orElse(null);
                 if (targetFieldCode.equals(fieldCode)) {
                     newConditions.add(condition);
+                    added = true;
                 } else {
                     newConditions.add(c);
                 }
             }
         }
-        return newConditions;
+        switch (prop) {
+            case FIELD_CONDITIONS:
+                setConditions(newConditions);
+                break;
+            case FIELD_ADVANCED_CONDITIONS:
+                setAdvancedConditions(newConditions);
+                break;
+            default:
+                throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
+        }
+        return added;
     }
 
     public void addGanttTypeCodes(List<String> typeCodes) {
