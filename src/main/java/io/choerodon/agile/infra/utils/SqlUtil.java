@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.domain.entity.SqlTemplateData;
 import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 
 import org.hzero.core.base.BaseConstants;
@@ -26,7 +27,13 @@ public class SqlUtil {
     public static final String SQL_YYYY_MM_DD_HH_MM = "%Y-%m-%d %H:%i";
 
     public static final String INSTANCE_ID = "instance_id";
-    public static final String DEFAULT_PRIMARY_KEY = "issue_id";
+    public static final String BACKLOG_ID = "backlog_id";
+
+    public static final String PRIMARY_KEY_ISSUE = "issue_id";
+    public static final String PRIMARY_KEY_BACKLOG = "id";
+
+    public static final String ALIAS_ISSUE = "ai";
+    public static final String ALIAS_BACKLOG = "bl";
 
     public static final List<String> DATETIME_MM_FIELD_LIST =
             Arrays.asList(
@@ -61,9 +68,11 @@ public class SqlUtil {
     }
 
     public static String generateSelfTableSql(String operation,
-                                              List<?> values, String alias,
+                                              List<?> values,
                                               FieldTableVO fieldTable,
-                                              String additionalCondition) {
+                                              String additionalCondition,
+                                              InstanceType instanceType) {
+        String alias = InstanceType.ISSUE.equals(instanceType) ? ALIAS_ISSUE : ALIAS_BACKLOG;
         StringBuilder sqlBuilder = new StringBuilder();
         SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(fieldTable.getField(), alias);
@@ -93,14 +102,15 @@ public class SqlUtil {
     public static String generateLinkedTableSql(String operation,
                                                 List<?> values,
                                                 FieldTableVO fieldTable,
-                                                String alias,
                                                 Set<Long> projectIds,
                                                 String additionalCondition,
                                                 String innerColumn,
-                                                boolean isProgram) {
+                                                boolean isProgram,
+                                                InstanceType instanceType) {
+        String alias = InstanceType.ISSUE.equals(instanceType) ? ALIAS_ISSUE : ALIAS_BACKLOG;
         StringBuilder sqlBuilder = new StringBuilder();
         String dbColumn = fieldTable.getField();
-        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String primaryKey = InstanceType.ISSUE.equals(instanceType) ? PRIMARY_KEY_ISSUE : PRIMARY_KEY_BACKLOG;
         if (innerColumn == null) {
             innerColumn = primaryKey;
         }
@@ -142,14 +152,15 @@ public class SqlUtil {
     public static String appendPredefinedSql(String operation,
                                              Pair<String, String> dataPair,
                                              FieldTableVO fieldTable,
-                                             String alias,
                                              Set<Long> projectIds,
                                              String additionalCondition,
                                              String innerColumn,
-                                             boolean isProgram) {
+                                             boolean isProgram,
+                                             InstanceType instanceType) {
+        String alias = InstanceType.ISSUE.equals(instanceType) ? ALIAS_ISSUE : ALIAS_BACKLOG;
         StringBuilder sqlBuilder = new StringBuilder();
         String dbColumn = fieldTable.getField();
-        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String primaryKey = InstanceType.ISSUE.equals(instanceType) ? PRIMARY_KEY_ISSUE : PRIMARY_KEY_BACKLOG;
         if (innerColumn == null) {
             innerColumn = primaryKey;
         }
@@ -174,13 +185,14 @@ public class SqlUtil {
         } else {
             data.setProjectCol("program_id");
         }
-        boolean isLinkedTable = !SearchConstant.TABLE_AGILE_ISSUE.equals(table);
+        String selfTable = InstanceType.ISSUE.equals(instanceType) ? SearchConstant.TABLE_AGILE_ISSUE : SearchConstant.TABLE_BACKLOG;
+        boolean isLinkedTable = !selfTable.equals(table);
         switch (opt) {
             case BETWEEN:
                 data.setFirstValue(dataPair.getFirst());
                 data.setSecondValue(dataPair.getSecond());
-                data.setColumn(fieldTable.getField());
                 if (isLinkedTable) {
+                    data.setColumn(fieldTable.getField());
                     sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_BETWEEN));
                 } else {
                     sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), DATE_BETWEEN));

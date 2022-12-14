@@ -12,11 +12,14 @@ import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
+import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.core.util.Pair;
 
 /**
  * @author zhaotianxin
@@ -229,4 +232,11 @@ public interface BacklogExpandService {
     Page<BacklogInfoVO> listBacklog(Long projectId, PageRequest pageRequest, SearchVO searchVO);
 
     List<BacklogInfoVO> selectByIds(Set<Long> backlogIds);
+
+    String parseBacklogSql(FieldTableVO fieldTable,
+                           Condition condition,
+                           Set<Long> projectIds,
+                           List<?> values,
+                           Pair<String, String> dataPair,
+                           boolean isSelector);
 }
