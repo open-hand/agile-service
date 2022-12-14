@@ -51,9 +51,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     @Autowired
     private PredefinedFieldSqlGenerator predefinedFieldSqlGenerator;
 
-    private static final String DEFAULT_PRIMARY_KEY = "issue_id";
-    private static final String INSTANCE_ID = "instance_id";
-
     private static final Logger logger = LoggerFactory.getLogger(AdvancedParamParserServiceImpl.class);
 
     @Override
@@ -131,8 +128,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         if (ObjectUtils.isEmpty(issueIds)) {
             return sqlBuilder.toString();
         }
-        String alias = "ai";
-        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String alias = SqlUtil.ALIAS_ISSUE;
+        String primaryKey = SqlUtil.PRIMARY_KEY_ISSUE;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         String issueIdStr = "(" + StringUtils.join(issueIds, BaseConstants.Symbol.COMMA) + ")";
         EvaluationContext context =
@@ -310,7 +307,6 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         Assert.isTrue(options.contains(operation), DATA_INVALID);
         String fieldCode = field.getFieldCode();
         boolean isPredefined = field.getPredefined();
-        String alias = "ai";
         boolean isSelector = (clazz == List.class);
         if (isPredefined) {
             FieldTableVO fieldTable = predefinedFieldMap.get(fieldCode);
@@ -320,7 +316,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             if (isSelector) {
                 sqlBuilder.append(generateCustomFieldSelectorSql(field, instanceType, operation, projectIds, values));
             } else {
-                String primaryKey = DEFAULT_PRIMARY_KEY;
+                String alias = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.ALIAS_ISSUE : SqlUtil.ALIAS_BACKLOG;
+                String primaryKey = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.PRIMARY_KEY_ISSUE : SqlUtil.PRIMARY_KEY_BACKLOG;
                 String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
                 String schemeCode = instanceType.getSchemeCode();
                 appendCustomSql(sqlBuilder, projectIds, operation, dataPair, mainTableFilterColumn, field, schemeCode);
@@ -335,9 +332,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                                   String operation,
                                                   Set<Long> projectIds,
                                                   List<? extends Object> values) {
-        String alias = "ai";
+        String alias = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.ALIAS_ISSUE : SqlUtil.ALIAS_BACKLOG;
         StringBuilder sqlBuilder = new StringBuilder();
-        String primaryKey = DEFAULT_PRIMARY_KEY;
+        String primaryKey = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.PRIMARY_KEY_ISSUE : SqlUtil.PRIMARY_KEY_BACKLOG;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         Long fieldId = field.getFieldId();
         String schemeCode = instanceType.getSchemeCode();
@@ -380,6 +377,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
             case FieldCode.ENVIRONMENT:
             case FieldCode.FEATURE_TYPE:
             case SearchConstant.Field.TYPE_CODE:
+            case SearchConstant.Field.SOURCE:
                 List<String> valueStrList = value.getValueStrList();
                 List<String> result = new ArrayList<>();
                 if (!ObjectUtils.isEmpty(valueStrList)) {

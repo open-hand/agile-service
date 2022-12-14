@@ -36,6 +36,7 @@ public class SearchConstant {
     public static final List<String> NO_ENCRYPT_FIELDS = Arrays.asList(FieldCode.SUB_PROJECT);
 
     public static final String TABLE_AGILE_ISSUE = "agile_issue";
+    public static final String TABLE_BACKLOG = "backlog";
     public static final String TABLE_AGILE_ISSUE_SPRINT_REL = "agile_issue_sprint_rel";
     public static final String TABLE_AGILE_COMPONENT_ISSUE_REL = "agile_component_issue_rel";
     public static final String TABLE_AGILE_LABEL_ISSUE_REL = "agile_label_issue_rel";
@@ -101,7 +102,9 @@ public class SearchConstant {
             new ObjectSchemeFieldDTO().setCode(FieldCode.FEATURE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
             new ObjectSchemeFieldDTO().setCode(Field.STAGE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
             new ObjectSchemeFieldDTO().setCode(Field.TYPE_CODE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.ISSUE_TYPE_PROJECT).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            new ObjectSchemeFieldDTO().setCode(Field.ISSUE_TYPE_PROJECT).setFieldType(FieldTypeCnName.SINGLE.getCode()),
+            new ObjectSchemeFieldDTO().setCode(Field.TYPE_ID).setFieldType(FieldTypeCnName.SINGLE.getCode()),
+            new ObjectSchemeFieldDTO().setCode(Field.SOURCE).setFieldType(FieldTypeCnName.SINGLE.getCode())
     );
 
     public class Field {
@@ -135,6 +138,14 @@ public class SearchConstant {
          * 项目下的问题类型筛选
          */
         public static final String ISSUE_TYPE_PROJECT = "issueTypeProject";
+        /**
+         * 需求池需求类型
+         */
+        public static final String TYPE_ID = "typeId";
+        /**
+         * 需求池需求来源
+         */
+        public static final String SOURCE = "source";
     }
 
 
