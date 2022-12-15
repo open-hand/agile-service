@@ -146,6 +146,10 @@ public class SearchConstant {
          * 需求池需求来源
          */
         public static final String SOURCE = "source";
+        /**
+         * 需求编码
+         */
+        public static final String BACKLOG_NUM = "backlogNum";
     }
 
 
