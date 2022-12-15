@@ -1,19 +1,11 @@
 package io.choerodon.agile.infra.utils;
 
-import io.choerodon.agile.api.vo.IssueCommentVO;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
-import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
-import io.choerodon.core.enums.MessageAdditionalType;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.hzero.boot.message.MessageClient;
-import org.hzero.boot.message.entity.MessageSender;
-import org.hzero.boot.message.entity.Receiver;
-import org.hzero.core.base.BaseConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -21,9 +13,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import io.choerodon.agile.api.vo.IssueCommentVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.WorkLogDTO;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.core.enums.MessageAdditionalType;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
+
+import org.hzero.boot.message.MessageClient;
+import org.hzero.boot.message.entity.MessageSender;
+import org.hzero.boot.message.entity.Receiver;
+import org.hzero.core.base.BaseConstants;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/8.
@@ -420,6 +427,39 @@ public class SiteMsgUtil {
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"ISSUE_SET_PARTICIPANT",sendUserIds, map);
+        messageSender.setAdditionalInformation(objectMap);
+        messageClient.async().sendMessage(messageSender);
+    }
+
+    public void workLogDelete(Long projectId, IssueDetailDTO issue, WorkLogDTO workLog, CustomUserDetails deleteUser) {
+        if(issue == null) {
+            issue = new IssueDetailDTO();
+        }
+        if(workLog   == null) {
+            workLog = new WorkLogDTO();
+        }
+        if(deleteUser == null) {
+            deleteUser = DetailsHelper.getAnonymousDetails();
+        }
+        SimpleDateFormat format = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
+        Map<String,String> map = new HashMap<>();
+        map.put("projectId", String.valueOf(projectId));
+        map.put("issueId", String.valueOf(issue.getIssueId()));
+        map.put("issueNum", String.valueOf(issue.getIssueNum()));
+        map.put(ISSUE_SUMMARY, String.valueOf(issue.getSummary()));
+        map.put("workLogId", String.valueOf(workLog.getLogId()));
+        map.put("workTime", String.valueOf(workLog.getWorkTime()));
+        final Date startDate = workLog.getStartDate();
+        map.put("starDate", startDate == null ? String.valueOf((Object) null) : format.format(startDate));
+        map.put("workDescription", String.valueOf(workLog.getDescription()));
+        map.put("deleteUserId", String.valueOf(deleteUser.getUserId()));
+        map.put("deleteUserRealName", String.valueOf(deleteUser.getRealName()));
+
+        // 额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(), projectId);
+        //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUE_WORK_HOUR_DELETE", Collections.emptyList(), map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
     }

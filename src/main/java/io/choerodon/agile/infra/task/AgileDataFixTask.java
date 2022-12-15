@@ -115,4 +115,28 @@ public class AgileDataFixTask {
         );
         LOGGER.info("==============================>>>>>>>> fixIssueSprintRelZeroData completed <<<<<<<<=================================");
     }
+
+    @JobTask(maxRetryCount = 1,
+            code = "2.2-clearIssueSprintRelOldDirtyData",
+            description = "清除上古时期刚上线项目群的时候,issue冲刺关系表中不存在的冲刺的脏数据")
+    @TimedTask(name = "2.2-clearIssueSprintRelOldDirtyData",
+            description = "清除上古时期刚上线项目群的时候,issue冲刺关系表中不存在的冲刺的脏数据",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
+    public void clearIssueSprintRelOldDirtyData(Map<String, Object> param) {
+        LOGGER.info("==============================>>>>>>>> clearIssueSprintRelOldDirtyData start <<<<<<<<=================================");
+        this.jdbcTemplate.update(
+                "DELETE isr " +
+                    "FROM agile_issue_sprint_rel isr " +
+                    "WHERE NOT EXISTS (" +
+                        "SELECT 1 " +
+                        "FROM agile_sprint s " +
+                        "WHERE s.sprint_id = isr.sprint_id " +
+                    ")"
+        );
+        LOGGER.info("==============================>>>>>>>> clearIssueSprintRelOldDirtyData completed <<<<<<<<=================================");
+    }
 }
