@@ -62,7 +62,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         List<Condition> conditions = new ArrayList<>();
         conditions.addAll(searchParamVO.getConditions());
         conditions.addAll(searchParamVO.getAdvancedConditions());
-        String sql = generateSql(instanceType, projectIds, predefinedFieldMap, conditions, searchParamVO.getIssueIds());
+        String sql = generateSql(instanceType, projectIds, predefinedFieldMap, conditions, searchParamVO.getInstanceIds());
         if (logger.isDebugEnabled()) {
             logger.debug("高级筛选条件：{}, 生成sql：{}", searchParamVO, sql);
         }
@@ -115,7 +115,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 }
             }
         }
-        String issueIdSql = generateIssueIdSql(issueIds);
+        String issueIdSql = generateInstanceIdSql(issueIds, instanceType);
         if (sqlBuilder.length() > 0 && issueIdSql.length() > 0) {
             sqlBuilder.append(" and ");
         }
@@ -123,15 +123,16 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return sqlBuilder.toString();
     }
 
-    private String generateIssueIdSql(Set<Long> issueIds) {
+    private String generateInstanceIdSql(Set<Long> instanceIds,
+                                         InstanceType instanceType) {
         StringBuilder sqlBuilder = new StringBuilder();
-        if (ObjectUtils.isEmpty(issueIds)) {
+        if (ObjectUtils.isEmpty(instanceIds)) {
             return sqlBuilder.toString();
         }
-        String alias = SqlUtil.ALIAS_ISSUE;
-        String primaryKey = SqlUtil.PRIMARY_KEY_ISSUE;
+        String alias = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.ALIAS_ISSUE : SqlUtil.ALIAS_BACKLOG;
+        String primaryKey = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.PRIMARY_KEY_ISSUE : SqlUtil.PRIMARY_KEY_BACKLOG;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
-        String issueIdStr = "(" + StringUtils.join(issueIds, BaseConstants.Symbol.COMMA) + ")";
+        String issueIdStr = "(" + StringUtils.join(instanceIds, BaseConstants.Symbol.COMMA) + ")";
         EvaluationContext context =
                 new SqlTemplateData()
                         .setColumn(mainTableFilterColumn)

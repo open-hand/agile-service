@@ -33,10 +33,12 @@ public class SearchParamVO {
     private Boolean treeFlag;
     @ApiModelProperty("是否统计子问题的数量")
     private Boolean countSubIssue;
+    @ApiModelProperty("快速筛选id")
     @Encrypt
     private List<Long> quickFilterIds;
+    @ApiModelProperty("筛选的instanceId")
     @Encrypt
-    private Set<Long> issueIds;
+    private Set<Long> instanceIds;
     @ApiModelProperty("瀑布项目使用，是否包含空冲刺")
     private Boolean containsEmptySprint;
     @ApiModelProperty("展示的字段")
@@ -98,12 +100,12 @@ public class SearchParamVO {
         this.containsEmptySprint = containsEmptySprint;
     }
 
-    public Set<Long> getIssueIds() {
-        return issueIds;
+    public Set<Long> getInstanceIds() {
+        return instanceIds;
     }
 
-    public void setIssueIds(Set<Long> issueIds) {
-        this.issueIds = issueIds;
+    public void setInstanceIds(Set<Long> instanceIds) {
+        this.instanceIds = instanceIds;
     }
 
     public Boolean getCountSubIssue() {
@@ -339,7 +341,7 @@ public class SearchParamVO {
                 ", treeFlag=" + treeFlag +
                 ", countSubIssue=" + countSubIssue +
                 ", quickFilterIds=" + quickFilterIds +
-                ", issueIds=" + issueIds +
+                ", issueIds=" + instanceIds +
                 ", containsEmptySprint=" + containsEmptySprint +
                 ", displayFields=" + displayFields +
                 ", emptyCondition=" + emptyCondition +

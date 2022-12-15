@@ -287,7 +287,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                         .setTable(table)
                         .setProjectIdStr(projectIdStr)
                         .setAdditionalCondition("")
-                        .setProjectCol("project_id");
+                        .setProjectCol(SqlUtil.PROJECT_ID);
         switch (opt) {
             case IN:
             case NOT_IN:

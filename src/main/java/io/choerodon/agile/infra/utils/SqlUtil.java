@@ -34,6 +34,8 @@ public class SqlUtil {
 
     public static final String ALIAS_ISSUE = "ai";
     public static final String ALIAS_BACKLOG = "bl";
+    public static final String PROJECT_ID = "project_id";
+    public static final String PROGRAM_ID = "program_id";
 
     public static final List<String> DATETIME_MM_FIELD_LIST =
             Arrays.asList(
@@ -128,9 +130,9 @@ public class SqlUtil {
                         .setDbColumn(dbColumn)
                         .setAdditionalCondition(additionalCondition);
         if (!isProgram) {
-            data.setProjectCol("project_id");
+            data.setProjectCol(PROJECT_ID);
         } else {
-            data.setProjectCol("program_id");
+            data.setProjectCol(PROGRAM_ID);
         }
         switch (opt) {
             case IN:
@@ -181,9 +183,9 @@ public class SqlUtil {
                         .setColumn(column)
                         .setAdditionalCondition(additionalCondition);
         if (!isProgram) {
-            data.setProjectCol("project_id");
+            data.setProjectCol(PROJECT_ID);
         } else {
-            data.setProjectCol("program_id");
+            data.setProjectCol(PROGRAM_ID);
         }
         String selfTable = InstanceType.ISSUE.equals(instanceType) ? SearchConstant.TABLE_AGILE_ISSUE : SearchConstant.TABLE_BACKLOG;
         boolean isLinkedTable = !selfTable.equals(table);

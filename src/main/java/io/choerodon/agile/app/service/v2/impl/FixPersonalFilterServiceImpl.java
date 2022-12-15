@@ -403,7 +403,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         if (option != null && !option.isNull() && !option.isEmpty()) {
             Set<Long> issueIds = objectMapper.readValue(option.traverse(), new TypeReference<Set<Long>>() {
             });
-            searchParamVO.setIssueIds(issueIds);
+            searchParamVO.setInstanceIds(issueIds);
         }
     }
 
