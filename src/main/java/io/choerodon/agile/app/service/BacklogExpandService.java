@@ -239,4 +239,6 @@ public interface BacklogExpandService {
                            List<?> values,
                            Pair<String, String> dataPair,
                            boolean isSelector);
+
+    void fixPersonalFilter();
 }

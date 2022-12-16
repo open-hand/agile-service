@@ -336,6 +336,9 @@ public class FixDataServiceImpl implements FixDataService {
     @Override
     public void fixPersonalFilter(Set<String> typeCodes) {
         fixPersonalFilterService.fix(typeCodes);
+        if(backlogExpandService != null) {
+            backlogExpandService.fixPersonalFilter();
+        }
     }
 
     private void migrateWorkGroupData() {

@@ -12,4 +12,6 @@ public interface FixPersonalFilterService {
      * 2.3.0修复个人筛选数据
      */
     void fix(Set<String> typeCodes);
+
+    String convertJsonToAdvancedFilterJson(String typeCode, String json);
 }
