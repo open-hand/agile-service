@@ -28,6 +28,12 @@
         AND organization_id = #{organizationId}
         AND user_id = #{userId}
         AND filter_type_code = #{filterTypeCode}
+        <if test="version == 'v1'">
+            advanced_filter_json = ''
+        </if>
+        <if test="version == 'v2'">
+            filter_json = ''
+        </if>
         <if test='searchStr != null and searchStr != "" '>
             AND name LIKE concat('%',#{searchStr},'%')
         </if>
