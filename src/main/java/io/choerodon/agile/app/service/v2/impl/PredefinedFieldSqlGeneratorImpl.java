@@ -19,10 +19,12 @@ import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.AgileWaterfallService;
+import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
 import io.choerodon.agile.domain.entity.SqlTemplateData;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
+import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.utils.SqlUtil;
@@ -47,6 +49,8 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
     private ProjectInfoMapper projectInfoMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @Override
     public String parseSql(FieldTableVO fieldTable,
@@ -67,6 +71,9 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                 }
                 break;
             case FieldTableVO.TYPE_BACKLOG:
+                if (backlogExpandService != null) {
+                    sql = backlogExpandService.parseBacklogSql(fieldTable, condition, projectIds, values, dataPair, isSelector);
+                }
                 break;
             case FieldTableVO.TYPE_WATERFALL:
                 if (agileWaterfallService != null) {
@@ -101,36 +108,38 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         StringBuilder sqlBuilder = new StringBuilder();
         String fieldCode = fieldTable.getName();
         String operation = condition.getOperation();
-        String alias = "ai";
         switch (fieldCode) {
             case SearchConstant.Field.CONTENT:
-                sqlBuilder.append(generateContentSql(operation, dataPair, alias, projectIds));
+                sqlBuilder.append(generateContentSql(operation, dataPair, projectIds));
                 break;
             default:
-                sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, dataPair, fieldTable, alias, projectIds, "", null, false));
+                sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, dataPair, fieldTable, projectIds, "", null, false, InstanceType.ISSUE));
                 break;
         }
         return sqlBuilder.toString();
     }
 
-    private String parseBaseSelectorSql(FieldTableVO fieldTable, Condition condition, Set<Long> projectIds, List<?> values) {
+    private String parseBaseSelectorSql(FieldTableVO fieldTable,
+                                        Condition condition,
+                                        Set<Long> projectIds,
+                                        List<?> values) {
         StringBuilder sqlBuilder = new StringBuilder();
         String fieldCode = fieldTable.getName();
         String operation = condition.getOperation();
         boolean isLinkedTable = !SearchConstant.TABLE_AGILE_ISSUE.equals(fieldTable.getTable());
-        String alias = "ai";
+        String alias = SqlUtil.ALIAS_ISSUE;
         switch (fieldCode) {
             case FieldCode.TAG:
                 sqlBuilder.append(generateTagSql(operation, values, fieldTable, alias, projectIds));
                 break;
             case FieldCode.FIX_VERSION:
-                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'fix'", null, false));
+                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, projectIds, "and relation_type = 'fix'", null, false, InstanceType.ISSUE));
                 break;
             case FieldCode.INFLUENCE_VERSION:
-                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and relation_type = 'influence'", null, false));
+                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, projectIds, "and relation_type = 'influence'", null, false, InstanceType.ISSUE));
                 break;
             case SearchConstant.Field.MY_STAR:
-                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "and type = 'issue'", SqlUtil.INSTANCE_ID, false));
+                sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, projectIds, "and type = 'issue'", SqlUtil.INSTANCE_ID, false, InstanceType.ISSUE));
                 break;
             case SearchConstant.Field.MY_PARTICIPATE:
                 sqlBuilder.append(generateMyParticipateSql(projectIds, operation, alias, fieldTable, values));
@@ -144,10 +153,10 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
             default:
                 if (!isLinkedTable) {
                     //主表字段
-                    sqlBuilder.append(SqlUtil.generateSelfTableSql(operation, values, alias, fieldTable, ""));
+                    sqlBuilder.append(SqlUtil.generateSelfTableSql(operation, values, fieldTable, "", InstanceType.ISSUE));
                 } else {
                     //关联表
-                    sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, alias, projectIds, "", null, false));
+                    sqlBuilder.append(SqlUtil.generateLinkedTableSql(operation, values, fieldTable, projectIds, "", null, false, InstanceType.ISSUE));
                 }
                 break;
         }
@@ -196,7 +205,6 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
 
     private String generateContentSql(String operation,
                                       Pair<String, String> dataPair,
-                                      String alias,
                                       Set<Long> projectIds) {
         StringBuilder sqlBuilder = new StringBuilder();
         //去除searchVO.searchArgs.issueNum或searchVO.contents的项目code前缀
@@ -223,10 +231,10 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
         //content == summary和issueNum
         FieldTableVO summary = SearchConstant.PREDEFINED_FIELD_TABLE_MAP.get(FieldCode.SUMMARY);
-        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, summary, "ai", projectIds, "", null, false));
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, summary, projectIds, "", null, false, InstanceType.ISSUE));
         sqlBuilder.append(" or ");
         FieldTableVO issueNum = SearchConstant.PREDEFINED_FIELD_TABLE_MAP.get(FieldCode.ISSUE_NUM);
-        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, issueNum, "ai", projectIds, "", null, false));
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, issueNum, projectIds, "", null, false, InstanceType.ISSUE));
 
         sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
@@ -249,7 +257,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         if (tags == null) {
             return sqlBuilder.toString();
         }
-        String primaryKey = SqlUtil.DEFAULT_PRIMARY_KEY;
+        String primaryKey = SqlUtil.PRIMARY_KEY_ISSUE;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
         Iterator<TagVO> tagIterator = tags.iterator();
@@ -279,7 +287,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                         .setTable(table)
                         .setProjectIdStr(projectIdStr)
                         .setAdditionalCondition("")
-                        .setProjectCol("project_id");
+                        .setProjectCol(SqlUtil.PROJECT_ID);
         switch (opt) {
             case IN:
             case NOT_IN:
@@ -303,7 +311,7 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
                                             List<? extends Object> values) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
-        String primaryKey = SqlUtil.DEFAULT_PRIMARY_KEY;
+        String primaryKey = SqlUtil.PRIMARY_KEY_ISSUE;
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         String assigneeColumn = "assignee_id";
         assigneeColumn = SqlUtil.buildMainTableFilterColumn(assigneeColumn, alias);

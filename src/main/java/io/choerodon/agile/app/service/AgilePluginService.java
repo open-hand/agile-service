@@ -683,4 +683,7 @@ public interface AgilePluginService {
                            List<? extends Object> values,
                            Pair<String, String> dataPair,
                            boolean isSelector);
+
+    List<InstanceOpenRelVO> listByInstanceIds(List<Long> projectIds, List<Long> instanceIds, String instanceType, String source);
+
 }

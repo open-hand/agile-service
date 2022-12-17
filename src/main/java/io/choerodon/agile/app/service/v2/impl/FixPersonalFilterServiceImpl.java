@@ -52,6 +52,8 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     @Autowired
     private IEncryptionService iEncryptionService;
 
+    public static final String TYPE_BACKLOG = "backlog";
+
     private static final List<String> CONDITION_KEYS =
             Arrays.asList("advancedSearchArgs", "otherArgs", "searchArgs");
 
@@ -68,9 +70,11 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final String YQ_CLOUD_NUM = "yqCloudNum";
     private static final String ISSUE_TYPE_ID = "issueTypeId";
     private static final String STATUS_ID = "statusId";
+    private static final String STATUS_IDS = "statusIds";
     private static final String STATUS_LIST = "statusList";
     private static final String REPORTER_IDS = "reporterIds";
     private static final String PRIORITY_ID = "priorityId";
+    private static final String PRIORITY_IDS = "priorityIds";
     private static final String MAIN_RESPONSIBLE_IDS = "mainResponsibleIds";
     private static final String ASSIGNEE_ID = "assigneeId";
     private static final String UPDATOR_IDS = "updatorIds";
@@ -80,12 +84,18 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final String UPDATE = "update";
     private static final String CREATE = "create";
     private static final String CONTENTS = "contents";
+    private static final String CONTENT = "content";
     private static final String ISSUE_IDS = "issueIds";
     private static final String QUICK_FILTER_IDS = "quickFilterIds";
     private static final String STAR_BEACON = "starBeacon";
     private static final String MY_ASSIGNED = "myAssigned";
     private static final String USER_ID = "userId";
+    private static final String USER_IDS = "userIds";
     private static final String TREE = "tree";
+    private static final String TYPE_IDS = "typeIds";
+    private static final String CLASSIFICATION_IDS = "classificationIds";
+
+
 
     private static final String SUFFIX_AGILE_START_DATE = "StartDate";
     private static final String SUFFIX_AGILE_END_DATE = "EndDate";
@@ -102,6 +112,8 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final Map<String, String> AGILE_OPTION_FIELD_MAPPING = new HashMap<>();
     private static final Map<String, String> FEATURE_OPTION_FIELD_MAPPING = new HashMap<>();
     private static final Map<String, String> DATE_FIELD_MAPPING = new HashMap<>();
+
+    private static final Map<String, String> BACKLOG_OPTION_FIELD_MAPPING = new HashMap<>();
 
     private static final String OPTION = "option";
     private static final String DATE = "date";
@@ -170,6 +182,16 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         DATE_FIELD_MAPPING.put(FieldCode.ACTUAL_END_TIME, FieldCode.ACTUAL_END_TIME);
         DATE_FIELD_MAPPING.put(FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_START_TIME);
         DATE_FIELD_MAPPING.put(FieldCode.ESTIMATED_END_TIME, FieldCode.ESTIMATED_END_TIME);
+        //需求字段映射
+        BACKLOG_OPTION_FIELD_MAPPING.put(PRIORITY_IDS, FieldCode.PRIORITY);
+        BACKLOG_OPTION_FIELD_MAPPING.put(USER_IDS, FieldCode.PROCESSOR);
+        BACKLOG_OPTION_FIELD_MAPPING.put(TYPE_IDS, SearchConstant.Field.TYPE_ID);
+        BACKLOG_OPTION_FIELD_MAPPING.put(CREATOR_IDS, FieldCode.CREATOR);
+        BACKLOG_OPTION_FIELD_MAPPING.put(SearchConstant.Field.SOURCE, SearchConstant.Field.SOURCE);
+        BACKLOG_OPTION_FIELD_MAPPING.put(CLASSIFICATION_IDS, FieldCode.BACKLOG_CLASSIFICATION);
+        BACKLOG_OPTION_FIELD_MAPPING.put(STATUS_IDS, FieldCode.STATUS);
+        BACKLOG_OPTION_FIELD_MAPPING.put(UPDATOR_IDS, FieldCode.UPDATOR);
+
 
         //todo teamProjectList reporterList 代明确
         IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.AGILE_ISSUE,
@@ -198,6 +220,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                         FieldCode.SPRINT,
                         ISSUE_TYPE_ID,
                         FieldCode.ENVIRONMENT));
+        IGNORED_FIELD_BY_TYPE_MAP.put(TYPE_BACKLOG, SetUtils.unmodifiableSet(USER_ID));
     }
 
 
@@ -211,37 +234,41 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
             List<PersonalFilterDTO> personalFilters = personalFilterMapper.select(dto);
             personalFilters.forEach(filter -> {
                 String json = filter.getFilterJson();
-                if (StringUtils.isEmpty(json)) {
+                if (StringUtils.isEmpty(json) || !StringUtils.isEmpty(filter.getAdvancedFilterJson())) {
                     return;
                 }
-//                logger.info("id: {}", filter.getFilterId());
-                SearchParamVO searchParamVO = new SearchParamVO();
-                try {
-                    JsonNode jsonNode = objectMapper.readTree(json);
-                    Iterator<String> fieldNameIterator = jsonNode.fieldNames();
-                    while (fieldNameIterator.hasNext()) {
-                        String fieldName = fieldNameIterator.next();
-                        JsonNode conditionNode = jsonNode.get(fieldName);
-                        if (CONDITION_KEYS.contains(fieldName)) {
-                            processConditionDetails(conditionNode, searchParamVO, typeCode);
-                        } else if (CONTENTS.equals(fieldName)) {
-                            processContents(searchParamVO, conditionNode);
-                        } else if (QUICK_FILTER_IDS.equals(fieldName)) {
-                            //快速筛选
-                            parseQuickFilterIds(searchParamVO, fieldName, conditionNode);
-                        } else {
-                            //todo
-                            throw new CommonException("error." + fieldName);
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new CommonException("error", e);
-                }
-                String advancedFilterJson = JsonUtils.toJson(searchParamVO);
+                String advancedFilterJson = convertJsonToAdvancedFilterJson(typeCode, json);
                 filter.setAdvancedFilterJson(advancedFilterJson);
                 personalFilterMapper.updateByPrimaryKeySelective(filter);
             });
         });
+    }
+
+    @Override
+    public String convertJsonToAdvancedFilterJson(String typeCode, String json) {
+        SearchParamVO searchParamVO = new SearchParamVO();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            Iterator<String> fieldNameIterator = jsonNode.fieldNames();
+            while (fieldNameIterator.hasNext()) {
+                String fieldName = fieldNameIterator.next();
+                JsonNode conditionNode = jsonNode.get(fieldName);
+                if (CONDITION_KEYS.contains(fieldName)) {
+                    processConditionDetails(conditionNode, searchParamVO, typeCode);
+                } else if (CONTENTS.equals(fieldName) || CONTENT.equals(fieldName)) {
+                    processContents(searchParamVO, conditionNode);
+                } else if (QUICK_FILTER_IDS.equals(fieldName)) {
+                    //快速筛选
+                    parseQuickFilterIds(searchParamVO, fieldName, conditionNode);
+                } else {
+                    //todo
+                    throw new CommonException("error." + fieldName);
+                }
+            }
+        } catch (IOException e) {
+            throw new CommonException("error", e);
+        }
+        return JsonUtils.toJson(searchParamVO);
     }
 
     private void parseQuickFilterIds(SearchParamVO searchParamVO, String fieldName, JsonNode conditionNode) throws IOException {
@@ -291,6 +318,9 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                 break;
             case PersonalFilterTypeCode.FEATURE_ISSUE:
                 optionMap = FEATURE_OPTION_FIELD_MAPPING;
+                break;
+            case TYPE_BACKLOG:
+                optionMap = BACKLOG_OPTION_FIELD_MAPPING;
                 break;
             default:
                 break;
@@ -403,7 +433,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         if (option != null && !option.isNull() && !option.isEmpty()) {
             Set<Long> issueIds = objectMapper.readValue(option.traverse(), new TypeReference<Set<Long>>() {
             });
-            searchParamVO.setIssueIds(issueIds);
+            searchParamVO.setInstanceIds(issueIds);
         }
     }
 
@@ -420,6 +450,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         switch (typeCode) {
             case PersonalFilterTypeCode.AGILE_ISSUE:
             case PersonalFilterTypeCode.WATERFALL_ISSUE:
+            case TYPE_BACKLOG:
                 dateSuffix = AGILE_DATE_SUFFIX;
                 break;
             case PersonalFilterTypeCode.FEATURE_ISSUE:
@@ -636,7 +667,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         } else {
             Condition condition;
             try {
-                if (FieldCode.ENVIRONMENT.equals(fieldCode) || FieldCode.FEATURE_TYPE.equals(fieldCode)) {
+                if (FieldCode.ENVIRONMENT.equals(fieldCode) || FieldCode.FEATURE_TYPE.equals(fieldCode) || SearchConstant.Field.SOURCE.equals(fieldCode)) {
                     //环境，字符串类型数据
                     List<String> valueStrList = objectMapper.readValue(option.traverse(), new TypeReference<List<String>>() {
                     });
