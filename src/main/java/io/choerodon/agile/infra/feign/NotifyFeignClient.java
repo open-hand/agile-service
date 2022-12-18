@@ -2,13 +2,16 @@ package io.choerodon.agile.infra.feign;
 
 import java.util.List;
 
-import io.choerodon.agile.infra.feign.fallback.NotifyFallbackFactory;
-import org.hzero.boot.message.entity.MessageSender;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(value = "choerodon-message", fallbackFactory = NotifyFallbackFactory.class)
+import io.choerodon.agile.infra.feign.fallback.NotifyFallbackFactory;
+
+import org.hzero.boot.message.entity.MessageSender;
+import org.hzero.common.HZeroService;
+
+@FeignClient(value = HZeroService.Message.NAME, fallbackFactory = NotifyFallbackFactory.class)
 public interface NotifyFeignClient {
 
 
