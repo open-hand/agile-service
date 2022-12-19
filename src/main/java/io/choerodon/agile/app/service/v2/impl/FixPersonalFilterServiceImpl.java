@@ -27,7 +27,6 @@ import io.choerodon.agile.infra.enums.PersonalFilterTypeCode;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.mapper.PersonalFilterMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.core.exception.CommonException;
 
 import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
 import static io.choerodon.agile.infra.enums.search.SearchConstant.Relationship;
@@ -94,7 +93,6 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private static final String TREE = "tree";
     private static final String TYPE_IDS = "typeIds";
     private static final String CLASSIFICATION_IDS = "classificationIds";
-
 
 
     private static final String SUFFIX_AGILE_START_DATE = "StartDate";
@@ -238,10 +236,14 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                     return;
                 }
                 String advancedFilterJson = convertJsonToAdvancedFilterJson(typeCode, json);
+                if (advancedFilterJson == null) {
+                    return;
+                }
                 filter.setAdvancedFilterJson(advancedFilterJson);
                 personalFilterMapper.updateByPrimaryKeySelective(filter);
             });
         });
+        logger.info("修复高级筛选数据完成");
     }
 
     @Override
@@ -261,12 +263,12 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                     //快速筛选
                     parseQuickFilterIds(searchParamVO, fieldName, conditionNode);
                 } else {
-                    //todo
-                    throw new CommonException("error." + fieldName);
+                    logger.error("不合法的字段名: {}", fieldName);
                 }
             }
         } catch (IOException e) {
-            throw new CommonException("error", e);
+            logger.error("不合法json数据: {}", json);
+            return null;
         }
         return JsonUtils.toJson(searchParamVO);
     }
@@ -469,10 +471,10 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         }
         if (field == null) {
             //非日期字段，抛异常
-            if (ignoredFields.contains(conditionFieldName)) {
-                return;
+            if (!ignoredFields.contains(conditionFieldName)) {
+                logger.error("不合法的json key: {}", conditionFieldName);
             }
-            throw new CommonException("error.illegal.json.key." + conditionFieldName);
+            return;
         }
         //判断字段是否已经处理过
         boolean done = Boolean.TRUE.equals(dateFieldDoneMap.get(field));
@@ -496,7 +498,8 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
             if (pair != null) {
                 String fieldCode = DATE_FIELD_MAPPING.get(field);
                 if (fieldCode == null) {
-                    throw new CommonException("error.illegal.date.field");
+                    logger.error("不合法的日期字段:{}", field);
+                    return;
                 }
                 Condition condition =
                         new Condition()
@@ -531,7 +534,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                 Long fieldId = idNode.asLong();
                 String relationship = Relationship.AND.toString();
                 String opt = Operation.IN.toString();
-                Pair<Value, Value> pair = Pair.of(null, null);
+                Pair<Value, Value> pair = null;
                 JsonNode value = valueNode.get(VALUE);
                 switch (prop) {
                     case OPTION:
@@ -553,6 +556,9 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                         break;
                     default:
                         break;
+                }
+                if (pair == null) {
+                    return;
                 }
                 Value first = pair.getFirst();
                 Value second = pair.getSecond();
@@ -607,7 +613,8 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
             Date endDate = parseDateFromString(end, formatter);
             pair = Pair.of(new Value().setValueDate(startDate), new Value().setValueDate(endDate));
         } catch (ParseException e) {
-            throw new CommonException("error.parse.custom.field.date", e);
+            logger.error("不合法的日期格式:{}", e.getMessage());
+            return null;
         }
         return pair;
     }
@@ -647,7 +654,8 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                 valueIdList = objectMapper.readValue(value.traverse(), new TypeReference<List<Long>>() {
                 });
             } catch (IOException e) {
-                throw new CommonException("error.read.option.to.list", e);
+                logger.error("自定义字段选择器值映射错误: {}", e.getMessage());
+                return null;
             }
             pair = Pair.of(new Value().setValueIdList(valueIdList), null);
         }
@@ -749,7 +757,8 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                     }
                 }
             } catch (IOException e) {
-                throw new CommonException("error.read.option.to.list", e);
+                logger.error("系统字段选择器值映射错误:{}", e.getMessage());
+                return;
             }
             conditions.add(condition);
         }
@@ -797,7 +806,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                                 .setValue(new Value().setObjectList(tags));
                 conditions.add(condition);
             } catch (IOException e) {
-                throw new CommonException("error.read.tag.to.list", e);
+                logger.error("Tag字段选择器值映射错误:{}", e.getMessage());
             }
         }
     }

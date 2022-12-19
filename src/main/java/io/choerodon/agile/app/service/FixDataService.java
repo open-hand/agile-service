@@ -26,5 +26,10 @@ public interface FixDataService {
     void fixStatusMachineCustomTransferRoleData();
 
 
+    /**
+     * 高级筛选修数据
+     *
+     * @param typeCodes
+     */
     void fixPersonalFilter(Set<String> typeCodes);
 }
