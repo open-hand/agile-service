@@ -32,7 +32,7 @@
             and advanced_filter_json = ''
         </if>
         <if test="version == 'v2'">
-            and andfilter_json = ''
+            and filter_json = ''
         </if>
         <if test='searchStr != null and searchStr != "" '>
             AND name LIKE concat('%',#{searchStr},'%')
