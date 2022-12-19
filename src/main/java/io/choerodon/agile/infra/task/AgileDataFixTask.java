@@ -34,9 +34,9 @@ public class AgileDataFixTask {
 
 //    @JobTask(maxRetryCount = 3,
 //            code = "fixPersonalFilter",
-//            description = "升级到2.3.0,修复个人筛选数据到高级筛选")
+//            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选")
 //    @TimedTask(name = "fixPersonalFilter",
-//            description = "升级到2.3.0,修复个人筛选数据到高级筛选",
+//            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选",
 //            oneExecution = true,
 //            repeatCount = 0,
 //            repeatInterval = 1,
