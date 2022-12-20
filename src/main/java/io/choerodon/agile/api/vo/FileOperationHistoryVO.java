@@ -145,4 +145,22 @@ public class FileOperationHistoryVO {
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
+
+    @Override
+    public String toString() {
+        return "FileOperationHistoryVO{" +
+                "id=" + id +
+                ", projectId=" + projectId +
+                ", organizationId=" + organizationId +
+                ", userId=" + userId +
+                ", action='" + action + '\'' +
+                ", successCount=" + successCount +
+                ", failCount=" + failCount +
+                ", status='" + status + '\'' +
+                ", fileUrl='" + fileUrl + '\'' +
+                ", objectVersionNumber=" + objectVersionNumber +
+                ", creationDate=" + creationDate +
+                ", lastUpdateDate=" + lastUpdateDate +
+                '}';
+    }
 }
