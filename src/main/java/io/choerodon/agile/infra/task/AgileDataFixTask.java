@@ -32,16 +32,16 @@ public class AgileDataFixTask {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-//    @JobTask(maxRetryCount = 3,
-//            code = "fixPersonalFilter",
-//            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选")
-//    @TimedTask(name = "fixPersonalFilter",
-//            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选",
-//            oneExecution = true,
-//            repeatCount = 0,
-//            repeatInterval = 1,
-//            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
-//            params = {})
+    @JobTask(maxRetryCount = 3,
+            code = "fixPersonalFilter",
+            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选格式")
+    @TimedTask(name = "fixPersonalFilter",
+            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选格式",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
     public void fixPersonalFilter(Map<String, Object> map) {
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix Start, Version: 2.3.0 <<<<<<<<=================================");
         Set<String> typeCodes =
