@@ -1464,7 +1464,10 @@ public class ExcelServiceImpl implements ExcelService {
     public FileOperationHistoryVO queryLatestRecode(Long projectId, String action) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         FileOperationHistoryDTO result = fileOperationHistoryMapper.queryLatestRecode(projectId, userId, action);
-        return result == null ? new FileOperationHistoryVO() : modelMapper.map(result, FileOperationHistoryVO.class);
+        LOGGER.info("数据库：{}", result);
+        FileOperationHistoryVO returnResult = (result == null ? new FileOperationHistoryVO() : modelMapper.map(result, FileOperationHistoryVO.class));
+        LOGGER.info("映射VO：{}", returnResult);
+        return returnResult;
     }
 
     @Override
