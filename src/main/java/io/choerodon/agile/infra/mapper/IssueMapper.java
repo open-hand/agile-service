@@ -502,7 +502,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @param assigneeFilterIds
      * @param sortMap
      * @return
-     * @see IssueMapper#queryChildrenList(List, Set, String, String, Map)
+     * @see IssueMapper#queryChildrenList(List, Set, String, String, Map, boolean, String)
      */
     @Deprecated
     List<IssueDTO> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
@@ -516,7 +516,9 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                      @Param("projectIds") Set<Long> projectIds,
                                      @Param("quickFilterSql") String quickFilterSql,
                                      @Param("advancedSql") String advancedSql,
-                                     @Param("sortMap") Map<String, Object> sortMap);
+                                     @Param("sortMap") Map<String, Object> sortMap,
+                                     @Param("ganttDefaultOrder") boolean ganttDefaultOrder,
+                                     @Param("dimension") String dimension);
 
     List<IssueDTO> queryStoryAndTaskByProjectId(@Param("projectId") Long projectId, @Param("searchVO") SearchVO searchVO);
 
