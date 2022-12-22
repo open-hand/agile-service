@@ -1,10 +1,11 @@
 package io.choerodon.agile.api.vo.business;
 
 import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 
-public class AgileWorkHoursConfigVO {
+public class WorkHoursConfigVO {
 
     @Encrypt
     @ApiModelProperty(value = "id")
@@ -23,7 +24,7 @@ public class AgileWorkHoursConfigVO {
     @ApiModelProperty(value = "是否允许删除工时")
     private Boolean canDeleteFlag;
     @ApiModelProperty(value = "状态")
-    private IamProjectStatusVO iamProjectStatusVO;
+    private ProjectStatusVO iamProjectStatusVO;
 
 
     public Long getId() {
@@ -42,11 +43,11 @@ public class AgileWorkHoursConfigVO {
         this.projectStatusId = projectStatusId;
     }
 
-    public IamProjectStatusVO getIamProjectStatusVO() {
+    public ProjectStatusVO getIamProjectStatusVO() {
         return iamProjectStatusVO;
     }
 
-    public void setIamProjectStatusVO(IamProjectStatusVO iamProjectStatusVO) {
+    public void setIamProjectStatusVO(ProjectStatusVO iamProjectStatusVO) {
         this.iamProjectStatusVO = iamProjectStatusVO;
     }
 

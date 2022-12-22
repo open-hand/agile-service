@@ -1,10 +1,10 @@
 package io.choerodon.agile.api.vo.business;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.persistence.Id;
 
-public class IamProjectStatusVO {
+import io.swagger.annotations.ApiModelProperty;
+
+public class ProjectStatusVO {
     @Id
     @ApiModelProperty("主键Id")
     private Long id;
