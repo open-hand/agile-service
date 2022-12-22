@@ -11,18 +11,17 @@ public class AgileWorkHoursConfigVO {
     private Long id;
 
     @ApiModelProperty(value = "组织Id")
-    private Long tenantId;
+    private Long organizationId;
 
     @ApiModelProperty(value = "项目状态Id")
     @Encrypt
     private Long projectStatusId;
 
     @ApiModelProperty(value = "是否允许登记工时")
-    private Boolean register;
+    private Boolean canAddFlag;
 
     @ApiModelProperty(value = "是否允许删除工时")
-    private Boolean delete;
-
+    private Boolean canDeleteFlag;
     @ApiModelProperty(value = "状态")
     private IamProjectStatusVO iamProjectStatusVO;
 
@@ -35,14 +34,6 @@ public class AgileWorkHoursConfigVO {
         this.id = id;
     }
 
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
-
     public Long getProjectStatusId() {
         return projectStatusId;
     }
@@ -51,27 +42,35 @@ public class AgileWorkHoursConfigVO {
         this.projectStatusId = projectStatusId;
     }
 
-    public Boolean getRegister() {
-        return register;
-    }
-
-    public void setRegister(Boolean register) {
-        this.register = register;
-    }
-
-    public Boolean getDelete() {
-        return delete;
-    }
-
-    public void setDelete(Boolean delete) {
-        this.delete = delete;
-    }
-
     public IamProjectStatusVO getIamProjectStatusVO() {
         return iamProjectStatusVO;
     }
 
     public void setIamProjectStatusVO(IamProjectStatusVO iamProjectStatusVO) {
         this.iamProjectStatusVO = iamProjectStatusVO;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Boolean getCanAddFlag() {
+        return canAddFlag;
+    }
+
+    public void setCanAddFlag(Boolean canAddFlag) {
+        this.canAddFlag = canAddFlag;
+    }
+
+    public Boolean getCanDeleteFlag() {
+        return canDeleteFlag;
+    }
+
+    public void setCanDeleteFlag(Boolean canDeleteFlag) {
+        this.canDeleteFlag = canDeleteFlag;
     }
 }
