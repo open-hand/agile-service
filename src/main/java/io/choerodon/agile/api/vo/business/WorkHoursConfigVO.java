@@ -24,7 +24,7 @@ public class WorkHoursConfigVO {
     @ApiModelProperty(value = "是否允许删除工时")
     private Boolean canDeleteFlag;
     @ApiModelProperty(value = "状态")
-    private ProjectStatusVO iamProjectStatusVO;
+    private ProjectStatusVO projectStatusVO;
 
 
     public Long getId() {
@@ -43,12 +43,12 @@ public class WorkHoursConfigVO {
         this.projectStatusId = projectStatusId;
     }
 
-    public ProjectStatusVO getIamProjectStatusVO() {
-        return iamProjectStatusVO;
+    public ProjectStatusVO getProjectStatusVO() {
+        return projectStatusVO;
     }
 
-    public void setIamProjectStatusVO(ProjectStatusVO iamProjectStatusVO) {
-        this.iamProjectStatusVO = iamProjectStatusVO;
+    public void setProjectStatusVO(ProjectStatusVO projectStatusVO) {
+        this.projectStatusVO = projectStatusVO;
     }
 
     public Long getOrganizationId() {

@@ -314,7 +314,7 @@ public class IssueVO {
     private List<InstanceOpenRelVO> instanceOpenRels;
 
     @ApiModelProperty("工时登记配置")
-    private WorkHoursConfigVO agileWorkHoursConfigVO;
+    private WorkHoursConfigVO workHoursConfigVO;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1092,11 +1092,11 @@ public class IssueVO {
         this.instanceOpenRels = instanceOpenRels;
     }
 
-    public WorkHoursConfigVO getAgileWorkHoursConfigVO() {
-        return agileWorkHoursConfigVO;
+    public WorkHoursConfigVO getWorkHoursConfigVO() {
+        return workHoursConfigVO;
     }
 
-    public void setAgileWorkHoursConfigVO(WorkHoursConfigVO agileWorkHoursConfigVO) {
-        this.agileWorkHoursConfigVO = agileWorkHoursConfigVO;
+    public void setWorkHoursConfigVO(WorkHoursConfigVO workHoursConfigVO) {
+        this.workHoursConfigVO = workHoursConfigVO;
     }
 }
