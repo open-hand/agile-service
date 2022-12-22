@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.IssueWorkTimeCountVO;
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.api.validator.WorkLogValidator;
 import io.choerodon.agile.app.service.*;
@@ -10,6 +11,7 @@ import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.WorkLogMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
@@ -59,6 +61,12 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private AgilePluginService agilePluginService;
+
+    @Autowired
+    private RemoteIamOperator remoteIamOperator;
+
     private void setTo(Long issueId, BigDecimal predictionTime) {
         IssueConvertDTO issueConvertDTO = modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueConvertDTO.class);
         issueConvertDTO.setRemainingTime(predictionTime);
@@ -105,6 +113,14 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
     @Override
     public WorkLogVO createWorkLog(Long projectId, WorkLogVO workLogVO) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(workLogVO.getIssueId());
+        //登记工时前，校验工时的配置
+        if (agilePluginService != null) {
+            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            if (projectVO == null) {
+                throw new CommonException("error.project.empty");
+            }
+            agilePluginService.checkCreateWorkLog(projectVO.getOrganizationId(), projectVO.getId(), projectVO.getStatusId());
+        }
         WorkLogValidator.checkCreateWorkLog(projectId, workLogVO, issueDTO);
         if (workLogVO.getResidualPrediction() != null) {
             switch (workLogVO.getResidualPrediction()) {
@@ -139,6 +155,14 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
 
     @Override
     public void deleteWorkLog(Long projectId, Long logId) {
+        //删除工时前校验工时配置
+        if (agilePluginService != null) {
+            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            if (projectVO == null) {
+                throw new CommonException("error.project.empty");
+            }
+            agilePluginService.checkDeleteWorkLog(projectVO.getOrganizationId(), projectId, projectVO.getStatusId());
+        }
         iWorkLogService.deleteBase(projectId, logId);
     }
 
@@ -154,7 +178,8 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
 
     @Override
     public List<WorkLogVO> queryWorkLogListByIssueId(Long projectId, Long issueId) {
-        List<WorkLogVO> workLogVOList = modelMapper.map(workLogMapper.queryByIssueId(issueId, projectId), new TypeToken<List<WorkLogVO>>(){}.getType());
+        List<WorkLogVO> workLogVOList = modelMapper.map(workLogMapper.queryByIssueId(issueId, projectId), new TypeToken<List<WorkLogVO>>() {
+        }.getType());
         List<Long> assigneeIds = workLogVOList.stream().filter(workLogVO -> workLogVO.getCreatedBy() != null && !Objects.equals(workLogVO.getCreatedBy(), 0L)).map(WorkLogVO::getCreatedBy).distinct().collect(Collectors.toList());
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         workLogVOList.forEach(workLogVO -> {
