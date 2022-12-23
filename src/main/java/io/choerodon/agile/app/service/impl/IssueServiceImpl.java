@@ -456,6 +456,30 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         setRemainingTime(issueConvertDTO);
         // 处理预计、实际时间
         handleEstimateTimeAndActualTime(issueConvertDTO);
+        //处理甘特图创建子缺陷可以选择已关闭冲刺的问题
+        //https://choerodon.com.cn/#/agile/work-list/issue?type=project&id=243303070577803264&name=%E7%94%84%E7%9F%A5%E9%A1%B9%E7%9B%AE%E7%BE%A4&category=AGILE&organizationId=1128&paramIssueId=393079285088505856&paramName=yq-5896
+        resetSubIssueSprintIfClosed(issueConvertDTO);
+    }
+
+    private void resetSubIssueSprintIfClosed(IssueConvertDTO issueConvertDTO) {
+        Long sprintId = issueConvertDTO.getSprintId();
+        if (sprintId == null) {
+            return;
+        }
+        SprintDTO sprint = sprintMapper.selectByPrimaryKey(sprintId);
+        if (sprint == null) {
+            return;
+        }
+        String statusCode = sprint.getStatusCode();
+        Long parentId = issueConvertDTO.getParentIssueId();
+        Long relateIssueId = issueConvertDTO.getRelateIssueId();
+        if ((parentId != null && !Objects.equals(0L, parentId))
+                || (relateIssueId != null && !Objects.equals(0L, relateIssueId))) {
+            if (SprintStatusCode.CLOSED.equals(statusCode)) {
+                //冲刺已关闭，置空
+                issueConvertDTO.setSprintId(null);
+            }
+        }
     }
 
     private void handleEstimateTimeAndActualTime(IssueConvertDTO issueConvertDTO) {
