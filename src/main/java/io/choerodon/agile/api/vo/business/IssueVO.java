@@ -318,7 +318,7 @@ public class IssueVO {
     private WorkHoursConfigVO workHoursConfigVO;
 
     @ApiModelProperty("工时属性配置")
-    private WorkHoursAttributeVO workHoursAttributeVO;
+    private List<WorkHoursConfigAttributeVO> workHoursConfigAttributeVOS;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1104,11 +1104,13 @@ public class IssueVO {
         this.workHoursConfigVO = workHoursConfigVO;
     }
 
-    public WorkHoursAttributeVO getWorkHoursAttributeVO() {
-        return workHoursAttributeVO;
+
+
+    public List<WorkHoursConfigAttributeVO> getWorkHoursConfigAttributeVOS() {
+        return workHoursConfigAttributeVOS;
     }
 
-    public void setWorkHoursAttributeVO(WorkHoursAttributeVO workHoursAttributeVO) {
-        this.workHoursAttributeVO = workHoursAttributeVO;
+    public void setWorkHoursConfigAttributeVOS(List<WorkHoursConfigAttributeVO> workHoursConfigAttributeVOS) {
+        this.workHoursConfigAttributeVOS = workHoursConfigAttributeVOS;
     }
 }
