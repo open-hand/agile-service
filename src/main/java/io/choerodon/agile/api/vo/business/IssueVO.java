@@ -233,9 +233,9 @@ public class IssueVO {
     @ApiModelProperty(value = "活跃的pi团队")
     private List<ProjectVO> activePiTeams;
     @ApiModelProperty(value = "活页的pi冲刺")
-    private List<SprintDetailVO>  activePiSprints;
+    private List<SprintDetailVO> activePiSprints;
     @ApiModelProperty(value = "关闭的pi冲刺")
-    private List<SprintDetailVO>  closedPiSprints;
+    private List<SprintDetailVO> closedPiSprints;
     @ApiModelProperty(value = "wsjf")
     private WsjfVO wsjf;
     @ApiModelProperty(value = "预计开始时间")
@@ -268,6 +268,7 @@ public class IssueVO {
     public void setSprintId(Long sprintId) {
         this.sprintId = sprintId;
     }
+
     @ApiModelProperty(value = "是否为星标")
     private Boolean starBeacon;
     @ApiModelProperty(value = "父级是否为星标")
@@ -315,6 +316,9 @@ public class IssueVO {
 
     @ApiModelProperty("工时登记配置")
     private WorkHoursConfigVO workHoursConfigVO;
+
+    @ApiModelProperty("工时属性配置")
+    private WorkHoursAttributeVO workHoursAttributeVO;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1098,5 +1102,13 @@ public class IssueVO {
 
     public void setWorkHoursConfigVO(WorkHoursConfigVO workHoursConfigVO) {
         this.workHoursConfigVO = workHoursConfigVO;
+    }
+
+    public WorkHoursAttributeVO getWorkHoursAttributeVO() {
+        return workHoursAttributeVO;
+    }
+
+    public void setWorkHoursAttributeVO(WorkHoursAttributeVO workHoursAttributeVO) {
+        this.workHoursAttributeVO = workHoursAttributeVO;
     }
 }
