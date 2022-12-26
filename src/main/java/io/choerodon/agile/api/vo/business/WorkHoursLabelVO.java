@@ -13,6 +13,10 @@ import io.choerodon.mybatis.domain.AuditDomain;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+/**
+ * 工时日志标签VO
+ * @author gaokuo.dai@zknow.com 2022-12-26
+ */
 @ApiModel(value = "工时日志标签VO")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WorkHoursLabelVO extends AuditDomain {

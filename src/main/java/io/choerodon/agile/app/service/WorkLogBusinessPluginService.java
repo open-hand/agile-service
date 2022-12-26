@@ -12,9 +12,9 @@ import io.choerodon.agile.infra.dto.WorkLogDTO;
 public interface WorkLogBusinessPluginService {
 
 
-    void checkCreateWorkLog(Long organizationId, Long projectId, Long statusId);
+    void checkBeforeCreateWorkLog(Long organizationId, Long projectId, Long statusId);
 
-    void checkDeleteWorkLog(Long organizationId, Long projectId, Long statusId);
+    void checkBeforeDeleteWorkLog(Long organizationId, Long projectId, Long statusId);
 
     /**
      * 根据工作项ID查询工时日志列表
