@@ -656,7 +656,4 @@ public interface AgilePluginService {
      */
     void afterBackLogMoveProject(Long organizationId, Collection<? extends InstanceOpenRelVO> instanceOpenRelVOCollection);
 
-    void checkCreateWorkLog(Long organizationId, Long projectId, Long statusId);
-
-    void checkDeleteWorkLog(Long organizationId, Long projectId, Long statusId);
 }
