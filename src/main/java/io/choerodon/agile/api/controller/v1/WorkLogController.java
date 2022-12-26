@@ -52,7 +52,7 @@ public class WorkLogController {
                                                    @ApiParam(value = "work log object", required = true)
                                                    @RequestBody WorkLogVO workLogVO) {
         return Optional.ofNullable(workLogService.updateWorkLog(projectId, logId, workLogVO))
-                .map(Results::created)
+                .map(Results::success)
                 .orElseThrow(() -> new CommonException("error.workLog.update"));
     }
 

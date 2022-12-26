@@ -42,4 +42,14 @@ public interface WorkLogBusinessPluginService {
      * @return              处理后的返回值
      */
     WorkLogDTO createWorkLog(Long projectId, WorkLogVO workLog, WorkLogDTO workLogDTO);
+
+    /**
+     * 修改工时日志
+     * @param projectId     项目ID
+     * @param workLogId     工时日志ID
+     * @param workLog       前端传参
+     * @param workLogDTO    基础返回值
+     * @return              处理后的返回值
+     */
+    WorkLogDTO updateWorkLog(Long projectId, Long workLogId, WorkLogVO workLog, WorkLogDTO workLogDTO);
 }
