@@ -169,6 +169,9 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
             workLogBusinessPluginService.checkDeleteWorkLog(projectVO.getOrganizationId(), projectId, projectVO.getStatusId());
         }
         iWorkLogService.deleteBase(projectId, logId);
+        if(this.workLogBusinessPluginService != null) {
+            this.workLogBusinessPluginService.deleteWorkLog(projectId, logId);
+        }
     }
 
     @Override

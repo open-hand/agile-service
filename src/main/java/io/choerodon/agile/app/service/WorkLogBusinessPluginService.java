@@ -52,4 +52,11 @@ public interface WorkLogBusinessPluginService {
      * @return              处理后的返回值
      */
     WorkLogDTO updateWorkLog(Long projectId, Long workLogId, WorkLogVO workLog, WorkLogDTO workLogDTO);
+
+    /**
+     * 删除工时日志
+     * @param projectId     项目ID
+     * @param workLogId     工作日志ID
+     */
+    void deleteWorkLog(Long projectId, Long workLogId);
 }
