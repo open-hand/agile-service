@@ -19,10 +19,10 @@ public class WorkHoursConfigVO {
     private Long projectStatusId;
 
     @ApiModelProperty(value = "是否允许登记工时")
-    private Boolean canAddFlag;
+    private Boolean disabledAddFlag;
 
     @ApiModelProperty(value = "是否允许删除工时")
-    private Boolean canDeleteFlag;
+    private Boolean disabledDeleteFlag;
     @ApiModelProperty(value = "状态")
     private ProjectStatusVO projectStatusVO;
 
@@ -59,19 +59,20 @@ public class WorkHoursConfigVO {
         this.organizationId = organizationId;
     }
 
-    public Boolean getCanAddFlag() {
-        return canAddFlag;
+
+    public Boolean getDisabledAddFlag() {
+        return disabledAddFlag;
     }
 
-    public void setCanAddFlag(Boolean canAddFlag) {
-        this.canAddFlag = canAddFlag;
+    public void setDisabledAddFlag(Boolean disabledAddFlag) {
+        this.disabledAddFlag = disabledAddFlag;
     }
 
-    public Boolean getCanDeleteFlag() {
-        return canDeleteFlag;
+    public Boolean getDisabledDeleteFlag() {
+        return disabledDeleteFlag;
     }
 
-    public void setCanDeleteFlag(Boolean canDeleteFlag) {
-        this.canDeleteFlag = canDeleteFlag;
+    public void setDisabledDeleteFlag(Boolean disabledDeleteFlag) {
+        this.disabledDeleteFlag = disabledDeleteFlag;
     }
 }
