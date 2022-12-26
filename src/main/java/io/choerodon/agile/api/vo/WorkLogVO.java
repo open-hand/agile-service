@@ -3,10 +3,12 @@ package io.choerodon.agile.api.vo;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
+import io.choerodon.agile.api.vo.business.WorkHoursAttachmentVO;
 import io.choerodon.agile.api.vo.business.WorkHoursLabelVO;
 import io.choerodon.agile.api.vo.business.WorkHoursTypeVO;
 
@@ -72,6 +74,9 @@ public class WorkLogVO {
     
     @ApiModelProperty(value = "工时日志标签")
     private WorkHoursLabelVO workHoursLabel;
+
+    @ApiModelProperty(value = "工时日志附件")
+    private List<WorkHoursAttachmentVO> workHoursAttachments;
 
     public String getUserImageUrl() {
         return userImageUrl;
@@ -208,6 +213,9 @@ public class WorkLogVO {
         return this;
     }
 
+    /**
+     * @return 工时日志类型
+     */
     public WorkHoursTypeVO getWorkHoursType() {
         return workHoursType;
     }
@@ -217,12 +225,27 @@ public class WorkLogVO {
         return this;
     }
 
+    /**
+     * @return 工时日志标签
+     */
     public WorkHoursLabelVO getWorkHoursLabel() {
         return workHoursLabel;
     }
 
     public WorkLogVO setWorkHoursLabel(WorkHoursLabelVO workHoursLabel) {
         this.workHoursLabel = workHoursLabel;
+        return this;
+    }
+
+    /**
+     * @return 工时日志附件
+     */
+    public List<WorkHoursAttachmentVO> getWorkHoursAttachments() {
+        return workHoursAttachments;
+    }
+
+    public WorkLogVO setWorkHoursAttachments(List<WorkHoursAttachmentVO> workHoursAttachments) {
+        this.workHoursAttachments = workHoursAttachments;
         return this;
     }
 }

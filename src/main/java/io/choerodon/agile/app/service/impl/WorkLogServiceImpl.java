@@ -115,7 +115,7 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
             if (projectVO == null) {
                 throw new CommonException("error.project.empty");
             }
-            workLogBusinessPluginService.checkCreateWorkLog(projectVO.getOrganizationId(), projectVO.getId(), projectVO.getStatusId());
+            workLogBusinessPluginService.checkBeforeCreateWorkLog(projectVO.getOrganizationId(), projectVO.getId(), projectVO.getStatusId());
         }
         WorkLogValidator.checkCreateWorkLog(projectId, workLogVO, issueDTO);
         if (workLogVO.getResidualPrediction() != null) {
@@ -166,7 +166,7 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
             if (projectVO == null) {
                 throw new CommonException("error.project.empty");
             }
-            workLogBusinessPluginService.checkDeleteWorkLog(projectVO.getOrganizationId(), projectId, projectVO.getStatusId());
+            workLogBusinessPluginService.checkBeforeDeleteWorkLog(projectVO.getOrganizationId(), projectId, projectVO.getStatusId());
         }
         iWorkLogService.deleteBase(projectId, logId);
         if(this.workLogBusinessPluginService != null) {
