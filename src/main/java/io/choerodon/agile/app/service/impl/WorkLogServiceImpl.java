@@ -148,8 +148,14 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
         WorkLogValidator.checkUpdateWorkLog(workLogVO);
         workLogVO.setProjectId(projectId);
         WorkLogDTO res = updateBase(modelMapper.map(workLogVO, WorkLogDTO.class));
-        BaseFieldUtil.updateIssueLastUpdateInfo(res.getIssueId(), res.getProjectId());
-        return queryWorkLogById(res.getProjectId(), res.getLogId());
+        projectId = res.getProjectId();
+        logId = res.getLogId();
+        final Long issueId = res.getIssueId();
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueId, projectId);
+        if(this.workLogBusinessPluginService != null) {
+            res = this.workLogBusinessPluginService.updateWorkLog(projectId, logId, workLogVO, res);
+        }
+        return queryWorkLogById(projectId, logId);
     }
 
     @Override

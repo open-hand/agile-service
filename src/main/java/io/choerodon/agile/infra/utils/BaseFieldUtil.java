@@ -5,13 +5,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 import javax.persistence.Id;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
+import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -19,15 +25,10 @@ import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.mybatis.domain.AuditDomain;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
+
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * 表基础字段处理工具类
@@ -49,7 +50,7 @@ public class BaseFieldUtil {
     /**
      * 更新issue的最后更新时间，最后更新人
      *
-     * @param primaryKey 主键值
+     * @param issueId    主键值
      * @param projectId  项目id
      */
     public static IssueDTO updateIssueLastUpdateInfo(Long issueId, Long projectId) {
