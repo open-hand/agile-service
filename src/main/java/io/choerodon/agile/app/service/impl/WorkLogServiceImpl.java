@@ -137,6 +137,9 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
         }
         BaseFieldUtil.updateIssueLastUpdateInfo(workLogVO.getIssueId(), projectId);
         WorkLogDTO res = iWorkLogService.createBase(modelMapper.map(workLogVO, WorkLogDTO.class));
+        if(this.workLogBusinessPluginService != null) {
+            res = this.workLogBusinessPluginService.createWorkLog(projectId, workLogVO, res);
+        }
         return queryWorkLogById(res.getProjectId(), res.getLogId());
     }
 
@@ -169,6 +172,9 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
         workLogDTO.setLogId(logId);
         WorkLogVO workLogVO = modelMapper.map(workLogMapper.selectOne(workLogDTO), WorkLogVO.class);
         workLogVO.setUserName(userService.queryUserNameByOption(workLogVO.getCreatedBy(), true).getRealName());
+        if(workLogBusinessPluginService != null) {
+            workLogVO = this.workLogBusinessPluginService.queryWorkLogById(projectId, logId, workLogVO);
+        }
         return workLogVO;
     }
 
