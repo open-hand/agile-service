@@ -227,6 +227,9 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
     }
 
     changeSet(id: '2022-12-27-agile-issue-modify-data-type-description', author: 'gaokuo.dai@zknow.com') {
-        modifyDataType (tableName: "agile_issue", columnName: "description", newDataType: "longtext", remarks: '描述')
+        modifyDataType (tableName: "agile_issue", columnName: "description", newDataType: "longtext")
+        if (!helper.isMysql()) {
+            setColumnRemarks (tableName: "agile_data_log", columnName: "old_string", remarks: "描述")
+        }
     }
 }

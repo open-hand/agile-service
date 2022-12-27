@@ -74,7 +74,13 @@ databaseChangeLog(logicalFilePath:'agile_data_log.groovy') {
     }
 
     changeSet(id: '2022-12-27-agile-data-log-modify-data-type-old/new_string', author: 'gaokuo.dai@zknow.com') {
-        modifyDataType (tableName: "agile_data_log", columnName: "old_string", newDataType: "longtext", remarks: '旧值')
-        modifyDataType (tableName: "agile_data_log", columnName: "new_string", newDataType: "longtext", remarks: '新值')
+        modifyDataType (tableName: "agile_data_log", columnName: "old_string", newDataType: "longtext")
+        if (!helper.isMysql()) {
+            setColumnRemarks (tableName: "agile_data_log", columnName: "old_string", remarks: "旧值")
+        }
+        modifyDataType (tableName: "agile_data_log", columnName: "new_string", newDataType: "longtext")
+        if (!helper.isMysql()) {
+            setColumnRemarks (tableName: "agile_data_log", columnName: "new_string", remarks: "新值")
+        }
     }
 }
