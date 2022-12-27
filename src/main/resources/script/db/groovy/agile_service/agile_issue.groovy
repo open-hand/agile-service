@@ -225,4 +225,8 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
     changeSet(id: '2022-01-17-agile-issue-drop-index', author: 'huaxin.deng@hand-china.com') {
         dropIndex(tableName: "agile_issue", indexName: "idx_project_id")
     }
+
+    changeSet(id: '2022-12-27-agile-issue-modify-data-type-description', author: 'gaokuo.dai@zknow.com') {
+        modifyDataType (tableName: "agile_issue", columnName: "description", newDataType: "longtext")
+    }
 }
