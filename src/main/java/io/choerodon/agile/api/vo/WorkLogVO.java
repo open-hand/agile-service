@@ -1,17 +1,24 @@
 package io.choerodon.agile.api.vo;
 
 
-
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.api.vo.business.WorkHoursAttachmentVO;
+import io.choerodon.agile.api.vo.business.WorkHoursLabelVO;
+import io.choerodon.agile.api.vo.business.WorkHoursTypeVO;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/18.
  * Email: fuqianghuang01@gmail.com
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WorkLogVO {
 
     @ApiModelProperty(value = "工作日志主键id")
@@ -61,49 +68,64 @@ public class WorkLogVO {
 
     @ApiModelProperty(value = "用户登录名")
     private String loginName;
+    
+    @ApiModelProperty(value = "工时日志类型")
+    private WorkHoursTypeVO workHoursType;
+    
+    @ApiModelProperty(value = "工时日志标签")
+    private WorkHoursLabelVO workHoursLabel;
+
+    @ApiModelProperty(value = "工时日志附件")
+    private List<WorkHoursAttachmentVO> workHoursAttachments;
 
     public String getUserImageUrl() {
         return userImageUrl;
     }
 
-    public void setUserImageUrl(String userImageUrl) {
+    public WorkLogVO setUserImageUrl(String userImageUrl) {
         this.userImageUrl = userImageUrl;
+        return this;
     }
 
     public String getRealName() {
         return realName;
     }
 
-    public void setRealName(String realName) {
+    public WorkLogVO setRealName(String realName) {
         this.realName = realName;
+        return this;
     }
 
     public String getLoginName() {
         return loginName;
     }
 
-    public void setLoginName(String loginName) {
+    public WorkLogVO setLoginName(String loginName) {
         this.loginName = loginName;
+        return this;
     }
 
     public Long getLogId() {
         return logId;
     }
 
-    public void setLogId(Long logId) {
+    public WorkLogVO setLogId(Long logId) {
         this.logId = logId;
+        return this;
     }
 
-    public void setWorkTime(BigDecimal workTime) {
+    public WorkLogVO setWorkTime(BigDecimal workTime) {
         this.workTime = workTime;
+        return this;
     }
 
     public BigDecimal getWorkTime() {
         return workTime;
     }
 
-    public void setStartDate(Date startDate) {
+    public WorkLogVO setStartDate(Date startDate) {
         this.startDate = startDate;
+        return this;
     }
 
     public Date getStartDate() {
@@ -114,52 +136,59 @@ public class WorkLogVO {
         return description;
     }
 
-    public void setDescription(String description) {
+    public WorkLogVO setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public Long getIssueId() {
         return issueId;
     }
 
-    public void setIssueId(Long issueId) {
+    public WorkLogVO setIssueId(Long issueId) {
         this.issueId = issueId;
+        return this;
     }
 
     public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public WorkLogVO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
-    public void setObjectVersionNumber(Long objectVersionNumber) {
+    public WorkLogVO setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+        return this;
     }
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
     }
 
-    public void setResidualPrediction(String residualPrediction) {
+    public WorkLogVO setResidualPrediction(String residualPrediction) {
         this.residualPrediction = residualPrediction;
+        return this;
     }
 
     public String getResidualPrediction() {
         return residualPrediction;
     }
 
-    public void setPredictionTime(BigDecimal predictionTime) {
+    public WorkLogVO setPredictionTime(BigDecimal predictionTime) {
         this.predictionTime = predictionTime;
+        return this;
     }
 
     public BigDecimal getPredictionTime() {
         return predictionTime;
     }
 
-    public void setCreatedBy(Long createdBy) {
+    public WorkLogVO setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
+        return this;
     }
 
     public Long getCreatedBy() {
@@ -170,15 +199,53 @@ public class WorkLogVO {
         return userName;
     }
 
-    public void setUserName(String userName) {
+    public WorkLogVO setUserName(String userName) {
         this.userName = userName;
+        return this;
     }
 
     public Date getLastUpdateDate() {
         return lastUpdateDate;
     }
 
-    public void setLastUpdateDate(Date lastUpdateDate) {
+    public WorkLogVO setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+        return this;
+    }
+
+    /**
+     * @return 工时日志类型
+     */
+    public WorkHoursTypeVO getWorkHoursType() {
+        return workHoursType;
+    }
+
+    public WorkLogVO setWorkHoursType(WorkHoursTypeVO workHoursType) {
+        this.workHoursType = workHoursType;
+        return this;
+    }
+
+    /**
+     * @return 工时日志标签
+     */
+    public WorkHoursLabelVO getWorkHoursLabel() {
+        return workHoursLabel;
+    }
+
+    public WorkLogVO setWorkHoursLabel(WorkHoursLabelVO workHoursLabel) {
+        this.workHoursLabel = workHoursLabel;
+        return this;
+    }
+
+    /**
+     * @return 工时日志附件
+     */
+    public List<WorkHoursAttachmentVO> getWorkHoursAttachments() {
+        return workHoursAttachments;
+    }
+
+    public WorkLogVO setWorkHoursAttachments(List<WorkHoursAttachmentVO> workHoursAttachments) {
+        this.workHoursAttachments = workHoursAttachments;
+        return this;
     }
 }

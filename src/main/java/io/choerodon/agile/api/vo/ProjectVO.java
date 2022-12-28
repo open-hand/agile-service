@@ -47,6 +47,9 @@ public class ProjectVO {
     private Date creationDate;
     @ApiModelProperty(value = "项目状态")
     private String projectStatus;
+    @ApiModelProperty("项目状态Id")
+    @Encrypt
+    private Long statusId;
 
     @ApiModelProperty("项目状态的名称")
     private String statusName;
@@ -232,6 +235,7 @@ public class ProjectVO {
         this.types = types;
         return this;
     }
+
     /**
      * @return 项目群ART信息
      */
@@ -250,5 +254,13 @@ public class ProjectVO {
 
     public void setHealthStateVO(HealthStateVO healthStateVO) {
         this.healthStateVO = healthStateVO;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 }
