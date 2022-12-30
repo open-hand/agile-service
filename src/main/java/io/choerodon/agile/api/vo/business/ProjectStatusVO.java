@@ -3,10 +3,12 @@ package io.choerodon.agile.api.vo.business;
 import javax.persistence.Id;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class ProjectStatusVO {
     @Id
     @ApiModelProperty("主键Id")
+    @Encrypt
     private Long id;
     @ApiModelProperty("组织Id")
     private Long tenantId;
