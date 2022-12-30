@@ -35,7 +35,6 @@ import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -44,6 +43,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 import org.hzero.core.base.AopProxy;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author shinan.chen
@@ -84,7 +84,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired(required = false)
@@ -515,7 +515,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess(batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
                 if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
-                    messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                    socketSendHelper.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
                     batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
                 }
             }
@@ -628,7 +628,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (sendMsg) {
             batchUpdateFieldStatusVO.setProcess(batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
             if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
-                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                socketSendHelper.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
                 batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
             }
         }
@@ -788,7 +788,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
                 if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
-                    messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                    socketSendHelper.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
                     batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
                 }
             }

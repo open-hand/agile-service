@@ -65,7 +65,6 @@ import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
@@ -84,6 +83,7 @@ import org.hzero.core.message.MessageAccessor;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * 敏捷开发Issue
@@ -354,7 +354,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired(required = false)
     protected AgileWaterfallService agileWaterfallService;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -2925,7 +2925,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error: {0}", e);
         }
-        messageClientC7n.sendByUserId(userId, websocketKey, message);
+        socketSendHelper.sendByUserId(userId, websocketKey, message);
     }
 
     @Override

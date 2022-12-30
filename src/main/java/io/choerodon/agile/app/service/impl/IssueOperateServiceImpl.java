@@ -22,12 +22,12 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author zhaotianxin
@@ -42,7 +42,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     @Autowired
     private IssueService issueService;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private UserService userService;
     @Autowired
@@ -63,7 +63,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             if (Boolean.FALSE.equals(projectOwner)) {
                 batchUpdateFieldStatusVO.setStatus("failed");
                 batchUpdateFieldStatusVO.setError("您无删除权限");
-                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 return;
             }
             Double progress = 0.0;
@@ -71,7 +71,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             try {
                 batchUpdateFieldStatusVO.setStatus("doing");
                 batchUpdateFieldStatusVO.setProcess(progress);
-                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                 // 查询子任务ids
                 List<Long> subList = new ArrayList<>(issueMapper.selectSubListByIssueIds(projectId, issueIds));
                 int i = 0;
@@ -84,7 +84,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                     double process = (i * 1.0) / issueIds.size();
                     if (process - lastSendProcess >= 0.1) {
                         batchUpdateFieldStatusVO.setProcess(process);
-                        messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                        socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                         lastSendProcess = process;
                     }
                 }
@@ -95,7 +95,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
                 batchUpdateFieldStatusVO.setError(e.getMessage());
                 throw new CommonException("delete issue failed, exception: {}", e.getMessage());
             } finally {
-                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             }
         }
     }
@@ -128,7 +128,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             linkIssueLinkageMessageVO.setMessage("error.link.issue.linkage.execution");
             throw new CommonException("error.link.issue.linkage.execution", e);
         } finally {
-            messageClientC7n.sendByUserId(userId, websocketKey, JSON.toJSONString(linkIssueLinkageMessageVO));
+            socketSendHelper.sendByUserId(userId, websocketKey, JSON.toJSONString(linkIssueLinkageMessageVO));
         }
     }
 
