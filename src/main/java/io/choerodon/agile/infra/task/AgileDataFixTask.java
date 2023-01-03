@@ -134,4 +134,26 @@ public class AgileDataFixTask {
         );
         LOGGER.info("==============================>>>>>>>> clearIssueSprintRelOldDirtyData completed <<<<<<<<=================================");
     }
+
+    @JobTask(maxRetryCount = 1,
+            code = "2.2-clearNoIssueWorkLog",
+            description = "清除关联的工作项不存在的工时日志数据")
+    @TimedTask(name = "2.2-clearNoIssueWorkLog",
+            description = "清除关联的工作项不存在的工时日志数据",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
+    public void clearNoIssueWorkLog(Map<String, Object> param) {
+        LOGGER.info("==============================>>>>>>>> clearNoIssueWorkLog start <<<<<<<<=================================");
+        this.jdbcTemplate.update(
+                "delete A " +
+                    "from agile_work_log A " +
+                    "WHERE not exists(" +
+                        "SELECT 1 FROM agile_issue B WHERE A.issue_id = B.issue_id" +
+                    ")"
+        );
+        LOGGER.info("==============================>>>>>>>> clearNoIssueWorkLog completed <<<<<<<<=================================");
+    }
 }
