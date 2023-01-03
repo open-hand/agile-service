@@ -11,20 +11,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
@@ -103,6 +105,10 @@ public class FixDataServiceImpl implements FixDataService {
     private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
+    private PriorityMapper priorityMapper;
 
     @Override
     public void fixCreateProject() {
@@ -605,7 +611,7 @@ public class FixDataServiceImpl implements FixDataService {
             dataMap.put(fieldId, organizationId, null, f.getTypeCode(), dto);
             String minRank = minRankMap.get(organizationId);
             String rank;
-            if (StringUtils.hasText(minRank)) {
+            if (StringUtils.isNotBlank(minRank)) {
                 rank = RankUtil.genPre(minRank);
             } else {
                 rank = RankUtil.mid();
@@ -972,4 +978,37 @@ public class FixDataServiceImpl implements FixDataService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void fixEmptyIssuePriority() {
+        final List<IssueDTO> nullPriorityIdIssues = this.issueMapper.selectByCondition(Condition.builder(IssueDTO.class).andWhere(Sqls.custom()
+                .andIsNull(IssueDTO.FIELD_PRIORITY_ID)
+        ).build());
+        if(CollectionUtils.isEmpty(nullPriorityIdIssues)) {
+            return;
+        }
+        Map<Long, Long> orgDefaultPriorityMap = new HashMap<>();
+        for (IssueDTO nullPriorityIdIssue : nullPriorityIdIssues) {
+            final Long projectId = nullPriorityIdIssue.getProjectId();
+            Assert.notNull(projectId, "工作项" + nullPriorityIdIssue.getIssueId() + "没有项目ID, 数据修复终止");
+            final Long organizationId = ConvertUtil.getOrganizationId(projectId);
+            Assert.notNull(organizationId, "项目" + projectId + "未找到所属组织, 数据修复终止");
+            Long priorityId = orgDefaultPriorityMap.get(organizationId);
+            if(priorityId == null) {
+                final PriorityDTO queryParam = new PriorityDTO();
+                queryParam.setOrganizationId(organizationId);
+                final List<PriorityDTO> prioritiesInOrg = this.priorityMapper.select(queryParam);
+                Assert.notEmpty(prioritiesInOrg, "组织下未找到可用优先级, 数据修复终止");
+                final PriorityDTO priority = prioritiesInOrg.stream()
+                        .filter(p -> Boolean.TRUE.equals(p.getDefault()))
+                        .findAny()
+                        .orElse(prioritiesInOrg.get(0));
+                priorityId = priority.getId();
+                orgDefaultPriorityMap.put(organizationId, priorityId);
+            }
+            nullPriorityIdIssue.setPriorityId(priorityId);
+            nullPriorityIdIssue.setPriorityCode("priority-" + priorityId);
+            this.issueMapper.updateOptional(nullPriorityIdIssue, IssueDTO.FIELD_PRIORITY_ID, IssueDTO.FIELD_PRIORITY_CODE);
+        }
+    }
 }
