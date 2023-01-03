@@ -156,4 +156,20 @@ public class AgileDataFixTask {
         );
         LOGGER.info("==============================>>>>>>>> clearNoIssueWorkLog completed <<<<<<<<=================================");
     }
+
+    @JobTask(maxRetryCount = 1,
+            code = "2.2-fixEmptyIssuePriority",
+            description = "修复之前导入BUG导致的工作项优先级为空的数据")
+    @TimedTask(name = "2.2-fixEmptyIssuePriority",
+            description = "修复之前导入BUG导致的工作项优先级为空的数据",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
+    public void fixEmptyIssuePriority(Map<String, Object> param) {
+        LOGGER.info("==============================>>>>>>>> fixEmptyIssuePriority start <<<<<<<<=================================");
+        this.fixDataService.fixEmptyIssuePriority();
+        LOGGER.info("==============================>>>>>>>> fixEmptyIssuePriority completed <<<<<<<<=================================");
+    }
 }
