@@ -185,8 +185,8 @@ public class ListLayoutServiceImpl implements ListLayoutService {
         ListLayoutColumnRelDTO listLayoutColumnRelDTO = new ListLayoutColumnRelDTO(layoutVO.getId(), projectId, organizationId);
         List<ListLayoutColumnRelDTO> list = listLayoutColumnRelMapper.select(listLayoutColumnRelDTO);
         if (!CollectionUtils.isEmpty(list)) {
-            layoutVO.setListLayoutColumnRelVOS(modelMapper.map(list, new TypeToken<List<ListLayoutColumnRelVO>>() {
-            }.getType()));
+            list = list.stream().sorted(Comparator.comparingInt(e -> Optional.ofNullable(e.getSort()).orElse(Integer.MAX_VALUE))).collect(Collectors.toList());
+            layoutVO.setListLayoutColumnRelVOS(modelMapper.map(list, new TypeToken<List<ListLayoutColumnRelVO>>() {}.getType()));
         }
         return layoutVO;
     }
