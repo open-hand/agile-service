@@ -1,8 +1,21 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.IssuePersonalSortVO;
 import io.choerodon.agile.api.vo.ListLayoutColumnRelVO;
 import io.choerodon.agile.api.vo.ListLayoutVO;
@@ -14,20 +27,9 @@ import io.choerodon.agile.infra.enums.IssueFieldMapping;
 import io.choerodon.agile.infra.mapper.IssuePersonalSortMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutColumnRelMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutMapper;
+import io.choerodon.agile.infra.utils.UserDetailsUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -44,6 +46,8 @@ public class ListLayoutServiceImpl implements ListLayoutService {
     private ModelMapper modelMapper;
     @Autowired
     private IssuePersonalSortMapper issuePersonalSortMapper;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public ListLayoutVO save(Long organizationId, Long projectId, ListLayoutVO listLayoutVO) {
@@ -63,27 +67,31 @@ public class ListLayoutServiceImpl implements ListLayoutService {
     }
 
     private void saveColumnRel(Long organizationId, Long projectId, Long layoutId, List<ListLayoutColumnRelVO> listLayoutColumnRelVOS) {
+        if(listLayoutColumnRelVOS == null) {
+            listLayoutColumnRelVOS = Collections.emptyList();
+        }
+        listLayoutColumnRelVOS = ListLayoutColumnRelVO.distinct(listLayoutColumnRelVOS);
         ListLayoutColumnRelDTO listLayoutColumnRelDTO = new ListLayoutColumnRelDTO();
         listLayoutColumnRelDTO.setProjectId(projectId);
         listLayoutColumnRelDTO.setOrganizationId(organizationId);
         listLayoutColumnRelDTO.setLayoutId(layoutId);
-        List<ListLayoutColumnRelDTO> layoutColumnRelDTOS = listLayoutColumnRelMapper.select(listLayoutColumnRelDTO);
-        if (!Objects.equals(projectId, 0L)) {
+        List<ListLayoutColumnRelDTO> layoutColumnRelInDb = listLayoutColumnRelMapper.select(listLayoutColumnRelDTO);
+        if (projectId != null && projectId != 0L) {
             //项目层
-            deleteIssuePersonalSortIfExisted(layoutColumnRelDTOS, listLayoutColumnRelVOS, projectId, organizationId);
+            deleteIssuePersonalSortIfExisted(layoutColumnRelInDb, listLayoutColumnRelVOS, projectId, organizationId);
         }
-        if (!CollectionUtils.isEmpty(layoutColumnRelDTOS)) {
+        if (!CollectionUtils.isEmpty(layoutColumnRelInDb)) {
             listLayoutColumnRelMapper.delete(listLayoutColumnRelDTO);
         }
-        listLayoutColumnRelVOS.forEach(v -> {
-            ListLayoutColumnRelDTO layoutColumnRelDTO = modelMapper.map(v, ListLayoutColumnRelDTO.class);
+        for (ListLayoutColumnRelVO listLayoutColumnRel : listLayoutColumnRelVOS) {
+            ListLayoutColumnRelDTO layoutColumnRelDTO = modelMapper.map(listLayoutColumnRel, ListLayoutColumnRelDTO.class);
             layoutColumnRelDTO.setOrganizationId(organizationId);
             layoutColumnRelDTO.setLayoutId(layoutId);
             layoutColumnRelDTO.setProjectId(projectId);
             if (listLayoutColumnRelMapper.insertSelective(layoutColumnRelDTO) != 1) {
                 throw new CommonException("error.list.layout.column.rel.insert");
             }
-        });
+        }
     }
 
     private void deleteIssuePersonalSortIfExisted(List<ListLayoutColumnRelDTO> existedLayoutColumnRelList,
@@ -92,68 +100,68 @@ public class ListLayoutServiceImpl implements ListLayoutService {
                                                   Long organizationId) {
         Set<String> inputDisplayCodes =
                 inputLayoutColumnRelList.stream()
-                        .filter(x -> Boolean.TRUE.equals(x.getDisplay()))
+                        .filter(rel -> Boolean.TRUE.equals(rel.getDisplay()))
                         .map(ListLayoutColumnRelVO::getColumnCode)
                         .collect(Collectors.toSet());
         Set<String> deleteCodes = new HashSet<>();
-        existedLayoutColumnRelList.forEach(rel -> {
-            String columnCode = rel.getColumnCode();
-            boolean display = rel.getDisplay();
+        for (ListLayoutColumnRelDTO existedRel : existedLayoutColumnRelList) {
+            String columnCode = existedRel.getColumnCode();
+            boolean display = Boolean.TRUE.equals(existedRel.getDisplay());
             if (!inputDisplayCodes.contains(columnCode) && display) {
                 deleteCodes.add(columnCode);
             }
-        });
+        }
         String projectCodePrefix = "pro_";
         String organizationCodePrefix = "org_";
         String customFieldSortPrefix = "foundation.";
-        if (!deleteCodes.isEmpty()) {
-            IssuePersonalSortDTO dto = new IssuePersonalSortDTO();
-            dto.setOrganizationId(organizationId);
-            dto.setProjectId(projectId);
-            dto.setUserId(DetailsHelper.getUserDetails().getUserId());
-            dto.setBusinessType("gantt");
-            List<IssuePersonalSortDTO> sorts = issuePersonalSortMapper.select(dto);
-            if (sorts.isEmpty()) {
-                return;
+        if (CollectionUtils.isEmpty(deleteCodes)) {
+            return;
+        }
+        IssuePersonalSortDTO dto = new IssuePersonalSortDTO();
+        dto.setOrganizationId(organizationId);
+        dto.setProjectId(projectId);
+        dto.setUserId(UserDetailsUtil.getCurrentUserId());
+        dto.setBusinessType("gantt");
+        List<IssuePersonalSortDTO> sorts = issuePersonalSortMapper.select(dto);
+        if (CollectionUtils.isEmpty(sorts)) {
+            return;
+        }
+        IssuePersonalSortDTO sort = sorts.get(0);
+        String sortJson = sort.getSortJson();
+        if (StringUtils.isBlank(sortJson)) {
+            return;
+        }
+        Map<String, IssuePersonalSortVO> sortMap = new LinkedHashMap<>();
+        try {
+            List<IssuePersonalSortVO> issuePersonalSorts =
+                    objectMapper.readValue(sortJson, new TypeReference<List<IssuePersonalSortVO>>() {});
+            for (IssuePersonalSortVO issuePersonalSort : issuePersonalSorts) {
+                sortMap.put(issuePersonalSort.getProperty(), issuePersonalSort);
             }
-            IssuePersonalSortDTO sort = sorts.get(0);
-            String sortJson = sort.getSortJson();
-            if (StringUtils.isEmpty(sortJson)) {
-                return;
-            }
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, IssuePersonalSortVO> sortMap = new LinkedHashMap<>();
-            try {
-                List<IssuePersonalSortVO> issuePersonalSorts =
-                        objectMapper.readValue(sortJson, new TypeReference<List<IssuePersonalSortVO>>() {});
-                issuePersonalSorts.forEach(s -> sortMap.put(s.getProperty(), s));
-            } catch (IOException e) {
-                throw new CommonException("error.gantt.sortJson.deserialization", e);
-            }
-            deleteCodes.forEach(code -> {
-                String property;
-                if (code.startsWith(projectCodePrefix) || code.startsWith(organizationCodePrefix)) {
-                    property = customFieldSortPrefix + code;
-                } else {
-                    property = IssueFieldMapping.getSortFieldByCode(code);
-                    if (property == null) {
-                        property = code;
-                    }
+        } catch (IOException e) {
+            throw new CommonException("error.gantt.sortJson.deserialization", e);
+        }
+        for (String code : deleteCodes) {
+            String property;
+            if (code.startsWith(projectCodePrefix) || code.startsWith(organizationCodePrefix)) {
+                property = customFieldSortPrefix + code;
+            } else {
+                property = IssueFieldMapping.getSortFieldByCode(code);
+                if (property == null) {
+                    property = code;
                 }
-                if (sortMap.containsKey(property)) {
-                    sortMap.remove(property);
-                }
-            });
-            List<IssuePersonalSortVO> sortList = new ArrayList<>(sortMap.values());
-            try {
-                sortJson = objectMapper.writeValueAsString(sortList);
-                sort.setSortJson(sortJson);
-                if (issuePersonalSortMapper.updateByPrimaryKey(sort) != 1) {
-                    throw new CommonException("error.gantt.sort.save");
-                }
-            } catch (JsonProcessingException e) {
-                throw new CommonException("error.gantt.sortJson.serialization", e);
             }
+            sortMap.remove(property);
+        }
+        List<IssuePersonalSortVO> sortList = new ArrayList<>(sortMap.values());
+        try {
+            sortJson = objectMapper.writeValueAsString(sortList);
+            sort.setSortJson(sortJson);
+            if (issuePersonalSortMapper.updateByPrimaryKey(sort) != 1) {
+                throw new CommonException("error.gantt.sort.save");
+            }
+        } catch (JsonProcessingException e) {
+            throw new CommonException("error.gantt.sortJson.serialization", e);
         }
     }
 
