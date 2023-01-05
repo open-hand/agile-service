@@ -29,10 +29,10 @@
         AND user_id = #{userId}
         AND filter_type_code = #{filterTypeCode}
         <if test="version == 'v1'">
-            and advanced_filter_json = ''
+            and filter_json != ''
         </if>
         <if test="version == 'v2'">
-            and filter_json = ''
+            and advanced_filter_json != ''
         </if>
         <if test='searchStr != null and searchStr != "" '>
             AND name LIKE concat('%',#{searchStr},'%')
