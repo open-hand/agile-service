@@ -31,6 +31,8 @@ public class IssueDTO extends AuditDomain {
     public static final String FIELD_STATUS_ID = "statusId";
     public static final String FIELD_PROJECT_ID = "projectId";
     public static final String FIELD_EPIC_NAME = "epicName";
+    public static final String FIELD_PRIORITY_ID = "priorityId";
+    public static final String FIELD_PRIORITY_CODE = "priorityCode";
 
     /***/
     @Id

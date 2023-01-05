@@ -1,15 +1,14 @@
 package io.choerodon.agile.infra.dto;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.GeneratedValue;
-
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/18.
@@ -19,6 +18,9 @@ import java.util.Date;
 @ModifyAudit
 @VersionAudit
 public class WorkLogDTO extends AuditDomain {
+
+    public static final String FIELD_ISSUE_ID = "issueId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     @Id
     @GeneratedValue

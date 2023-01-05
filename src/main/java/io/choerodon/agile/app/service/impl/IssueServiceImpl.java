@@ -222,6 +222,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WorkCalendarSubscribeService workCalendarSubscribeService;
     @Autowired
     private WikiRelationService wikiRelationService;
+    @Autowired
+    private IWorkLogService workLogService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -2019,6 +2021,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agileWaterfallService != null) {
             agileWaterfallService.deleteIssueForWaterfall(projectId, issueId, issueConvertDTO);
         }
+        // 删除工时
+        this.workLogService.deleteByProjectIdWithoutDataLog(projectId, issueId );
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
         deleteRuleLogRel(projectId, issueId, fieldIds);
