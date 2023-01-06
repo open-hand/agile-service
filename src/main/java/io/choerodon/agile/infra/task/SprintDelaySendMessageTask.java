@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.yqcloud.core.oauth.ZKnowDetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class SprintDelaySendMessageTask {
     @Value("${services.domain.url}")
     private String domainUrl;
 
-    @JobTask(
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
             maxRetryCount = 3,
             code = "sprintDelaySendMessage",
             description = "冲刺延期，发送消息给指定人"

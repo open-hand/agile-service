@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.yqcloud.core.oauth.ZKnowDetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.SetUtils;
@@ -32,7 +33,8 @@ public class AgileDataFixTask {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @JobTask(maxRetryCount = 3,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 3,
             code = "fixPersonalFilter",
             description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选格式")
     @TimedTask(name = "fixPersonalFilter",
@@ -50,7 +52,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 2.3.0 <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "fixIssueDuplicateUnclosedSprintRel",
             description = "修复批量编辑BUG造成的工作项同时关联了多个未关闭冲刺的脏数据")
     @TimedTask(name = "fixIssueDuplicateUnclosedSprintRel",
@@ -94,7 +97,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> fixIssueDuplicateUnclosedSprintRel completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.1&2.2-fixIssueSprintRelZeroData",
             description = "修复工作项详情,清空当前活跃冲刺时,向关系表中插入的脏数据")
     @TimedTask(name = "2.1&2.2-fixIssueSprintRelZeroData",
@@ -116,7 +120,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> fixIssueSprintRelZeroData completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.2-clearIssueSprintRelOldDirtyData",
             description = "清除上古时期刚上线项目群的时候,issue冲刺关系表中不存在的冲刺的脏数据")
     @TimedTask(name = "2.2-clearIssueSprintRelOldDirtyData",
@@ -140,7 +145,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> clearIssueSprintRelOldDirtyData completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.2-clearNoIssueWorkLog",
             description = "清除关联的工作项不存在的工时日志数据")
     @TimedTask(name = "2.2-clearNoIssueWorkLog",
@@ -162,7 +168,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> clearNoIssueWorkLog completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.2-fixEmptyIssuePriority",
             description = "修复之前导入BUG导致的工作项优先级为空的数据")
     @TimedTask(name = "2.2-fixEmptyIssuePriority",
