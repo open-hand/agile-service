@@ -957,7 +957,7 @@ public class IssueAssembler extends AbstractAssembler {
                                     DataLogDTO assignee = assigneeMap.getOrDefault(entry.getKey(), Collections.emptyMap())
                                             .getOrDefault(log.getIssueId(), new DataLogDTO());
                                     if (Objects.isNull(assignee.getNewValue())){
-                                        log.setCreatedBy(issueTypeMap.get(log.getIssueId()).getAssigneeId());
+                                        log.setCreatedBy(Optional.ofNullable(issueTypeMap.get(log.getIssueId())).map(IssueOverviewVO::getAssigneeId).orElse(null));
                                     }else {
                                         log.setCreatedBy(Long.parseLong(assignee.getNewValue()));
                                     }
