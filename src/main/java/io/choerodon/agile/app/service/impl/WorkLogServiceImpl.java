@@ -1,32 +1,36 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.IssueWorkTimeCountVO;
-import io.choerodon.agile.api.vo.WorkLogVO;
-import io.choerodon.agile.api.validator.WorkLogValidator;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.annotation.RuleNotice;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.WorkLogDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.agile.infra.enums.RuleNoticeEvent;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.WorkLogMapper;
-import io.choerodon.agile.infra.utils.BaseFieldUtil;
-import io.choerodon.core.exception.CommonException;
-import org.hzero.core.base.AopProxy;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import io.choerodon.agile.api.validator.WorkLogValidator;
+import io.choerodon.agile.api.vo.IssueWorkTimeCountVO;
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.api.vo.WorkLogVO;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.annotation.RuleNotice;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.agile.infra.dto.WorkLogDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.RuleNoticeEvent;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.WorkLogMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.core.exception.CommonException;
+
+import org.hzero.core.base.AopProxy;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/18.
@@ -44,20 +48,20 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
 
     @Autowired
     private WorkLogMapper workLogMapper;
-
     @Autowired
     private IssueMapper issueMapper;
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private IssueAccessDataService issueAccessDataService;
-
     @Autowired
     private IWorkLogService iWorkLogService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private WorkLogBusinessPluginService workLogBusinessPluginService;
+    @Autowired
+    private RemoteIamOperator remoteIamOperator;
 
     private void setTo(Long issueId, BigDecimal predictionTime) {
         IssueConvertDTO issueConvertDTO = modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueConvertDTO.class);
@@ -105,6 +109,14 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
     @Override
     public WorkLogVO createWorkLog(Long projectId, WorkLogVO workLogVO) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(workLogVO.getIssueId());
+        //登记工时前，校验工时的配置
+        if (workLogBusinessPluginService != null) {
+            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            if (projectVO == null) {
+                throw new CommonException("error.project.empty");
+            }
+            workLogBusinessPluginService.checkBeforeCreateWorkLog(projectVO.getOrganizationId(), projectVO.getId(), projectVO.getStatusId());
+        }
         WorkLogValidator.checkCreateWorkLog(projectId, workLogVO, issueDTO);
         if (workLogVO.getResidualPrediction() != null) {
             switch (workLogVO.getResidualPrediction()) {
@@ -125,6 +137,9 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
         }
         BaseFieldUtil.updateIssueLastUpdateInfo(workLogVO.getIssueId(), projectId);
         WorkLogDTO res = iWorkLogService.createBase(modelMapper.map(workLogVO, WorkLogDTO.class));
+        if(this.workLogBusinessPluginService != null) {
+            res = this.workLogBusinessPluginService.createWorkLog(projectId, workLogVO, res);
+        }
         return queryWorkLogById(res.getProjectId(), res.getLogId());
     }
 
@@ -133,13 +148,30 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
         WorkLogValidator.checkUpdateWorkLog(workLogVO);
         workLogVO.setProjectId(projectId);
         WorkLogDTO res = updateBase(modelMapper.map(workLogVO, WorkLogDTO.class));
-        BaseFieldUtil.updateIssueLastUpdateInfo(res.getIssueId(), res.getProjectId());
-        return queryWorkLogById(res.getProjectId(), res.getLogId());
+        projectId = res.getProjectId();
+        logId = res.getLogId();
+        final Long issueId = res.getIssueId();
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueId, projectId);
+        if(this.workLogBusinessPluginService != null) {
+            res = this.workLogBusinessPluginService.updateWorkLog(projectId, logId, workLogVO, res);
+        }
+        return queryWorkLogById(projectId, logId);
     }
 
     @Override
     public void deleteWorkLog(Long projectId, Long logId) {
+        //删除工时前校验工时配置
+        if (workLogBusinessPluginService != null) {
+            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            if (projectVO == null) {
+                throw new CommonException("error.project.empty");
+            }
+            workLogBusinessPluginService.checkBeforeDeleteWorkLog(projectVO.getOrganizationId(), projectId, projectVO.getStatusId());
+        }
         iWorkLogService.deleteBase(projectId, logId);
+        if(this.workLogBusinessPluginService != null) {
+            this.workLogBusinessPluginService.deleteWorkLog(projectId, logId);
+        }
     }
 
     @Override
@@ -149,15 +181,23 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
         workLogDTO.setLogId(logId);
         WorkLogVO workLogVO = modelMapper.map(workLogMapper.selectOne(workLogDTO), WorkLogVO.class);
         workLogVO.setUserName(userService.queryUserNameByOption(workLogVO.getCreatedBy(), true).getRealName());
+        if(workLogBusinessPluginService != null) {
+            workLogVO = this.workLogBusinessPluginService.queryWorkLogById(projectId, logId, workLogVO);
+        }
         return workLogVO;
     }
 
     @Override
     public List<WorkLogVO> queryWorkLogListByIssueId(Long projectId, Long issueId) {
-        List<WorkLogVO> workLogVOList = modelMapper.map(workLogMapper.queryByIssueId(issueId, projectId), new TypeToken<List<WorkLogVO>>(){}.getType());
-        List<Long> assigneeIds = workLogVOList.stream().filter(workLogVO -> workLogVO.getCreatedBy() != null && !Objects.equals(workLogVO.getCreatedBy(), 0L)).map(WorkLogVO::getCreatedBy).distinct().collect(Collectors.toList());
+        List<WorkLogVO> workLogVOList = modelMapper.map(workLogMapper.queryByIssueId(issueId, projectId), new TypeToken<List<WorkLogVO>>() {
+        }.getType());
+        List<Long> assigneeIds = workLogVOList.stream()
+                .map(WorkLogVO::getCreatedBy)
+                .filter(createdBy -> createdBy != null && !Objects.equals(createdBy, 0L))
+                .distinct()
+                .collect(Collectors.toList());
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
-        workLogVOList.forEach(workLogVO -> {
+        for (WorkLogVO workLogVO : workLogVOList) {
             UserMessageDTO userMessageDTO = usersMap.get(workLogVO.getCreatedBy());
             if (userMessageDTO != null) {
                 workLogVO.setUserName(userMessageDTO.getName());
@@ -165,7 +205,10 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
                 workLogVO.setRealName(userMessageDTO.getRealName());
                 workLogVO.setLoginName(userMessageDTO.getLoginName());
             }
-        });
+        }
+        if (workLogBusinessPluginService != null) {
+            workLogVOList = this.workLogBusinessPluginService.queryWorkLogListByIssueId(projectId, issueId, workLogVOList);
+        }
         return workLogVOList;
     }
 

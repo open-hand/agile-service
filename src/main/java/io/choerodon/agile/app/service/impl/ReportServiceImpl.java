@@ -1677,8 +1677,8 @@ public class ReportServiceImpl implements ReportService {
         String filterSql;
         List<Long> assigneeFilterIds = null;
         StringBuilder selectSql = new StringBuilder();
-        StringBuilder groupSql = new StringBuilder();
-        StringBuilder linkSql = new StringBuilder();
+        Set<String> groupSql = new HashSet<>();
+        Set<String> linkSql = new HashSet<>();
         FieldSql analysisFieldSql = null;
         FieldSql comparedFieldSql = null;
 
@@ -1711,8 +1711,8 @@ public class ReportServiceImpl implements ReportService {
                 filterSql,
                 assigneeFilterIds,
                 selectSql.toString(),
-                groupSql.toString(),
-                linkSql.toString());
+                String.join(",\n", groupSql),
+                String.join("\n", linkSql));
         dealCustomChartIdDataAndPercent(result, analysisFieldSql, comparedFieldSql);
         return result;
     }
@@ -1813,8 +1813,8 @@ public class ReportServiceImpl implements ReportService {
             Boolean predefined,
             String type,
             StringBuilder selectSql,
-            StringBuilder groupSql,
-            StringBuilder linkSql,
+            Set<String> groupSqlSet,
+            Set<String>  linkSqlSet,
             Long organizationId,
             Long projectId) {
         FieldSql fieldSql;
@@ -1832,19 +1832,15 @@ public class ReportServiceImpl implements ReportService {
             if (fieldSql == null) {
                 throw new CommonException("error.customReport.field.not.support");
             }
-            linkSql.append("\n")
-                    .append(CustomFieldSql.getDefaultSql(fieldCode, type));
+            linkSqlSet.add(CustomFieldSql.getDefaultSql(fieldCode, type));
         }
         selectSql.append(", ")
                 .append(fieldSql.getValueSql())
                 .append(" AS ").append(type).append("_value, ")
                 .append(fieldSql.getIdSql())
                 .append(" AS ").append(type).append("_id");
-        if (groupSql.length() > 0) {
-            groupSql.append(", ");
-        }
-        groupSql.append(fieldSql.getGroupSql());
-        linkSql.append("\n").append(fieldSql.getLinkSql());
+        groupSqlSet.add(fieldSql.getGroupSql());
+        linkSqlSet.add(fieldSql.getLinkSql());
         return fieldSql;
     }
 

@@ -28,8 +28,8 @@
             <artifactId>choerodon-starter-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.choerodon</groupId>
-            <artifactId>choerodon-starter-asgard</artifactId>
+            <groupId>com.zknow.starter</groupId>
+            <artifactId>zknow-starter-asgard</artifactId>
         </dependency>
 
         <!-- hzero starter -->
@@ -60,6 +60,10 @@
         <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-excel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hzero.starter</groupId>
+            <artifactId>hzero-starter-websocket</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hzero.starter</groupId>

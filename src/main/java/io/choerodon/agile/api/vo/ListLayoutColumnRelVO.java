@@ -1,19 +1,61 @@
 package io.choerodon.agile.api.vo;
 
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
+import java.util.*;
 import javax.validation.constraints.NotNull;
+
+import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author zhaotianxin
  * @date 2021-05-07 14:13
  */
 public class ListLayoutColumnRelVO {
+
+    /**
+     * 根据ColumnCode去重<br/>
+     * 如有重复, 保留display=true OR sort更小的
+     * @param input 输入
+     * @return      输出
+     */
+    public static List<ListLayoutColumnRelVO> distinct(List<ListLayoutColumnRelVO> input) {
+        if(CollectionUtils.isEmpty(input)) {
+            return Collections.emptyList();
+        }
+        // 在HashMap的内存占用和效率之间找到最佳平衡点
+        Map<String, ListLayoutColumnRelVO> distinctMap = new HashMap<>((int)Math.pow(2, (int)Math.ceil(Math.log(input.size())/Math.log(2))), 1);
+        for (ListLayoutColumnRelVO inputRel : input) {
+            String columnCode = inputRel.getColumnCode();
+            if(StringUtils.isBlank(columnCode)) {
+                continue;
+            }
+            ListLayoutColumnRelVO existsRel = distinctMap.get(columnCode);
+            if(existsRel == null) {
+                distinctMap.put(columnCode, inputRel);
+            } else {
+                // 当已存在的不展示且新输入展示, 则用新输入替换已存在的, continue
+                if(!Boolean.TRUE.equals(existsRel.getDisplay()) && Boolean.TRUE.equals(inputRel.getDisplay())) {
+                    distinctMap.put(columnCode, inputRel);
+                    continue;
+                }
+                // 当已存在的sort大于新输入的sort, 则用新输入的替换已存在的, continue
+                int existsRelSort = Optional.ofNullable(existsRel.getSort()).orElse(0);
+                int inputRelSort = Optional.ofNullable(inputRel.getSort()).orElse(0);
+                if(existsRelSort > inputRelSort) {
+                    distinctMap.put(columnCode, inputRel);
+                }
+                // 否则, 丢弃新输入, 保留已存在的
+            }
+        }
+        return new ArrayList<>(distinctMap.values());
+    }
+
     @Encrypt
     @ApiModelProperty(value = "id")
     private Long id;
-
     @Encrypt
     @ApiModelProperty(value = "布局id")
     private Long layoutId;
@@ -40,7 +82,6 @@ public class ListLayoutColumnRelVO {
     private Long organizationId;
     @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
     @ApiModelProperty(value = "额外配置：工时包含子任务")
     private Boolean extraConfig;
 

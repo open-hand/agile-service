@@ -25,6 +25,11 @@ public interface FixDataService {
      */
     void fixStatusMachineCustomTransferRoleData();
 
+    /**
+     * 2.2-修复之前导入BUG导致的工作项优先级为空的数据
+     */
+    void fixEmptyIssuePriority();
+
 
     /**
      * 高级筛选修数据

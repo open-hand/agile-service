@@ -72,4 +72,9 @@ databaseChangeLog(logicalFilePath:'agile_data_log.groovy') {
     changeSet(id: '2022-01-17-agile-data-log-drop-index', author: 'huaxin.deng@hand-china.com') {
         dropIndex(tableName: "agile_data_log", indexName: "idx_project_id")
     }
+
+    changeSet(id: '2022-12-27-agile-data-log-modify-data-type-old/new_string', author: 'gaokuo.dai@zknow.com') {
+        modifyDataType (tableName: "agile_data_log", columnName: "old_string", newDataType: "longtext")
+        modifyDataType (tableName: "agile_data_log", columnName: "new_string", newDataType: "longtext")
+    }
 }

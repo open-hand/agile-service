@@ -441,6 +441,7 @@ public class SiteMsgUtil {
         if(deleteUser == null) {
             deleteUser = DetailsHelper.getAnonymousDetails();
         }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         SimpleDateFormat format = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
         Map<String,String> map = new HashMap<>();
         map.put("projectId", String.valueOf(projectId));
@@ -457,8 +458,9 @@ public class SiteMsgUtil {
 
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
-        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(), projectId);
-        //发送站内信
+//        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(), projectId);
+        objectMap.put(MessageAdditionalType.PARAM_TENANT_ID.getTypeName(), organizationId);
+        // 发送消息通知
         MessageSender messageSender = handlerMessageSender(0L,"ISSUE_WORK_HOUR_DELETE", Collections.emptyList(), map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);

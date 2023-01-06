@@ -65,7 +65,6 @@ import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
@@ -84,6 +83,7 @@ import org.hzero.core.message.MessageAccessor;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * 敏捷开发Issue
@@ -222,6 +222,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WorkCalendarSubscribeService workCalendarSubscribeService;
     @Autowired
     private WikiRelationService wikiRelationService;
+    @Autowired
+    private IWorkLogService workLogService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -354,7 +356,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired(required = false)
     protected AgileWaterfallService agileWaterfallService;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -456,6 +458,30 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         setRemainingTime(issueConvertDTO);
         // 处理预计、实际时间
         handleEstimateTimeAndActualTime(issueConvertDTO);
+        //处理甘特图创建子缺陷可以选择已关闭冲刺的问题
+        //https://choerodon.com.cn/#/agile/work-list/issue?type=project&id=243303070577803264&name=%E7%94%84%E7%9F%A5%E9%A1%B9%E7%9B%AE%E7%BE%A4&category=AGILE&organizationId=1128&paramIssueId=393079285088505856&paramName=yq-5896
+        resetSubIssueSprintIfClosed(issueConvertDTO);
+    }
+
+    private void resetSubIssueSprintIfClosed(IssueConvertDTO issueConvertDTO) {
+        Long sprintId = issueConvertDTO.getSprintId();
+        if (sprintId == null) {
+            return;
+        }
+        SprintDTO sprint = sprintMapper.selectByPrimaryKey(sprintId);
+        if (sprint == null) {
+            return;
+        }
+        String statusCode = sprint.getStatusCode();
+        Long parentId = issueConvertDTO.getParentIssueId();
+        Long relateIssueId = issueConvertDTO.getRelateIssueId();
+        if ((parentId != null && !Objects.equals(0L, parentId))
+                || (relateIssueId != null && !Objects.equals(0L, relateIssueId))) {
+            if (SprintStatusCode.CLOSED.equals(statusCode)) {
+                //冲刺已关闭，置空
+                issueConvertDTO.setSprintId(null);
+            }
+        }
     }
 
     private void handleEstimateTimeAndActualTime(IssueConvertDTO issueConvertDTO) {
@@ -769,7 +795,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             List<Long> issueIds = issueIdPage.getContent();
             Set<Long> childrenIds = new HashSet<>();
             if (isTreeView) {
-                List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null);
+                List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null, false, null);
                 //todo 支持第三方调用，筛选出父级时同时把所有子级返回
                 boolean withSubIssues = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getWithSubIssues()).orElse(false));
                 // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
@@ -1995,6 +2021,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agileWaterfallService != null) {
             agileWaterfallService.deleteIssueForWaterfall(projectId, issueId, issueConvertDTO);
         }
+        // 删除工时
+        this.workLogService.deleteByProjectIdWithoutDataLog(projectId, issueId );
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
         deleteRuleLogRel(projectId, issueId, fieldIds);
@@ -2901,7 +2929,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error: {0}", e);
         }
-        messageClientC7n.sendByUserId(userId, websocketKey, message);
+        socketSendHelper.sendByUserId(userId, websocketKey, message);
     }
 
     @Override

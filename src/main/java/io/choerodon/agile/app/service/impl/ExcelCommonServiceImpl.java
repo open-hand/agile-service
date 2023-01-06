@@ -42,7 +42,6 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -51,6 +50,7 @@ import org.hzero.boot.file.FileClient;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author huaxin.deng@hand-china.com
@@ -131,7 +131,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private PageFieldService pageFieldService;
     @Autowired
@@ -640,7 +640,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             LOGGER.error("object to json error");
             LOGGER.error(e.getMessage(), e);
         }
-        messageClientC7n.sendByUserId(userId, websocketKey, message);
+        socketSendHelper.sendByUserId(userId, websocketKey, message);
     }
 
     @Override

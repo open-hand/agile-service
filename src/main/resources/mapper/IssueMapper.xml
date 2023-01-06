@@ -1230,8 +1230,16 @@
         select
         ai.issue_id,
         ai.project_id,
+        <if test="ganttDefaultOrder">
+            agir.rank,
+            agir.instance_id,
+            agir.instance_type,
+        </if>
         CONVERT(ai.issue_num,SIGNED) as issue_num_convert
         from agile_issue ai
+        <if test="ganttDefaultOrder">
+            left join agile_gantt_issue_rank agir on ai.issue_id = agir.issue_id and agir.dimension = #{dimension}
+        </if>
         <if test="sortMap != null and sortMap.sortFieldId != null ">
             LEFT JOIN
             (

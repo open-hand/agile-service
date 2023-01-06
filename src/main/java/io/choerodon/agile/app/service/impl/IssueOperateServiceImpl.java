@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
@@ -22,12 +23,13 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author zhaotianxin
@@ -42,7 +44,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     @Autowired
     private IssueService issueService;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private UserService userService;
     @Autowired
@@ -53,50 +55,53 @@ public class IssueOperateServiceImpl implements IssueOperateService {
     @Async
     @Override
     public void batchDeleteIssue(Long projectId, List<Long> issueIds) {
-        if (!CollectionUtils.isEmpty(issueIds)) {
-            String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + BaseConstants.Symbol.MIDDLE_LINE + projectId;
-            Long userId = DetailsHelper.getUserDetails().getUserId();
-            BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
-            batchUpdateFieldStatusVO.setKey(messageCode);
-            batchUpdateFieldStatusVO.setUserId(userId);
-            boolean projectOwner = userService.isProjectOwner(projectId, userId);
-            if (Boolean.FALSE.equals(projectOwner)) {
-                batchUpdateFieldStatusVO.setStatus("failed");
-                batchUpdateFieldStatusVO.setError("您无删除权限");
-                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-                return;
-            }
-            Double progress = 0.0;
-            double lastSendProcess = 0D;
-            try {
-                batchUpdateFieldStatusVO.setStatus("doing");
-                batchUpdateFieldStatusVO.setProcess(progress);
-                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-                // 查询子任务ids
-                List<Long> subList = new ArrayList<>(issueMapper.selectSubListByIssueIds(projectId, issueIds));
-                int i = 0;
-                for (Long issueId : issueIds) {
-                    i++;
-                    // 删除任务会附带删除子任务,因此需要判断问题是否被删除ss
-                    if (!subList.contains(issueId)) {
-                        issueService.deleteIssueOnRequiresNew(projectId, issueId, batchUpdateFieldStatusVO);
-                    }
-                    double process = (i * 1.0) / issueIds.size();
-                    if (process - lastSendProcess >= 0.1) {
-                        batchUpdateFieldStatusVO.setProcess(process);
-                        messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-                        lastSendProcess = process;
-                    }
+        if (CollectionUtils.isEmpty(issueIds)) {
+            return;
+        }
+        String messageCode = WEBSOCKET_BATCH_DELETE_ISSUE + BaseConstants.Symbol.MIDDLE_LINE + projectId;
+        final CustomUserDetails userDetails = DetailsHelper.getUserDetails();
+        Assert.notNull(userDetails, BaseConstants.ErrorCode.NOT_LOGIN);
+        BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
+        final Long userId = userDetails.getUserId();
+        batchUpdateFieldStatusVO.setKey(messageCode);
+        batchUpdateFieldStatusVO.setUserId(userId);
+        boolean projectOwner = userService.isProjectOwner(projectId, userId);
+        if (!Boolean.TRUE.equals(projectOwner) && !Boolean.TRUE.equals(userDetails.getAdmin())) {
+            batchUpdateFieldStatusVO.setStatus("failed");
+            batchUpdateFieldStatusVO.setError("您无删除权限");
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            return;
+        }
+        Double progress = 0.0;
+        double lastSendProcess = 0D;
+        try {
+            batchUpdateFieldStatusVO.setStatus("doing");
+            batchUpdateFieldStatusVO.setProcess(progress);
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            // 查询子任务ids
+            List<Long> subList = new ArrayList<>(issueMapper.selectSubListByIssueIds(projectId, issueIds));
+            int i = 0;
+            for (Long issueId : issueIds) {
+                i++;
+                // 删除任务会附带删除子任务,因此需要判断问题是否被删除ss
+                if (!subList.contains(issueId)) {
+                    issueService.deleteIssueOnRequiresNew(projectId, issueId, batchUpdateFieldStatusVO);
                 }
-                batchUpdateFieldStatusVO.setStatus("success");
-                batchUpdateFieldStatusVO.setProcess(1.0);
-            } catch (Exception e) {
-                batchUpdateFieldStatusVO.setStatus("failed");
-                batchUpdateFieldStatusVO.setError(e.getMessage());
-                throw new CommonException("delete issue failed, exception: {}", e.getMessage());
-            } finally {
-                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                double process = (i * 1.0) / issueIds.size();
+                if (process - lastSendProcess >= 0.1) {
+                    batchUpdateFieldStatusVO.setProcess(process);
+                    socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                    lastSendProcess = process;
+                }
             }
+            batchUpdateFieldStatusVO.setStatus("success");
+            batchUpdateFieldStatusVO.setProcess(1.0);
+        } catch (Exception e) {
+            batchUpdateFieldStatusVO.setStatus("failed");
+            batchUpdateFieldStatusVO.setError(e.getMessage());
+            throw new CommonException("delete issue failed, exception: {}", e.getMessage());
+        } finally {
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 
@@ -128,7 +133,7 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             linkIssueLinkageMessageVO.setMessage("error.link.issue.linkage.execution");
             throw new CommonException("error.link.issue.linkage.execution", e);
         } finally {
-            messageClientC7n.sendByUserId(userId, websocketKey, JSON.toJSONString(linkIssueLinkageMessageVO));
+            socketSendHelper.sendByUserId(userId, websocketKey, JSON.toJSONString(linkIssueLinkageMessageVO));
         }
     }
 

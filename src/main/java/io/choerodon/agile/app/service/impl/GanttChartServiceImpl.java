@@ -811,7 +811,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (GanttDimension.isTask(instanceType) && !Objects.equals(0L, instanceId)) {
             //子任务拖动，查出子任务
             String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
-            List<IssueDTO> childIssues = issueMapper.queryChildrenList(Arrays.asList(instanceId), projectIds, null, advancedSql, sortMap);
+            List<IssueDTO> childIssues = issueMapper.queryChildrenList(Arrays.asList(instanceId), projectIds, null, advancedSql, sortMap, true, dimension);
             issueIds = childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
         } else if (GanttDimension.isEpic(instanceType) && !Objects.equals(0L, instanceId)) {
             //在史诗下的拖动
@@ -1258,13 +1258,7 @@ public class GanttChartServiceImpl implements GanttChartService {
                         IssueTypeCode.SUB_TASK.value()));
         String filterSql = issueService.getQuickFilter(searchParamVO.getQuickFilterIds());
         boolean isTreeView = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getTreeFlag()).orElse(true));
-        boolean isDefaultOrder = ObjectUtils.isEmpty(pageRequest.getSort());
-        boolean ganttDefaultOrder = false;
-        if (isDefaultOrder && orderByRank) {
-            //无排序时根据rank,issueNum排序
-            addGanttDefaultOrder(null, pageRequest);
-            ganttDefaultOrder = true;
-        }
+        boolean ganttDefaultOrder = queryGanttDefaultOrder(pageRequest, orderByRank);
         Long projectId = new ArrayList<>(projectMap.entrySet()).get(0).getKey();
         Map<String, Object> sortMap = issueService.processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
@@ -1280,7 +1274,7 @@ public class GanttChartServiceImpl implements GanttChartService {
         if (!ObjectUtils.isEmpty(issueIds)) {
             Set<Long> childrenIds = new HashSet<>();
             if (isTreeView) {
-                List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, filterSql, advancedSql, null);
+                List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, filterSql, advancedSql, null, ganttDefaultOrder, dimension);
                 childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
             }
             issueIds.addAll(childrenIds);
@@ -1291,6 +1285,17 @@ public class GanttChartServiceImpl implements GanttChartService {
         } else {
             return emptyPage;
         }
+    }
+
+    private boolean queryGanttDefaultOrder(PageRequest pageRequest, boolean orderByRank) {
+        boolean isDefaultOrder = ObjectUtils.isEmpty(pageRequest.getSort());
+        boolean ganttDefaultOrder = false;
+        if (isDefaultOrder && orderByRank) {
+            //无排序时根据rank,issueNum排序
+            addGanttDefaultOrder(null, pageRequest);
+            ganttDefaultOrder = true;
+        }
+        return ganttDefaultOrder;
     }
 
 

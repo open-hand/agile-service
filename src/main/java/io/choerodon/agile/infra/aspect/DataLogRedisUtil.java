@@ -1,20 +1,22 @@
 package io.choerodon.agile.infra.aspect;
 
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.IssueStatusDTO;
-import io.choerodon.agile.infra.dto.ProductVersionDTO;
-import io.choerodon.agile.infra.dto.SprintDTO;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.SprintMapper;
-import io.choerodon.agile.infra.mapper.VersionIssueRelMapper;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import io.choerodon.agile.infra.dto.IssueStatusDTO;
+import io.choerodon.agile.infra.dto.ProductVersionDTO;
+import io.choerodon.agile.infra.dto.SprintDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.SprintMapper;
+import io.choerodon.agile.infra.mapper.VersionIssueRelMapper;
+import io.choerodon.agile.infra.utils.RedisUtil;
 
 /**
  * @author dinghuang123@gmail.com
@@ -84,7 +86,7 @@ public class DataLogRedisUtil {
 
     public void deleteEpicChartCache(Long epicId, Long projectId, Long issueId, String type) {
         if (epicId == null && issueId != null) {
-            epicId = issueMapper.selectByPrimaryKey(issueId).getEpicId();
+            epicId = Optional.ofNullable(issueMapper.selectByPrimaryKey(issueId)).map(IssueDTO::getEpicId).orElse(null);
         }
         if (epicId != null && epicId != 0) {
             redisUtil.deleteRedisCache(new String[]{EPIC_CHART + projectId + COLON + epicId + COLON + type

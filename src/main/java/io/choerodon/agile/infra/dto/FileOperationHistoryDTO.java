@@ -171,4 +171,24 @@ public class FileOperationHistoryDTO extends AuditDomain {
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
+
+    @Override
+    public String toString() {
+        return "FileOperationHistoryDTO{" +
+                "id=" + id +
+                ", projectId=" + projectId +
+                ", organizationId=" + organizationId +
+                ", userId=" + userId +
+                ", action='" + action + '\'' +
+                ", successCount=" + successCount +
+                ", failCount=" + failCount +
+                ", status='" + status + '\'' +
+                ", fileUrl='" + fileUrl + '\'' +
+                ", objectVersionNumber=" + objectVersionNumber +
+                ", process=" + process +
+                ", msg='" + msg + '\'' +
+                ", creationDate='" + getCreationDate() + '\'' +
+                ", lastUpdateDate='" + getLastUpdateDate() + '\'' +
+                '}';
+    }
 }
