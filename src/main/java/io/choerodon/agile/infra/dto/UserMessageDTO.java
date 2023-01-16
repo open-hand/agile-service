@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -14,18 +15,17 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserMessageDTO extends AuditDomain {
     private String name;
-
     private String loginName;
-
     private String realName;
-
     private String imageUrl;
-
     private String email;
-
     private Boolean ldap;
     @Encrypt
     private Long id;
+    @ApiModelProperty("attribute14, 目前用做用real_name的拼音首字母大写")
+    private String attribute14;
+    @ApiModelProperty("attribute15, 目前用做用real_name的拼音小写")
+    private String attribute15;
 
     public UserMessageDTO() {
 
@@ -117,5 +117,27 @@ public class UserMessageDTO extends AuditDomain {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    /**
+     * @return attribute14, 目前用做用real_name的拼音首字母大写
+     */
+    public String getAttribute14() {
+        return attribute14;
+    }
+
+    public void setAttribute14(String attribute14) {
+        this.attribute14 = attribute14;
+    }
+
+    /**
+     * @return attribute15, 目前用做用real_name的拼音小写
+     */
+    public String getAttribute15() {
+        return attribute15;
+    }
+
+    public void setAttribute15(String attribute15) {
+        this.attribute15 = attribute15;
     }
 }
