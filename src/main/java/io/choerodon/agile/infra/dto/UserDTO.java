@@ -1,10 +1,13 @@
 package io.choerodon.agile.infra.dto;
 
+import java.util.Date;
+
+import io.swagger.annotations.ApiModelProperty;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.domain.AuditDomain;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.util.Date;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -48,6 +51,12 @@ public class UserDTO extends AuditDomain {
     private Date lockedUntilAt;
 
     private Integer passwordAttempt;
+
+    @ApiModelProperty("attribute14, 目前用做用real_name的拼音首字母大写")
+    private String attribute14;
+
+    @ApiModelProperty("attribute15, 目前用做用real_name的拼音小写")
+    private String attribute15;
 
     public Long getId() {
         return id;
@@ -196,5 +205,27 @@ public class UserDTO extends AuditDomain {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    /**
+     * @return attribute14, 目前用做用real_name的拼音首字母大写
+     */
+    public String getAttribute14() {
+        return attribute14;
+    }
+
+    public void setAttribute14(String attribute14) {
+        this.attribute14 = attribute14;
+    }
+
+    /**
+     * @return attribute15, 目前用做用real_name的拼音小写
+     */
+    public String getAttribute15() {
+        return attribute15;
+    }
+
+    public void setAttribute15(String attribute15) {
+        this.attribute15 = attribute15;
     }
 }
