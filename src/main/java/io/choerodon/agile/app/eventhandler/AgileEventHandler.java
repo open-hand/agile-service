@@ -189,14 +189,14 @@ public class AgileEventHandler {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
         LOGGER.info("接受更新项目消息{}", message);
         Long projectId = projectEvent.getProjectId();
+        // 删除redis的缓存
+        SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:" + projectId);
         List<ProjectEventCategory> projectEventCategories = projectEvent.getNewProjectCategoryVOS();
         if (!CollectionUtils.isEmpty(projectEventCategories)) {
             initIfAgileProject(projectEvent, projectEventCategories);
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
-        // 删除redis的缓存
-        SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:" + projectId);
         return message;
     }
 

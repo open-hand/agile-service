@@ -4068,7 +4068,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 projects.addAll(projectVOS);
             }
         } else {
-            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
             if (!organizationId.equals(projectVO.getOrganizationId())) {
                 throw new CommonException("error.organization.illegal");
             }
