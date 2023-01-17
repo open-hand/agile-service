@@ -184,4 +184,22 @@ public class AgileDataFixTask {
         this.fixDataService.fixEmptyIssuePriority();
         LOGGER.info("==============================>>>>>>>> fixEmptyIssuePriority completed <<<<<<<<=================================");
     }
+
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
+            code = "2.3-alpha-fixEmptyPersonalFilter",
+            description = "删除路线图个人筛选独立数据修复+v2高级筛选数据修复导致的路线图空个人筛选")
+    @TimedTask(name = "2.3-alpha-fixEmptyPersonalFilter",
+            description = "删除路线图个人筛选独立数据修复+v2高级筛选数据修复导致的路线图空个人筛选",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
+    public void fixEmptyPersonalFilter(Map<String, Object> param) {
+        LOGGER.info("==============================>>>>>>>> fixEmptyPersonalFilter start <<<<<<<<=================================");
+        int deleteCount = this.jdbcTemplate.update("delete from agile_personal_filter WHERE filter_type_code = 'feature_issue' AND advanced_filter_json = '{\"conditions\":[]}'");
+        LOGGER.info("==============================>>>>>>>> fixEmptyPersonalFilter remove " + deleteCount + " personal filter <<<<<<<<=================================");
+        LOGGER.info("==============================>>>>>>>> fixEmptyPersonalFilter completed <<<<<<<<=================================");
+    }
 }

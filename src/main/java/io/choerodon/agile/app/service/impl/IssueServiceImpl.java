@@ -238,6 +238,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String EPIC_ID_FIELD = "epicId";
     private static final String SPRINT_ID_FIELD = "sprintId";
     private static final String STORY_POINTS_FIELD = "storyPoints";
+    private static final String ESTIMATE_TIME_FIELD = "estimateTime";
     private static final String REMAIN_TIME_FIELD = "remainingTime";
     private static final String STATUS_ID = "statusId";
     private static final String PARENT_ISSUE_ID = "parentIssueId";
@@ -280,10 +281,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final List<String> WORK_BENCH_SEARCH_TYPE = Arrays.asList("myBug", "reportedBug", MY_START_BEACON, "myReported", "myAssigned");
     private static final String[] UPDATE_TYPE_CODE_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID};
     private static final String[] TRANSFORMED_TASK_FIELD_LIST_NO_RANK = new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, STATUS_ID};
-    private static final String[] NO_NEED_COPY_PREDEFINED_FIELDS_NAME = new String[]
+    private static final String[] COPY_PREDEFINED_FIELDS_NAME = new String[]
             {
                     ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD, STATUS_ID,
-                    FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
+                    FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, ESTIMATE_TIME_FIELD, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME, REPORTER_ID, PRIORITY_ID,
                     ACTUAL_START_TIME, ACTUAL_END_TIME, PARTICIPANT_IDS, PRODUCT_IDS
             };
@@ -3139,17 +3140,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public void handleCopyPredefinedFields(Long organizationId, IssueDetailDTO issueDetail, List<String> predefinedFieldNames) {
-        //将不需要复制的预定义字段置空
-        for (String fieldName : NO_NEED_COPY_PREDEFINED_FIELDS_NAME) {
+        // 对比前端传入的需要复制的预定义字段和支持复制的预定义字段, 找出不需要复制的字段名
+        // 将不需要复制的预定义字段置空
+        for (String fieldName : COPY_PREDEFINED_FIELDS_NAME) {
             if (!predefinedFieldNames.contains(fieldName)) {
                 setFieldValueEmpty(issueDetail, fieldName);
             }
         }
-        //设置报告人为复制人
+        // 不复制报告人, 则将报告人设置为复制人
         if (!predefinedFieldNames.contains(REPORTER_ID)) {
-            issueDetail.setReporterId(DetailsHelper.getUserDetails().getUserId());
+            issueDetail.setReporterId(Optional.ofNullable(DetailsHelper.getUserDetails()).map(CustomUserDetails::getUserId).orElse(null));
         }
-        //设置优先级为默认优先级
+        // 不复制优先级, 则将优先级设置为默认优先级
         if (!predefinedFieldNames.contains(PRIORITY_ID)) {
             PriorityVO priorityVO = priorityService.queryDefaultByOrganizationId(organizationId);
             issueDetail.setPriorityCode("priority-" + priorityVO.getId());
@@ -4066,7 +4068,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 projects.addAll(projectVOS);
             }
         } else {
-            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
             if (!organizationId.equals(projectVO.getOrganizationId())) {
                 throw new CommonException("error.organization.illegal");
             }
