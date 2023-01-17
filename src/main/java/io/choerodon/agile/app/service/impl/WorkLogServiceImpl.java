@@ -28,6 +28,7 @@ import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.WorkLogMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 
 import org.hzero.core.base.AopProxy;
@@ -111,7 +112,7 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(workLogVO.getIssueId());
         //登记工时前，校验工时的配置
         if (workLogBusinessPluginService != null) {
-            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
             if (projectVO == null) {
                 throw new CommonException("error.project.empty");
             }
@@ -162,7 +163,7 @@ public class WorkLogServiceImpl implements WorkLogService, AopProxy<WorkLogServi
     public void deleteWorkLog(Long projectId, Long logId) {
         //删除工时前校验工时配置
         if (workLogBusinessPluginService != null) {
-            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
             if (projectVO == null) {
                 throw new CommonException("error.project.empty");
             }

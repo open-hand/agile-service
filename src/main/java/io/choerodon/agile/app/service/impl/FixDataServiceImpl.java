@@ -123,7 +123,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("查询出有问题的项目共有{}个，开始修复数据", projectIds.size());
         int count = 0;
         for (Long projectId : projectIds) {
-            ProjectVO project = remoteIamOperator.queryProject(projectId);
+            ProjectVO project = ConvertUtil.queryProject(projectId);
             LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
             if (
                     project == null
@@ -154,7 +154,7 @@ public class FixDataServiceImpl implements FixDataService {
             LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
             return;
         }
-        ProjectVO project = remoteIamOperator.queryProject(projectId);
+        ProjectVO project = ConvertUtil.queryProject(projectId);
         LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
         if (
                 project == null
