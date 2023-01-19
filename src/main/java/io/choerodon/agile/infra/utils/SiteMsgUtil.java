@@ -73,7 +73,7 @@ public class SiteMsgUtil {
                             Long operatorId,
                             Long projectId,
                             boolean customFieldUsers) {
-        ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
         map.put(SUMMARY, summary);
@@ -157,7 +157,7 @@ public class SiteMsgUtil {
                               String operatorName,
                               Long operatorId) {
         // 设置模板参数
-        ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, assigneeName);
         map.put(SUMMARY, summary);
@@ -182,7 +182,7 @@ public class SiteMsgUtil {
                            Long projectId,
                            String operatorName,
                            Long operatorId) {
-        ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, assigneeName);
         map.put(OPERATOR_NAME, operatorName);
@@ -265,7 +265,7 @@ public class SiteMsgUtil {
                                            String url,
                                            Long projectId,
                                            Long operatorId) {
-        ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
         map.put(SUMMARY, summary);
@@ -290,7 +290,7 @@ public class SiteMsgUtil {
                                              String operatorName,
                                              Long operatorId) {
         // 设置模板参数
-        ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, assigneeName);
         map.put(SUMMARY, summary);
@@ -315,7 +315,7 @@ public class SiteMsgUtil {
                                           Long projectId,
                                           String operatorName,
                                           Long operatorId) {
-        ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+        ProjectVO projectVO = ConvertUtil.queryProject(projectId);
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, assigneeName);
         map.put(OPERATOR_NAME, operatorName);
