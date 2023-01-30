@@ -1881,7 +1881,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (sprintChanged) {
                 // 如果冲刺有变化
                 // 批量删除父子工作项, 所有未关闭冲刺的关联关系
-                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, null, issueIds);
+                BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, issueUpdateVO.getSprintId(), issueIds);
                 issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
                 // 批量插入父子工作项, 目标冲刺的关联关系
                 if(!clearSprint) {
