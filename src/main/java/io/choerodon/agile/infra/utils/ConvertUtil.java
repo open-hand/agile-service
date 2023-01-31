@@ -76,27 +76,36 @@ public class ConvertUtil {
             throw new CommonException("error.projectId.not.null");
         }
         RedisUtil redisUtil = SpringBeanUtil.getBean(RedisUtil.class);
-        String key = "projectInfo:"+projectId;
-        Object project = redisUtil.get(key);
-        if (project != null) {
-            ProjectVO projectVO = JSON.parseObject(project.toString(), ProjectVO.class);
-            if (projectVO.getId() == null) {
-                redisUtil.delete(key);
-                throw new CommonException("error.queryProject.notFound");
-            } else {
-                return projectVO;
-            }
-        } else {
-            ProjectVO projectVO = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class).queryProject(projectId);
-            if (projectVO != null) {
-                if (projectVO.getId() == null) {
-                    throw new CommonException("error.queryProject.notFound");
-                }
-                redisUtil.set(key, JSON.toJSONString(projectVO));
-                return projectVO;
-            } else {
+        String key = "projectInfo:" + projectId;
+        Object obj = redisUtil.get(key);
+        ProjectVO projectVO = null;
+        if (obj != null) {
+            projectVO = JSON.parseObject(obj.toString(), ProjectVO.class);
+            validateProject(redisUtil, key, projectVO);
+        }
+        if (projectVO == null) {
+            projectVO = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class).queryProject(projectId);
+            if (projectVO == null) {
                 throw new CommonException("error.queryProject.notFound");
             }
+            validateProject(redisUtil, key, projectVO);
+            redisUtil.set(key, JSON.toJSONString(projectVO));
+        }
+        return projectVO;
+    }
+
+    private static void validateProject(RedisUtil redisUtil,
+                                        String key,
+                                        ProjectVO projectVO) {
+        if (projectVO == null) {
+            return;
+        }
+        if (projectVO.getId() == null) {
+            redisUtil.delete(key);
+            throw new CommonException("error.queryProject.notFound");
+        } else if (CollectionUtils.isEmpty(projectVO.getCategories())) {
+            redisUtil.delete(key);
+            throw new CommonException("error.queryProject.categories.init");
         }
     }
 
