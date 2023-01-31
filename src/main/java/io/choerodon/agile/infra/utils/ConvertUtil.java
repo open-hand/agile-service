@@ -72,7 +72,22 @@ public class ConvertUtil {
         return queryProject(projectId).getName();
     }
 
+    /**
+     * 获取项目信息, 优先从缓存里获取, 取不到再去cbase取
+     * @param projectId                项目ID
+     * @return 查询结果
+     */
     public static ProjectVO queryProject(Long projectId) {
+        return queryProject(projectId, true);
+    }
+
+    /**
+     * 获取项目信息, 优先从缓存里获取, 取不到再去cbase取
+     * @param projectId                项目ID
+     * @param checkProjectInfIntact    是否校验cbase返回的数据完整
+     * @return 查询结果
+     */
+    public static ProjectVO queryProject(Long projectId, boolean checkProjectInfIntact) {
         if (Objects.isNull(projectId)) {
             throw new CommonException("error.projectId.not.null");
         }
@@ -96,13 +111,18 @@ public class ConvertUtil {
             if (projectVO == null) {
                 throw new CommonException("error.queryProject.notFound");
             }
-            // 有的时候CBASE会返回残缺的数据, 这里需要校验CBASE返回值合法性
-            if (projectVO.getId() == null) {
-                throw new CommonException("error.queryProject.notFound");
-            } else if (CollectionUtils.isEmpty(projectVO.getCategories())) {
-                throw new CommonException("error.queryProject.categories.init");
+            if(checkProjectInfIntact) {
+                // 有的时候CBASE会返回残缺的数据, 这里需要校验CBASE返回值合法性
+                if (projectVO.getId() == null) {
+                    throw new CommonException("error.queryProject.notFound");
+                } else if (CollectionUtils.isEmpty(projectVO.getCategories())) {
+                    throw new CommonException("error.queryProject.categories.init");
+                }
             }
-            redisUtil.set(key, JSON.toJSONString(projectVO));
+            // 只有完整的数据才能写入缓存
+            if(projectVO.getId() != null && !CollectionUtils.isEmpty(projectVO.getCategories())) {
+                redisUtil.set(key, JSON.toJSONString(projectVO));
+            }
         }
         return projectVO;
     }
