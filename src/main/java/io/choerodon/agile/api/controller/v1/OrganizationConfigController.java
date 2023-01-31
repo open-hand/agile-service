@@ -43,6 +43,8 @@ public class OrganizationConfigController {
     private StatusFieldSettingService statusFieldSettingService;
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired
+    private IssuePredecessorService issuePredecessorService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "组织层创建问题类型的状态机模板")
@@ -362,6 +364,15 @@ public class OrganizationConfigController {
                                                  @ApiParam(value = "节点", required = true)
                                                  @RequestBody NodeSortVO nodeSortVO) {
         return new ResponseEntity<>(organizationConfigService.updateSort(organizationId, statusMachineId, nodeSortVO), HttpStatus.OK);
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询前置项类型")
+    @GetMapping(value = "/issue_predecessor/types")
+    public ResponseEntity queryPredecessorTypes(@ApiParam(value = "项目id", required = true)
+                                                @PathVariable(name = "organization_id") Long organizationId) {
+        return ResponseEntity.ok(issuePredecessorService.queryPredecessorTypes(organizationId));
     }
 
 }
