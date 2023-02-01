@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.google.common.reflect.TypeToken;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
@@ -107,6 +108,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private StatusTemplateMapper statusTemplateMapper;
     @Autowired
     private StatusBranchMergeSettingService statusBranchMergeSettingService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -318,7 +321,11 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                 statusBranchMergeSettingService.listByOptions(0L, organizationId, issueTypeId, statusIds)
                         .stream()
                         .collect(Collectors.groupingBy(StatusBranchMergeSettingVO::getStatusId));
-
+        //瀑布前置项配置
+        Map<Long, List<PredecessorIssueStatusLinkageVO>> predecessorIssueMap = new HashMap<>();
+        if (agileWaterfallService != null) {
+            predecessorIssueMap = agileWaterfallService.listPredecessorIssueMapByIssueTypeAndStatusIds(0L, organizationId, issueTypeId, statusIds);
+        }
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
         Map<Long, List<StatusNoticeSettingVO>> statusNoticSettingMap = statusNoticeSettingVOS.stream()
@@ -340,6 +347,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             if (!ObjectUtils.isEmpty(statusBranchMergeSettingList)) {
                 statusSettingVO.setStatusBranchMergeSettingVO(statusBranchMergeSettingList.get(0));
             }
+            statusSettingVO.setPredecessorIssueStatusLinkageVOS(predecessorIssueMap.getOrDefault(statusSettingVO.getId(), Collections.emptyList()));
         }
         page.setContent(list);
         return page;
