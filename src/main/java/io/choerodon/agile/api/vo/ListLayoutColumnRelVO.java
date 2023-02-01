@@ -3,6 +3,8 @@ package io.choerodon.agile.api.vo;
 import java.util.*;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,9 +78,11 @@ public class ListLayoutColumnRelVO {
     private Boolean display;
     @ApiModelProperty(value = "字段项目名称")
     private String fieldProjectName;
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "项目id")
     private Long projectId;
     @ApiModelProperty(value = "组织id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long organizationId;
     @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
