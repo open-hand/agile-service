@@ -61,15 +61,15 @@ public class ConvertUtil {
     }
 
     public static Long getOrganizationId(Long projectId) {
-        return queryProject(projectId).getOrganizationId();
+        return queryProject(projectId, false).getOrganizationId();
     }
 
     public static String getCode(Long projectId) {
-        return queryProject(projectId).getCode();
+        return queryProject(projectId, false).getCode();
     }
 
     public static String getName(Long projectId) {
-        return queryProject(projectId).getName();
+        return queryProject(projectId, false).getName();
     }
 
     /**
@@ -128,7 +128,7 @@ public class ConvertUtil {
     }
 
     public static Boolean hasModule(Long projectId, String code) {
-        ProjectVO projectVO= ConvertUtil.queryProject(projectId);
+        ProjectVO projectVO= ConvertUtil.queryProject(projectId, false);
         List<ProjectCategoryDTO> categories = projectVO.getCategories();
         if(CollectionUtils.isEmpty(categories)){
             return false;
