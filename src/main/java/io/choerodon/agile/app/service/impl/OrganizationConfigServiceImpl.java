@@ -797,7 +797,9 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
         return  machineNodeDTO;
     }
-    private Long queryStatusMachineId(Long organizationId, Long issueTypeId){
+
+    @Override
+    public Long queryStatusMachineId(Long organizationId, Long issueTypeId) {
         OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
         if (ObjectUtils.isEmpty(organizationConfigDTO)) {
             Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
