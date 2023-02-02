@@ -88,6 +88,7 @@ public class ListLayoutServiceImpl implements ListLayoutService {
             layoutColumnRelDTO.setOrganizationId(organizationId);
             layoutColumnRelDTO.setLayoutId(layoutId);
             layoutColumnRelDTO.setProjectId(projectId);
+            layoutColumnRelDTO.setId(null);
             if (listLayoutColumnRelMapper.insertSelective(layoutColumnRelDTO) != 1) {
                 throw new CommonException("error.list.layout.column.rel.insert");
             }
