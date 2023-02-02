@@ -20,6 +20,8 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
@@ -29,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -655,8 +656,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         // 状态流转
         List<StatusTransferSettingVO> statusTransferSettingVOS = statusSettingVO.getStatusTransferSettingVOS();
         if (!CollectionUtils.isEmpty(statusTransferSettingVOS)) {
-            List<StatusTransferSettingCreateVO> list = new ArrayList<>();
-            handlerTransfer(list, statusTransferSettingVOS, userIds);
+            List<StatusTransferSettingCreateVO> list = handlerTransfer(statusTransferSettingVOS, userIds);
             statusTransferSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, list);
         }
         // 分支合并状态流转
@@ -681,25 +681,44 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
     }
 
-    private void handlerTransfer(List<StatusTransferSettingCreateVO> list, List<StatusTransferSettingVO> statusTransferSettingVOS, List<Long> userIds) {
-        Map<String, List<StatusTransferSettingVO>> map = statusTransferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getUserType));
+    private List<StatusTransferSettingCreateVO> handlerTransfer(List<StatusTransferSettingVO> sourceStatusTransferSettings,
+                                                                List<Long> userIdInProject) {
+        List<StatusTransferSettingCreateVO> result = new ArrayList<>();
+        Map<String, List<StatusTransferSettingVO>> map =
+                sourceStatusTransferSettings.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getUserType));
         for (Map.Entry<String, List<StatusTransferSettingVO>> entry : map.entrySet()) {
             StatusTransferSettingCreateVO settingCreateVO = new StatusTransferSettingCreateVO();
-            settingCreateVO.setType(entry.getKey());
-            List<StatusTransferSettingVO> entryValue = entry.getValue();
-            if (Objects.equals(entry.getKey(), "specifier") && !CollectionUtils.isEmpty(entryValue)) {
-                List<Long> ids = entryValue.stream()
-                        .map(StatusTransferSettingVO::getUserId)
-                        .filter(userIds::contains)
-                        .collect(Collectors.toList());
-                if (!CollectionUtils.isEmpty(ids)) {
+            String userType = entry.getKey();
+            settingCreateVO.setType(userType);
+            List<StatusTransferSettingVO> settings = entry.getValue();
+            if (StatusTransferType.SPECIFIER.equals(userType)) {
+                List<Long> userIds =
+                        settings.stream()
+                                .map(StatusTransferSettingVO::getUserId)
+                                .filter(userIdInProject::contains)
+                                .collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(userIds)) {
                     settingCreateVO.setUserIds(userIds);
-                    list.add(settingCreateVO);
+                    result.add(settingCreateVO);
                 }
+            } else if (StatusTransferType.ROLE.equals(userType)) {
+                List<Long> roleIds =
+                        settings.stream()
+                                .map(StatusTransferSettingVO::getUserId)
+                                .collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(roleIds)) {
+                    settingCreateVO.setUserIds(roleIds);
+                    result.add(settingCreateVO);
+                }
+            } else if (StatusTransferType.OTHER.equals(userType)) {
+                StatusTransferSettingVO other = settings.get(0);
+                settingCreateVO.setVerifySubissueCompleted(other.getVerifySubissueCompleted());
+                result.add(settingCreateVO);
             } else {
-                list.add(settingCreateVO);
+                result.add(settingCreateVO);
             }
         }
+        return result;
     }
 
     private void handlerStatusLinkage(Long projectId, List<StatusLinkageVO> statusLinkageVOS, List<Long> issueTypeIds, List<StatusLinkageVO> statusLinkage) {
