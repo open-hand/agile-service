@@ -627,6 +627,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                 objectVersionNumber++;
             }
         }
+        // 瀑布-状态联动-关联工作项联动
+        copyPredecessorIssueStatusLinkage(statusSettingVO, projectId, issueTypeId, statusId);
         // 通知设置
         List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusSettingVO.getStatusNoticeSettingVOS();
         if (!CollectionUtils.isEmpty(statusNoticeSettingVOS)) {
@@ -666,6 +668,16 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                     statusBranchMergeSetting.getIssueTypeId(),
                     statusBranchMergeSetting.getStatusId(),
                     statusBranchMergeSetting.getAutoTransform());
+        }
+    }
+
+    private void copyPredecessorIssueStatusLinkage(StatusSettingVO statusSetting,
+                                                   Long projectId,
+                                                   Long issueTypeId,
+                                                   Long statusId) {
+        List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkage = statusSetting.getPredecessorIssueStatusLinkageVOS();
+        if (!CollectionUtils.isEmpty(predecessorIssueStatusLinkage) && agileWaterfallService != null) {
+            agileWaterfallService.copyPredecessorIssueStatusLinkage(predecessorIssueStatusLinkage, projectId, issueTypeId, statusId);
         }
     }
 
