@@ -14,17 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.vo.IssuePersonalSortVO;
 import io.choerodon.agile.api.vo.ListLayoutColumnRelVO;
 import io.choerodon.agile.api.vo.ListLayoutVO;
 import io.choerodon.agile.app.service.ListLayoutService;
+import io.choerodon.agile.domain.repository.PersonalSortRepository;
 import io.choerodon.agile.infra.dto.IssuePersonalSortDTO;
 import io.choerodon.agile.infra.dto.ListLayoutColumnRelDTO;
 import io.choerodon.agile.infra.dto.ListLayoutDTO;
 import io.choerodon.agile.infra.enums.IssueFieldMapping;
-import io.choerodon.agile.infra.mapper.IssuePersonalSortMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutColumnRelMapper;
 import io.choerodon.agile.infra.mapper.ListLayoutMapper;
 import io.choerodon.agile.infra.utils.UserDetailsUtil;
@@ -32,8 +31,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
 /**
- * @author zhaotianxin
- * @date 2021-05-07 14:20
+ * @author zhaotianxin 2021-05-07 14:20
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -45,28 +43,29 @@ public class ListLayoutServiceImpl implements ListLayoutService {
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private IssuePersonalSortMapper issuePersonalSortMapper;
+    private PersonalSortRepository personalSortRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public ListLayoutVO save(Long organizationId, Long projectId, ListLayoutVO listLayoutVO) {
-        if (ObjectUtils.isEmpty(listLayoutVO.getApplyType())) {
+        final String applyType = listLayoutVO.getApplyType();
+        if (StringUtils.isBlank(applyType)) {
             throw new CommonException("error.list.layout.apply.type.null");
         }
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        ListLayoutDTO layoutDTO = new ListLayoutDTO(listLayoutVO.getApplyType(), userId, projectId, organizationId);
-        List<ListLayoutDTO> layoutDTOS = listLayoutMapper.select(layoutDTO);
-        if (CollectionUtils.isEmpty(layoutDTOS)) {
-            baseInsert(layoutDTO);
+        ListLayoutDTO layout = new ListLayoutDTO(applyType, userId, projectId, organizationId);
+        ListLayoutDTO layoutInDb = listLayoutMapper.selectOne(layout);
+        if (layoutInDb == null) {
+            baseInsert(layout);
         } else {
-            layoutDTO = layoutDTOS.get(0);
+            layout = layoutInDb;
         }
-        saveColumnRel(organizationId, projectId, layoutDTO.getId(), listLayoutVO.getListLayoutColumnRelVOS());
-        return queryByApplyType(organizationId, projectId, listLayoutVO.getApplyType());
+        saveColumnRel(organizationId, projectId, layout.getId(), applyType, listLayoutVO.getListLayoutColumnRelVOS());
+        return queryByApplyType(organizationId, projectId, applyType);
     }
 
-    private void saveColumnRel(Long organizationId, Long projectId, Long layoutId, List<ListLayoutColumnRelVO> listLayoutColumnRelVOS) {
+    private void saveColumnRel(Long organizationId, Long projectId, Long layoutId, String applyType, List<ListLayoutColumnRelVO> listLayoutColumnRelVOS) {
         if(listLayoutColumnRelVOS == null) {
             listLayoutColumnRelVOS = Collections.emptyList();
         }
@@ -78,7 +77,7 @@ public class ListLayoutServiceImpl implements ListLayoutService {
         List<ListLayoutColumnRelDTO> layoutColumnRelInDb = listLayoutColumnRelMapper.select(listLayoutColumnRelDTO);
         if (projectId != null && projectId != 0L) {
             //项目层
-            deleteIssuePersonalSortIfExisted(layoutColumnRelInDb, listLayoutColumnRelVOS, projectId, organizationId);
+            deleteIssuePersonalSortIfExisted(layoutColumnRelInDb, listLayoutColumnRelVOS, projectId, organizationId, applyType);
         }
         if (!CollectionUtils.isEmpty(layoutColumnRelInDb)) {
             listLayoutColumnRelMapper.delete(listLayoutColumnRelDTO);
@@ -97,9 +96,9 @@ public class ListLayoutServiceImpl implements ListLayoutService {
     private void deleteIssuePersonalSortIfExisted(List<ListLayoutColumnRelDTO> existedLayoutColumnRelList,
                                                   List<ListLayoutColumnRelVO> inputLayoutColumnRelList,
                                                   Long projectId,
-                                                  Long organizationId) {
-        Set<String> inputDisplayCodes =
-                inputLayoutColumnRelList.stream()
+                                                  Long organizationId,
+                                                  String applyType) {
+        Set<String> inputDisplayCodes = inputLayoutColumnRelList.stream()
                         .filter(rel -> Boolean.TRUE.equals(rel.getDisplay()))
                         .map(ListLayoutColumnRelVO::getColumnCode)
                         .collect(Collectors.toSet());
@@ -111,36 +110,37 @@ public class ListLayoutServiceImpl implements ListLayoutService {
                 deleteCodes.add(columnCode);
             }
         }
-        String projectCodePrefix = "pro_";
-        String organizationCodePrefix = "org_";
-        String customFieldSortPrefix = "foundation.";
         if (CollectionUtils.isEmpty(deleteCodes)) {
             return;
         }
-        IssuePersonalSortDTO dto = new IssuePersonalSortDTO();
-        dto.setOrganizationId(organizationId);
-        dto.setProjectId(projectId);
-        dto.setUserId(UserDetailsUtil.getCurrentUserId());
-        dto.setBusinessType("gantt");
-        List<IssuePersonalSortDTO> sorts = issuePersonalSortMapper.select(dto);
-        if (CollectionUtils.isEmpty(sorts)) {
+
+        IssuePersonalSortDTO personalSort = new IssuePersonalSortDTO();
+        personalSort.setOrganizationId(organizationId);
+        personalSort.setProjectId(projectId);
+        personalSort.setUserId(UserDetailsUtil.getCurrentUserId());
+        personalSort.setBusinessType(applyType);
+        personalSort = this.personalSortRepository.selectOne(personalSort);
+        if (personalSort == null) {
             return;
         }
-        IssuePersonalSortDTO sort = sorts.get(0);
-        String sortJson = sort.getSortJson();
+        String sortJson = personalSort.getSortJson();
         if (StringUtils.isBlank(sortJson)) {
             return;
         }
         Map<String, IssuePersonalSortVO> sortMap = new LinkedHashMap<>();
+        List<IssuePersonalSortVO> issuePersonalSorts;
         try {
-            List<IssuePersonalSortVO> issuePersonalSorts =
-                    objectMapper.readValue(sortJson, new TypeReference<List<IssuePersonalSortVO>>() {});
-            for (IssuePersonalSortVO issuePersonalSort : issuePersonalSorts) {
-                sortMap.put(issuePersonalSort.getProperty(), issuePersonalSort);
-            }
+            issuePersonalSorts = objectMapper.readValue(sortJson, new TypeReference<List<IssuePersonalSortVO>>() {});
         } catch (IOException e) {
             throw new CommonException("error.gantt.sortJson.deserialization", e);
         }
+        for (IssuePersonalSortVO issuePersonalSort : issuePersonalSorts) {
+            sortMap.put(issuePersonalSort.getProperty(), issuePersonalSort);
+        }
+
+        String projectCodePrefix = "pro_";
+        String organizationCodePrefix = "org_";
+        String customFieldSortPrefix = "foundation.";
         for (String code : deleteCodes) {
             String property;
             if (code.startsWith(projectCodePrefix) || code.startsWith(organizationCodePrefix)) {
@@ -156,13 +156,11 @@ public class ListLayoutServiceImpl implements ListLayoutService {
         List<IssuePersonalSortVO> sortList = new ArrayList<>(sortMap.values());
         try {
             sortJson = objectMapper.writeValueAsString(sortList);
-            sort.setSortJson(sortJson);
-            if (issuePersonalSortMapper.updateByPrimaryKey(sort) != 1) {
-                throw new CommonException("error.gantt.sort.save");
-            }
         } catch (JsonProcessingException e) {
             throw new CommonException("error.gantt.sortJson.serialization", e);
         }
+        personalSort.setSortJson(sortJson);
+        this.personalSortRepository.updateOptional(personalSort, IssuePersonalSortDTO.FIELD_SORT_JSON);
     }
 
     private ListLayoutDTO baseInsert(ListLayoutDTO layoutDTO) {

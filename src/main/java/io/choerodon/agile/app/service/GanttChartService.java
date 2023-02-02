@@ -96,10 +96,6 @@ public interface GanttChartService {
                                       Long organizationId,
                                       GanttParentInfoVO ganttParentInfoVO);
 
-    void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts);
-
-    List<IssuePersonalSortVO> listLatestSort(Long projectId);
-
     List<IssueDTO> querySubByIssueIds(Set<Long> projectIds,
                                       List<Long> issueIds,
                                       Map<String, Object> sortMap,
