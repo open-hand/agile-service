@@ -1,7 +1,8 @@
 package io.choerodon.agile.infra.utils;
 
-import io.choerodon.agile.api.vo.ProjectVO;
 import org.springframework.stereotype.Component;
+
+import io.choerodon.agile.api.vo.ProjectVO;
 
 /**
  * @author shinan.chen
@@ -24,6 +25,6 @@ public class ProjectUtil {
     }
 
     private ProjectVO queryProject(Long projectId) {
-        return ConvertUtil.queryProject(projectId);
+        return ConvertUtil.queryProject(projectId, false);
     }
 }

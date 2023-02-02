@@ -7,6 +7,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import org.springframework.util.CollectionUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.InstanceService;
 import io.choerodon.agile.app.service.PriorityService;
@@ -15,7 +17,6 @@ import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.core.exception.CommonException;
-import org.springframework.util.CollectionUtils;
 
 /**
  * @author dinghuang123@gmail.com
@@ -60,57 +61,74 @@ public class ConvertUtil {
     }
 
     public static Long getOrganizationId(Long projectId) {
-        return queryProject(projectId).getOrganizationId();
+        return queryProject(projectId, false).getOrganizationId();
     }
 
     public static String getCode(Long projectId) {
-        return queryProject(projectId).getCode();
+        return queryProject(projectId, false).getCode();
     }
 
     public static String getName(Long projectId) {
-        return queryProject(projectId).getName();
+        return queryProject(projectId, false).getName();
     }
 
+    /**
+     * 获取项目信息, 优先从缓存里获取, 取不到再去cbase取
+     * @param projectId                项目ID
+     * @return 查询结果
+     */
     public static ProjectVO queryProject(Long projectId) {
+        return queryProject(projectId, true);
+    }
+
+    /**
+     * 获取项目信息, 优先从缓存里获取, 取不到再去cbase取
+     * @param projectId                项目ID
+     * @param checkProjectInfIntact    是否校验cbase返回的数据完整
+     * @return 查询结果
+     */
+    public static ProjectVO queryProject(Long projectId, boolean checkProjectInfIntact) {
         if (Objects.isNull(projectId)) {
             throw new CommonException("error.projectId.not.null");
         }
+        // 先从缓存取
         RedisUtil redisUtil = SpringBeanUtil.getBean(RedisUtil.class);
         String key = "projectInfo:" + projectId;
         Object obj = redisUtil.get(key);
         ProjectVO projectVO = null;
         if (obj != null) {
             projectVO = JSON.parseObject(obj.toString(), ProjectVO.class);
-            validateProject(redisUtil, key, projectVO);
+            // 有的时候缓存里的数据是残缺的, 需要做一些数据校验,
+            // 如果数据有问题, 则清空这个有问题的缓存, 从CBASE重新加载
+            if (projectVO.getId() == null || CollectionUtils.isEmpty(projectVO.getCategories())) {
+                redisUtil.delete(key);
+                projectVO = null;
+            }
         }
+        // 缓存取不到从CBASE取
         if (projectVO == null) {
             projectVO = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class).queryProject(projectId);
             if (projectVO == null) {
                 throw new CommonException("error.queryProject.notFound");
             }
-            validateProject(redisUtil, key, projectVO);
-            redisUtil.set(key, JSON.toJSONString(projectVO));
+            if(checkProjectInfIntact) {
+                // 有的时候CBASE会返回残缺的数据, 这里需要校验CBASE返回值合法性
+                if (projectVO.getId() == null) {
+                    throw new CommonException("error.queryProject.notFound");
+                } else if (CollectionUtils.isEmpty(projectVO.getCategories())) {
+                    throw new CommonException("error.queryProject.categories.init");
+                }
+            }
+            // 只有完整的数据才能写入缓存
+            if(projectVO.getId() != null && !CollectionUtils.isEmpty(projectVO.getCategories())) {
+                redisUtil.set(key, JSON.toJSONString(projectVO));
+            }
         }
         return projectVO;
     }
 
-    private static void validateProject(RedisUtil redisUtil,
-                                        String key,
-                                        ProjectVO projectVO) {
-        if (projectVO == null) {
-            return;
-        }
-        if (projectVO.getId() == null) {
-            redisUtil.delete(key);
-            throw new CommonException("error.queryProject.notFound");
-        } else if (CollectionUtils.isEmpty(projectVO.getCategories())) {
-            redisUtil.delete(key);
-            throw new CommonException("error.queryProject.categories.init");
-        }
-    }
-
     public static Boolean hasModule(Long projectId, String code) {
-        ProjectVO projectVO= ConvertUtil.queryProject(projectId);
+        ProjectVO projectVO= ConvertUtil.queryProject(projectId, false);
         List<ProjectCategoryDTO> categories = projectVO.getCategories();
         if(CollectionUtils.isEmpty(categories)){
             return false;
