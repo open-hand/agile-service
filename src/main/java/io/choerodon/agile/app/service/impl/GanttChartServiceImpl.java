@@ -1,18 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.SetUtils;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +21,6 @@ import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
-import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.api.vo.waterfall.GanttParentInfoVO;
 import io.choerodon.agile.api.vo.waterfall.GanttParentVO;
 import io.choerodon.agile.app.assembler.BoardAssembler;
@@ -40,7 +34,6 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -1548,81 +1541,6 @@ public class GanttChartServiceImpl implements GanttChartService {
             } else {
                 programs.forEach(p -> projectMap.put(p.getId(), p));
                 fieldCodeValues.put("feature", agilePluginService.queryIssueFeature(projectIds, issueIds));
-            }
-        }
-    }
-
-    @Override
-    public void saveSort(Long projectId, List<IssuePersonalSortVO> issuePersonalSorts) {
-        if (issuePersonalSorts == null) {
-            issuePersonalSorts = new ArrayList<>();
-        }
-        validateIssuePersonalSorts(issuePersonalSorts);
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        IssuePersonalSortDTO personalSort = new IssuePersonalSortDTO();
-        personalSort.setProjectId(projectId);
-        personalSort.setOrganizationId(organizationId);
-        personalSort.setUserId(userId);
-        personalSort.setBusinessType("gantt");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String sortJson;
-        try {
-            sortJson = objectMapper.writeValueAsString(issuePersonalSorts);
-        } catch (JsonProcessingException e) {
-            throw new CommonException("error.gantt.sortJson.serialization", e);
-        }
-        List<IssuePersonalSortDTO> personalSortList = issuePersonalSortMapper.select(personalSort);
-        if (personalSortList.isEmpty()) {
-            personalSort.setSortJson(sortJson);
-            if (issuePersonalSortMapper.insert(personalSort) != 1) {
-                throw new CommonException("error.gantt.sort.save");
-            }
-        } else {
-            IssuePersonalSortDTO existedOne = personalSortList.get(0);
-            existedOne.setSortJson(sortJson);
-            if (issuePersonalSortMapper.updateByPrimaryKey(existedOne) != 1) {
-                throw new CommonException("error.gantt.sort.save");
-            }
-        }
-    }
-
-    private void validateIssuePersonalSorts(List<IssuePersonalSortVO> issuePersonalSorts) {
-        if (!ObjectUtils.isEmpty(issuePersonalSorts)) {
-            issuePersonalSorts.forEach(sort -> {
-                String property = sort.getProperty();
-                String direction = sort.getDirection();
-                AssertUtilsForCommonException.notEmpty(property, "error.gantt.sort.property.empty");
-                AssertUtilsForCommonException.notEmpty(direction, "error.gantt.sort.direction.empty");
-                List<String> directions = Arrays.asList("asc", "desc");
-                if (!directions.contains(direction.toLowerCase())) {
-                    throw new CommonException("error.illegal.gantt.sort.direction");
-                }
-            });
-        }
-    }
-
-    @Override
-    public List<IssuePersonalSortVO> listLatestSort(Long projectId) {
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        IssuePersonalSortDTO personalSort = new IssuePersonalSortDTO();
-        personalSort.setProjectId(projectId);
-        personalSort.setOrganizationId(organizationId);
-        personalSort.setUserId(userId);
-        personalSort.setBusinessType("gantt");
-        List<IssuePersonalSortDTO> personalSortList = issuePersonalSortMapper.select(personalSort);
-        if (personalSortList.isEmpty()) {
-            return Collections.emptyList();
-        } else {
-            IssuePersonalSortDTO sort = personalSortList.get(0);
-            String json = sort.getSortJson();
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                return objectMapper.readValue(json, new TypeReference<List<IssuePersonalSortVO>>() {
-                });
-            } catch (IOException e) {
-                throw new CommonException("error.gantt.sortJson.deserialization", e);
             }
         }
     }
