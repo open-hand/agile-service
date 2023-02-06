@@ -156,12 +156,12 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     public IssueVO createIssue(IssueCreateVO issueCreateVO, String applyType) {
         Long projectId = issueCreateVO.getProjectId();
         Long issueId = handlerIssue(issueCreateVO, applyType);
+        //前端请求创建issue和创建自定义字段是两个接口，issue创建不走切面，解决issue创建和自定义字段创建都走切面导致某个触发器失败的问题
+        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         //创建问题执行工作流自定义流转
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
         statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
-        //前端请求创建issue和创建自定义字段是两个接口，issue创建不走切面，解决issue创建和自定义字段创建都走切面导致某个触发器失败的问题
-        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
         if (execResult != null) {
             result.setErrorMsg(execResult.getErrorMsg());
@@ -174,11 +174,11 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         Long projectId = issueCreateVO.getProjectId();
         //处理issue的属性数据，将issue插入或者跟新数据库
         Long issueId = handlerIssue(issueCreateVO, applyType);
+        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         //创建问题执行工作流自定义流转
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
         statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
-        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
         if (execResult != null) {
             result.setErrorMsg(execResult.getErrorMsg());
