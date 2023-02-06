@@ -116,4 +116,9 @@ public interface AgileWaterfallService {
                              List<? extends Object> values,
                              Pair<String, String> dataPair,
                              boolean isSelector);
+
+    void copyPredecessorIssueStatusLinkage(List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkages,
+                                           Long projectId,
+                                           Long issueTypeId,
+                                           Long statusId);
 }

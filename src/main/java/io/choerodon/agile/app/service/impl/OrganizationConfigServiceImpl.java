@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.google.common.reflect.TypeToken;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
@@ -19,6 +20,8 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
@@ -28,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -107,6 +109,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     private StatusTemplateMapper statusTemplateMapper;
     @Autowired
     private StatusBranchMergeSettingService statusBranchMergeSettingService;
+    @Autowired(required = false)
+    private AgileWaterfallService agileWaterfallService;
 
     @Override
     public OrganizationConfigDTO initStatusMachineTemplate(Long organizationId, Long issueTypeId) {
@@ -318,7 +322,11 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                 statusBranchMergeSettingService.listByOptions(0L, organizationId, issueTypeId, statusIds)
                         .stream()
                         .collect(Collectors.groupingBy(StatusBranchMergeSettingVO::getStatusId));
-
+        //瀑布前置项配置
+        Map<Long, List<PredecessorIssueStatusLinkageVO>> predecessorIssueMap = new HashMap<>();
+        if (agileWaterfallService != null) {
+            predecessorIssueMap = agileWaterfallService.listPredecessorIssueMapByIssueTypeAndStatusIds(0L, organizationId, issueTypeId, statusIds);
+        }
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
         Map<Long, List<StatusNoticeSettingVO>> statusNoticSettingMap = statusNoticeSettingVOS.stream()
@@ -340,6 +348,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
             if (!ObjectUtils.isEmpty(statusBranchMergeSettingList)) {
                 statusSettingVO.setStatusBranchMergeSettingVO(statusBranchMergeSettingList.get(0));
             }
+            statusSettingVO.setPredecessorIssueStatusLinkageVOS(predecessorIssueMap.getOrDefault(statusSettingVO.getId(), Collections.emptyList()));
         }
         page.setContent(list);
         return page;
@@ -619,6 +628,8 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                 objectVersionNumber++;
             }
         }
+        // 瀑布-状态联动-关联工作项联动
+        copyPredecessorIssueStatusLinkage(statusSettingVO, projectId, issueTypeId, statusId);
         // 通知设置
         List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusSettingVO.getStatusNoticeSettingVOS();
         if (!CollectionUtils.isEmpty(statusNoticeSettingVOS)) {
@@ -645,8 +656,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         // 状态流转
         List<StatusTransferSettingVO> statusTransferSettingVOS = statusSettingVO.getStatusTransferSettingVOS();
         if (!CollectionUtils.isEmpty(statusTransferSettingVOS)) {
-            List<StatusTransferSettingCreateVO> list = new ArrayList<>();
-            handlerTransfer(list, statusTransferSettingVOS, userIds);
+            List<StatusTransferSettingCreateVO> list = handlerTransfer(statusTransferSettingVOS, userIds);
             statusTransferSettingService.createOrUpdate(projectId, issueTypeId, statusId, objectVersionNumber, applyType, list);
         }
         // 分支合并状态流转
@@ -661,25 +671,54 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
     }
 
-    private void handlerTransfer(List<StatusTransferSettingCreateVO> list, List<StatusTransferSettingVO> statusTransferSettingVOS, List<Long> userIds) {
-        Map<String, List<StatusTransferSettingVO>> map = statusTransferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getUserType));
+    private void copyPredecessorIssueStatusLinkage(StatusSettingVO statusSetting,
+                                                   Long projectId,
+                                                   Long issueTypeId,
+                                                   Long statusId) {
+        List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkage = statusSetting.getPredecessorIssueStatusLinkageVOS();
+        if (!CollectionUtils.isEmpty(predecessorIssueStatusLinkage) && agileWaterfallService != null) {
+            agileWaterfallService.copyPredecessorIssueStatusLinkage(predecessorIssueStatusLinkage, projectId, issueTypeId, statusId);
+        }
+    }
+
+    private List<StatusTransferSettingCreateVO> handlerTransfer(List<StatusTransferSettingVO> sourceStatusTransferSettings,
+                                                                List<Long> userIdInProject) {
+        List<StatusTransferSettingCreateVO> result = new ArrayList<>();
+        Map<String, List<StatusTransferSettingVO>> map =
+                sourceStatusTransferSettings.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getUserType));
         for (Map.Entry<String, List<StatusTransferSettingVO>> entry : map.entrySet()) {
             StatusTransferSettingCreateVO settingCreateVO = new StatusTransferSettingCreateVO();
-            settingCreateVO.setType(entry.getKey());
-            List<StatusTransferSettingVO> entryValue = entry.getValue();
-            if (Objects.equals(entry.getKey(), "specifier") && !CollectionUtils.isEmpty(entryValue)) {
-                List<Long> ids = entryValue.stream()
-                        .map(StatusTransferSettingVO::getUserId)
-                        .filter(userIds::contains)
-                        .collect(Collectors.toList());
-                if (!CollectionUtils.isEmpty(ids)) {
+            String userType = entry.getKey();
+            settingCreateVO.setType(userType);
+            List<StatusTransferSettingVO> settings = entry.getValue();
+            if (StatusTransferType.SPECIFIER.equals(userType)) {
+                List<Long> userIds =
+                        settings.stream()
+                                .map(StatusTransferSettingVO::getUserId)
+                                .filter(userIdInProject::contains)
+                                .collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(userIds)) {
                     settingCreateVO.setUserIds(userIds);
-                    list.add(settingCreateVO);
+                    result.add(settingCreateVO);
                 }
+            } else if (StatusTransferType.ROLE.equals(userType)) {
+                List<Long> roleIds =
+                        settings.stream()
+                                .map(StatusTransferSettingVO::getUserId)
+                                .collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(roleIds)) {
+                    settingCreateVO.setUserIds(roleIds);
+                    result.add(settingCreateVO);
+                }
+            } else if (StatusTransferType.OTHER.equals(userType)) {
+                StatusTransferSettingVO other = settings.get(0);
+                settingCreateVO.setVerifySubissueCompleted(other.getVerifySubissueCompleted());
+                result.add(settingCreateVO);
             } else {
-                list.add(settingCreateVO);
+                result.add(settingCreateVO);
             }
         }
+        return result;
     }
 
     private void handlerStatusLinkage(Long projectId, List<StatusLinkageVO> statusLinkageVOS, List<Long> issueTypeIds, List<StatusLinkageVO> statusLinkage) {
@@ -797,7 +836,9 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         }
         return  machineNodeDTO;
     }
-    private Long queryStatusMachineId(Long organizationId, Long issueTypeId){
+
+    @Override
+    public Long queryStatusMachineId(Long organizationId, Long issueTypeId) {
         OrganizationConfigDTO organizationConfigDTO = querySchemeId(organizationId, "scheme_state_machine", SchemeApplyType.AGILE);
         if (ObjectUtils.isEmpty(organizationConfigDTO)) {
             Long schemeId = stateMachineSchemeService.initOrgDefaultStatusMachineScheme(organizationId);
