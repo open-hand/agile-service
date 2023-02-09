@@ -1075,24 +1075,54 @@ public class GanttChartServiceImpl implements GanttChartService {
                                                     String instanceType,
                                                     Long instanceId) {
         GanttDimension ganttDimension = GanttDimension.valueOf(instanceType.toUpperCase());
-        List<Long> instanceIds = Arrays.asList(instanceId);
-        switch (ganttDimension) {
-            case EPIC:
-                searchParamVO.addConditionByFieldCode(FieldCode.EPIC, instanceIds);
-                break;
-            case FEATURE:
-                searchParamVO.addConditionByFieldCode(FieldCode.FEATURE, instanceIds);
-                break;
-            case SPRINT:
-                searchParamVO.addConditionByFieldCode(FieldCode.SPRINT, instanceIds);
-                break;
-            case ASSIGNEE:
-                searchParamVO.addConditionByFieldCode(FieldCode.ASSIGNEE, instanceIds);
-                break;
-            case TASK:
-                break;
-            default:
-                break;
+        if (Objects.equals(0L, instanceId)) {
+            //未分配
+            String fieldCode = null;
+            switch (ganttDimension) {
+                case EPIC:
+                    fieldCode = FieldCode.EPIC;
+                    break;
+                case FEATURE:
+                    fieldCode = FieldCode.FEATURE;
+                    break;
+                case SPRINT:
+                    fieldCode = FieldCode.SPRINT;
+                    break;
+                case ASSIGNEE:
+                    fieldCode = FieldCode.ASSIGNEE;
+                    break;
+                case TASK:
+                    break;
+                default:
+                    break;
+            }
+            if (fieldCode != null) {
+                searchParamVO.addCondition(
+                        new Condition()
+                                .setField(new Field().setFieldCode(fieldCode).setPredefined(true))
+                                .setRelationship(SearchConstant.Relationship.AND.toString())
+                                .setOperation(SearchConstant.Operation.IS_NULL.toString()));
+            }
+        } else {
+            List<Long> instanceIds = Arrays.asList(instanceId);
+            switch (ganttDimension) {
+                case EPIC:
+                    searchParamVO.addConditionByFieldCode(FieldCode.EPIC, instanceIds);
+                    break;
+                case FEATURE:
+                    searchParamVO.addConditionByFieldCode(FieldCode.FEATURE, instanceIds);
+                    break;
+                case SPRINT:
+                    searchParamVO.addConditionByFieldCode(FieldCode.SPRINT, instanceIds);
+                    break;
+                case ASSIGNEE:
+                    searchParamVO.addConditionByFieldCode(FieldCode.ASSIGNEE, instanceIds);
+                    break;
+                case TASK:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
