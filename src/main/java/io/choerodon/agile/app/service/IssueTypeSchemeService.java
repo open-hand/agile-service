@@ -8,6 +8,7 @@ import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeWithInfoVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.agile.infra.dto.IssueTypeSchemeDTO;
 import io.choerodon.core.domain.Page;
@@ -90,13 +91,13 @@ public interface IssueTypeSchemeService {
     /**
      * 创建项目初始化问题类型方案
      *
-     * @param projectId projectId
+     * @param projectEvent projectEvent
      * @param projectCode projectCode
      * @return result
      */
-    void initByConsumeCreateProject(Long projectId, String projectCode);
+    void initByConsumeCreateProject(ProjectEvent projectEvent, String projectCode);
 
-    void initByConsumeCreateProjectByCodes(Long projectId, String projectCode, Set<String> codes);
+    void initByConsumeCreateProjectByCodes(ProjectEvent projectEvent, String projectCode, Set<String> codes);
 
 
     Page<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(PageRequest pageRequest, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeVO);

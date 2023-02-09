@@ -150,7 +150,7 @@ public class AgileEventHandler {
                 //创建项目时创建默认状态机方案
                 stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
                 //创建项目时创建默认问题类型方案
-                issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
+                issueTypeSchemeService.initByConsumeCreateProject(projectEvent, projectEvent.getProjectCode());
                 // 同步状态机模板和看板模板
                 handlerOrganizationTemplate(projectEvent);
             } else if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
@@ -161,7 +161,7 @@ public class AgileEventHandler {
 
             if (backlogExpandService != null && codes.contains(ProjectCategory.MODULE_BACKLOG)) {
                 // 选择需求管理后默认开启需求池
-                backlogExpandService.startBacklog(projectEvent.getProjectId());
+                backlogExpandService.startBacklog(projectEvent);
             }
         }
     }
@@ -174,7 +174,7 @@ public class AgileEventHandler {
             boardTemplateService.syncBoardTemplate(projectEvent, SchemeApplyType.AGILE);
         } else {
             // 初始化问题类型状态机
-            projectConfigService.initIssueTypeStatusMachine(projectEvent.getProjectId(), SchemeApplyType.AGILE);
+            projectConfigService.initIssueTypeStatusMachine(projectEvent, SchemeApplyType.AGILE);
         }
     }
 
