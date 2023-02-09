@@ -17,6 +17,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.app.service.*;
@@ -972,8 +973,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public void initIssueTypeStatusMachine(Long projectId, String applyType) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+    public void initIssueTypeStatusMachine(ProjectEvent projectEvent, String applyType) {
+        Long projectId = projectEvent.getProjectId();
+        Long organizationId = projectEvent.getOrganizationId();
         ProjectConfigDTO projectConfigDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
         ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType);
         if (ObjectUtils.isEmpty(projectConfigDTO)) {

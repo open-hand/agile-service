@@ -15,6 +15,7 @@ import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeWithInfoVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.InitIssueType;
@@ -193,8 +194,9 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     }
 
     @Override
-    public void initByConsumeCreateProject(Long projectId, String projectCode) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+    public void initByConsumeCreateProject(ProjectEvent projectEvent, String projectCode) {
+        Long projectId = projectEvent.getProjectId();
+        Long organizationId = projectEvent.getOrganizationId();
         //查询系统问题类型，typeCode不重复
         List<IssueTypeDTO> issueTypes = getIssueTypes(organizationId, projectId);
         //处理老的组织没有创建的数据
@@ -207,8 +209,9 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     }
 
     @Override
-    public void initByConsumeCreateProjectByCodes(Long projectId, String projectCode, Set<String> codes) {
-        Long organizationId = projectUtil.getOrganizationId(projectId);
+    public void initByConsumeCreateProjectByCodes(ProjectEvent projectEvent, String projectCode, Set<String> codes) {
+        Long projectId = projectEvent.getProjectId();
+        Long organizationId = projectEvent.getOrganizationId();
         //查询系统问题类型，typeCode不重复
         List<IssueTypeDTO> issueTypes = getIssueTypes(organizationId, projectId);
         //处理老的组织没有创建的数据

@@ -12,6 +12,7 @@ import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
@@ -223,7 +224,7 @@ public interface BacklogExpandService {
 
     List<BacklogInfoVO> listBacklogByIdsWithOption(List<Long> backlogIds, String param);
 
-    void startBacklog(Long projectId);
+    void startBacklog(ProjectEvent projectEvent);
 
     Boolean checkExistBacklogRel(Long projectId, Long issueId);
 

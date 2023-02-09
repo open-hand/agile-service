@@ -357,7 +357,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     @Override
     public void syncStatusMachineTemplate(ProjectEvent projectEvent, String applyType) {
         Long projectId = projectEvent.getProjectId();
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long organizationId = projectEvent.getOrganizationId();
         ProjectConfigDTO projectConfigDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
         ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType);
         if (ObjectUtils.isEmpty(projectConfigDTO)) {

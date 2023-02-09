@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -233,7 +234,7 @@ public interface ProjectConfigService {
 
     void updateNodeObjectVersionNumber(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType);
 
-    void initIssueTypeStatusMachine(Long project, String applyType);
+    void initIssueTypeStatusMachine(ProjectEvent projectEvent, String applyType);
 
     void checkDeleteStatusByProject(Long projectId, List<String> applyTypes, Long statusId);
 
