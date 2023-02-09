@@ -86,6 +86,10 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             customFields = filterNotExistFields(customFields);
             JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
             int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size());
+            if (ObjectUtils.isEmpty(predefinedFields) && !ObjectUtils.isEmpty(customFields)) {
+                //如果只有自定义字段，allCount = issueId size
+                allCount = issueIds.size();
+            }
             double incrementalValue = 1.0 / (allCount == 0 ? 1 : allCount);
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
             Map<Long, TriggerCarrierVO> triggerCarrierMap = new HashMap<>();
