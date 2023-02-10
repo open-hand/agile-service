@@ -184,7 +184,7 @@ public class FieldValueController {
                                                               @RequestParam Long organizationId,
                                                               @ApiParam(value = "问题类型id", required = true)
                                                               @RequestParam @Encrypt Long issueTypeId) {
-        return Results.success(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId));
+        return ResponseEntity.ok(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId));
     }
 
 
