@@ -793,17 +793,19 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             Set<Long> issueTypeIds =
                     issueTypeMapper.selectByReferenceId(new HashSet<>(Collections.singletonList(issueTypeId)), organizationId)
                             .stream().map(IssueTypeDTO::getId).collect(Collectors.toSet());
+            if(CollectionUtils.isEmpty(issueTypeIds)) {
+                return emptyPage;
+            }
             Page<IssueTypeExtendDTO> page =
                     PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, null, organizationId));
-            List<IssueTypeExtendDTO> list = page.getContent();
-            if (list.isEmpty()) {
+            if (page.isEmpty()) {
                 return emptyPage;
             }
             Map<Long, Boolean> projectEnableMap =
-                    list.stream()
+                    page.stream()
                             .collect(Collectors.toMap(IssueTypeExtendDTO::getProjectId, IssueTypeExtendDTO::getEnabled));
             Set<Long> projectIds =
-                    list.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
+                    page.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
             List<ProjectVO> projects = Optional.ofNullable(remoteIamOperator.queryProjectByIds(projectIds)).orElse(Collections.emptyList());
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
