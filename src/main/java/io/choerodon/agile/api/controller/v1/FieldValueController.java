@@ -1,28 +1,28 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.validator.IssueValidator;
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.*;
+import java.util.List;
+import javax.validation.Valid;
 
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
-import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
-import java.util.List;
+import io.choerodon.agile.api.validator.IssueValidator;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.swagger.annotation.Permission;
+
+import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
  * @author shinan.chen
@@ -54,7 +54,7 @@ public class FieldValueController {
                                                                         @RequestParam Long organizationId,
                                                                         @ApiParam(value = "参数对象", required = true)
                                                                         @RequestBody @Valid PageFieldViewParamVO paramDTO) {
-        return new ResponseEntity<>(pageFieldService.queryPageFieldViewList(organizationId, projectId, paramDTO), HttpStatus.OK);
+        return Results.success(pageFieldService.queryPageFieldViewList(organizationId, projectId, paramDTO));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -68,13 +68,13 @@ public class FieldValueController {
                                                                                       @RequestParam Long organizationId,
                                                                                       @ApiParam(value = "参数对象", required = true)
                                                                                       @RequestBody @Valid PageFieldViewParamVO paramDTO) {
-        return new ResponseEntity<>(pageFieldService.queryPageFieldViewListWithInstanceId(organizationId, projectId, instanceId, paramDTO), HttpStatus.OK);
+        return Results.success(pageFieldService.queryPageFieldViewListWithInstanceId(organizationId, projectId, instanceId, paramDTO));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建实例时，批量创建字段值")
     @PostMapping("/{instance_id}")
-    public ResponseEntity createFieldValues(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>createFieldValues(@ApiParam(value = "项目id", required = true)
                                             @PathVariable("project_id") Long projectId,
                                             @ApiParam(value = "实例id", required = true)
                                             @PathVariable("instance_id") @Encrypt Long instanceId,
@@ -85,13 +85,13 @@ public class FieldValueController {
                                             @ApiParam(value = "自定义字段列表（包含值）", required = true)
                                             @RequestBody List<PageFieldViewCreateVO> createDTOs) {
         fieldValueService.createFieldValues(organizationId, projectId, instanceId, schemeCode, createDTOs);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return Results.created(null);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "快速创建实例时，批量创建字段值（默认值）")
     @PostMapping("/quick_create/{instance_id}")
-    public ResponseEntity createFieldValuesWithQuickCreate(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>createFieldValuesWithQuickCreate(@ApiParam(value = "项目id", required = true)
                                                            @PathVariable("project_id") Long projectId,
                                                            @ApiParam(value = "实例id", required = true)
                                                            @PathVariable("instance_id") @Encrypt Long instanceId,
@@ -100,7 +100,7 @@ public class FieldValueController {
                                                            @ApiParam(value = "参数对象", required = true)
                                                            @RequestBody @Valid PageFieldViewParamVO paramDTO) {
         fieldValueService.createFieldValuesWithQuickCreate(organizationId, projectId, instanceId, paramDTO);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return Results.created(null);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -120,7 +120,7 @@ public class FieldValueController {
                                                                @RequestParam(required = false) String fieldCode,
                                                                @ApiParam(value = "值对象列表", required = true)
                                                                @RequestBody PageFieldViewUpdateVO updateDTO) {
-        return new ResponseEntity<>(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO, fieldCode), HttpStatus.OK);
+        return Results.success(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO, fieldCode));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -134,7 +134,7 @@ public class FieldValueController {
                                                                        @RequestParam String schemeCode,
                                                                        @ApiParam(value = "字段类型", required = true)
                                                                        @RequestParam(defaultValue = "null", required = false) String issueTypeList) {
-        return new ResponseEntity<>(objectSchemeFieldService.getIssueHeadForAgile(organizationId, projectId, schemeCode, issueTypeList), HttpStatus.OK);
+        return Results.success(objectSchemeFieldService.getIssueHeadForAgile(organizationId, projectId, schemeCode, issueTypeList));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -144,7 +144,7 @@ public class FieldValueController {
                                                                                 @PathVariable("project_id") Long projectId,
                                                                                 @ApiParam(value = "问题类型")
                                                                                 @RequestParam(defaultValue = "null", required = false) String issueTypeList) {
-        return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldListWithOutOption(projectId, issueTypeList), HttpStatus.OK);
+        return Results.success(objectSchemeFieldService.queryCustomFieldListWithOutOption(projectId, issueTypeList));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -156,13 +156,13 @@ public class FieldValueController {
                                                                                    @RequestParam @Encrypt Long issueTypeId,
                                                                                    @ApiParam(value = "组织id", required = true)
                                                                                    @RequestParam Long organizationId) {
-        return new ResponseEntity<>(objectSchemeFieldService.listFieldsWithOptionals(projectId, issueTypeId, organizationId), HttpStatus.OK);
+        return Results.success(objectSchemeFieldService.listFieldsWithOptionals(projectId, issueTypeId, organizationId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "批量修改预定义字段值和自定义字段值")
     @PostMapping("/batch_update_fields_value")
-    public ResponseEntity batchUpdateFieldsValue(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void>batchUpdateFieldsValue(@ApiParam(value = "项目id", required = true)
                                                  @PathVariable("project_id") Long projectId,
                                                  @ApiParam(value = "方案编码", required = true)
                                                  @RequestParam String schemeCode,
@@ -172,7 +172,7 @@ public class FieldValueController {
                                                  @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
         issueValidator.verifybatchUpdateFieldsValue(projectId, batchUpdateFieldsValueVo, applyType);
         issueFieldValueService.asyncUpdateFields(projectId, schemeCode, batchUpdateFieldsValueVo, applyType, (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -184,7 +184,7 @@ public class FieldValueController {
                                                               @RequestParam Long organizationId,
                                                               @ApiParam(value = "问题类型id", required = true)
                                                               @RequestParam @Encrypt Long issueTypeId) {
-        return new ResponseEntity<>(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId), HttpStatus.OK);
+        return Results.success(objectSchemeFieldService.getIssueSummaryDefaultValue(organizationId, projectId, issueTypeId));
     }
 
 
@@ -199,7 +199,7 @@ public class FieldValueController {
                                                                @RequestParam String schemeCode,
                                                                @ApiParam(value = "字段类型", required = true)
                                                                @RequestParam String issueTypeList) {
-        return new ResponseEntity<>(objectSchemeFieldService.getAllField(organizationId, projectId, schemeCode, issueTypeList), HttpStatus.OK);
+        return Results.success(objectSchemeFieldService.getAllField(organizationId, projectId, schemeCode, issueTypeList));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -218,7 +218,7 @@ public class FieldValueController {
             @RequestParam(required = false, defaultValue = "false") Boolean enabled,
             @ApiParam(value = "分页信息", required = true)
             @ApiIgnore PageRequest pageRequest) {
-        return new ResponseEntity<>(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, enabled, pageRequest), HttpStatus.OK);
+        return Results.success(fieldOptionService.getOptionsPageByFieldId(organizationId, fieldId, searchValue, selected, enabled, pageRequest));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -230,6 +230,6 @@ public class FieldValueController {
                                                                               @RequestParam @Encrypt Long issueTypeId,
                                                                                 @ApiParam(value = "字段编码集合", required = true)
                                                                               @RequestBody List<String> fieldCodes) {
-        return new ResponseEntity<>(pageFieldService.filterRequireFieldByFieldCodes(projectId, issueTypeId, fieldCodes), HttpStatus.OK);
+        return Results.success(pageFieldService.filterRequireFieldByFieldCodes(projectId, issueTypeId, fieldCodes));
     }
 }
