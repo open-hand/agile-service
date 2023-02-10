@@ -11,10 +11,17 @@
         <if test="projectId != null">
             and t1.project_id = #{projectId}
         </if>
-        and t1.issue_type_id in
-        <foreach collection="issueTypeIds" item="item" open="(" close=")" separator=",">
-            #{item}
-        </foreach>
+        <choose>
+            <when test="issueTypeIds != null and issueTypeIds.size() != 0">
+                and t1.issue_type_id in
+                <foreach collection="issueTypeIds" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </when>
+            <otherwise>
+                and 1 = 2
+            </otherwise>
+        </choose>
     </select>
 
     <select id="selectMaxRank" resultType="java.lang.String">
