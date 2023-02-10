@@ -207,7 +207,7 @@ public class FixDataServiceImpl implements FixDataService {
         //创建项目时创建默认状态机方案
         stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
         //创建项目时创建默认问题类型方案
-        issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
+        issueTypeSchemeService.initByConsumeCreateProject(projectEvent, projectEvent.getProjectCode());
         LOGGER.info("已修复数据，项目id:{}", projectId);
     }
     @Override

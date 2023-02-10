@@ -60,19 +60,35 @@ public class ConvertUtil {
         return SpringBeanUtil.getBean(PriorityService.class).queryByOrganizationId(organizationId);
     }
 
+    /**
+     * 【注意】：在项目创建初始化/更新初始化不要使用该方法，由于choerodon-base更新项目sagaTask在最后，导致可能查到的类别和saga里的真正的项目类别不一致，导致问题
+     * @param projectId
+     * @return
+     */
     public static Long getOrganizationId(Long projectId) {
         return queryProject(projectId, false).getOrganizationId();
     }
 
+    /**
+     * 【注意】：在项目创建初始化/更新初始化不要使用该方法，由于choerodon-base更新项目sagaTask在最后，导致可能查到的类别和saga里的真正的项目类别不一致，导致问题
+     * @param projectId
+     * @return
+     */
     public static String getCode(Long projectId) {
         return queryProject(projectId, false).getCode();
     }
 
+    /**
+     * 【注意】：在项目创建初始化/更新初始化不要使用该方法，由于choerodon-base更新项目sagaTask在最后，导致可能查到的类别和saga里的真正的项目类别不一致，导致问题
+     * @param projectId
+     * @return
+     */
     public static String getName(Long projectId) {
         return queryProject(projectId, false).getName();
     }
 
     /**
+     * 【注意】：在项目创建初始化/更新初始化不要使用该方法，由于choerodon-base更新项目sagaTask在最后，导致可能查到的类别和saga里的真正的项目类别不一致，导致问题
      * 获取项目信息, 优先从缓存里获取, 取不到再去cbase取
      * @param projectId                项目ID
      * @return 查询结果
@@ -82,6 +98,8 @@ public class ConvertUtil {
     }
 
     /**
+     * 【注意】：在项目创建初始化/更新初始化不要使用该方法，由于choerodon-base更新项目sagaTask在最后，导致可能查到的类别和saga里的真正的项目类别不一致，导致问题
+     *
      * 获取项目信息, 优先从缓存里获取, 取不到再去cbase取
      * @param projectId                项目ID
      * @param checkProjectInfIntact    是否校验cbase返回的数据完整
@@ -127,6 +145,12 @@ public class ConvertUtil {
         return projectVO;
     }
 
+    /**
+     * 【注意】：在项目创建初始化/更新初始化不要使用该方法，由于choerodon-base更新项目sagaTask在最后，导致可能查到的类别和saga里的真正的项目类别不一致，导致问题
+     * @param projectId
+     * @param code
+     * @return
+     */
     public static Boolean hasModule(Long projectId, String code) {
         ProjectVO projectVO= ConvertUtil.queryProject(projectId, false);
         List<ProjectCategoryDTO> categories = projectVO.getCategories();

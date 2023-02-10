@@ -306,7 +306,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     @Override
     public void initScheme(String name, String schemeApplyType, ProjectEvent projectEvent) {
         Long projectId = projectEvent.getProjectId();
-        Long organizationId = projectUtil.getOrganizationId(projectId);
+        Long organizationId = projectEvent.getOrganizationId();
         StateMachineSchemeDTO scheme = new StateMachineSchemeDTO();
         scheme.setStatus(StateMachineSchemeStatus.ACTIVE);
         scheme.setName(name);

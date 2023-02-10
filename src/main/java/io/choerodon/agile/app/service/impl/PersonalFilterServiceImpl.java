@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -143,9 +142,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
                                    PersonalFilterVO personalFilterVO,
                                    String version) {
         PersonalFilterDTO dto = personalFilterMapper.selectByPrimaryKey(filterId);
-        if (Objects.isNull(dto)) {
-            throw new CommonException(NOT_FOUND_ERROR);
-        }
+        Assert.notNull(dto, NOT_FOUND_ERROR);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         if (!Objects.isNull(personalFilterVO.getName())) {
             checkUpdateName(organizationId, projectId, userId, filterId, personalFilterVO.getName(), dto.getFilterTypeCode());

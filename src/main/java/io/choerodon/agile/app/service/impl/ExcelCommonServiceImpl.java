@@ -607,7 +607,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (illegalSheet) {
                 throw new CommonException("error.illegal.sheet.name");
             }
-        } catch (IndexOutOfBoundsException | CommonException e) {
+        } catch (IndexOutOfBoundsException | IllegalArgumentException | CommonException e) {
             history.setStatus("template_error");
             if (fileOperationHistoryMapper.updateByPrimaryKeySelective(history) != 1) {
                 throw new CommonException(ERROR_FILE_OPERATION_HISTORY_UPDATE);
@@ -2400,7 +2400,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                         relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
                     } else {
                         int num = Integer.parseInt(str);
-                        String issueNum = projectCode + "-" + num;
+                        String issueNum = projectCode + BaseConstants.Symbol.MIDDLE_LINE + num;
                         IssueVO issueVO = issueMapper.selectByIssueNum(projectId, issueNum);
                         if (issueVO == null) {
                             ok = false;
@@ -2480,7 +2480,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
-            StatusVO statusVO = issueStatusMap.get(issueType + "-" + value);
+            // issueType表中没有"使能"这个类型, 视为"特性处理"
+            final String finalIssueType = Objects.equals("使能", issueType) ? "特性" : issueType;
+            StatusVO statusVO = issueStatusMap.get(finalIssueType + BaseConstants.Symbol.MIDDLE_LINE + value);
             if (statusVO == null) {
                 cell.setCellValue(buildWithErrorMsg(value, "状态输入错误"));
                 addErrorColumn(rowNum, col, errorRowColMap);
@@ -3435,7 +3437,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                     relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
                 } else {
                     int num = Integer.parseInt(str);
-                    String issueNum = projectCode + "-" + num;
+                    String issueNum = projectCode + BaseConstants.Symbol.MIDDLE_LINE + num;
                     IssueVO issueVO = issueMapper.selectByIssueNum(projectId, issueNum);
                     if (issueVO == null) {
                         ok = false;
@@ -3529,7 +3531,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
-        StatusVO statusVO = issueStatusMap.get(issueType + "-" + value);
+        // issueType表中没有"使能"这个类型, 视为"特性处理"
+        final String finalIssueType = Objects.equals("使能", issueType) ? "特性" : issueType;
+        StatusVO statusVO = issueStatusMap.get(finalIssueType + BaseConstants.Symbol.MIDDLE_LINE + value);
         if (statusVO == null) {
             String errorMsg = buildWithErrorMsg(value, "状态输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
@@ -3680,12 +3684,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (StringUtils.isEmpty(value)) {
             return;
         }
-        if (value.lastIndexOf("-") == -1) {
+        if (value.lastIndexOf(BaseConstants.Symbol.MIDDLE_LINE) == -1) {
             putNumError(rowJson, cellJson, value);
             return;
         }
         IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(issueExcelImportVO.getProjectId(),
-                value.substring(value.lastIndexOf("-") + 1), true);
+                value.substring(value.lastIndexOf(BaseConstants.Symbol.MIDDLE_LINE) + 1), true);
         if (issueNumDTO == null) {
             putNumError(rowJson, cellJson, value);
             return;
