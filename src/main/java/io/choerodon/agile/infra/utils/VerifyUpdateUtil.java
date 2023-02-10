@@ -42,19 +42,21 @@ public class VerifyUpdateUtil {
      */
     public List<String> verifyUpdateData(JSONObject updateMap, Object objectUpdate) {
         List<String> fieldList = new ArrayList<>();
-        Class objectClass = objectUpdate.getClass();
-        updateMap.forEach((String k, Object v) -> {
+        Class<?> objectClass = objectUpdate.getClass();
+        for (Map.Entry<String, Object> entry : updateMap.entrySet()) {
+            String fieldCode = entry.getKey();
+            Object fieldValue = entry.getValue();
             try {
-                Field field = objectClass.getDeclaredField(k);
+                Field field = objectClass.getDeclaredField(fieldCode);
                 field.setAccessible(true);
                 Boolean flag = true;
                 Update update = field.getAnnotation(Update.class);
                 if (update != null && update.temp()) {
                     flag = false;
                 }
-                flag = handleFieldType(field, objectUpdate, v, flag);
+                flag = handleFieldType(field, objectUpdate, fieldValue, flag);
                 if (flag && update == null) {
-                    fieldList.add(k);
+                    fieldList.add(fieldCode);
                 }
                 if (update != null && !Objects.equals(update.name(), "")) {
                     fieldList.add(update.name());
@@ -62,7 +64,7 @@ public class VerifyUpdateUtil {
             } catch (Exception e) {
                 throw new CommonException("error.verifyUpdateData.noField", e);
             }
-        });
+        }
         if (agilePluginService != null) {
             agilePluginService.verifyUpdateData(updateMap, fieldList);
         }

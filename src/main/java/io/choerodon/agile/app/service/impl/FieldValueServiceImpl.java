@@ -43,6 +43,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 import org.hzero.core.base.AopProxy;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
@@ -547,15 +548,15 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (agilePluginService != null) {
             agilePluginService.handlerProgramPredefinedFields(projectId, predefinedFields, programMap, applyType);
         }
-        issueDTOS.forEach(v -> {
+        for (IssueDTO issue : issueDTOS) {
             try {
-                this.self().handleIssueField(projectId, v, predefinedFields, batchUpdateFieldStatusVO, applyType, sendMsg, schemeCode, issueCustomFieldMap, triggerCarrierMap, programMap, fixVersion, influenceVersion);
+                this.self().handleIssueField(projectId, issue, predefinedFields, batchUpdateFieldStatusVO, applyType, sendMsg, schemeCode, issueCustomFieldMap, triggerCarrierMap, programMap, fixVersion, influenceVersion);
             } catch (Exception e) {
                 LOGGER.info("update issue exception:", e);
-                Integer failedCount = ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getFailedCount()) ? 0 : batchUpdateFieldStatusVO.getFailedCount();
+                int failedCount = ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getFailedCount()) ? 0 : batchUpdateFieldStatusVO.getFailedCount();
                 batchUpdateFieldStatusVO.setFailedCount(failedCount++);
             }
-        });
+        }
     }
 
     @Override
@@ -597,6 +598,16 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             fieldList.remove(EPIC_ID);
             issueUpdateVO.setEpicId(null);
             addErrMessage(issueDTO, batchUpdateFieldStatusVO, EPIC_ID);
+        }
+        // 子任务跳过设置史诗, 但是允许清空史诗
+        if(
+                IssueTypeCode.SUB_TASK.value().equals(issueDTO.getTypeCode()) &&
+                        (issueUpdateVO.getEpicId() != null &&
+                                !Objects.equals(BaseConstants.DEFAULT_TENANT_ID, issueUpdateVO.getEpicId())
+                        )
+        ) {
+            fieldList.remove(EPIC_ID);
+            issueUpdateVO.setEpicId(null);
         }
         IssueVO issueVO = issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO, fieldList);
         // 处理影响的版本
