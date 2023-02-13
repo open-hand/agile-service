@@ -2882,16 +2882,17 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelVO.setVersionId(valueIdMap.get(version));
             versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
             versionIssueRelList.add(versionIssueRelVO);
-            versions.add(valueIdMap.get(value));
+            versions.add(valueIdMap.get(version));
         }
         List<Long> oldIds = new ArrayList<>();
         final IssueVO oldIssue = issueExcelImportVO.getOldIssue();
         final List<VersionIssueRelVO> oldVersionIssueRelVOList = oldIssue == null ? Collections.emptyList() : oldIssue.getVersionIssueRelVOList();
         if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) && !CollectionUtils.isEmpty(oldVersionIssueRelVOList)) {
-            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> FIX_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
         }
         if (needUpdateMultiValueField(issueExcelImportVO.getUpdate(), versions, oldIds)) {
             issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            issueExcelImportVO.setVersionType(FIX_RELATION_TYPE);
             excelColumn.setValues(versions);
         }
     }
@@ -2932,10 +2933,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         final IssueVO oldIssue = issueExcelImportVO.getOldIssue();
         final List<VersionIssueRelVO> oldVersionIssueRelVOList = oldIssue == null ? Collections.emptyList() : oldIssue.getVersionIssueRelVOList();
         if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) && !CollectionUtils.isEmpty(oldVersionIssueRelVOList)) {
-            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> INFLUENCE_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
         }
         if (needUpdateMultiValueField(issueExcelImportVO.getUpdate(), versions, oldIds)) {
             issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            issueExcelImportVO.setVersionType(INFLUENCE_RELATION_TYPE);
             excelColumn.setValues(versions);
         }
     }
