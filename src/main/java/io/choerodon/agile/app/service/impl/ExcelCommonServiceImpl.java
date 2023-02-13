@@ -2890,7 +2890,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             versionIssueRelVO.setVersionId(valueIdMap.get(version));
             versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             versionIssueRelList.add(versionIssueRelVO);
-            versions.add(valueIdMap.get(value));
+            versions.add(valueIdMap.get(version));
         }
         List<Long> oldIds = new ArrayList<>();
         final IssueVO oldIssue = issueExcelImportVO.getOldIssue();
@@ -2900,6 +2900,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         if (needUpdateMultiValueField(issueExcelImportVO.getUpdate(), versions, oldIds)) {
             issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            issueExcelImportVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             excelColumn.setValues(versions);
         }
     }
@@ -2944,6 +2945,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         if (needUpdateMultiValueField(issueExcelImportVO.getUpdate(), versions, oldIds)) {
             issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
+            issueExcelImportVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             excelColumn.setValues(versions);
         }
     }
