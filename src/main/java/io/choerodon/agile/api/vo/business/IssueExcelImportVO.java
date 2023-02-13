@@ -65,6 +65,9 @@ public class IssueExcelImportVO implements Cloneable {
     @ApiModelProperty(value = "关联的版本列表")
     private List<VersionIssueRelVO> versionIssueRelVOList;
 
+    @ApiModelProperty(value = "版本类型：fix、influence")
+    private String versionType;
+
     @ApiModelProperty(value = "关联的标签列表")
     private List<LabelIssueRelVO> labelIssueRelVOList;
 
@@ -356,6 +359,18 @@ public class IssueExcelImportVO implements Cloneable {
 
     public void setVersionIssueRelVOList(List<VersionIssueRelVO> versionIssueRelVOList) {
         this.versionIssueRelVOList = versionIssueRelVOList;
+    }
+
+    /**
+     * @return 版本类型：fix、influence
+     */
+    public String getVersionType() {
+        return versionType;
+    }
+
+    public IssueExcelImportVO setVersionType(String versionType) {
+        this.versionType = versionType;
+        return this;
     }
 
     public List<LabelIssueRelVO> getLabelIssueRelVOList() {
