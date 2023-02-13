@@ -2996,7 +2996,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             } else if (needUpdateSingleValueField(
                     issueExcelImportVO.getUpdate(),
                     value,
-                    issueExcelImportVO.getOldIssue().getEpicName())
+                    Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getEpicName).orElse(null))
             ) {
                     issueExcelImportVO.setEpicName(value);
                     issueExcelImportVO.setSummary(value);
@@ -3050,7 +3050,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             } else if (needUpdateSingleValueField(
                     issueExcelImportVO.getUpdate(),
                     valueIdMap.get(value),
-                    issueExcelImportVO.getOldIssue().getFeatureId())
+                    Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getFeatureId).orElse(null))
             ) {
                 Long featureId = valueIdMap.get(value);
                 issueExcelImportVO.setFeatureId(featureId);
@@ -3091,7 +3091,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 } else if(needUpdateSingleValueField(
                         issueExcelImportVO.getUpdate(),
                         valueIdMap.get(value),
-                        issueExcelImportVO.getOldIssue().getEpicId())
+                        Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getEpicId).orElse(null))
                 ) {
                     issueExcelImportVO.setEpicId(valueIdMap.get(value));
                     excelColumn.setValues(Collections.singletonList(valueIdMap.get(value)));
@@ -3119,7 +3119,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         } else if (needUpdateSingleValueField(
                 issueExcelImportVO.getUpdate(),
                 value,
-                issueExcelImportVO.getOldIssue().getSummary())
+                Optional.ofNullable(issueExcelImportVO.getOldIssue()).map(IssueVO::getSummary).orElse(null))
         ) {
             issueExcelImportVO.setSummary(value);
         }
