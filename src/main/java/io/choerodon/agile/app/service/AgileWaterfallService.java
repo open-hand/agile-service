@@ -107,4 +107,9 @@ public interface AgileWaterfallService {
 
     void deleteByWorkSpaceId(Long projectId, Long workSpaceId);
 
+    void copyPredecessorIssueStatusLinkage(List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkages,
+                                           Long projectId,
+                                           Long issueTypeId,
+                                           Long statusId);
+
 }

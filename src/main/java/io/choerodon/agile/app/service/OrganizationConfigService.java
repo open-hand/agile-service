@@ -117,4 +117,13 @@ public interface OrganizationConfigService {
     void updateAutoTransform(Long organizationId, Long issueTypeId, Long statusId, Boolean autoTransform);
 
     NodeSortVO updateSort(Long organizationId, Long statusMachineId, NodeSortVO nodeSortVO);
+
+    /**
+     * 组织层根据问题类型查状态机id
+     *
+     * @param organizationId
+     * @param issueTypeId
+     * @return
+     */
+    Long queryStatusMachineId(Long organizationId, Long issueTypeId);
 }
