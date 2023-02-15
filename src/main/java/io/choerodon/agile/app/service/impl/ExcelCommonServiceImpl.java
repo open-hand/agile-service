@@ -610,7 +610,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (illegalSheet) {
                 throw new CommonException("error.illegal.sheet.name");
             }
-        } catch (IndexOutOfBoundsException | CommonException e) {
+        } catch (IndexOutOfBoundsException | IllegalArgumentException | CommonException e) {
             history.setStatus("template_error");
             if (fileOperationHistoryMapper.updateByPrimaryKeySelective(history) != 1) {
                 throw new CommonException(ERROR_FILE_OPERATION_HISTORY_UPDATE);
