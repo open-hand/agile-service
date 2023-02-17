@@ -1,10 +1,10 @@
 package io.choerodon.agile.api.vo;
 
 
-
-import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
+
+import io.choerodon.agile.infra.utils.StringUtil;
 
 /**
  * 敏捷开发Issue链接
@@ -68,6 +68,28 @@ public class IssueLinkVO {
 
     @ApiModelProperty(value = "关联issue的应用类型")
     private String applyType;
+
+    @ApiModelProperty(value = "工作项所属项目id")
+    private Long linkedIssueProjectId;
+
+    @ApiModelProperty(value = "工作项所属的项目")
+    private String projectName;
+
+    public Long getLinkedIssueProjectId() {
+        return linkedIssueProjectId;
+    }
+
+    public void setLinkedIssueProjectId(Long linkedIssueProjectId) {
+        this.linkedIssueProjectId = linkedIssueProjectId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
 
     public Long getProjectId() {
         return projectId;

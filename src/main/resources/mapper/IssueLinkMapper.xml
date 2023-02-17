@@ -9,29 +9,31 @@
     <select id="queryIssueLinkByIssueId" resultType="io.choerodon.agile.infra.dto.IssueLinkDTO">
         SELECT a.*
         FROM
-            (
-                SELECT
-                    ail.*,
-                    ailt.link_name                                 AS link_type_name,
-                    ailt.out_ward                                  AS ward,
-                    CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
-                    ai.issue_num  AS issue_num1,
-                    ai.summary,
-                    ai.priority_id,
-                    ai.status_id,
-                    ai.issue_type_id,
-                    ai.assignee_id,
-                    ai.apply_type,
-                    ai.type_code,
-                    ail.issue_id as key_issue_id
-                FROM
-                    agile_issue_link ail
-                    LEFT JOIN agile_issue_link_type ailt ON ailt.link_type_id = ail.link_type_id
-                    LEFT JOIN agile_issue ai ON ail.linked_issue_id = ai.issue_id
-                    LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
-                WHERE
-                    ail.issue_id in
-                    <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+        (
+        SELECT
+        ail.issue_id, ail.linked_issue_id, ail.object_version_number, ail.created_by, ail.creation_date,
+        ail.last_updated_by, ail.last_update_date, ail.link_id, ail.link_type_id, ail.project_id,
+        ailt.link_name AS link_type_name,
+        ailt.out_ward AS ward,
+        CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
+        ai.issue_num AS issue_num1,
+        ai.summary,
+        ai.priority_id,
+        ai.status_id,
+        ai.issue_type_id,
+        ai.assignee_id,
+        ai.apply_type,
+        ai.type_code,
+        ai.project_id AS linkedIssueProjectId,
+        ail.issue_id as key_issue_id
+        FROM
+        agile_issue_link ail
+        LEFT JOIN agile_issue_link_type ailt ON ailt.link_type_id = ail.link_type_id
+        LEFT JOIN agile_issue ai ON ail.linked_issue_id = ai.issue_id
+        LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
+        WHERE
+        ail.issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
                         #{issueId}
                     </foreach>
                     AND ai.project_id in
@@ -41,30 +43,33 @@
                     <if test="noIssueTest">
                         AND ai.apply_type = 'agile'
                     </if>
-                UNION ALL
-                SELECT
-                    ail1.*,
-                    ailt1.link_name                                  AS link_type_name,
-                    ailt1.in_ward                                    AS ward,
-                    CONCAT_WS('-', api1.project_code, ai1.issue_num) AS issue_num,
-                    ai1.issue_num AS issue_num1,
-                    ai1.summary,
-                    ai1.priority_id,
-                    ai1.status_id,
-                    ai1.issue_type_id,
-                    ai1.assignee_id,
-                    ai1.apply_type,
-                    ai1.type_code,
-                    ail1.linked_issue_id as key_issue_id
-                FROM
-                    agile_issue_link ail1
-                    LEFT JOIN agile_issue_link_type ailt1 ON ailt1.link_type_id = ail1.link_type_id
-                    LEFT JOIN agile_issue ai1 ON ail1.issue_id = ai1.issue_id
-                    LEFT JOIN agile_project_info api1 ON api1.project_id = ai1.project_id
-                    LEFT JOIN agile_issue_link ail2 ON ail1.issue_id = ail2.linked_issue_id AND ail1.linked_issue_id = ail2.issue_id AND ail1.link_type_id = ail2.link_type_id
-                WHERE
-                    ail1.linked_issue_id in
-                    <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+        UNION ALL
+        SELECT
+        ail1.issue_id, ail1.linked_issue_id, ail1.object_version_number, ail1.created_by, ail1.creation_date,
+        ail1.last_updated_by, ail1.last_update_date, ail1.link_id, ail1.link_type_id, ail1.project_id,
+        ailt1.link_name AS link_type_name,
+        ailt1.in_ward AS ward,
+        CONCAT_WS('-', api1.project_code, ai1.issue_num) AS issue_num,
+        ai1.issue_num AS issue_num1,
+        ai1.summary,
+        ai1.priority_id,
+        ai1.status_id,
+        ai1.issue_type_id,
+        ai1.assignee_id,
+        ai1.apply_type,
+        ai1.type_code,
+        ai1.project_id AS linkedIssueProjectId,
+        ail1.linked_issue_id as key_issue_id
+        FROM
+        agile_issue_link ail1
+        LEFT JOIN agile_issue_link_type ailt1 ON ailt1.link_type_id = ail1.link_type_id
+        LEFT JOIN agile_issue ai1 ON ail1.issue_id = ai1.issue_id
+        LEFT JOIN agile_project_info api1 ON api1.project_id = ai1.project_id
+        LEFT JOIN agile_issue_link ail2 ON ail1.issue_id = ail2.linked_issue_id AND ail1.linked_issue_id = ail2.issue_id
+        AND ail1.link_type_id = ail2.link_type_id
+        WHERE
+        ail1.linked_issue_id in
+        <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
                         #{issueId}
                     </foreach>
                     AND ai1.project_id in
