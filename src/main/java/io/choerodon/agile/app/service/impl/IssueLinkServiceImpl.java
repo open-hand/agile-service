@@ -103,6 +103,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
                 issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), noIssueTest));
 
         Set<Long> projectIds = issueLinkVOS.stream().map(IssueLinkVO::getLinkedIssueProjectId).collect(Collectors.toSet());
+        projectIds.remove(projectId);
         Map<Long, ProjectVO> projectVOMap = remoteIamOperator.queryProjectByIds(projectIds).stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
 
         issueLinkVOS.forEach(issueLinkVO -> {
@@ -125,7 +126,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         }
         IssueLinkDTO query = new IssueLinkDTO();
         query.setIssueId(issueLinkDTO.getIssueId());
-        return modelMapper.map(issueLinkMapper.select(query), new TypeToken<List<IssueLinkDTO>>(){}.getType());
+        return modelMapper.map(issueLinkMapper.select(query), new TypeToken<List<IssueLinkDTO>>() {
+        }.getType());
     }
 
     @Override
