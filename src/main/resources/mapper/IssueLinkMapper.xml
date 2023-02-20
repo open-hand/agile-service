@@ -36,10 +36,6 @@
         <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
                         #{issueId}
                     </foreach>
-                    AND ai.project_id in
-                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
-                        #{projectId}
-                    </foreach>
                     <if test="noIssueTest">
                         AND ai.apply_type = 'agile'
                     </if>
@@ -71,10 +67,6 @@
         ail1.linked_issue_id in
         <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
                         #{issueId}
-                    </foreach>
-                    AND ai1.project_id in
-                    <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
-                        #{projectId}
                     </foreach>
                     <if test="noIssueTest">
                         AND ai1.apply_type = 'agile'
