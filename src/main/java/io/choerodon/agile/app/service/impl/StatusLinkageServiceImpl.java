@@ -1,14 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.enums.TriggerExecutionStatus;
-import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.core.exception.CommonException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -19,9 +14,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.IssueTypeExtendDTO;
+import io.choerodon.agile.infra.dto.StatusLinkageDTO;
+import io.choerodon.agile.infra.dto.StatusLinkageExecutionLogDTO;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.TriggerExecutionStatus;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * @author zhaotianxin
@@ -148,7 +152,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         List<StatusLinkageVO> linkageVOS = modelMapper.map(statusLinkageDTOS, new TypeToken<List<StatusLinkageVO>>() {
         }.getType());
         // 获取项目的状态
-        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, applyType);
+        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, null, applyType);
         Map<Long, StatusVO> statusMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(statusVOS)) {
             statusMap.putAll(statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity())));
@@ -219,7 +223,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
                                             Set<Long> influenceIssueIds,
                                             IssueDTO issueDTO) {
         if (agilePluginService != null) {
-            agilePluginService.storyLinkageFeature(projectId,issueDTO,applyType);
+            agilePluginService.storyLinkageFeature(projectId, issueDTO, applyType);
         }
         // 判断issue是不是子任务或者子bug
         Boolean checkBugOrSubTask = checkIsSubBugOrSubTask(issueDTO);
@@ -255,7 +259,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         Boolean isChange = false;
         Long changeStatus = null;
         List<Long> issueTypeIds = childrenIssueOfParentIssue.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
-        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId,parentIssue.getIssueTypeId(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
+        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId, parentIssue.getIssueTypeId(), issueTypeIds, statusLinkageDTO.getParentIssueStatusSetting());
         Map<Long, List<StatusLinkageDTO>> linkageDTOMap = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
         Map<Long, List<IssueDTO>> issueMap = childrenIssueOfParentIssue.stream().collect(Collectors.groupingBy(IssueDTO::getIssueTypeId));
         if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(sourceIssue.getIssueTypeId())) {
@@ -334,11 +338,11 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         for (IssueDTO dto : issueDTOS) {
             List<Long> influenceStatusIds = allInfluenceMap.getOrDefault(dto.getIssueId(), new ArrayList<>());
             if (!CollectionUtils.isEmpty(influenceStatusIds)) {
-                dto.setStatusId(influenceStatusIds.get(influenceStatusIds.size() -1));
+                dto.setStatusId(influenceStatusIds.get(influenceStatusIds.size() - 1));
             }
         }
         List<Long> issueTypeIds = issueDTOS.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
-        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId,parentIssue.getIssueTypeId(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
+        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeId(projectId, parentIssue.getIssueTypeId(), issueTypeIds, statusLinkageDTO.getParentIssueStatusSetting());
         Map<Long, List<StatusLinkageDTO>> linkageDTOMap = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
         Map<Long, List<IssueDTO>> issueMap = issueDTOS.stream().collect(Collectors.groupingBy(IssueDTO::getIssueTypeId));
         if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(issue.getIssueTypeId())) {
@@ -359,14 +363,14 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             influenceIssue.setLoop(false);
             influenceIssue.setLinkageSettingId(statusLinkageDTO.getId());
             influenceIssue.setChildrenTriggered(true);
-            if(statusIds.contains(changeStatus)){
+            if (statusIds.contains(changeStatus)) {
                 allInfluenceMap.put(0L, new ArrayList<>());
                 influenceIssue.setLoop(true);
                 return;
             }
             issueService.handlerInfluenceMap(allInfluenceMap, parentIssueId, changeStatus, issueLinkChangeGroup, issueId, influenceIssue, false);
             List<InfluenceIssueVO> childrenVOS = influenceIssueVO.getChildrenVO();
-            if(CollectionUtils.isEmpty(childrenVOS)){
+            if (CollectionUtils.isEmpty(childrenVOS)) {
                 childrenVOS = new ArrayList<>();
             }
             childrenVOS.add(influenceIssue);
@@ -423,7 +427,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         organizationConfigService.updateNodeObjectVersionNumber(organizationId, issueTypeId, statusId, objectVersionNumber);
         return listByOptions(organizationId, issueTypeId, statusId);
     }
-    private List<StatusLinkageDTO> queryByOrg(Long organizationId, Long issueTypeId, Long statusId){
+
+    private List<StatusLinkageDTO> queryByOrg(Long organizationId, Long issueTypeId, Long statusId) {
         StatusLinkageDTO statusLinkageDTO = new StatusLinkageDTO();
         statusLinkageDTO.setProjectId(0L);
         statusLinkageDTO.setOrganizationId(organizationId);
@@ -507,7 +512,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper
                 .selectTransformByStatusId(organizationId, stateMachineId, parentIssue.getStatusId(), changeStatus, false);
-        if (CollectionUtils.isEmpty(statusMachineTransformDTOS)){
+        if (CollectionUtils.isEmpty(statusMachineTransformDTOS)) {
             statusMachineTransformDTOS = statusMachineTransformMapper
                     .selectTransformByStatusId(organizationId, stateMachineId, parentIssue.getStatusId(), changeStatus, true);
         }
@@ -583,7 +588,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         long count = sub.stream().filter(v -> statusLinkStatus.contains(v.getStatusId())).count();
         if (Objects.equals(ALL_TRANSFER, type) && count != sub.size()) {
             return Boolean.FALSE;
-        } else if(Objects.equals(ANYONE_TRANSFER, type) && count == 0){
+        } else if (Objects.equals(ANYONE_TRANSFER, type) && count == 0) {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;

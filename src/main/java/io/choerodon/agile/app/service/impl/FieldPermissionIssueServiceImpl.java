@@ -3,6 +3,12 @@ package io.choerodon.agile.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.FieldPermissionDTO;
@@ -11,11 +17,6 @@ import io.choerodon.agile.infra.mapper.FieldPermissionMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author superlee
@@ -68,7 +69,7 @@ public class FieldPermissionIssueServiceImpl implements FieldPermissionIssueServ
         List<IssueTypeNoPermissionFields> result = new ArrayList<>();
         Map<Long, IssueTypeNoPermissionFields> resultMap = new HashMap<>();
         // 查询当前项目下的问题类型
-        List<IssueTypeWithStateMachineIdVO> issueTypes = projectConfigService.queryIssueTypesWithStateMachineIdByProjectId(projectId, null, false);
+        List<IssueTypeWithStateMachineIdVO> issueTypes = projectConfigService.queryIssueTypesWithStateMachineIdByProjectId(projectId, null, null, false);
         Set<Long> issueTypeIds = new HashSet<>();
         issueTypes.forEach(issueType -> {
             issueTypeIds.add(issueType.getId());

@@ -219,7 +219,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         List<ProductVersionDataVO> productVersions = versionDataAssembler.toTargetList(productVersionMapper.queryVersionByProjectId(projectId), ProductVersionDataVO.class);
         if (!productVersions.isEmpty()) {
             List<Long> productVersionIds = productVersions.stream().map(ProductVersionDataVO::getVersionId).collect(toList());
-            Map<String, List<Long>> statusMap = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE)
+            Map<String, List<Long>> statusMap = projectConfigService.queryStatusByProjectId(projectId, null, SchemeApplyType.AGILE)
                     .stream().collect(Collectors.groupingBy(StatusVO::getType, Collectors.mapping(StatusVO::getId, Collectors.toList())));
             List<Long> done = statusMap.get(CATEGORY_DONE_CODE);
             Boolean condition = done != null && !done.isEmpty();
@@ -240,7 +240,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Override
     public ProductVersionStatisticsVO queryVersionStatisticsByVersionId(Long projectId, Long versionId) {
         ProductVersionStatisticsVO productVersionStatisticsVO = versionStatisticsAssembler.toTarget(productVersionMapper.queryVersionStatisticsByVersionId(projectId, versionId), ProductVersionStatisticsVO.class);
-        List<StatusVO> statusMapVOS = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE);
+        List<StatusVO> statusMapVOS = projectConfigService.queryStatusByProjectId(projectId, null, SchemeApplyType.AGILE);
         Map<String, List<Long>> statusIdMap = statusMapVOS.stream().collect(Collectors.groupingBy(StatusVO::getType, Collectors.mapping(StatusVO::getId, Collectors.toList())));
         Map<String, List<StatusVO>> statusMap = statusMapVOS.stream().collect(Collectors.groupingBy(StatusVO::getType));
         UserDTO userDTO = userService.queryUserNameByOption(productVersionStatisticsVO.getCreatedBy(), false);

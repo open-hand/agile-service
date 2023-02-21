@@ -3,10 +3,14 @@ package io.choerodon.agile.infra.feign.operator;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.util.ResponseUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import io.choerodon.agile.api.vo.*;
@@ -16,8 +20,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.IamFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
-
-import org.hzero.core.util.ResponseUtils;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * Copyright (c) 2022. Hand Enterprise Solution Company. All right reserved.
@@ -28,6 +31,8 @@ import org.hzero.core.util.ResponseUtils;
 @Component
 public class RemoteIamOperator {
 
+    private static final String USER_OF_ORG_RESULT_REDIS_KEY = "org:%s:user:%s";
+
     private final IamFeignClient iamFeignClient;
     private final BaseFeignClient baseFeignClient;
 
@@ -37,34 +42,41 @@ public class RemoteIamOperator {
         this.baseFeignClient = baseFeignClient;
     }
 
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
     /**
      * 分页查询租户信息
+     *
      * @param tenantName 模糊查询条件--租户名称
-     * @param tenantNum 模糊查询条件--租户编码
+     * @param tenantNum  模糊查询条件--租户编码
      * @return 查询结果
      */
     public Page<TenantVO> pagingTenants(String tenantName, String tenantNum, int page, int size) {
         return ResponseUtils.getResponse(
                 this.iamFeignClient.pagingTenants(tenantName, tenantNum, page, size),
-                new TypeReference<Page<TenantVO>>() {}
+                new TypeReference<Page<TenantVO>>() {
+                }
         );
     }
 
     /**
      * 根据租户编码查询租户信息<br/>
      * <span style="color:red">注意, 这个是通过模糊查询接口获取的结果, 当租户编码区分度太低时也许会出问题, 慎用</span>
+     *
      * @param tenantNum 租户名称
      * @return 查询结果
      */
     public TenantVO findTenantByNumber(String tenantNum) {
-        if(StringUtils.isBlank(tenantNum)) {
+        if (StringUtils.isBlank(tenantNum)) {
             return null;
         }
         final Page<TenantVO> page = ResponseUtils.getResponse(
                 this.iamFeignClient.pagingTenants(null, tenantNum, 0, 1000),
-                new TypeReference<Page<TenantVO>>() {}
+                new TypeReference<Page<TenantVO>>() {
+                }
         );
-        if(CollectionUtils.isEmpty(page)) {
+        if (CollectionUtils.isEmpty(page)) {
             return null;
         }
         return page.stream().filter(t -> tenantNum.equals(t.getTenantNum())).findFirst().orElse(null);
@@ -168,12 +180,14 @@ public class RemoteIamOperator {
                 new TypeReference<List<ProjectVO>>() {
                 });
     }
+
     /**
      * 查询组织下所有项目
+     *
      * @param organizationId 组织ID
      * @param projectCodes   过滤条件--项目编码
      * @param enabledFlag    过滤条件--是否启用
-     * @return               查询结果
+     * @return 查询结果
      */
     public List<ProjectVO> listProjectsByOrgId(Long organizationId, Collection<String> projectCodes, Boolean enabledFlag) {
         return ResponseUtils.getResponse(baseFeignClient.listProjectsByOrgId(organizationId, projectCodes, enabledFlag),
@@ -182,9 +196,9 @@ public class RemoteIamOperator {
     }
 
     public Page<ProjectVO> listWithCategoryByOrganizationIds(Long organizationId,
-                                                      ProjectSearchVO projectSearchVO,
-                                                      Integer page,
-                                                      Integer size) {
+                                                             ProjectSearchVO projectSearchVO,
+                                                             Integer page,
+                                                             Integer size) {
         return ResponseUtils.getResponse(baseFeignClient.listWithCategoryByOrganizationIds(organizationId, projectSearchVO, page, size),
                 new TypeReference<Page<ProjectVO>>() {
                 });
@@ -357,6 +371,27 @@ public class RemoteIamOperator {
         return ResponseUtils.getResponse(baseFeignClient.pagingQueryProjectsByUserId(organizationId, userId, page, size, projectVO),
                 new TypeReference<Page<ProjectVO>>() {
                 });
+    }
+
+    /**
+     * 根据项目id查询用户在项目所属组织下是否有角色
+     *
+     * @param projectId
+     * @return
+     */
+    public Boolean memberOfOrganization(Long projectId) {
+        ProjectVO projectVO = queryProject(projectId);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        String cacheKey = String.format(USER_OF_ORG_RESULT_REDIS_KEY, projectVO.getOrganizationId(), userId);
+
+        String cacheResult = stringRedisTemplate.opsForValue().get(cacheKey);
+        if (cacheResult == null) {
+            Boolean result = ResponseUtils.getResponse(baseFeignClient.memberOfOrganization(projectVO.getOrganizationId(), userId), Boolean.class);
+            stringRedisTemplate.opsForValue().set(String.format(USER_OF_ORG_RESULT_REDIS_KEY, projectVO.getOrganizationId(), userId), result.toString(), 60, TimeUnit.SECONDS);
+            return result;
+        } else {
+            return Boolean.valueOf(cacheResult);
+        }
     }
 
 }
