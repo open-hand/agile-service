@@ -124,7 +124,7 @@ public interface BaseFeignClient {
      * 根据年份查询工作日历假期(包含查询年份和下一年份数据)
      *
      * @param organizationId organizationId
-     * @param year year
+     * @param year           year
      * @return result
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/work_calendar_holiday_refs")
@@ -137,7 +137,7 @@ public interface BaseFeignClient {
      * 根据年份查询工作日历，包含当年、去年、明年
      *
      * @param organizationId organizationId
-     * @param year year
+     * @param year           year
      * @return result
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/work_calendar_holiday_refs/year_include_last_and_next")
@@ -164,7 +164,7 @@ public interface BaseFeignClient {
     @GetMapping("choerodon/v1/users/{id}/projects")
     ResponseEntity<String> queryProjects(@PathVariable("id") Long id,
                                          @RequestParam(required = false, name = "included_disabled")
-                                                 boolean includedDisabled);
+                                         boolean includedDisabled);
 
     @GetMapping("/choerodon/v1/organizations/{organization_id}/users/{user_id}/projects")
     ResponseEntity<String> queryOrgProjects(@PathVariable("organization_id") Long organizationId,
@@ -250,16 +250,19 @@ public interface BaseFeignClient {
 
     /**
      * 查询组织下所有项目
+     *
      * @param organizationId 组织ID
      * @param projectCodes   过滤条件--项目编码
      * @param enabledFlag    过滤条件--是否启用
-     * @return               查询结果
+     * @return 查询结果
      */
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/all")
     ResponseEntity<String> listProjectsByOrgId(@PathVariable("organization_id") Long organizationId,
                                                @RequestParam(required = false) Collection<String> projectCodes,
                                                @RequestParam(required = false) Boolean enabledFlag);
 
-
+    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/users/{user_id}/member_of_org")
+    ResponseEntity<String> memberOfOrganization(@PathVariable("organization_id") Long organizationId,
+                                                @PathVariable("user_id") Long userId);
 }
 
