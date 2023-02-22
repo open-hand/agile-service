@@ -58,14 +58,14 @@ public interface IssueLinkService {
     /**
      * 查询未关联当前问题的问题
      *
-     * @param issueId 测试用例id
-     * @param projectId 项目id
-     * @param searchVO 查询参数
-     * @param pageRequest 分页参数
+     * @param issueId        测试用例id
+     * @param projectId      项目id
+     * @param searchVO       查询参数
+     * @param pageRequest    分页参数
      * @param organizationId 组织id
      * @return 测试用例未关联的问题
      */
-    Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
+    Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, Long targetProjectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
     /**
      * 校验关联问题时状态联动是否会出现死循环
