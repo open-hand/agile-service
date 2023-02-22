@@ -1,33 +1,32 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.IssueLinkCreateVO;
-import io.choerodon.agile.api.vo.IssueLinkResponseVO;
-import io.choerodon.agile.api.vo.IssueLinkVO;
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
-import io.choerodon.agile.app.service.IssueLinkService;
+import java.util.List;
+import java.util.Optional;
 
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-import java.util.Optional;
+import io.choerodon.agile.api.vo.IssueLinkCreateVO;
+import io.choerodon.agile.api.vo.IssueLinkResponseVO;
+import io.choerodon.agile.api.vo.IssueLinkVO;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.app.service.IssueLinkService;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.Permission;
 
 /**
  * @author dinghuang123@gmail.com
@@ -69,12 +68,12 @@ public class IssueLinkController {
     @ApiOperation("根据issueId查询issueLink")
     @GetMapping(value = "/{issueId}")
     public ResponseEntity<List<IssueLinkVO>> listIssueLinkByIssueId(@ApiParam(value = "项目id", required = true)
-                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                     @ApiParam(value = "issueId", required = true)
-                                                                     @PathVariable @Encrypt Long issueId,
+                                                                    @PathVariable @Encrypt Long issueId,
                                                                     @ApiParam(value = "是否包含测试任务")
-                                                                     @RequestParam(required = false,name = "no_issue_test",defaultValue = "false")
-                                                                                 Boolean noIssueTest) {
+                                                                    @RequestParam(required = false, name = "no_issue_test", defaultValue = "false")
+                                                                    Boolean noIssueTest) {
         return Optional.ofNullable(issueLinkService.listIssueLinkByIssueId(issueId, projectId, noIssueTest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLink.listIssueLinkByIssueId"));
@@ -84,9 +83,9 @@ public class IssueLinkController {
     @ApiOperation("根据issueId查询issueLink,外接测试项目")
     @PostMapping(value = "/issues")
     public ResponseEntity<List<IssueLinkVO>> listIssueLinkByBatch(@ApiParam(value = "项目id", required = true)
-                                                                    @PathVariable(name = "project_id") Long projectId,
+                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "issueIds", required = true)
-                                                                    @RequestBody List<Long> issueIds) {
+                                                                  @RequestBody List<Long> issueIds) {
         return Optional.ofNullable(issueLinkService.listIssueLinkByBatch(projectId, issueIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLink.listIssueLinkByBatch"));
@@ -99,9 +98,11 @@ public class IssueLinkController {
             @ApiIgnore
             @ApiParam(value = "分页信息", required = true)
             @SortDefault(value = "issueNum", direction = Sort.Direction.DESC)
-                    PageRequest pageRequest,
+            PageRequest pageRequest,
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "project_id") Long projectId,
+            @ApiParam(value = "查询信息的项目id")
+            @RequestParam(name = "target_project_id", required = false) Long targetProjectId,
             @ApiParam(value = "项目id", required = true)
             @PathVariable(name = "issueId") @Encrypt Long issueId,
             @ApiParam(value = "查询参数", required = true)
@@ -112,7 +113,7 @@ public class IssueLinkController {
         if (organizationId == null) {
             organizationId = ConvertUtil.getOrganizationId(projectId);
         }
-        return Optional.ofNullable(issueLinkService.listUnLinkIssue(issueId, projectId, searchVO, pageRequest, organizationId))
+        return Optional.ofNullable(issueLinkService.listUnLinkIssue(issueId, projectId, targetProjectId, searchVO, pageRequest, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listUnLinkIssue"));
     }

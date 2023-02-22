@@ -159,7 +159,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     }
 
     @Override
-    public Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
+    public Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, Long targetProjectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
         if (searchVO == null) {
             searchVO = new SearchVO();
         }
@@ -172,6 +172,14 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         if (searchVO.getAdvancedSearchArgs() == null) {
             searchVO.setAdvancedSearchArgs(new HashMap<>(1));
         }
+
+        if (targetProjectId != null) {
+            if (Boolean.FALSE.equals(remoteIamOperator.memberOfOrganization(targetProjectId))) {
+                throw new CommonException("error.user.permission");
+            }
+            projectId = targetProjectId;
+        }
+
         Set<Long> issueIds = new HashSet<>();
         issueIds.add(issueId);
         List<IssueLinkDTO> issueLinks = issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), false);
