@@ -108,7 +108,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
         issueLinkVOS.forEach(issueLinkVO -> {
             if (projectVOMap.get(issueLinkVO.getLinkedIssueProjectId()) != null) {
-                issueLinkVO.setProjectName(projectVOMap.get(issueLinkVO.getLinkedIssueProjectId()).getName());
+                issueLinkVO.setLinkedProjectVO(projectVOMap.get(issueLinkVO.getLinkedIssueProjectId()));
             }
         });
         return issueLinkVOS;
