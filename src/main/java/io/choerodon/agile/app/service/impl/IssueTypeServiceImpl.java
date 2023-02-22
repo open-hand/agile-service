@@ -2,10 +2,14 @@ package io.choerodon.agile.app.service.impl;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.core.util.JsonUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
@@ -13,6 +17,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -43,6 +48,8 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 @RefreshScope
 @Transactional(rollbackFor = Exception.class)
 public class IssueTypeServiceImpl implements IssueTypeService {
+
+    private static final String ISSUE_TYPE_REDIS_KEY = "issue-type:project:%s";
 
     @Autowired
     private IssueTypeMapper issueTypeMapper;
@@ -122,13 +129,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired
     private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
 
-    private static final List<String> AGILE_CREATE_ISSUE_TYPES =
-            Arrays.asList(
-                    IssueTypeCode.STORY.value(),
-                    IssueTypeCode.SUB_TASK.value(),
-                    IssueTypeCode.TASK.value(),
-                    IssueTypeCode.BUG.value()
-            );
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final List<String> AGILE_CREATE_ISSUE_TYPES = Arrays.asList(IssueTypeCode.STORY.value(), IssueTypeCode.SUB_TASK.value(), IssueTypeCode.TASK.value(), IssueTypeCode.BUG.value());
 
 
     private static final List<String> IGNORED_ISSUE_TYPES =
@@ -1164,34 +1171,38 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId,
-                                                   Long projectId) {
+    public Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId, Long projectId) {
         if (projectId == null) {
             projectId = ZERO;
         }
-        return issueTypeMapper.selectByOptions(organizationId, projectId, null)
-                .stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+        return issueTypeMapper.selectByOptions(organizationId, projectId, null).stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
     }
 
     @Override
-    public List<IssueTypeVO> listIssueType(Long organizationId,
-                                           Set<Long> projectIds) {
-        if (CollectionUtils.isEmpty(projectIds)) {
-            return issueTypeMapper.selectByOptions(organizationId, ZERO, null);
-        } else {
-            return issueTypeMapper.listByProjectIds(organizationId, projectIds, null);
-        }
+    public Map<Long, Map<Long, IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, Set<Long> projectIds) {
+        Map<Long, Map<Long, IssueTypeVO>> issueTypeMapByProjectIds = new HashMap<>();
+        projectIds.forEach(projectId -> {
+            String cache = stringRedisTemplate.opsForValue().get(String.format(ISSUE_TYPE_REDIS_KEY, projectId));
+            if (ObjectUtils.isEmpty(cache)) {
+                Map<Long, IssueTypeVO> issueTypeVOMap = listIssueTypeMap(organizationId, projectId);
+                stringRedisTemplate.opsForValue().set(String.format(ISSUE_TYPE_REDIS_KEY, projectId), JsonUtils.toJson(issueTypeVOMap), 60, TimeUnit.SECONDS);
+                issueTypeMapByProjectIds.put(projectId, issueTypeVOMap);
+            } else {
+                stringRedisTemplate.opsForValue().set(String.format(ISSUE_TYPE_REDIS_KEY, projectId), cache, 60, TimeUnit.SECONDS);
+                issueTypeMapByProjectIds.put(projectId, JsonUtils.fromJson(cache, new TypeReference<Map<Long, IssueTypeVO>>() {
+                }));
+            }
+        });
+        return issueTypeMapByProjectIds;
     }
 
     @Override
     public Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds) {
-        return issueTypeMapper.selectByProjectIds(organizationId, projectIds)
-                .stream().collect(Collectors.groupingBy(IssueTypeVO::getId));
+        return issueTypeMapper.selectByProjectIds(organizationId, projectIds).stream().collect(Collectors.groupingBy(IssueTypeVO::getId));
     }
 
     @Override
-    public void updateRank(Long projectId,
-                           Long organizationId,
+    public void updateRank(Long projectId, Long organizationId,
                            Long issueTypeId,
                            IssueTypeRankVO issueTypeRankVO) {
         Map<Long, IssueTypeVO> issueTypeMap = initRankIfNull(organizationId, projectId);

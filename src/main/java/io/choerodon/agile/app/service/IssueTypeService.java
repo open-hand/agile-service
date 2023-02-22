@@ -136,8 +136,7 @@ public interface IssueTypeService {
      */
     Boolean checkIcon(Long organizationId, Long projectId, String icon, Long id);
 
-    List<IssueTypeVO> listIssueType(Long organizationId,
-                                    Set<Long> projectIds);
+    Map<Long, Map<Long, IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, Set<Long> projectIds);
 
     /**
      * 根据projectIds查询问题类型
