@@ -73,7 +73,7 @@ public class IssueLinkVO {
     private Long linkedIssueProjectId;
 
     @ApiModelProperty(value = "工作项所属的项目")
-    private String projectName;
+    private ProjectVO linkedProjectVO;
 
     public Long getLinkedIssueProjectId() {
         return linkedIssueProjectId;
@@ -83,12 +83,12 @@ public class IssueLinkVO {
         this.linkedIssueProjectId = linkedIssueProjectId;
     }
 
-    public String getProjectName() {
-        return projectName;
+    public ProjectVO getLinkedProjectVO() {
+        return linkedProjectVO;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+    public void setLinkedProjectVO(ProjectVO linkedProjectVO) {
+        this.linkedProjectVO = linkedProjectVO;
     }
 
     public Long getProjectId() {
