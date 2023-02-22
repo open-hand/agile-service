@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.choerodon.agile.api.vo.IssueTypeRankVO;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
@@ -135,11 +136,14 @@ public interface IssueTypeService {
      */
     Boolean checkIcon(Long organizationId, Long projectId, String icon, Long id);
 
+    List<IssueTypeVO> listIssueType(Long organizationId,
+                                    Set<Long> projectIds);
+
     /**
      * 根据projectIds查询问题类型
      *
      * @param organizationId organizationId
-     * @param projectIds projectIds
+     * @param projectIds     projectIds
      * @return result
      */
     Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds);
