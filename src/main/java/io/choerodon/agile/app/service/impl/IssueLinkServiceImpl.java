@@ -194,7 +194,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         List<Long> issueTypeIds = searchVO.getAdvancedSearchArgs().get(ISSUE_TYPE_ID) == null ? new ArrayList<>() : (List<Long>) searchVO.getAdvancedSearchArgs().get(ISSUE_TYPE_ID);
         if (CollectionUtils.isEmpty(issueTypeIds)) {
             IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-            issueTypeSearchVO.setTypeCodes(Stream.of("story", "task", "bug").collect(Collectors.toList()));
+            issueTypeSearchVO.setTypeCodes(Stream.of("story", "task", "bug", "stage", "milestone", "activity").collect(Collectors.toList()));
             List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
             issueTypeIds = issueTypes.stream().map(IssueTypeVO::getId).collect(Collectors.toList());
             searchVO.getAdvancedSearchArgs().put(ISSUE_TYPE_ID, issueTypeIds);
