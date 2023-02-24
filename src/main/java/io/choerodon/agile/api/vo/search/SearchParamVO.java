@@ -220,6 +220,23 @@ public class SearchParamVO {
         }
     }
 
+    public void addIsNullOrNotNullCondition(String fieldCode, String opt) {
+        if (!SearchConstant.Operation.isNull(opt) && !SearchConstant.Operation.isNotNull(opt)) {
+            throw new CommonException("error.illegal.opt");
+        }
+        Condition condition =
+                Condition.filterByFieldCode(fieldCode, queryAllConditions());
+        Field field = new Field().setFieldCode(fieldCode).setPredefined(true);
+        Condition bracket =
+                new Condition()
+                        .setOperation(SearchConstant.Operation.BRACKET.toString())
+                        .setRelationship(SearchConstant.Relationship.AND.toString()).setField(field);
+        String optValue = SearchConstant.Operation.isNull(opt) ? SearchConstant.Operation.IS_NULL.toString() : SearchConstant.Operation.IS_NOT_NULL.toString();
+        Condition newCondition = new Condition().setField(field).setRelationship(SearchConstant.Relationship.OR.toString()).setOperation(optValue);
+        bracket.setSubConditions(Arrays.asList(condition, newCondition));
+        overrideCondition(bracket);
+    }
+
     private boolean overrideConditionIfExisted(Condition condition,
                                                String targetFieldCode,
                                                List<Condition> conditions,
