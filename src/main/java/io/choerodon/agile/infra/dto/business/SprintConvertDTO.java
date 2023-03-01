@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.dto.business;
 
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import java.util.Date;
 
@@ -9,7 +10,7 @@ import java.util.Date;
  * Created by jian_zhang02@163.com on 2018/5/14.
  */
 
-public class SprintConvertDTO {
+public class SprintConvertDTO extends AuditDomain {
 
     public SprintConvertDTO() {}
 
