@@ -530,9 +530,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
-        if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
-                    filePathService.generateFullPath(issueAttachmentDO.getUrl())));
+        final List<IssueAttachmentDTO> issueAttachmentDTOList = issue.getIssueAttachmentDTOList();
+        if (CollectionUtils.isNotEmpty(issueAttachmentDTOList)) {
+            for (IssueAttachmentDTO issueAttachmentDO : issueAttachmentDTOList) {
+                issueAttachmentDO.setUrl(filePathService.generateFullPath(issueAttachmentDO.getUrl()));
+            }
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
