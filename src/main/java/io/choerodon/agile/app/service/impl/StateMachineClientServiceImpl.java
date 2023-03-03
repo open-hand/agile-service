@@ -154,19 +154,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
      */
     @Override
     public IssueVO createIssue(IssueCreateVO issueCreateVO, String applyType) {
-        Long projectId = issueCreateVO.getProjectId();
-        Long issueId = handlerIssue(issueCreateVO, applyType);
-        //前端请求创建issue和创建自定义字段是两个接口，issue创建不走切面，解决issue创建和自定义字段创建都走切面导致某个触发器失败的问题
-        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
-        //创建问题执行工作流自定义流转
-        Set<Long> influenceIssueIds = new HashSet<>();
-        IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
-        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
-        result.setInfluenceIssueIds(new ArrayList<>(influenceIssueIds));
-        if (execResult != null) {
-            result.setErrorMsg(execResult.getErrorMsg());
-        }
-        return result;
+        return createIssueWithoutRuleNotice(issueCreateVO, applyType);
     }
 
     @Override
@@ -183,7 +171,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (execResult != null) {
             result.setErrorMsg(execResult.getErrorMsg());
         }
-        return result;
+        return this.issueService.queryIssue(projectId, issueId, ConvertUtil.getOrganizationId(projectId));
     }
 
     /**
