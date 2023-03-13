@@ -52,9 +52,21 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
                                       @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
 
     /**
+     * 根据条件查询issueType
+     *
+     * @param organizationId    organizationId
+     * @param projectId         projectId
+     * @param issueTypeSearchVO issueTypeSearchVO
+     * @return result
+     */
+    List<IssueTypeVO> listByProjectIds(@Param("organizationId") Long organizationId,
+                                       @Param("projectIds") Set<Long> projectId,
+                                       @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
+
+    /**
      * 根据reference_id查询
      *
-     * @param ids ids
+     * @param ids            ids
      * @param organizationId organizationId
      * @return result
      */

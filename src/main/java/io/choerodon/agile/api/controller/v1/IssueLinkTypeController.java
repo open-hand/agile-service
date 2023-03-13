@@ -2,16 +2,6 @@ package io.choerodon.agile.api.controller.v1;
 
 import java.util.Optional;
 
-import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
-import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
-import io.choerodon.agile.api.validator.IssueLinkTypeValidator;
-import io.choerodon.agile.api.vo.IssueLinkTypeVO;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -19,10 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import io.choerodon.agile.app.service.IssueLinkTypeService;
-import io.choerodon.core.exception.CommonException;
 import springfox.documentation.annotations.ApiIgnore;
+
+import io.choerodon.agile.api.validator.IssueLinkTypeValidator;
+import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
+import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
+import io.choerodon.agile.api.vo.IssueLinkTypeVO;
+import io.choerodon.agile.app.service.IssueLinkTypeService;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.Permission;
 
 /**
  * @author dinghuang123@gmail.com
@@ -41,15 +41,17 @@ public class IssueLinkTypeController {
     @ApiOperation("根据项目id查询issueLinkType")
     @PostMapping("/query_all")
     public ResponseEntity<Page<IssueLinkTypeVO>> listIssueLinkType(@ApiParam(value = "项目id", required = true)
-                                                                    @PathVariable(name = "project_id") Long projectId,
+                                                                   @PathVariable(name = "project_id") Long projectId,
+                                                                   @ApiParam(value = "查询信息的项目id")
+                                                                   @RequestParam(name = "target_project_id", required = false) Long targetProjectId,
                                                                    @ApiParam(value = "不包含的issueLinkTypeId")
-                                                                    @RequestParam(required = false) @Encrypt Long issueLinkTypeId,
+                                                                   @RequestParam(required = false) @Encrypt Long issueLinkTypeId,
                                                                    @ApiParam(value = "查询参数")
-                                                                    @RequestBody IssueLinkTypeSearchVO issueLinkTypeSearchVO,
+                                                                   @RequestBody IssueLinkTypeSearchVO issueLinkTypeSearchVO,
                                                                    @ApiParam(value = "分页信息", required = true)
-                                                                    @SortDefault(value = "link_type_id", direction = Sort.Direction.DESC)
-                                                                    @ApiIgnore PageRequest pageRequest) {
-        return Optional.ofNullable(issueLinkTypeService.listIssueLinkType(projectId, issueLinkTypeId, issueLinkTypeSearchVO, pageRequest))
+                                                                   @SortDefault(value = "link_type_id", direction = Sort.Direction.DESC)
+                                                                   @ApiIgnore PageRequest pageRequest) {
+        return Optional.ofNullable(issueLinkTypeService.listIssueLinkType(projectId, targetProjectId, issueLinkTypeId, issueLinkTypeSearchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.listIssueLinkType"));
     }
@@ -58,9 +60,9 @@ public class IssueLinkTypeController {
     @ApiOperation("根据issueLinkTypeId查询issueLinkType")
     @GetMapping(value = "/{linkTypeId}")
     public ResponseEntity<IssueLinkTypeVO> queryIssueLinkType(@ApiParam(value = "项目id", required = true)
-                                                               @PathVariable(name = "project_id") Long projectId,
+                                                              @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "linkTypeId", required = true)
-                                                               @PathVariable(name = "linkTypeId") @Encrypt Long linkTypeId) {
+                                                              @PathVariable(name = "linkTypeId") @Encrypt Long linkTypeId) {
         return Optional.ofNullable(issueLinkTypeService.queryIssueLinkType(projectId, linkTypeId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.queryIssueLinkType"));
@@ -70,9 +72,9 @@ public class IssueLinkTypeController {
     @ApiOperation("创建issueLinkType")
     @PostMapping
     public ResponseEntity<IssueLinkTypeVO> createIssueLinkType(@ApiParam(value = "项目id", required = true)
-                                                                @PathVariable(name = "project_id") Long projectId,
+                                                               @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "创建issueLinkType对象", required = true)
-                                                                @RequestBody IssueLinkTypeCreateVO issueLinkTypeCreateVO) {
+                                                               @RequestBody IssueLinkTypeCreateVO issueLinkTypeCreateVO) {
         issueLinkTypeValidator.verifyCreateData(issueLinkTypeCreateVO, projectId);
         issueLinkTypeValidator.verifyIssueLinkTypeName(projectId, issueLinkTypeCreateVO.getLinkName(), null);
         return Optional.ofNullable(issueLinkTypeService.createIssueLinkType(issueLinkTypeCreateVO))
@@ -84,9 +86,9 @@ public class IssueLinkTypeController {
     @ApiOperation("修改issueLinkType")
     @PutMapping
     public ResponseEntity<IssueLinkTypeVO> updateIssueLinkType(@ApiParam(value = "项目id", required = true)
-                                                                @PathVariable(name = "project_id") Long projectId,
+                                                               @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "issueLinkType", required = true)
-                                                                @RequestBody IssueLinkTypeVO issueLinkTypeVO) {
+                                                               @RequestBody IssueLinkTypeVO issueLinkTypeVO) {
         issueLinkTypeValidator.verifyUpdateData(issueLinkTypeVO, projectId);
         issueLinkTypeValidator.verifyIssueLinkTypeName(projectId, issueLinkTypeVO.getLinkName(), issueLinkTypeVO.getLinkTypeId());
         return Optional.ofNullable(issueLinkTypeService.updateIssueLinkType(issueLinkTypeVO))
@@ -98,11 +100,11 @@ public class IssueLinkTypeController {
     @ApiOperation("删除issueLink")
     @DeleteMapping(value = "/{issueLinkTypeId}")
     public ResponseEntity deleteIssueLinkType(@ApiParam(value = "项目id", required = true)
-                                              @PathVariable(name = "project_id") Long projectId,
+                                                  @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueLinkType", required = true)
-                                              @PathVariable(name = "issueLinkTypeId")@Encrypt  Long issueLinkTypeId,
+                                                  @PathVariable(name = "issueLinkTypeId") @Encrypt Long issueLinkTypeId,
                                               @ApiParam(value = "转移到其他的类型上，如果为空则不转移，直接删除")
-                                              @RequestParam(required = false) @Encrypt Long toIssueLinkTypeId) {
+                                                  @RequestParam(required = false) @Encrypt Long toIssueLinkTypeId) {
         issueLinkTypeValidator.verifyDeleteData(issueLinkTypeId, toIssueLinkTypeId, projectId);
         issueLinkTypeService.deleteIssueLinkType(issueLinkTypeId, toIssueLinkTypeId, projectId);
         return new ResponseEntity(HttpStatus.OK);

@@ -1,26 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.validator.IssueLinkValidator;
-import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
-import io.choerodon.agile.app.assembler.IssueLinkAssembler;
-import io.choerodon.agile.app.service.IssueLinkService;
-import io.choerodon.agile.app.service.IssueOperateService;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.infra.dto.LinkIssueStatusLinkageDTO;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.IssueLinkDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.mapper.IssueLinkMapper;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.IssueTypeMapper;
-import io.choerodon.agile.infra.mapper.LinkIssueStatusLinkageMapper;
-import io.choerodon.agile.infra.utils.BaseFieldUtil;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
@@ -31,10 +14,28 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import io.choerodon.agile.api.validator.IssueLinkValidator;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
+import io.choerodon.agile.app.assembler.IssueLinkAssembler;
+import io.choerodon.agile.app.service.IssueLinkService;
+import io.choerodon.agile.app.service.IssueOperateService;
+import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.infra.dto.IssueLinkDTO;
+import io.choerodon.agile.infra.dto.LinkIssueStatusLinkageDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.mapper.IssueLinkMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.IssueTypeMapper;
+import io.choerodon.agile.infra.mapper.LinkIssueStatusLinkageMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author dinghuang123@gmail.com
@@ -66,6 +67,9 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     @Autowired
     private IssueOperateService issueOperateService;
 
+    @Autowired
+    private RemoteIamOperator remoteIamOperator;
+
     @Override
     public IssueLinkResponseVO createIssueLinkList(List<IssueLinkCreateVO> issueLinkCreateVOList, Long issueId, Long projectId) {
         List<IssueLinkDTO> issueLinkDTOList = issueLinkAssembler.toTargetList(issueLinkCreateVOList, IssueLinkDTO.class);
@@ -95,8 +99,19 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
     @Override
     public List<IssueLinkVO> listIssueLinkByIssueId(Long issueId, Long projectId, Boolean noIssueTest) {
-        return issueLinkAssembler.issueLinkDTOToVO(projectId,
+        List<IssueLinkVO> issueLinkVOS = issueLinkAssembler.issueLinkDTOToVO(projectId,
                 issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), noIssueTest));
+
+        Set<Long> projectIds = issueLinkVOS.stream().map(IssueLinkVO::getLinkedIssueProjectId).collect(Collectors.toSet());
+        projectIds.remove(projectId);
+        Map<Long, ProjectVO> projectVOMap = remoteIamOperator.queryProjectByIds(projectIds).stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+
+        issueLinkVOS.forEach(issueLinkVO -> {
+            if (projectVOMap.get(issueLinkVO.getLinkedIssueProjectId()) != null) {
+                issueLinkVO.setLinkedProjectVO(projectVOMap.get(issueLinkVO.getLinkedIssueProjectId()));
+            }
+        });
+        return issueLinkVOS;
     }
 
     @Override
@@ -111,7 +126,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         }
         IssueLinkDTO query = new IssueLinkDTO();
         query.setIssueId(issueLinkDTO.getIssueId());
-        return modelMapper.map(issueLinkMapper.select(query), new TypeToken<List<IssueLinkDTO>>(){}.getType());
+        return modelMapper.map(issueLinkMapper.select(query), new TypeToken<List<IssueLinkDTO>>() {
+        }.getType());
     }
 
     @Override
@@ -129,7 +145,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     public List<IssueLinkFixVO> listIssueLinkByIssuedIds(Long projectId) {
         List<IssueLinkDTO> issueLinkDTOList = issueLinkMapper.listIssueLinkByIssueIds(projectId);
         if (issueLinkDTOList != null && !issueLinkDTOList.isEmpty()) {
-            return modelMapper.map(issueLinkDTOList, new TypeToken<List<IssueLinkFixVO>>() {}.getType());
+            return modelMapper.map(issueLinkDTOList, new TypeToken<List<IssueLinkFixVO>>() {
+            }.getType());
         } else {
             return new ArrayList<>();
         }
@@ -142,7 +159,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     }
 
     @Override
-    public Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
+    public Page<IssueListFieldKVVO> listUnLinkIssue(Long issueId, Long projectId, Long targetProjectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
         if (searchVO == null) {
             searchVO = new SearchVO();
         }
@@ -155,6 +172,14 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         if (searchVO.getAdvancedSearchArgs() == null) {
             searchVO.setAdvancedSearchArgs(new HashMap<>(1));
         }
+
+        if (targetProjectId != null) {
+            if (Boolean.FALSE.equals(remoteIamOperator.memberOfOrganization(targetProjectId))) {
+                throw new CommonException("error.user.permission");
+            }
+            projectId = targetProjectId;
+        }
+
         Set<Long> issueIds = new HashSet<>();
         issueIds.add(issueId);
         List<IssueLinkDTO> issueLinks = issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(Arrays.asList(issueId)), new HashSet<>(Arrays.asList(projectId)), false);
@@ -169,7 +194,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         List<Long> issueTypeIds = searchVO.getAdvancedSearchArgs().get(ISSUE_TYPE_ID) == null ? new ArrayList<>() : (List<Long>) searchVO.getAdvancedSearchArgs().get(ISSUE_TYPE_ID);
         if (CollectionUtils.isEmpty(issueTypeIds)) {
             IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-            issueTypeSearchVO.setTypeCodes(Stream.of("story", "task", "bug").collect(Collectors.toList()));
+            issueTypeSearchVO.setTypeCodes(Stream.of("story", "task", "bug", "stage", "milestone", "activity").collect(Collectors.toList()));
             List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
             issueTypeIds = issueTypes.stream().map(IssueTypeVO::getId).collect(Collectors.toList());
             searchVO.getAdvancedSearchArgs().put(ISSUE_TYPE_ID, issueTypeIds);
@@ -224,12 +249,12 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         return illegalLinkIssueIds;
     }
 
-    private Long  handlerIssueLinkChangeVOS(IssueDTO issueDTO, IssueDTO linkIssue, List<LinkIssueStatusLinkageDTO> linkages, List<IssueLinkChangeVO> list){
+    private Long handlerIssueLinkChangeVOS(IssueDTO issueDTO, IssueDTO linkIssue, List<LinkIssueStatusLinkageDTO> linkages, List<IssueLinkChangeVO> list) {
         Long statusId = null;
         for (LinkIssueStatusLinkageDTO linkageDTO : linkages) {
             Boolean issueStatusEqual = Objects.equals(issueDTO.getStatusId(), linkIssue.getStatusId());
             Boolean issueTypeEqual = Objects.equals(linkageDTO.getLinkIssueTypeId(), linkIssue.getIssueTypeId());
-            if (issueStatusEqual && issueTypeEqual ) {
+            if (issueStatusEqual && issueTypeEqual) {
                 IssueLinkChangeVO issueLinkChangeVO = new IssueLinkChangeVO();
                 issueLinkChangeVO.setIssueId(issueDTO.getIssueId());
                 issueLinkChangeVO.setStatusId(linkageDTO.getStatusId());

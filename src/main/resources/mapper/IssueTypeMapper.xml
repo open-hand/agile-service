@@ -128,41 +128,42 @@
         select
         t3.*
         from (
-            select
-            t1.id,
-            t1.organization_id,
-            t1.object_version_number,
-            t1.created_by,
-            t1.creation_date,
-            t1.last_updated_by,
-            t1.last_update_date,
-            t1.type_code,
-            t1.project_id,
-            t1.referenced,
-            t1.source,
-            t1.reference_id,
-            t1.is_initialize as initialize,
-            ifnull(t2.enabled, 1) as enabled,
-            ifnull(t2.name, t1.name) as name,
-            ifnull(t2.description, t1.description) as description,
-            ifnull(t2.icon, t1.icon) as icon,
-            ifnull(t2.colour, t1.colour) as colour,
-            t2.rank as rank
-            from fd_issue_type t1
-            left join fd_issue_type_extend t2
-            on t1.id = t2.issue_type_id and t2.project_id = #{projectId}
-            where t1.organization_id = #{organizationId}
-            <choose>
-                <when test="projectId == null or projectId == 0">
-                    and t1.project_id = 0
-                </when>
-                <otherwise>
-                    and t1.id in (
-                    select t2.id
-                    from fd_issue_type t2
-                    where t2.organization_id = #{organizationId}
-                    and t2.project_id = #{projectId}
-                    union
+        select
+        t1.id,
+        t1.organization_id,
+        t1.object_version_number,
+        t1.created_by,
+        t1.creation_date,
+        t1.last_updated_by,
+        t1.last_update_date,
+        t1.type_code,
+        t1.project_id,
+        t1.referenced,
+        t1.source,
+        t1.reference_id,
+        t1.is_initialize as initialize,
+        ifnull(t2.enabled, 1) as enabled,
+        ifnull(t2.name, t1.name) as name,
+        ifnull(t2.description, t1.description) as description,
+        ifnull(t2.icon, t1.icon) as icon,
+        ifnull(t2.colour, t1.colour) as colour,
+        t2.rank as rank,
+        t2.project_id as issue_type_extend_project_id
+        from fd_issue_type t1
+        left join fd_issue_type_extend t2
+        on t1.id = t2.issue_type_id and t2.project_id = #{projectId}
+        where t1.organization_id = #{organizationId}
+        <choose>
+            <when test="projectId == null or projectId == 0">
+                and t1.project_id = 0
+            </when>
+            <otherwise>
+                and t1.id in (
+                select t2.id
+                from fd_issue_type t2
+                where t2.organization_id = #{organizationId}
+                and t2.project_id = #{projectId}
+                union
                     select t3.id
                     from fd_issue_type t3
                     where t3.organization_id = #{organizationId}
@@ -470,11 +471,11 @@
             </if>
             <if test="issueTypeSchemeIds != null and issueTypeSchemeIds.size() != 0">
                 AND EXISTS (
-					SELECT 1 FROM fd_issue_type_scheme_config tsc WHERE tsc.issue_type_id = temp.id AND tsc.scheme_id IN
-					<foreach collection="issueTypeSchemeIds" item="issueTypeSchemeIds" open="(" close=")" separator=",">
-                        #{issueTypeSchemeIds}
-                    </foreach>
-				)
+                SELECT 1 FROM fd_issue_type_scheme_config tsc WHERE tsc.issue_type_id = temp.id AND tsc.scheme_id IN
+                <foreach collection="issueTypeSchemeIds" item="issueTypeSchemeIds" open="(" close=")" separator=",">
+                    #{issueTypeSchemeIds}
+                </foreach>
+                )
             </if>
         </where>
         ORDER BY temp.rank DESC, temp.id DESC

@@ -1,7 +1,24 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.IssueLinkService;
+import io.choerodon.agile.app.service.IssueService;
+import io.choerodon.agile.app.service.LinkIssueStatusLinkageService;
+import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.infra.dto.IssueLinkTypeDTO;
 import io.choerodon.agile.infra.dto.LinkIssueStatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
@@ -14,19 +31,6 @@ import io.choerodon.agile.infra.mapper.LinkIssueStatusLinkageMapper;
 import io.choerodon.agile.infra.mapper.StatusMachineTransformMapper;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -109,11 +113,11 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         return handlerLinkIssueStatusLinkageVO(projectId, issueTypeId, linkageDTOS);
     }
 
-    private List<LinkIssueStatusLinkageVO> handlerLinkIssueStatusLinkageVO(Long projectId, Long issueTypeId,List<LinkIssueStatusLinkageDTO> linkageDTOS) {
+    private List<LinkIssueStatusLinkageVO> handlerLinkIssueStatusLinkageVO(Long projectId, Long issueTypeId, List<LinkIssueStatusLinkageDTO> linkageDTOS) {
         // 获取项目的状态
         String applyType = projectConfigService.getApplyType(projectId, issueTypeId);
 
-        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, applyType);
+        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, null, applyType);
         Map<Long, StatusVO> statusMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(statusVOS)) {
             statusMap.putAll(statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity())));
@@ -157,7 +161,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         if (CollectionUtils.isEmpty(linkageDTOS)) {
             return new HashMap<>();
         }
-        List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS = handlerLinkIssueStatusLinkageVO(projectId, issueTypeId,linkageDTOS);
+        List<LinkIssueStatusLinkageVO> linkIssueStatusLinkageVOS = handlerLinkIssueStatusLinkageVO(projectId, issueTypeId, linkageDTOS);
         return linkIssueStatusLinkageVOS.stream().collect(Collectors.groupingBy(LinkIssueStatusLinkageVO::getStatusId));
     }
 
@@ -182,7 +186,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         if (CollectionUtils.isEmpty(linkageDTOS)) {
             return;
         }
-        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, applyType);
+        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, null, applyType);
         List<Long> allStatusId = new ArrayList<>();
         if (!CollectionUtils.isEmpty(statusVOS)) {
             allStatusId.addAll(statusVOS.stream().map(StatusVO::getId).collect(Collectors.toList()));
@@ -197,7 +201,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
             if (!ObjectUtils.isEmpty(statusId) && allStatusId.contains(statusId) && !ObjectUtils.isEmpty(linkVO.getLinkedIssueId())) {
                 Map<Long, Long> issueMap = issueChangeMap.getOrDefault(issueTypeId, new HashMap<>());
                 Long linkIssue = Objects.equals(issueId, linkVO.getLinkedIssueId()) ? linkVO.getIssueId() : linkVO.getLinkedIssueId();
-                issueMap.put(linkIssue , statusId);
+                issueMap.put(linkIssue, statusId);
                 issueChangeMap.put(issueTypeId, issueMap);
                 issueIds.add(linkIssue);
             }
@@ -237,10 +241,10 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         List<StatusVO> statusVOS = modelMapper.map(statusAndTransformVOS, new TypeToken<List<StatusVO>>() {
         }.getType());
         List<Long> filterStatusIds = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(dtos) ) {
+        if (!CollectionUtils.isEmpty(dtos)) {
             filterStatusIds.addAll(dtos.stream().map(LinkIssueStatusLinkageDTO::getLinkIssueStatusId).collect(Collectors.toList()));
         }
-        if(!CollectionUtils.isEmpty(filterStatusIds)){
+        if (!CollectionUtils.isEmpty(filterStatusIds)) {
             statusVOS = statusVOS.stream().filter(v -> !filterStatusIds.contains(v.getId())).collect(Collectors.toList());
         }
         return statusVOS;
@@ -255,7 +259,7 @@ public class LinkIssueStatusLinkageServiceImpl implements LinkIssueStatusLinkage
         if (CollectionUtils.isEmpty(linkageDTOS)) {
             return new HashMap<>();
         }
-        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE);
+        List<StatusVO> statusVOS = projectConfigService.queryStatusByProjectId(projectId, null, SchemeApplyType.AGILE);
         Map<Long, StatusVO> statusMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(statusVOS)) {
             statusMap.putAll(statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, Function.identity())));
