@@ -160,7 +160,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     @Override
     public IssueVO createIssueWithoutRuleNotice(IssueCreateVO issueCreateVO, String applyType) {
         Long projectId = issueCreateVO.getProjectId();
-        //处理issue的属性数据，将issue插入或者跟新数据库
+        //处理issue的属性数据，将issue插入或者更新数据库
         Long issueId = handlerIssue(issueCreateVO, applyType);
         IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
         //创建问题执行工作流自定义流转
