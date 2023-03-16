@@ -54,7 +54,7 @@ public enum SystemBaseFieldSql implements FieldSql {
     EPIC("epic",
             "LEFT JOIN agile_issue aie ON aie.issue_id = ai.epic_id AND aie.type_code = 'issue_epic'",
             "aie.epic_name, aie.issue_id",
-            "IFNULL(aie.epic_name, '未分配')", "aie.issue_id", DEFAULT),
+            "IFNULL(aie.epic_name, '未分配')", "IFNULL(aie.issue_id, 0)", DEFAULT),
     //所属冲刺
     SPRINT("sprint",
             "LEFT JOIN agile_issue_sprint_rel aisr ON ai.issue_id = aisr.issue_id\n" +
