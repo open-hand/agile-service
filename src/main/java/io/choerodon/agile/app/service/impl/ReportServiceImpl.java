@@ -1677,8 +1677,8 @@ public class ReportServiceImpl implements ReportService {
         String filterSql;
         List<Long> assigneeFilterIds = null;
         StringBuilder selectSql = new StringBuilder();
-        Set<String> groupSql = new HashSet<>();
-        Set<String> linkSql = new HashSet<>();
+        LinkedHashSet<String> groupSql = new LinkedHashSet<>();
+        LinkedHashSet<String> linkSql = new LinkedHashSet<>();
         FieldSql analysisFieldSql = null;
         FieldSql comparedFieldSql = null;
 
@@ -1813,8 +1813,8 @@ public class ReportServiceImpl implements ReportService {
             Boolean predefined,
             String type,
             StringBuilder selectSql,
-            Set<String> groupSqlSet,
-            Set<String>  linkSqlSet,
+            LinkedHashSet<String> groupSqlSet,
+            LinkedHashSet<String>  linkSqlSet,
             Long organizationId,
             Long projectId) {
         FieldSql fieldSql;
