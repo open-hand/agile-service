@@ -31,25 +31,25 @@ public enum SystemBaseFieldSql implements FieldSql {
             "LEFT JOIN agile_component_issue_rel acir ON acir.issue_id = ai.issue_id\n" +
                     "LEFT JOIN agile_issue_component aic ON aic.component_id = acir.component_id",
             "aic.`name`, aic.component_id",
-            "IFNULL(aic.`name`, '无' )", "aic.component_id", DEFAULT),
+            "IFNULL(aic.`name`, '无' )", "IFNULL(aic.component_id, 0)", DEFAULT),
     //标签
     LABEL("label",
             "LEFT JOIN agile_label_issue_rel alir ON alir.issue_id = ai.issue_id\n" +
                     "LEFT JOIN agile_issue_label ail ON ail.label_id = alir.label_id",
             "ail.label_name, ail.label_id",
-            "IFNULL(ail.label_name, '无')", "ail.label_id", DEFAULT),
+            "IFNULL(ail.label_name, '无')", "IFNULL(ail.label_id, 0)", DEFAULT),
     //影响版本
     INFLUENCE_VERSION("influenceVersion",
             "LEFT JOIN agile_version_issue_rel lai ON lai.issue_id = ai.issue_id AND lai.relation_type = 'influence'" +
                     "LEFT JOIN agile_product_version api ON api.version_id = lai.version_id",
             "api.version_id, api.`name`",
-            "IFNULL(api.`name`,'无')", "api.version_id", DEFAULT),
+            "IFNULL(api.`name`,'无')", "IFNULL(api.version_id, 0)", DEFAULT),
     //修复版本
     FIX_VERSION("fixVersion",
             "LEFT JOIN agile_version_issue_rel laf ON laf.issue_id = ai.issue_id AND laf.relation_type = 'fix'" +
                     "LEFT JOIN agile_product_version apf ON apf.version_id = laf.version_id",
             "apf.version_id, apf.`name`",
-            "IFNULL(apf.`name`,'无')", "apf.version_id", DEFAULT),
+            "IFNULL(apf.`name`,'无')", "IFNULL(apf.version_id, 0)", DEFAULT),
     //所属史诗
     EPIC("epic",
             "LEFT JOIN agile_issue aie ON aie.issue_id = ai.epic_id AND aie.type_code = 'issue_epic'",
@@ -60,7 +60,7 @@ public enum SystemBaseFieldSql implements FieldSql {
             "LEFT JOIN agile_issue_sprint_rel aisr ON ai.issue_id = aisr.issue_id\n" +
                     "LEFT JOIN agile_sprint asr ON asr.sprint_id = aisr.sprint_id",
             "asr.sprint_name, asr.sprint_id",
-            "IFNULL(asr.sprint_name, '未分配')", "asr.sprint_id", DEFAULT),
+            "IFNULL(asr.sprint_name, '未分配')", "IFNULL(asr.sprint_id, 0)", DEFAULT),
     //报告人
     REPORTER("reporter", "", "ai.reporter_id",
             "null", "IFNULL(ai.reporter_id, 0)", USER),
