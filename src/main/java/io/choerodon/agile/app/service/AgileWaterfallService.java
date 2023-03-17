@@ -121,4 +121,13 @@ public interface AgileWaterfallService {
                                            Long projectId,
                                            Long issueTypeId,
                                            Long statusId);
+
+    /**
+     * 判断瀑布项目的所有后代是否全部已完成
+     *
+     * @param issueDTO
+     * @param projectId
+     * @return
+     */
+    boolean validateAllSubIssueUnCompleted(IssueDTO issueDTO, Long projectId);
 }
