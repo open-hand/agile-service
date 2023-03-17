@@ -72,6 +72,10 @@
         </dependency>
         <dependency>
             <groupId>org.hzero.starter</groupId>
+            <artifactId>hzero-starter-lock</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-developer-route</artifactId>
             <version>1.10.0.RELEASE</version>
             <optional>true</optional>
