@@ -30,11 +30,13 @@ import io.choerodon.agile.infra.utils.UserDetailsUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
+import org.hzero.lock.annotation.Lock;
+import org.hzero.lock.enums.LockType;
+
 /**
  * @author zhaotianxin 2021-05-07 14:20
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ListLayoutServiceImpl implements ListLayoutService {
     @Autowired
     private ListLayoutMapper listLayoutMapper;
@@ -48,6 +50,14 @@ public class ListLayoutServiceImpl implements ListLayoutService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    @Lock(
+            name = "'ListLayout-save-lock.' + #organizationId + '-' + #projectId + '-' + T(io.choerodon.core.oauth.DetailsHelper).getUserDetails().getUserId() + '-' + #listLayoutVO.applyType",
+            nameIsSpel = true,
+            lockType = LockType.WRITE,
+            waitTime = 30L,
+            leaseTime = -1L
+    )
     public ListLayoutVO save(Long organizationId, Long projectId, ListLayoutVO listLayoutVO) {
         final String applyType = listLayoutVO.getApplyType();
         if (StringUtils.isBlank(applyType)) {
