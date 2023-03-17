@@ -764,9 +764,12 @@ public class FieldCascadeRuleServiceImpl implements FieldCascadeRuleService {
         }
         List<FieldCascadeRuleOptionDTO> insertOptionList = new ArrayList<>();
         List<FieldCascadeRuleOptionDTO> updateOptionList = new ArrayList<>();
-        Map<Long, FieldCascadeRuleOptionDTO> oldOptionIdMap = getRelOptionByRuleId(fieldCascadeRuleId, projectId)
-                .stream()
-                .collect(Collectors.toMap(FieldCascadeRuleOptionDTO::getCascadeOptionId, Function.identity()));
+        List<FieldCascadeRuleOptionDTO> fieldCascadeRuleOptionList = getRelOptionByRuleId(fieldCascadeRuleId, projectId);
+        Map<Long, FieldCascadeRuleOptionDTO> oldOptionIdMap = new HashMap<>();
+        for (FieldCascadeRuleOptionDTO fieldCascadeRuleOption : fieldCascadeRuleOptionList) {
+            Long cascadeOptionId = fieldCascadeRuleOption.getCascadeOptionId();
+            oldOptionIdMap.put(cascadeOptionId, fieldCascadeRuleOption);
+        }
         FieldCascadeRuleDTO fieldCascadeRuleDTO = fieldCascadeRuleMapper.selectByPrimaryKey(fieldCascadeRuleId);
         ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldMapper.selectByPrimaryKey(fieldCascadeRuleDTO.getCascadeFieldId());
         fieldOptionList.forEach(fieldCascadeRuleOption -> {
