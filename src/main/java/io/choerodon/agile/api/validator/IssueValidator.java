@@ -1,9 +1,8 @@
 package io.choerodon.agile.api.validator;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
 
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -434,8 +433,10 @@ public class IssueValidator {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
         }
+        final Long projectId = issueCreateVO.getProjectId();
+        final Long organizationId = ConvertUtil.getOrganizationId(projectId);
         if (SchemeApplyType.AGILE.equals(applyType) && issueCreateVO.getEpicName() != null
-                && issueService.checkEpicName(issueCreateVO.getProjectId(), issueCreateVO.getEpicName(), null)) {
+                && issueService.checkEpicName(projectId, issueCreateVO.getEpicName(), null)) {
             throw new CommonException("error.epicName.exist");
         }
         if (issueCreateVO.getRankVO() != null) {
@@ -453,6 +454,7 @@ public class IssueValidator {
                 throw new CommonException("error.projectId.isNull");
             }
         }
+        this.checkIssueTypeExists(organizationId, projectId, Collections.singletonList(issueCreateVO.getIssueTypeId()), true);
     }
 
     public void checkPredefinedFields(List<String> predefinedFieldNames) {
@@ -480,6 +482,29 @@ public class IssueValidator {
             }
          }
     }
+
+    /**
+     * 检查IssueType是否存在, 不存在就报错
+     * @param organizationId    组织ID
+     * @param projectId         项目ID
+     * @param issueTypeIds      issueTypeId集合
+     * @param checkIsEnabled    是否校验必须启用, 传空不校验
+     * @return                  如果校验通过则返回这些值
+     */
+    @NotEmpty
+    public List<IssueTypeVO> checkIssueTypeExists(Long organizationId, Long projectId, Collection<Long> issueTypeIds, @Nullable Boolean checkIsEnabled) {
+        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
+        issueTypeSearchVO.setIssueTypeIds(new ArrayList<>(issueTypeIds));
+        if(Boolean.TRUE.equals(checkIsEnabled)) {
+            issueTypeSearchVO.setEnabled(true);
+        }
+        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
+        if (issueTypes.isEmpty()) {
+            throw new CommonException("error.issue.type.not.existed");
+        }
+        return issueTypes;
+    }
+
 
     private Long decrypt(String id) {
         return EncryptionUtils.decrypt(id, EncryptionUtils.BLANK_KEY);

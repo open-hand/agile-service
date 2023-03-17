@@ -393,13 +393,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
 
     @Override
     public void createFieldValuesWithQuickCreate(Long organizationId, Long projectId, Long instanceId, PageFieldViewParamVO paramDTO) {
-        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-        issueTypeSearchVO.setIssueTypeIds(Arrays.asList(paramDTO.getIssueTypeId()));
-        issueTypeSearchVO.setEnabled(true);
-        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
-        if (issueTypes.isEmpty()) {
-            throw new CommonException("error.issue.type.not.existed");
-        }
+        List<IssueTypeVO> issueTypes = this.issueValidator.checkIssueTypeExists(organizationId, projectId, Collections.singletonList(paramDTO.getIssueTypeId()), true);
         IssueTypeVO issueType = issueTypes.get(0);
         String typeCode = issueType.getTypeCode();
         Long issueTypeId = issueType.getId();
