@@ -1,9 +1,10 @@
 package io.choerodon.agile.infra.utils;
 
 import static io.choerodon.agile.infra.enums.search.SearchConstant.SqlTemplate.*;
-import static io.choerodon.agile.infra.enums.search.SearchConstant.SqlTemplate.SELF_TABLE_ID_IS_NOT_NULL;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -218,7 +219,7 @@ public class SqlUtil {
             case LIKE:
                 String value;
                 if (opt.equals(SearchConstant.Operation.LIKE)) {
-                    value = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
+                    value = SearchConstant.SqlTemplate.toLikeValueExp(dataPair.getFirst());
                 } else {
                     value = dataPair.getFirst();
                 }
