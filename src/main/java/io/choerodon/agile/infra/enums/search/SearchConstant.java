@@ -304,7 +304,9 @@ public class SearchConstant {
             }
             // Mysql里, like会额外再将\\转义为\, 为了表达式正确, 需要再将\转义为\\
             // 下面的奇葩代码是Java中将\替换为\\的实现, 非请勿动
-            return "'%" + value.substring(1, value.length() - 1).replaceAll("\\\\", "\\\\\\\\") + "%'";
+            final String res = "'%" + value.substring(1, value.length() - 1).replaceAll("\\\\", "\\\\\\\\") + "%'";
+            // utf8mb4_unicode_ci还有特殊规范，每一坨反斜杠群前还要再拼2个反斜杠, 哎
+            return res.replaceAll("(\\\\+)", "\\\\\\\\$1");
         }
 
         /**
