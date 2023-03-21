@@ -1,8 +1,8 @@
 package io.choerodon.agile.app.service.v2.impl;
 
+import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
 import static io.choerodon.agile.infra.enums.search.SearchConstant.SqlTemplate.*;
 import static org.hzero.core.base.BaseConstants.ErrorCode.DATA_INVALID;
-import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -20,12 +20,12 @@ import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.validator.AdvancedParamValidator;
 import io.choerodon.agile.api.vo.FieldTableVO;
+import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Field;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
-import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
-import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
+import io.choerodon.agile.app.service.v2.PredefinedFieldSqlGenerator;
 import io.choerodon.agile.domain.entity.SqlTemplateData;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldTypeCnName;
@@ -88,7 +88,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 //括号，a && (b || c)，读取 b和c然后加括号
                 appendBracket(instanceType, projectIds, predefinedFieldMap, sqlBuilder, condition);
             } else {
-                FieldTypeCnName fieldTypeCnName = FieldTypeCnName.ofCode(fieldType).get();
+                FieldTypeCnName fieldTypeCnName = FieldTypeCnName.ofCode(fieldType).orElseThrow(() -> new CommonException(DATA_INVALID));
                 switch (fieldTypeCnName) {
                     case MEMBER:
                     case MULTI_MEMBER:
@@ -192,6 +192,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                         .setFieldId(fieldId.toString())
                         .setSchemeCode(schemeCode)
                         .setColumnName(columnName);
+        String value = dataPair.getFirst();
         switch (Operation.valueOf(operation)) {
             case BETWEEN:
                 data.setOpt(Operation.IN.getOpt()).setFirst(dataPair.getFirst()).setSecond(dataPair.getSecond());
@@ -202,12 +203,11 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                 sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_IS_NULL_OR_NOT_NULL));
                 break;
             case EQUAL:
-                String value = dataPair.getFirst();
                 data.setOpt(Operation.IN.getOpt()).setColumnOpt(Operation.EQUAL.getOpt()).setColumnValue(value);
                 sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
             case LIKE:
-                String valueStr = String.format(LIKE_VALUE, "%", dataPair.getFirst(), "%");
+                String valueStr = SearchConstant.SqlTemplate.toLikeValueExp(value);
                 data.setOpt(Operation.IN.getOpt()).setColumnOpt(Operation.LIKE.getOpt()).setColumnValue(valueStr);
                 sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), CUSTOM_FIELD_EQUAL_OR_LIKE));
                 break;
@@ -235,7 +235,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
     }
 
     private Pair<String, String> getPairValues(Condition condition,
-                                               Class clazz,
+                                               Class<?> clazz,
                                                Field field) {
         Pair<Value, Value> pair = condition.getBetweenValues();
         String operation = condition.getOperation();
@@ -260,7 +260,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return Pair.of(first, second);
     }
 
-    private String getValueByClazz(Class clazz, Value value, Field field) {
+    private String getValueByClazz(Class<?> clazz, Value value, Field field) {
         String valueStr = null;
         if (clazz == Date.class) {
             String patter = queryPatterByFieldCode(field);
@@ -276,7 +276,9 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         } else if (clazz == String.class) {
             valueStr = value.getValueStr();
             Assert.notNull(valueStr, DATA_INVALID);
-            valueStr = SqlUtil.appendSingleQuot(valueStr);
+            // Mysql里, sql语句中的\是转义符, 需要替换为\\
+            // 下面的奇葩代码是Java中将\替换为\\的实现, 非请勿动
+            valueStr = SqlUtil.appendSingleQuot(valueStr.replaceAll("\\\\", "\\\\\\\\"));
         }
         return valueStr;
     }
@@ -285,12 +287,12 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                       Condition condition,
                                       Set<Long> projectIds,
                                       InstanceType instanceType,
-                                      Class clazz) {
+                                      Class<?> clazz) {
         StringBuilder sqlBuilder = new StringBuilder();
         Field field = condition.getField();
         String operation = condition.getOperation();
         List<String> options = new ArrayList<>();
-        List<? extends Object> values = null;
+        List<?> values = null;
         Pair<String, String> dataPair = null;
         //判断与类型相关的操作符
         if (clazz == Date.class || clazz == BigDecimal.class) {
@@ -332,7 +334,7 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
                                                   InstanceType instanceType,
                                                   String operation,
                                                   Set<Long> projectIds,
-                                                  List<? extends Object> values) {
+                                                  List<?> values) {
         String alias = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.ALIAS_ISSUE : SqlUtil.ALIAS_BACKLOG;
         StringBuilder sqlBuilder = new StringBuilder();
         String primaryKey = InstanceType.ISSUE.equals(instanceType) ? SqlUtil.PRIMARY_KEY_ISSUE : SqlUtil.PRIMARY_KEY_BACKLOG;
@@ -365,8 +367,8 @@ public class AdvancedParamParserServiceImpl implements AdvancedParamParserServic
         return sqlBuilder.toString();
     }
 
-    private List<? extends Object> getOptionValues(Condition condition) {
-        List<? extends Object> values;
+    private List<?> getOptionValues(Condition condition) {
+        List<?> values;
         Value value = condition.getValue();
         if (value == null) {
             return null;
