@@ -1,18 +1,17 @@
 package io.choerodon.agile.api.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.business.ArtVO;
 import io.choerodon.agile.infra.feign.vo.HealthStateVO;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
-
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -69,6 +68,17 @@ public class ProjectVO {
     private HealthStateVO healthStateVO;
     @ApiModelProperty("项目群ART信息")
     private ArtVO artInfo;
+
+    @ApiModelProperty("允许其他项目关联此项目工作项/需求")
+    private Boolean allowLink;
+
+    public Boolean getAllowLink() {
+        return allowLink;
+    }
+
+    public void setAllowLink(Boolean allowLink) {
+        this.allowLink = allowLink;
+    }
 
     public String getColor() {
         return color;

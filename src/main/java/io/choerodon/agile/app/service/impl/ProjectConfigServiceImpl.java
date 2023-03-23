@@ -1,10 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
@@ -18,6 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -223,9 +223,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                                                                                             String applyType,
                                                                                             Boolean onlyEnabled) {
         if (targetProjectId != null) {
-            if (Boolean.FALSE.equals(remoteIamOperator.memberOfOrganization(targetProjectId))) {
-                throw new CommonException("error.user.permission");
-            }
+            remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }
         // 获取项目的 applyTypes
@@ -278,9 +276,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     @Override
     public List<StatusVO> queryStatusByProjectId(Long projectId, Long targetProjectId, String applyType) {
         if (targetProjectId != null) {
-            if (Boolean.FALSE.equals(remoteIamOperator.memberOfOrganization(targetProjectId))) {
-                throw new CommonException("error.user.permission");
-            }
+            remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }
         List<String> applyTypes = new ArrayList<>();
