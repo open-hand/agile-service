@@ -1,13 +1,14 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.util.List;
-
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
@@ -50,10 +51,8 @@ public class IssueLinkTypeServiceImpl implements IssueLinkTypeService {
 
     @Override
     public Page<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long targetProjectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, PageRequest pageRequest) {
-        if (targetProjectId != null) {
-            if (Boolean.FALSE.equals(remoteIamOperator.memberOfOrganization(targetProjectId))) {
-                throw new CommonException("error.user.permission");
-            }
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
+            remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }
         Long finalProjectId = projectId;

@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
@@ -292,8 +293,21 @@ public class SearchConstant {
 
         public static final String SELF_TABLE_EQUAL = " (#{column} #{opt} #{value}) ";
 
-
-        public static final String LIKE_VALUE = " CONCAT(CONCAT('%s' , %s) ,'%s') ";
+        /**
+         * 生成like的value语句
+         * @param value 必须为单引号包裹的文本, 否则会出现数据问题
+         * @return '%#{value}%'
+         */
+        public static String toLikeValueExp(String value) {
+            if(StringUtils.isEmpty(value)) {
+                return "%%";
+            }
+            // Mysql里, like会额外再将\\转义为\, 为了表达式正确, 需要再将\转义为\\
+            // 下面的奇葩代码是Java中将\替换为\\的实现, 非请勿动
+            final String res = "'%" + value.substring(1, value.length() - 1).replaceAll("\\\\", "\\\\\\\\") + "%'";
+            // utf8mb4_unicode_ci还有特殊规范，紧跟%后的一坨反斜杠群前还要再拼2个反斜杠, 哎
+            return res.replaceAll("(%\\\\+)", "$1\\\\\\\\");
+        }
 
         /**
          * issue_id in (select issue_id from agile_component_issue_rel where component_id in (1,2,3) and additional condition )

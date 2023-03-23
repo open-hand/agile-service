@@ -1,10 +1,5 @@
 package io.choerodon.agile.infra.feign.operator;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
@@ -20,7 +20,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.IamFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * Copyright (c) 2022. Hand Enterprise Solution Company. All right reserved.
@@ -374,24 +374,28 @@ public class RemoteIamOperator {
     }
 
     /**
-     * 根据项目id查询用户在项目所属组织下是否有角色
+     * 查询关联的目标项目的权限
      *
-     * @param projectId
+     * @param currentProjectId
+     * @param targetProjectId
      * @return
      */
-    public Boolean memberOfOrganization(Long projectId) {
-        ProjectVO projectVO = queryProject(projectId);
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        String cacheKey = String.format(USER_OF_ORG_RESULT_REDIS_KEY, projectVO.getOrganizationId(), userId);
+    public void checkTargetProjectPermission(Long currentProjectId, Long targetProjectId, Boolean checkAllowLink) {
+        ProjectVO currentProjectVO = queryProject(currentProjectId);
+        // 项目属于当前组织
+        ProjectVO targetProjectVO = queryProject(targetProjectId);
+        if (!Objects.equals(currentProjectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
+            throw new CommonException("error.link.targetProject.does.not.belong.to.current.organization");
+        }
 
-        String cacheResult = stringRedisTemplate.opsForValue().get(cacheKey);
-        if (cacheResult == null) {
-            Boolean result = ResponseUtils.getResponse(baseFeignClient.memberOfOrganization(projectVO.getOrganizationId(), userId), Boolean.class);
-            stringRedisTemplate.opsForValue().set(String.format(USER_OF_ORG_RESULT_REDIS_KEY, projectVO.getOrganizationId(), userId), result.toString(), 60, TimeUnit.SECONDS);
-            return result;
-        } else {
-            return Boolean.valueOf(cacheResult);
+        // 项目启用
+        if (Boolean.FALSE.equals(targetProjectVO.getEnabled())) {
+            throw new CommonException("error.link.targetProject.disable");
+        }
+
+        // 允许其他项目关联此项目工作项/需求
+        if (Boolean.TRUE.equals(checkAllowLink) && Boolean.FALSE.equals(targetProjectVO.getAllowLink())) {
+            throw new CommonException("error.link.targetProject.deny");
         }
     }
-
 }

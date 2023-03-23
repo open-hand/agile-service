@@ -1,10 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -13,6 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.api.vo.*;
@@ -173,10 +173,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             searchVO.setAdvancedSearchArgs(new HashMap<>(1));
         }
 
-        if (targetProjectId != null) {
-            if (Boolean.FALSE.equals(remoteIamOperator.memberOfOrganization(targetProjectId))) {
-                throw new CommonException("error.user.permission");
-            }
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
+            remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }
 
