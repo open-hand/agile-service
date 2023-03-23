@@ -173,7 +173,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             searchVO.setAdvancedSearchArgs(new HashMap<>(1));
         }
 
-        if (targetProjectId != null) {
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
             remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }

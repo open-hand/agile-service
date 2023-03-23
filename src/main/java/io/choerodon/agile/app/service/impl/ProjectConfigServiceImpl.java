@@ -222,7 +222,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                                                                                             Long targetProjectId,
                                                                                             String applyType,
                                                                                             Boolean onlyEnabled) {
-        if (targetProjectId != null) {
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
             remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }
@@ -275,7 +275,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<StatusVO> queryStatusByProjectId(Long projectId, Long targetProjectId, String applyType) {
-        if (targetProjectId != null) {
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
             remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }
