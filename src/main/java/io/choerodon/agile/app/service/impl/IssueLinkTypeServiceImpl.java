@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
@@ -50,7 +51,7 @@ public class IssueLinkTypeServiceImpl implements IssueLinkTypeService {
 
     @Override
     public Page<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long targetProjectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, PageRequest pageRequest) {
-        if (targetProjectId != null) {
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
             remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
             projectId = targetProjectId;
         }
