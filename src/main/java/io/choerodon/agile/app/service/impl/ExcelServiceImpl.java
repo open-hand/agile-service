@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,6 +65,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 import org.hzero.boot.file.FileClient;
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.message.MessageAccessor;
 import org.hzero.excel.config.ExcelConfig;
 import org.hzero.websocket.helper.SocketSendHelper;
 
@@ -291,34 +293,61 @@ public class ExcelServiceImpl implements ExcelService {
                          Long organizationId,
                          HttpServletResponse response,
                          ExcelTemplateVO excelTemplateVO) {
-        List<String> systemFields = excelTemplateVO.getSystemFields();
-        List<String> customFields = excelTemplateVO.getCustomFields();
-        if (ObjectUtils.isEmpty(systemFields)) {
-            throw new CommonException("error.excel.header.code.empty");
-        }
-        boolean withFeature = (agilePluginService != null && withFeature(projectId, organizationId));
-
-        validateSystemField(systemFields, withFeature);
-        systemFields = ExcelImportTemplate.IssueHeader.addFields(systemFields);
-        ExcelImportTemplate.Cursor cursor = new ExcelImportTemplate.Cursor();
-        List<PredefinedDTO> predefinedList =
-                processSystemFieldPredefinedList(projectId, systemFields, withFeature, cursor);
-        Map<String, String> customFieldCodeNameMap = new HashMap<>();
-        String issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
-        predefinedList.addAll(excelCommonService.processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap, issueTypeList));
-        List<String> headers = generateExcelHeaderTitle(systemFields, customFields, customFieldCodeNameMap);
-        Workbook wb = new XSSFWorkbook();
-        // copy guide sheet
-        excelCommonService.copyGuideSheetFromTemplate(wb, "/templates/IssueImportGuideTemplate.xlsx");
-        Sheet sheet = wb.createSheet(COMMON_SHEET_NAME);
-        CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
-        ExcelUtil.generateHeaders(sheet, style, headers);
         try {
+            List<String> systemFields = excelTemplateVO.getSystemFields();
+            List<String> customFields = excelTemplateVO.getCustomFields();
+            if (ObjectUtils.isEmpty(systemFields)) {
+                throw new CommonException("error.excel.header.code.empty");
+            }
+            boolean withFeature = (agilePluginService != null && withFeature(projectId, organizationId));
+
+            validateSystemField(systemFields, withFeature);
+            systemFields = ExcelImportTemplate.IssueHeader.addFields(systemFields);
+            ExcelImportTemplate.Cursor cursor = new ExcelImportTemplate.Cursor();
+            List<PredefinedDTO> predefinedList =
+                    processSystemFieldPredefinedList(projectId, systemFields, withFeature, cursor);
+            Map<String, String> customFieldCodeNameMap = new HashMap<>();
+            String issueTypeList = ProjectCategory.getProjectIssueTypeList(projectId);
+            predefinedList.addAll(excelCommonService.processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap, issueTypeList));
+            List<String> headers = generateExcelHeaderTitle(systemFields, customFields, customFieldCodeNameMap);
+            Workbook wb = new XSSFWorkbook();
+            // copy guide sheet
+            excelCommonService.copyGuideSheetFromTemplate(wb, "/templates/IssueImportGuideTemplate.xlsx");
+            Sheet sheet = wb.createSheet(COMMON_SHEET_NAME);
+            CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
+            ExcelUtil.generateHeaders(sheet, style, headers);
             //填充预定义值
             excelCommonService.fillInPredefinedValues(wb, sheet, predefinedList);
-            wb.write(response.getOutputStream());
+            final ServletOutputStream outputStream = response.getOutputStream();
+            wb.write(outputStream);
+            outputStream.flush();
         } catch (Exception e) {
-            LOGGER.info("exception: {0}", e);
+            LOGGER.error("导出下载模板异常", e);
+            Workbook errorWorkbook = new XSSFWorkbook();
+            final Sheet errorSheet = errorWorkbook.createSheet("error");
+            final Row errorSheetRow = errorSheet.createRow(0);
+            Font errorFont = errorWorkbook.createFont();
+            errorFont.setColor(IndexedColors.RED.getIndex());
+            final Cell errorCell = errorSheetRow.createCell(0);
+            final CellStyle errorStyle = errorWorkbook.createCellStyle();
+            errorStyle.setFont(errorFont);
+            errorCell.setCellStyle(errorStyle);
+
+            final String errorMessage;
+            if(e instanceof CommonException) {
+                CommonException ce = (CommonException) e;
+                errorMessage = MessageAccessor.getMessage(ce.getCode(), ce.getParameters()).desc();
+            } else {
+                errorMessage = MessageAccessor.getMessage(e.getMessage()).getDesc();
+            }
+            errorCell.setCellValue(errorMessage);
+            try {
+                final ServletOutputStream outputStream = response.getOutputStream();
+                errorWorkbook.write(outputStream);
+                outputStream.flush();
+            } catch (IOException ex) {
+                // ignore
+            }
         }
     }
 
@@ -343,7 +372,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private void checkAndThrowException(List<String> systemFields, String fieldCode) {
         if (!systemFields.contains(fieldCode)) {
-            throw new CommonException("error.required.system.code.not.existed." + fieldCode);
+            throw new CommonException("error.required.system.code.not.existed", fieldCode);
         }
     }
 
@@ -620,7 +649,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected boolean isCellEmpty(Cell cell) {
-        return cell == null || cell.toString().equals("") || cell.getCellTypeEnum() == CellType.BLANK;
+        return cell == null || cell.toString().equals("") || cell.getCellType() == CellType.BLANK;
     }
 
     @Async("issueImportExecutor")
@@ -797,7 +826,7 @@ public class ExcelServiceImpl implements ExcelService {
             sheetData.put(String.valueOf(rowNum), rowJson);
         }
         JSONObject cellJson = new JSONObject();
-        if (cell.getCellTypeEnum().equals(CellType.NUMERIC)
+        if (cell.getCellType() == CellType.NUMERIC
                 && DateUtil.isCellDateFormatted(cell)) {
             //日期格式单元格
             cellJson.put(ExcelSheetData.DATE_CELL, cell.getDateCellValue());
