@@ -550,7 +550,7 @@ public interface IssueService {
 
     List<IssueRequiredFields> listAllRequiredField(Long projectId, Long organizationId, Long issueId, Boolean subTask);
 
-    void copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId);
+    IssueDTO copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId);
 
     String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId);
 
