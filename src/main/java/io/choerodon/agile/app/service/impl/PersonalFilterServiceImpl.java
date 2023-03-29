@@ -60,6 +60,9 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
             PersonalFilterTypeCode.RISK_ISSUE,
             PersonalFilterTypeCode.FEATURE_ISSUE,
             PersonalFilterTypeCode.WATERFALL_ISSUE,
+            PersonalFilterTypeCode.ISSUE_ANALYSIS,
+            PersonalFilterTypeCode.BUG_ANALYSIS,
+            PersonalFilterTypeCode.BACKLOG_ANALYSIS,
     };
 
     @Autowired
