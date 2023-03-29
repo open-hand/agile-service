@@ -29,5 +29,17 @@ public class PersonalFilterTypeCode {
      * 瀑布个人筛选
      */
     public static final String WATERFALL_ISSUE = "waterfall_issue";
+    /**
+     * 问题分析
+     */
+    public static final String ISSUE_ANALYSIS = "issue_analysis";
+    /**
+     * 缺陷分析
+     */
+    public static final String BUG_ANALYSIS = "bug_analysis";
+    /**
+     * 需求分析
+     */
+    public static final String BACKLOG_ANALYSIS = "backlog_analysis";
 
 }
