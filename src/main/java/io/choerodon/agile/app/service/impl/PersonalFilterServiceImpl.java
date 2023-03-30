@@ -1,11 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +35,8 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public static final String V1 = "v1";
     public static final String V2 = "v2";
 
-    private static final String EMPTY_STRING = "";
-
     @Autowired
     private PersonalFilterMapper personalFilterMapper;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     public static final String UPDATE_ERROR = "error.personalFilter.update";
     public static final String DELETE_ERROR = "error.personalFilter.deleteById";
@@ -115,15 +107,15 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
                                   boolean isCreated) {
         if (V1.equals(version)) {
             personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterVO.getFilterJson(), false));
-            personalFilterDTO.setAdvancedFilterJson(EMPTY_STRING);
+            personalFilterDTO.setAdvancedFilterJson(StringUtils.EMPTY);
         } else if (V2.equals(version)) {
             SearchParamVO searchParamVO = personalFilterVO.getSearchParamVO();
-            String advancedFilterJson = isCreated ? EMPTY_STRING : null;
+            String advancedFilterJson = isCreated ? StringUtils.EMPTY : null;
             if (searchParamVO != null) {
                 advancedFilterJson = JsonUtils.toJson(searchParamVO);
             }
             personalFilterDTO.setAdvancedFilterJson(advancedFilterJson);
-            personalFilterDTO.setFilterJson(isCreated ? EMPTY_STRING : null);
+            personalFilterDTO.setFilterJson(isCreated ? StringUtils.EMPTY : null);
         } else {
             throw new CommonException("error.illegal.person.filter.version");
         }
@@ -144,17 +136,17 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
                                    Long filterId,
                                    PersonalFilterVO personalFilterVO,
                                    String version) {
-        PersonalFilterDTO dto = personalFilterMapper.selectByPrimaryKey(filterId);
-        Assert.notNull(dto, NOT_FOUND_ERROR);
-        Long userId = DetailsHelper.getUserDetails().getUserId();
+        PersonalFilterDTO personalFilter = personalFilterMapper.selectByPrimaryKey(filterId);
+        Assert.notNull(personalFilter, NOT_FOUND_ERROR);
+        Long userId = Optional.ofNullable(DetailsHelper.getUserDetails()).map(CustomUserDetails::getUserId).orElseThrow(() -> new CommonException(BaseConstants.ErrorCode.NOT_LOGIN));
         if (!Objects.isNull(personalFilterVO.getName())) {
-            checkUpdateName(organizationId, projectId, userId, filterId, personalFilterVO.getName(), dto.getFilterTypeCode());
+            checkUpdateName(organizationId, projectId, userId, filterId, personalFilterVO.getName(), personalFilter.getFilterTypeCode());
         }
         personalFilterVO.setFilterId(filterId);
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
         setJsonByVersion(personalFilterVO, version, personalFilterDTO, false);
         if (!ObjectUtils.isEmpty(personalFilterVO.getDefault()) && Boolean.TRUE.equals(personalFilterVO.getDefault())) {
-            personalFilterMapper.updateDefault(organizationId, projectId, userId, false, null, dto.getFilterTypeCode());
+            personalFilterMapper.updateDefault(organizationId, projectId, userId, false, null, personalFilter.getFilterTypeCode());
         }
         if (personalFilterMapper.updateByPrimaryKeySelective(personalFilterDTO) != 1) {
             throw new CommonException(UPDATE_ERROR);
