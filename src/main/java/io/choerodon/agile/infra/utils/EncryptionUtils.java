@@ -54,24 +54,21 @@ public class EncryptionUtils {
 
     private static ObjectMapper encryptMapper;
 
+    public static final String FIELD_ISSUE_TYPE_ID = "issueTypeId";
+
     public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","last_update_date","estimated_start_time", "estimated_end_time", "actual_start_time", "actual_end_time"};
 
     public static final String[] FILTER_FIELD =
             {
-                "issueTypeId", "statusId", "priorityId", "component",
+                FIELD_ISSUE_TYPE_ID, "statusId", "priorityId", "component",
                 "epic", "feature", "label", "sprint", "version",
                 "issueTypeList","epicList","piList","issueIds",
                 "statusList","assigneeId","reporterIds","programVersion",
                 "mainResponsibleIds","fixVersion","influenceVersion",
                 "creatorIds", "updatorIds", "statusIds","participantIds",
-                "userIds", "workGroupIds", "productIds",
-                    "categoryIds",
-                    "influenceIds",
-                    "probabilityIds",
-                    "proximityIds",
-                    "relatedPartyIds",
-                    "reporterList",
-                    "sprintList",
+                "userIds", "workGroupIds", "productIds", "categoryIds",
+                "influenceIds", "probabilityIds", "proximityIds", "relatedPartyIds",
+                "reporterList", "sprintList", "issueTypeAndProjectIdList",
             };
     public static final String[] FILTER_SINGLE_FIELD = {"userId"};
     public static final String[] IGNORE_VALUES = {"0","none"};
@@ -147,7 +144,7 @@ public class EncryptionUtils {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             List<Object> options = (List<Object>) entry.getValue();
             List<Object> filterOptions = new ArrayList<>();
-            if (!CollectionUtils.isEmpty(options)) {
+            if (CollectionUtils.isNotEmpty(options)) {
                 options.forEach(v -> filterEmptyValue(entry.getKey(), v, filterOptions));
             }
             map.put(entry.getKey(), filterOptions);
@@ -244,9 +241,9 @@ public class EncryptionUtils {
         if (!ArrayUtils.isEmpty(ignoreValue)) {
             ignoreValueList.addAll(Arrays.asList(ignoreValue));
         }
-        if (!CollectionUtils.isEmpty(crypts)) {
+        if (CollectionUtils.isNotEmpty(crypts)) {
             for (String crypt : crypts) {
-                if (!CollectionUtils.isEmpty(ignoreValueList) && ignoreValueList.contains(crypt)) {
+                if (CollectionUtils.isNotEmpty(ignoreValueList) && ignoreValueList.contains(crypt)) {
                     cryptsLong.add(Long.valueOf(crypt));
                 } else {
                     cryptsLong.add(decrypt(crypt, tableName));
@@ -430,7 +427,7 @@ public class EncryptionUtils {
         final List<Map<String, Object>> issueTypeAndProjectIdListTemp = adMapOptional.map(ad -> (List<Map<String, Object>>) (ad.get("issueTypeAndProjectIdList"))).orElse(null);
         if (CollectionUtils.isNotEmpty(issueTypeAndProjectIdListTemp)){
             for (Map<String, Object> issueTypeAndProjectIdVO : issueTypeAndProjectIdListTemp) {
-                final Object issueTypeId = issueTypeAndProjectIdVO.get("issueTypeId");
+                final Object issueTypeId = issueTypeAndProjectIdVO.get(FIELD_ISSUE_TYPE_ID);
                 if(issueTypeId != null) {
                     String issueTypeIdStr = String.valueOf(issueTypeId);
                     if(StringUtils.isNotBlank(issueTypeIdStr)) {
@@ -683,7 +680,7 @@ public class EncryptionUtils {
 
     public static List<String> encryptList(List<Long> parentIds) {
         List<String> list = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(parentIds)) {
+        if (CollectionUtils.isNotEmpty(parentIds)) {
             if (!EncryptContext.isEncrypt()) {
                 parentIds.forEach(v -> list.add(String.valueOf(v)));
             } else {
@@ -698,7 +695,7 @@ public class EncryptionUtils {
             return ids;
         }
         List<String> list = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(ids)) {
+        if (CollectionUtils.isNotEmpty(ids)) {
             ids.forEach(v -> list.add(encryptionService.encrypt(v, BLANK_KEY)));
         }
         return list;
@@ -752,16 +749,16 @@ public class EncryptionUtils {
             if (!ObjectUtils.isEmpty(jsonNode.get("advancedSearchArgs")) && !jsonNode.get("advancedSearchArgs").isNull()) {
                 Map<String, Object> adMapOptional = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("advancedSearchArgs")), new TypeReference<Map<String, Object>>() {
                 });
-                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(adMapOptional, encrypt))));
+                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerPersonFilterJsonOtherArgs(adMapOptional, encrypt))));
             } else {
-                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(new HashMap<>())));
+                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(Collections.emptyMap())));
             }
             if (!ObjectUtils.isEmpty(jsonNode.get("otherArgs")) && !jsonNode.get("otherArgs").isNull()) {
                 Map<String, Object> oAMap = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("otherArgs")),new TypeReference<Map<String,Object>>(){});
-                objectNode.set("otherArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(oAMap, encrypt))));
+                objectNode.set("otherArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerPersonFilterJsonOtherArgs(oAMap, encrypt))));
             }
             else {
-                objectNode.set("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap<>())));
+                objectNode.set("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(Collections.emptyMap())));
             }
             if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds")) && !jsonNode.get("quickFilterIds").isNull()){
                List<String> list =  objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("quickFilterIds")),new TypeReference<List<String>>() {});
@@ -785,40 +782,54 @@ public class EncryptionUtils {
         return null;
     }
 
-    private static Map<String, Object> handlerOtherArgs(Map<String, Object> map, boolean encrypt) {
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> handlerPersonFilterJsonOtherArgs(Map<String, Object> map, boolean encrypt) {
         List<String> list = Arrays.asList(FILTER_FIELD);
         List<String> singleList = Arrays.asList(FILTER_SINGLE_FIELD);
         Map<String, Object> map1 = new HashMap<>();
-        for (Map.Entry<String, Object> next : map.entrySet()) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
             Object object;
-            if (list.contains(next.getKey())) {
-                List<String> value = null;
-                try {
-                    value = objectMapper.readValue(objectMapper.writeValueAsString(next.getValue()), new TypeReference<List<String>>() {
-                    });
-                } catch (IOException e) {
-                    LOGGER.error("string to object error:");
-                    LOGGER.error(e.getMessage(), e);
-                }
-                if (!ObjectUtils.isEmpty(next.getValue()) && !CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encryptOrDecrypt(v, encrypt)).collect(Collectors.toList());
-
+            final String key = entry.getKey();
+            final Object valueStr = entry.getValue();
+            if (list.contains(key)) {
+                // issueTypeAndProjectIdList的结构和其他查询条件的结构不一样, 是[{issueTypeId: xxx, projectId: xxx}], 所以需要特殊处理
+                if("issueTypeAndProjectIdList".equals(key)) {
+                    List<Map<String, String>> valueList = (List<Map<String, String>>) valueStr;
+                    if (!ObjectUtils.isEmpty(valueStr) && CollectionUtils.isNotEmpty(valueList)) {
+                        for (Map<String, String> singleIssueTypeAndProjectIdQueryParam : valueList) {
+                            singleIssueTypeAndProjectIdQueryParam.put(FIELD_ISSUE_TYPE_ID, encryptOrDecrypt(singleIssueTypeAndProjectIdQueryParam.get(FIELD_ISSUE_TYPE_ID), encrypt));
+                        }
+                        object = valueList;
+                    } else {
+                        object = valueStr;
+                    }
                 } else {
-                    object = next.getValue();
+                    List<String> valueList = null;
+                    try {
+                        valueList = objectMapper.readValue(objectMapper.writeValueAsString(valueStr), new TypeReference<List<String>>() {});
+                    } catch (IOException e) {
+                        LOGGER.error("string to object error:");
+                        LOGGER.error(e.getMessage(), e);
+                    }
+                    if (!ObjectUtils.isEmpty(valueStr) && CollectionUtils.isNotEmpty(valueList)) {
+                        object = valueList.stream().map(value -> encryptOrDecrypt(value, encrypt)).collect(Collectors.toList());
+                    } else {
+                        object = valueStr;
+                    }
                 }
-            } else if (singleList.contains(next.getKey()) && next.getValue() != null) {
-                object = encryptOrDecrypt(next.getValue().toString(), encrypt);
-            } else if ("customField".equals(next.getKey())) {
-                object = personalFilterHandlerCustomField(next.getValue(), encrypt);
+            } else if (singleList.contains(key) && valueStr != null) {
+                object = encryptOrDecrypt(valueStr.toString(), encrypt);
+            } else if ("customField".equals(key)) {
+                object = personalFilterHandlerCustomField(valueStr, encrypt);
             } else {
-                object = next.getValue();
+                object = valueStr;
             }
-            map1.put(next.getKey(), object);
+            map1.put(key, object);
         }
         return map1;
     }
 
-    private static String encryptOrDecrypt(String value, Boolean encrypt){
+    private static String encryptOrDecrypt(String value, boolean encrypt){
         return encrypt ? encrypt(value, IGNORE_VALUES) : decrypt(value, IGNORE_VALUES);
     }
 
