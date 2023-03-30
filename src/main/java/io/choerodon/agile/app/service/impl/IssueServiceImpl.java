@@ -2867,7 +2867,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueId, new CopyIssueRequiredFieldVO());
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 10);
         final Long newIssueId;
-        final Long objectVersionNumber;
+        Long objectVersionNumber;
         final String newIssueNum;
         issueDetailDTO.setSummary(copyConditionVO.getSummary());
         IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
@@ -2892,21 +2892,21 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 30);
         // 复制关联内容
-        copyIssueLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId);
+        objectVersionNumber = copyIssueLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId).getObjectVersionNumber();
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 50);
         // 复制项目群的特性和史诗都不会去创建关联关系
         if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals(ISSUE_EPIC) || issueDetailDTO.getTypeCode().equals("feature")))) {
             //生成一条复制的关联
-            createCopyIssueLink(issueDetailDTO.getIssueId(), newIssueId, projectId);
+            objectVersionNumber = createCopyIssueLink(issueDetailDTO.getIssueId(), newIssueId, projectId).getObjectVersionNumber();
         }
         // 如果故事点和剩余工作量必填,就不需要再复制原issue的了
         setCopyRequireField(issueDetailDTO, handlerRequireFiled);
         //复制故事点和剩余工作量并记录日志
-        copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
+        objectVersionNumber = copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber).getObjectVersionNumber();
         // 处理冲刺、子任务、自定义字段的值
         List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 80);
-        handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO, copyIssueRequiredFieldVOMap, triggerCarrierVOS);
+        objectVersionNumber = handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO, copyIssueRequiredFieldVOMap, triggerCarrierVOS).getObjectVersionNumber();
         this.self().batchCreateIssueInvokeTrigger(triggerCarrierVOS);
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
@@ -2934,12 +2934,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId) {
-        if (!ObjectUtils.isEmpty(linkContents)) {
-            linkContents.forEach(linkContent -> {
-                copyIssueLinkContent(linkContent, oldIssueId, newIssueId, projectId);
-            });
+    public IssueDTO copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId) {
+        IssueDTO issueDTO = this.issueMapper.selectByPrimaryKey(newIssueId);
+        if (CollectionUtils.isNotEmpty(linkContents)) {
+            for (String linkContent : linkContents) {
+                issueDTO = copyIssueLinkContent(linkContent, oldIssueId, newIssueId, projectId);
+            }
         }
+        return issueDTO;
     }
 
     @Override
@@ -2953,7 +2955,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return ObjectUtils.isEmpty(status) ? "failed" : status;
     }
 
-    private void copyIssueLinkContent(String linkContent, Long issueId, Long newIssueId, Long projectId) {
+    private IssueDTO copyIssueLinkContent(String linkContent, Long issueId, Long newIssueId, Long projectId) {
         switch(linkContent) {
             case IssueCopyLinkContents.ISSUE_LINKS:
                 // 关联工作项
@@ -2992,6 +2994,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             default:
                 break;
         }
+        return this.issueMapper.selectByPrimaryKey(newIssueId);
     }
 
     @Override
@@ -3111,7 +3114,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return ObjectUtils.isEmpty(object) ? null : EncryptionUtils.jsonToList(object,VersionIssueRelVO.class);
     }
 
-    private void handlerOtherFields(Long projectId, List<String> predefinedFieldNames, IssueDetailDTO issueDetailDTO, Long newIssueId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap, List<TriggerCarrierVO> triggerCarrierVOS) {
+    private IssueDTO handlerOtherFields(Long projectId, List<String> predefinedFieldNames, IssueDetailDTO issueDetailDTO, Long newIssueId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap, List<TriggerCarrierVO> triggerCarrierVOS) {
         //复制冲刺
         if (predefinedFieldNames.contains(SPRINT_ID_FIELD)) {
             handleCreateCopyIssueSprintRel(issueDetailDTO, newIssueId);
@@ -3136,6 +3139,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             customFieldIds.addAll(copyIssueRequiredFieldVO.getCustomFields().stream().map(PageFieldViewCreateVO::getFieldId).collect(Collectors.toList()));
         }
         buildTriggerCarrierVO(projectId, newIssueId, triggerCarrierVOS, customFieldIds);
+        return issueMapper.selectByPrimaryKey(newIssueId);
     }
 
     @Override
@@ -3206,9 +3210,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueCreateVO.setEpicName(epicName);
     }
 
-    protected void copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {
+    protected IssueDTO copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (issueDetailDTO.getStoryPoints() == null && issueDetailDTO.getRemainingTime() == null) {
-            return;
+            return issueDTO;
         }
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         issueUpdateVO.setStoryPoints(issueDetailDTO.getStoryPoints());
@@ -3223,6 +3228,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             fieldList.add(REMAIN_TIME_FIELD);
         }
         updateIssueWithoutRuleNotice(projectId, issueUpdateVO, fieldList);
+        return issueMapper.selectByPrimaryKey(issueId);
     }
 
     protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap) {
@@ -3272,7 +3278,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    protected void createCopyIssueLink(Long issueId, Long newIssueId, Long projectId) {
+    protected IssueDTO createCopyIssueLink(Long issueId, Long newIssueId, Long projectId) {
         IssueLinkTypeDTO query = new IssueLinkTypeDTO();
         query.setProjectId(projectId);
         query.setOutWard("复制");
@@ -3287,6 +3293,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueLinkService.create(issueLink);
             }
         }
+        return this.issueMapper.selectByPrimaryKey(newIssueId);
     }
 
     private void insertSprintWhenTransform(Long issueId, Long sprintId, Long projectId, List<Long> issueIds) {
