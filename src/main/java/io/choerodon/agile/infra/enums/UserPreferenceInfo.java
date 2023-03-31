@@ -22,14 +22,14 @@ public enum UserPreferenceInfo {
     PROJECT_ISSUE_LIST_TODO_SHOW_SPRINT_NOT_STARTED(
             "project.issue-list.todo.show-sprint-not-started",
             ResourceLevel.PROJECT,
-            "false",
+            "true",
             UserPreferenceInfoTypeHandlers.BOOLEAN_REAL_VALUE_TYPE_HANDLER,
             UserPreferenceInfoTypeHandlers.BOOLEAN_STORE_VALUE_TYPE_HANDLER
     ),
     PROJECT_ISSUE_LIST_ALL_DISPLAY_VIEW_TYPE(
             "project.issue-list.all.display-view-type",
             ResourceLevel.PROJECT,
-            "TREE",
+            "tree",
             UserPreferenceInfoTypeHandlers.STRING_REAL_VALUE_TYPE_HANDLER,
             UserPreferenceInfoTypeHandlers.STRING_STORE_VALUE_TYPE_HANDLER
     ),
