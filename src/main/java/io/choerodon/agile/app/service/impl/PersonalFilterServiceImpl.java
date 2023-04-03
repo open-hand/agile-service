@@ -1,6 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -44,18 +47,6 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public static final String NAME_ERROR = "error.personalFilter.nameNotNull";
     public static final String INSERT_ERROR = "error.personalFilter.create";
     public static final String NAME_EXIST = "error.personalFilter.nameExist";
-    public static final String TYPE_CODE_ILLEGAL = "error.personalFilter.typeCode.illegal";
-    public static final String TYPE_CODE_NOT_NULL = "error.personalFilter.typeCode.notNull";
-    private static final String[] FILTER_TYPE_CODES = {
-            PersonalFilterTypeCode.AGILE_ISSUE,
-            PersonalFilterTypeCode.AGILE_WORK_HOURS,
-            PersonalFilterTypeCode.RISK_ISSUE,
-            PersonalFilterTypeCode.FEATURE_ISSUE,
-            PersonalFilterTypeCode.WATERFALL_ISSUE,
-            PersonalFilterTypeCode.ISSUE_ANALYSIS,
-            PersonalFilterTypeCode.BUG_ANALYSIS,
-            PersonalFilterTypeCode.BACKLOG_ANALYSIS,
-    };
 
     @Autowired
     private ModelMapper modelMapper;
@@ -77,8 +68,8 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     @Override
     public PersonalFilterVO create(Long organizationId, Long projectId, PersonalFilterVO personalFilterVO, String version) {
         String filterTypeCode = personalFilterVO.getFilterTypeCode();
-        checkFilterTypeCode(filterTypeCode);
-        if (personalFilterVO.getName() == null || personalFilterVO.getName().equals("")) {
+        PersonalFilterTypeCode.checkTypeCodeValidOrThrow(filterTypeCode);
+        if (personalFilterVO.getName() == null || personalFilterVO.getName().equals(StringUtils.EMPTY)) {
             throw new CommonException(NAME_ERROR);
         }
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
@@ -118,15 +109,6 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
             personalFilterDTO.setFilterJson(isCreated ? StringUtils.EMPTY : null);
         } else {
             throw new CommonException("error.illegal.person.filter.version");
-        }
-    }
-
-    private void checkFilterTypeCode(String filterTypeCode) {
-        if (Objects.isNull(filterTypeCode) || Objects.equals("", filterTypeCode)) {
-            throw new CommonException(TYPE_CODE_NOT_NULL);
-        }
-        if (!Arrays.asList(FILTER_TYPE_CODES).contains(filterTypeCode)) {
-            throw new CommonException(TYPE_CODE_ILLEGAL);
         }
     }
 
@@ -180,7 +162,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
                                                String searchStr,
                                                String filterTypeCode,
                                                String version) {
-        checkFilterTypeCode(filterTypeCode);
+        PersonalFilterTypeCode.checkTypeCodeValidOrThrow(filterTypeCode);
         List<PersonalFilterDTO> personalFilterList = personalFilterMapper.queryByProjectIdAndUserId(organizationId, projectId, userId, searchStr, filterTypeCode, version);
         List<PersonalFilterVO> result = new ArrayList<>();
         for (PersonalFilterDTO dto : personalFilterList) {
@@ -206,7 +188,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
 
     @Override
     public boolean nameIsExist(Long organizationId, Long projectId, Long userId, String name, String filterTypeCode, Long filterId) {
-        this.checkFilterTypeCode(filterTypeCode);
+        PersonalFilterTypeCode.checkTypeCodeValidOrThrow(filterTypeCode);
         return this.queryRepeatRecordCount(organizationId, projectId, userId, name, filterTypeCode, filterId) > 0;
     }
 
