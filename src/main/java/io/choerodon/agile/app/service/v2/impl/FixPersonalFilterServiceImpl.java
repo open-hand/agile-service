@@ -1,5 +1,8 @@
 package io.choerodon.agile.app.service.v2.impl;
 
+import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
+import static io.choerodon.agile.infra.enums.search.SearchConstant.Relationship;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -28,9 +31,6 @@ import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.mapper.PersonalFilterMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 
-import static io.choerodon.agile.infra.enums.search.SearchConstant.Operation;
-import static io.choerodon.agile.infra.enums.search.SearchConstant.Relationship;
-
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.JsonUtils;
 import org.hzero.core.util.Pair;
@@ -50,8 +50,6 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
     private PersonalFilterMapper personalFilterMapper;
     @Autowired
     private IEncryptionService iEncryptionService;
-
-    public static final String TYPE_BACKLOG = "backlog";
 
     private static final List<String> CONDITION_KEYS =
             Arrays.asList("advancedSearchArgs", "otherArgs", "searchArgs");
@@ -192,7 +190,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
 
 
         //todo teamProjectList reporterList 代明确
-        IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.AGILE_ISSUE,
+        IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.AGILE_ISSUE.getTypeCode(),
                 SetUtils.unmodifiableSet(
                         ASSIGNEE_IDS,
                         "version",
@@ -205,7 +203,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                         REPORTER_LIST,
                         SPRINT_LIST,
                         PI_LIST));
-        IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.FEATURE_ISSUE,
+        IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.FEATURE_ISSUE.getTypeCode(),
                 SetUtils.unmodifiableSet(
                         ASSIGNEE_IDS,
                         FieldCode.REPORTER,
@@ -218,7 +216,7 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
                         FieldCode.SPRINT,
                         ISSUE_TYPE_ID,
                         FieldCode.ENVIRONMENT));
-        IGNORED_FIELD_BY_TYPE_MAP.put(TYPE_BACKLOG, SetUtils.unmodifiableSet(USER_ID));
+        IGNORED_FIELD_BY_TYPE_MAP.put(PersonalFilterTypeCode.BACKLOG.getTypeCode(), SetUtils.unmodifiableSet(USER_ID));
     }
 
 
@@ -313,15 +311,15 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         boolean yqCloudFieldDone = false;
         Map<String, Boolean> dateFieldDoneMap = new HashMap<>();
         Map<String, String> optionMap = new HashMap<>();
-        switch (typeCode) {
-            case PersonalFilterTypeCode.AGILE_ISSUE:
-            case PersonalFilterTypeCode.WATERFALL_ISSUE:
+        switch (PersonalFilterTypeCode.of(typeCode)) {
+            case AGILE_ISSUE:
+            case WATERFALL_ISSUE:
                 optionMap = AGILE_OPTION_FIELD_MAPPING;
                 break;
-            case PersonalFilterTypeCode.FEATURE_ISSUE:
+            case FEATURE_ISSUE:
                 optionMap = FEATURE_OPTION_FIELD_MAPPING;
                 break;
-            case TYPE_BACKLOG:
+            case BACKLOG:
                 optionMap = BACKLOG_OPTION_FIELD_MAPPING;
                 break;
             default:
@@ -449,13 +447,13 @@ public class FixPersonalFilterServiceImpl implements FixPersonalFilterService {
         List<String> dateSuffix = new ArrayList<>();
         String startSuffix = SUFFIX_AGILE_SCOPE_START;
         String endSuffix = SUFFIX_AGILE_SCOPE_END;
-        switch (typeCode) {
-            case PersonalFilterTypeCode.AGILE_ISSUE:
-            case PersonalFilterTypeCode.WATERFALL_ISSUE:
-            case TYPE_BACKLOG:
+        switch (PersonalFilterTypeCode.of(typeCode)) {
+            case AGILE_ISSUE:
+            case WATERFALL_ISSUE:
+            case BACKLOG:
                 dateSuffix = AGILE_DATE_SUFFIX;
                 break;
-            case PersonalFilterTypeCode.FEATURE_ISSUE:
+            case FEATURE_ISSUE:
                 dateSuffix = FEATURE_DATE_SUFFIX;
                 startSuffix = SUFFIX_FEATURE_FROM;
                 endSuffix = SUFFIX_FEATURE_TO;
