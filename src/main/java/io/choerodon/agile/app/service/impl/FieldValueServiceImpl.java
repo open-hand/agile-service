@@ -545,8 +545,6 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         for (IssueDTO issue : issueDTOS) {
             try {
                 this.self().handleIssueField(projectId, issue, predefinedFields, batchUpdateFieldStatusVO, applyType, sendMsg, schemeCode, issueCustomFieldMap, triggerCarrierMap, programMap, fixVersion, influenceVersion);
-                //如果只更新自定义字段，同时也要更新最后更新时间
-                BaseFieldUtil.updateIssueLastUpdateInfo(issue.getIssueId(), projectId);
             } catch (Exception e) {
                 LOGGER.info("update issue exception:", e);
                 int failedCount = ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getFailedCount()) ? 0 : batchUpdateFieldStatusVO.getFailedCount();
@@ -639,6 +637,8 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
                 batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
             }
         }
+        //如果只更新自定义字段，同时也要更新最后更新时间
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueDTO.getIssueId(), projectId);
     }
 
     private Map<Long, List<PageFieldViewUpdateVO>> buildIssueCustomFieldMap(Long projectId, List<PageFieldViewUpdateVO> customFields, List<IssueDTO> issueDTOS) {
