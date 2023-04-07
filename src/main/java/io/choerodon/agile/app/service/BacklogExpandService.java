@@ -242,4 +242,11 @@ public interface BacklogExpandService {
                            boolean isSelector);
 
     void fixPersonalFilter();
+
+    /**
+     * 查询需求的高级搜索字段
+     *
+     * @return
+     */
+    Map<String, FieldTableVO> queryAdvanceParamFieldTableMap();
 }

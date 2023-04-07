@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import io.choerodon.agile.api.vo.FieldTableVO;
@@ -102,10 +105,24 @@ public class SqlUtil {
         return sqlBuilder.toString();
     }
 
+    /**
+     * 生成关联表的sql,一般关联表都是instanceId关联
+     * ai.issue_id in (select issue_id from table where column_id in (1,2,3))
+     *
+     * @param operation           操作符
+     * @param values              id集合
+     * @param fieldTable          筛选的系统字段的基本信息
+     * @param projectIds          关联表的项目id集合，如果关联表没有项目id字段，可以传空
+     * @param additionalCondition 额外的附加条件，比如修复的版本，影响的版本，and relation_type = 'fix'
+     * @param innerColumn         子查询的内部返回字段的名称，ai.issue_id in (select issue_id from table where column_id in (1,2,3)) issue_id就是innerColumn
+     * @param isProgram           是否是项目群，决定子查询里的是project_id还是program_id
+     * @param instanceType        实例类型，决定主表的别名和主键
+     * @return
+     */
     public static String generateLinkedTableSql(String operation,
                                                 List<?> values,
                                                 FieldTableVO fieldTable,
-                                                Set<Long> projectIds,
+                                                @Nullable Set<Long> projectIds,
                                                 String additionalCondition,
                                                 String innerColumn,
                                                 boolean isProgram,
@@ -119,7 +136,6 @@ public class SqlUtil {
         }
         String mainTableFilterColumn = SqlUtil.buildMainTableFilterColumn(primaryKey, alias);
         String table = fieldTable.getTable();
-        String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
         SearchConstant.Operation opt = SearchConstant.Operation.valueOf(operation);
         SqlTemplateData data =
                 new SqlTemplateData()
@@ -127,23 +143,30 @@ public class SqlUtil {
                         .setOpt(opt.getOpt())
                         .setInnerCol(innerColumn)
                         .setTable(table)
-                        .setProjectIdStr(projectIdStr)
                         .setDbColumn(dbColumn)
                         .setAdditionalCondition(additionalCondition);
-        if (!isProgram) {
-            data.setProjectCol(PROJECT_ID);
-        } else {
-            data.setProjectCol(PROGRAM_ID);
+        boolean linkedTableHasProjectId = CollectionUtils.isNotEmpty(projectIds);
+        if (linkedTableHasProjectId) {
+            String projectIdStr = StringUtils.join(projectIds, BaseConstants.Symbol.COMMA);
+            data.setProjectIdStr(projectIdStr);
+            if (!isProgram) {
+                data.setProjectCol(PROJECT_ID);
+            } else {
+                data.setProjectCol(PROGRAM_ID);
+            }
         }
+        String sqlTemplate;
         switch (opt) {
             case IN:
             case NOT_IN:
                 data.setValue(StringUtils.join(values, BaseConstants.Symbol.COMMA));
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IN_OR_NOT_IN));
+                sqlTemplate = linkedTableHasProjectId ? LINKED_TABLE_IN_OR_NOT_IN : LINKED_TABLE_IN_OR_NOT_IN_WITHOUT_PROJECT_ID;
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), sqlTemplate));
                 break;
             case IS_NULL:
             case IS_NOT_NULL:
-                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), LINKED_TABLE_IS_NULL_OR_NOT_NULL));
+                sqlTemplate = linkedTableHasProjectId ? LINKED_TABLE_IS_NULL_OR_NOT_NULL : LINKED_TABLE_IS_NULL_OR_NOT_NULL_WITHOUT_PROJECT_ID;
+                sqlBuilder.append(SearchConstant.SqlTemplate.fillInParam(data.ofContext(), sqlTemplate));
                 break;
             default:
                 break;
