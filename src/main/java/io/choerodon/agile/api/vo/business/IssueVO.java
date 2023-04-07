@@ -320,6 +320,10 @@ public class IssueVO {
     @ApiModelProperty("工时属性配置")
     private List<WorkHoursConfigAttributeVO> workHoursConfigAttributeVOS;
 
+    @ApiModelProperty("工作项关联的需求池的Id")
+    @Encrypt
+    private Long backlogId;
+
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
     }
@@ -1112,5 +1116,13 @@ public class IssueVO {
 
     public void setWorkHoursConfigAttributeVOS(List<WorkHoursConfigAttributeVO> workHoursConfigAttributeVOS) {
         this.workHoursConfigAttributeVOS = workHoursConfigAttributeVOS;
+    }
+
+    public Long getBacklogId() {
+        return backlogId;
+    }
+
+    public void setBacklogId(Long backlogId) {
+        this.backlogId = backlogId;
     }
 }
