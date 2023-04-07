@@ -133,9 +133,8 @@ public interface AgileWaterfallService {
 
     /**
      * 处理需求池关联的瀑布工作项
-     * @param backlogId 需求池Id
-     * @param issueVOS 工作项列表
+     * @param issueVOS  工作项列表
      * @return resultList
      */
-    List<IssueVO> handleParentId(Long backlogId, List<IssueVO> issueVOS);
+    List<IssueVO> handleParentId(Long organizationId, Long projectId, List<IssueVO> issueVOS);
 }

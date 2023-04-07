@@ -687,4 +687,10 @@ public interface AgilePluginService {
     List<InstanceOpenRelVO> listByInstanceIds(List<Long> projectIds, List<Long> instanceIds, String instanceType, String source);
 
 
+    /**
+     * 处理需求池关联的瀑布工作项
+     * @param issueVOS  工作项列表
+     * @return resultList
+     */
+    List<IssueVO> handleParentId(Long organizationId, Long projectId, List<IssueVO> issueVOS);
 }
