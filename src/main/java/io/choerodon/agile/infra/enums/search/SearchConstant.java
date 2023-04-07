@@ -96,16 +96,18 @@ public class SearchConstant {
      * 模拟系统字段，用于在数据库中没有的，但是界面筛选需要的字段
      */
     public static final List<ObjectSchemeFieldDTO> MOCK_FIELDS = Arrays.asList(
-            new ObjectSchemeFieldDTO().setCode(Field.YQ_CLOUD_NUM).setFieldType(FieldTypeCnName.INPUT.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.CONTENT).setFieldType(FieldTypeCnName.INPUT.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.MY_STAR).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.MY_PARTICIPATE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(FieldCode.FEATURE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.STAGE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.TYPE_CODE).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.ISSUE_TYPE_PROJECT).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.TYPE_ID).setFieldType(FieldTypeCnName.SINGLE.getCode()),
-            new ObjectSchemeFieldDTO().setCode(Field.SOURCE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            new ObjectSchemeFieldDTO().setCode(Field.YQ_CLOUD_NUM).setFieldType(FieldTypeCnName.INPUT.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.CONTENT).setFieldType(FieldTypeCnName.INPUT.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.MY_STAR).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.MY_PARTICIPATE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(FieldCode.FEATURE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.STAGE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.TYPE_CODE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.ISSUE_TYPE_PROJECT).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.TYPE_ID).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.SOURCE).setFieldType(FieldTypeCnName.SINGLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.RELATE_BACKLOG).setFieldType(FieldTypeCnName.MULTIPLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.SOURCE_BACKLOG).setFieldType(FieldTypeCnName.MULTIPLE.getCode())
     );
 
     public class Field {
@@ -151,6 +153,16 @@ public class SearchConstant {
          * 需求编码
          */
         public static final String BACKLOG_NUM = "backlogNum";
+
+        /**
+         * 关联需求
+         */
+        public static final String RELATE_BACKLOG = "relateBacklog";
+
+        /**
+         * 来源需求
+         */
+        public static final String SOURCE_BACKLOG = "sourceBacklog";
     }
 
 
@@ -314,11 +326,15 @@ public class SearchConstant {
          */
         public static final String LINKED_TABLE_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} in ( #{value} ) #{additionalCondition}) ";
 
+        public static final String LINKED_TABLE_IN_OR_NOT_IN_WITHOUT_PROJECT_ID = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{dbColumn} in ( #{value} ) #{additionalCondition}) ";
+
         public static final String LINKED_TABLE_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{dbColumn} #{innerOpt} #{value}) ";
 
         public static final String LINKED_TABLE_BETWEEN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) and #{column} >= #{firstValue} and #{column} <= #{secondValue}) ";
 
         public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where #{projectCol} in (#{projectIdStr}) #{additionalCondition}) ";
+
+        public static final String LINKED_TABLE_IS_NULL_OR_NOT_NULL_WITHOUT_PROJECT_ID = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where 1 = 1 #{additionalCondition}) ";
 
         public static final String MY_PARTICIPATE = " #{column} in (#{value}) or #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and field = 'assignee' and ( new_value in ( #{value} ) or old_value in ( #{value} ))) ";
 
