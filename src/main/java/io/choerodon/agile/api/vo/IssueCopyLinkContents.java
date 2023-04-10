@@ -1,13 +1,12 @@
 package io.choerodon.agile.api.vo;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Arrays;
 import java.util.List;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
- * @author huaxin.deng@hand-china.com
- * @since 2022/6/17
+ * @author huaxin.deng@hand-china.com 2022/6/17
  */
 public class IssueCopyLinkContents {
 
@@ -15,7 +14,8 @@ public class IssueCopyLinkContents {
     public static final String ATTACHMENTS = "attachments";
     public static final String KNOWLEDGE_RELATIONS = "knowledgeRelations";
     public static final String PREDECESSORS = "predecessors";
-    public static final String RELATED_BACKLOGS = "relatedBacklogs";
+    public static final String DECOMPOSE_BACKLOGS = "decomposeBacklogs";
+    public static final String LINK_BACKLOGS = "linkBacklogs";
     public static final String RELATED_TEST_CASES = "relatedTestCases";
     public static final String RELATED_BRANCHES = "relatedBranches";
     public static final String COMMENTS = "comments";
@@ -24,7 +24,8 @@ public class IssueCopyLinkContents {
         ATTACHMENTS,
         KNOWLEDGE_RELATIONS,
         PREDECESSORS,
-        RELATED_BACKLOGS,
+            DECOMPOSE_BACKLOGS,
+        LINK_BACKLOGS,
         RELATED_TEST_CASES,
         RELATED_BRANCHES,
         COMMENTS
@@ -38,8 +39,10 @@ public class IssueCopyLinkContents {
     private boolean knowledgeRelations;
     @ApiModelProperty(value = "前置依赖")
     private boolean predecessors;
+    @ApiModelProperty(value = "来源需求")
+    private boolean decomposeBacklogs;
     @ApiModelProperty(value = "关联需求")
-    private boolean relatedBacklogs;
+    private boolean linkBacklogs;
     @ApiModelProperty(value = "关联测试用例")
     private boolean relatedTestCases;
     @ApiModelProperty(value = "关联分支")
@@ -47,67 +50,111 @@ public class IssueCopyLinkContents {
     @ApiModelProperty(value = "评论")
     private boolean comments;
 
+    /**
+     * @return 关联工作项
+     */
     public boolean isIssueLinks() {
         return issueLinks;
     }
 
-    public void setIssueLinks(boolean issueLinks) {
+    public IssueCopyLinkContents setIssueLinks(boolean issueLinks) {
         this.issueLinks = issueLinks;
+        return this;
     }
 
+    /**
+     * @return 附件
+     */
     public boolean isAttachments() {
         return attachments;
     }
 
-    public void setAttachments(boolean attachments) {
+    public IssueCopyLinkContents setAttachments(boolean attachments) {
         this.attachments = attachments;
+        return this;
     }
 
+    /**
+     * @return 关联知识
+     */
     public boolean isKnowledgeRelations() {
         return knowledgeRelations;
     }
 
-    public void setKnowledgeRelations(boolean knowledgeRelations) {
+    public IssueCopyLinkContents setKnowledgeRelations(boolean knowledgeRelations) {
         this.knowledgeRelations = knowledgeRelations;
+        return this;
     }
 
+    /**
+     * @return 前置依赖
+     */
     public boolean isPredecessors() {
         return predecessors;
     }
 
-    public void setPredecessors(boolean predecessors) {
+    public IssueCopyLinkContents setPredecessors(boolean predecessors) {
         this.predecessors = predecessors;
+        return this;
     }
 
-    public boolean isRelatedBacklogs() {
-        return relatedBacklogs;
+    /**
+     * @return 来源需求
+     */
+    public boolean isDecomposeBacklogs() {
+        return decomposeBacklogs;
     }
 
-    public void setRelatedBacklogs(boolean relatedBacklogs) {
-        this.relatedBacklogs = relatedBacklogs;
+    public IssueCopyLinkContents setDecomposeBacklogs(boolean decomposeBacklogs) {
+        this.decomposeBacklogs = decomposeBacklogs;
+        return this;
     }
 
+    /**
+     * @return 关联需求
+     */
+    public boolean isLinkBacklogs() {
+        return linkBacklogs;
+    }
+
+    public IssueCopyLinkContents setLinkBacklogs(boolean linkBacklogs) {
+        this.linkBacklogs = linkBacklogs;
+        return this;
+    }
+
+    /**
+     * @return 关联测试用例
+     */
     public boolean isRelatedTestCases() {
         return relatedTestCases;
     }
 
-    public void setRelatedTestCases(boolean relatedTestCases) {
+    public IssueCopyLinkContents setRelatedTestCases(boolean relatedTestCases) {
         this.relatedTestCases = relatedTestCases;
+        return this;
     }
 
+    /**
+     * @return 关联分支
+     */
     public boolean isRelatedBranches() {
         return relatedBranches;
     }
 
-    public void setRelatedBranches(boolean relatedBranches) {
+    public IssueCopyLinkContents setRelatedBranches(boolean relatedBranches) {
         this.relatedBranches = relatedBranches;
+        return this;
     }
 
+    /**
+     * @return 评论
+     */
     public boolean isComments() {
         return comments;
     }
 
-    public void setComments(boolean comments) {
+    public IssueCopyLinkContents setComments(boolean comments) {
         this.comments = comments;
+        return this;
     }
 }

@@ -832,6 +832,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 boolean countSubIssue = Boolean.TRUE.equals(searchParamVO.getCountSubIssue());
                 agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId), issueListFieldKVVOS, countSubIssue);
             }
+            if(backlogExpandService != null){
+                backlogExpandService.addIssueBacklogInfo(organizationId, projectId, issueListFieldKVVOS);
+            }
             issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
         }
         return issueListDTOPage;
@@ -2032,7 +2035,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             agilePluginService.issueSyncByIssueId(ConvertUtil.getOrganizationId(projectId), issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.DELETE);
         }
         if (backlogExpandService != null) {
-            backlogExpandService.deleteIssueBacklogRel(issueId);
+            backlogExpandService.deleteIssueBacklogRel(issueId, null);
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.deleteIssueForWaterfall(projectId, issueId, issueConvertDTO);
@@ -2988,10 +2991,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 // 前置依赖项
                 issuePredecessorService.copyIssuePredecessors(projectId, issueId, newIssueId);
                 break;
-            case IssueCopyLinkContents.RELATED_BACKLOGS:
+            case IssueCopyLinkContents.DECOMPOSE_BACKLOGS:
                 // 关联需求
                 if (backlogExpandService != null) {
-                    backlogExpandService.copyIssueBacklogRel(projectId, issueId, newIssueId);
+                    backlogExpandService.copyIssueBacklogRel(projectId, issueId, newIssueId, BacklogExpandService.BacklogIssueLinkType.DECOMPOSE);
+                }
+                break;
+            case IssueCopyLinkContents.LINK_BACKLOGS:
+                // 关联需求
+                if (backlogExpandService != null) {
+                    backlogExpandService.copyIssueBacklogRel(projectId, issueId, newIssueId, BacklogExpandService.BacklogIssueLinkType.LINK);
                 }
                 break;
             case IssueCopyLinkContents.COMMENTS:
@@ -4323,7 +4332,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         linkContents.setRelatedTestCases(testServiceClientOperator.checkExistTestCaseLink(projectId, issueId));
         // 关联需求
         if (backlogExpandService != null) {
-            linkContents.setRelatedBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId));
+            linkContents.setDecomposeBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId, BacklogExpandService.BacklogIssueLinkType.DECOMPOSE));
+            linkContents.setLinkBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId, BacklogExpandService.BacklogIssueLinkType.LINK));
         }
         // 关联分支
         linkContents.setRelatedBranches(devopsClientOperator.checkExistIssueBranchRel(projectId, issueId));
@@ -4333,17 +4343,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private List<String> getLinkContents(IssueCopyLinkContents linkContents) {
         Class<?> clazz = linkContents.getClass();
         List<String> result = new ArrayList<>();
-        IssueCopyLinkContents.ISSUE_COPY_LINK_CONTENTS.forEach(content -> {
+        for (String contentName : IssueCopyLinkContents.ISSUE_COPY_LINK_CONTENTS) {
             try {
-                Field field = clazz.getDeclaredField(content);
+                Field field = clazz.getDeclaredField(contentName);
                 field.setAccessible(true);
-                if (Boolean.TRUE.equals(field.getBoolean(linkContents) )) {
-                    result.add(content);
+                if (Boolean.TRUE.equals(field.getBoolean(linkContents))) {
+                    result.add(contentName);
                 }
             } catch (Exception e) {
                 throw new CommonException("error.get.link.contents");
             }
-        });
+        }
         return result;
     }
 

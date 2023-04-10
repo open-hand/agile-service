@@ -220,6 +220,11 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "第三方实例关联关系")
     private List<InstanceOpenRelVO> instanceOpenRelList;
 
+    @ApiModelProperty(value = "关联需求")
+    private List<BacklogInfoVO> relateBacklogs;
+    @ApiModelProperty(value = "来源需求")
+    private List<BacklogInfoVO> sourceBacklogs;
+
     public List<InstanceOpenRelVO> getInstanceOpenRelList() {
         return instanceOpenRelList;
     }
@@ -784,5 +789,21 @@ public class IssueListFieldKVVO {
 
     public void setCompletedSubIssues(Integer completedSubIssues) {
         this.completedSubIssues = completedSubIssues;
+    }
+
+    public List<BacklogInfoVO> getRelateBacklogs() {
+        return relateBacklogs;
+    }
+
+    public void setRelateBacklogs(List<BacklogInfoVO> relateBacklogs) {
+        this.relateBacklogs = relateBacklogs;
+    }
+
+    public List<BacklogInfoVO> getSourceBacklogs() {
+        return sourceBacklogs;
+    }
+
+    public void setSourceBacklogs(List<BacklogInfoVO> sourceBacklogs) {
+        this.sourceBacklogs = sourceBacklogs;
     }
 }

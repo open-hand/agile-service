@@ -3,15 +3,13 @@ package io.choerodon.agile.app.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.AllDataLogVO;
-import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
-import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.business.IssueBacklogRelVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
@@ -23,16 +21,33 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.core.util.Pair;
 
 /**
- * @author zhaotianxin
- * @date 2020-09-22 16:27
+ * @author zhaotianxin 2020-09-22 16:27
  */
 public interface BacklogExpandService {
+
+    /**
+     * 工作项需求关联类型
+     * @author gaokuo.dai@zknow.com 2023-04-10
+     * @since 2.4
+     */
+    interface BacklogIssueLinkType {
+        /**
+         * 分解：来源需求
+         */
+        String DECOMPOSE = "decompose";
+        /**
+         * 关联：关联需求
+         */
+        String LINK = "link";
+    }
+
     /**
      * 删除issue和backlog的关联关系
      *
      * @param issueId issueId
+     * @param linkType 关联类型, 可空, 传空删除所有
      */
-    void deleteIssueBacklogRel(Long issueId);
+    void deleteIssueBacklogRel(Long issueId, @Nullable String linkType);
 
     /**
      * 自动变更backlog的状态
@@ -226,9 +241,16 @@ public interface BacklogExpandService {
 
     void startBacklog(ProjectEvent projectEvent);
 
-    Boolean checkExistBacklogRel(Long projectId, Long issueId);
+    boolean checkExistBacklogRel(Long projectId, Long issueId, String linkType);
 
-    void copyIssueBacklogRel(Long projectId, Long issueId, Long newIssueId);
+    /**
+     * 拷贝工作项需求关系
+     * @param projectId     项目ID
+     * @param issueId       旧工作项ID
+     * @param newIssueId    新工作项ID
+     * @param linkType      关联类型, 可空, 空则复制所有类型
+     */
+    void copyIssueBacklogRel(Long projectId, Long issueId, Long newIssueId, @Nullable String linkType);
 
     Page<BacklogInfoVO> listBacklog(Long projectId, PageRequest pageRequest, SearchVO searchVO);
 
@@ -244,9 +266,16 @@ public interface BacklogExpandService {
     void fixPersonalFilter();
 
     /**
-     * 查询需求的高级搜索字段
-     *
-     * @return
+     * @return 需求的高级搜索字段
      */
     Map<String, FieldTableVO> queryAdvanceParamFieldTableMap();
+
+    /**
+     * 添加issue的需求信息
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueListFieldKVVOS
+     */
+    void addIssueBacklogInfo(Long organizationId, Long projectId, List<IssueListFieldKVVO> issueListFieldKVVOS);
 }
