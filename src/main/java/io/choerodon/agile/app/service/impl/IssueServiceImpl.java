@@ -832,6 +832,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 boolean countSubIssue = Boolean.TRUE.equals(searchParamVO.getCountSubIssue());
                 agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId), issueListFieldKVVOS, countSubIssue);
             }
+            if(backlogExpandService != null){
+                backlogExpandService.addIssueBacklogInfo(organizationId, projectId, issueListFieldKVVOS);
+            }
             issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
         }
         return issueListDTOPage;
