@@ -4,6 +4,7 @@ package io.choerodon.agile.api.vo.business;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
@@ -323,6 +324,10 @@ public class IssueVO {
     @ApiModelProperty("工作项关联的需求池的Id")
     @Encrypt
     private Long backlogId;
+
+    @ApiModelProperty("所有父级工作项Id的集合")
+    @Encrypt
+    private List<Long> parentIssueIds;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1124,5 +1129,13 @@ public class IssueVO {
 
     public void setBacklogId(Long backlogId) {
         this.backlogId = backlogId;
+    }
+
+    public List<Long> getParentIssueIds() {
+        return parentIssueIds;
+    }
+
+    public void setParentIssueIds(List<Long> parentIssueIds) {
+        this.parentIssueIds = parentIssueIds;
     }
 }
