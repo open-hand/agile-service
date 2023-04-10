@@ -225,13 +225,20 @@ public interface BacklogExpandService {
                                                    Long organizationId,
                                                    Long projectId);
 
-    Page listBacklogFieldOption(String optionType,
+    Page<?> listBacklogFieldOption(String optionType,
                                 Long organizationId,
                                 Long projectId,
                                 PageRequest pageRequest,
                                 CascadeFieldOptionSearchVO cascadeFieldOptionSearchVO);
 
-    List<IssueBacklogRelVO> selectBacklogRelByIssueIds(Long projectId, List<Long> issueIds);
+    /**
+     * 根据工作项ID查询需求工作项关系信息
+     * @param projectId 项目ID
+     * @param issueIds  工作项ID集合
+     * @param linkType  关联类型, 可空, 不传查所有
+     * @return          查询结果
+     */
+    List<BacklogIssueRelVO> selectBacklogRelByIssueIds(Long projectId, List<Long> issueIds, @Nullable String linkType);
 
     List<BacklogInfoVO> listBacklogByProjectIds(List<Long> projectIds);
 
