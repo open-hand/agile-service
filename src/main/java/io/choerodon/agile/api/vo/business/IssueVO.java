@@ -329,6 +329,9 @@ public class IssueVO {
     @Encrypt
     private List<Long> parentIssueIds;
 
+    @ApiModelProperty("创建人")
+    private UserMessageDTO createUser;
+
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
     }
@@ -1137,5 +1140,13 @@ public class IssueVO {
 
     public void setParentIssueIds(List<Long> parentIssueIds) {
         this.parentIssueIds = parentIssueIds;
+    }
+
+    public UserMessageDTO getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(UserMessageDTO createUser) {
+        this.createUser = createUser;
     }
 }
