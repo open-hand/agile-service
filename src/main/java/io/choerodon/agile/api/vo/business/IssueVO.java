@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.infra.dto.business.PiNameDTO;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.*;
@@ -333,6 +334,9 @@ public class IssueVO {
 
     @ApiModelProperty("创建人")
     private UserMessageDTO createUser;
+
+    @ApiModelProperty("pi列表")
+    private List<PiNameDTO> piNameDTOList;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1158,5 +1162,13 @@ public class IssueVO {
 
     public void setIssueSprintVOS(List<IssueSprintVO> issueSprintVOS) {
         this.issueSprintVOS = issueSprintVOS;
+    }
+
+    public List<PiNameDTO> getPiNameDTOList() {
+        return piNameDTOList;
+    }
+
+    public void setPiNameDTOList(List<PiNameDTO> piNameDTOList) {
+        this.piNameDTOList = piNameDTOList;
     }
 }
