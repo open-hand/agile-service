@@ -282,7 +282,7 @@ public interface BacklogExpandService {
      *
      * @param organizationId
      * @param projectId
-     * @param issueListFieldKVVOS
+     * @param issues
      */
-    void addIssueBacklogInfo(Long organizationId, Long projectId, List<IssueListFieldKVVO> issueListFieldKVVOS);
+    void addIssueBacklogInfo(Long organizationId, Long projectId, List<? extends BaseIssueVO> issues);
 }
