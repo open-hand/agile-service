@@ -1,9 +1,7 @@
 package io.choerodon.agile.api.vo.business;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -16,33 +14,13 @@ import io.choerodon.agile.infra.utils.StringUtil;
  * Created by WangZhe@choerodon.io on 2019-06-28.
  * Email: ettwz@hotmail.com
  */
-public class IssueListFieldKVVO {
-
-    @ApiModelProperty(value = "问题主键id")
-    @Encrypt
-    private Long issueId;
-
-    @ApiModelProperty(value = "问题编号")
-    private String issueNum;
-
-    @ApiModelProperty(value = "问题类型code")
-    private String typeCode;
-
-    @ApiModelProperty(value = "问题概要")
-    private String summary;
+public class IssueListFieldKVVO extends BaseIssueVO {
 
     @ApiModelProperty(value = "经办人id")
     private Long assigneeId;
 
-    @ApiModelProperty(value = "报告人id")
-    private Long reporterId;
-
     @ApiModelProperty(value = "项目id")
     private Long projectId;
-
-    @ApiModelProperty(value = "问题类型id")
-    @Encrypt
-    private Long issueTypeId;
 
     @ApiModelProperty(value = "经办人名称")
     private String assigneeName;
@@ -56,33 +34,8 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "经办人用户标签")
     private List<String> userLabels;
 
-    @ApiModelProperty(value = "报告人名称")
-    private String reporterName;
-
-    @ApiModelProperty(value = "报告人登录名称")
-    private String reporterLoginName;
-
-    @ApiModelProperty(value = "报告人真实名称")
-    private String reporterRealName;
-
-    @ApiModelProperty(value = "报告人图标")
-    private String reporterImageUrl;
-
     @ApiModelProperty(value = "经办人图标")
     private String assigneeImageUrl;
-
-    @ApiModelProperty(value = "史诗名称")
-    private String epicName;
-
-    @ApiModelProperty(value = "史诗id")
-    @Encrypt(ignoreValue = {"0"})
-    private Long epicId;
-
-    @ApiModelProperty(value = "史诗颜色")
-    private String epicColor;
-
-    @ApiModelProperty(value = "故事点")
-    private BigDecimal storyPoints;
 
     @ApiModelProperty(value = "特性名称")
     private String featureName;
@@ -109,15 +62,6 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "状态DTO")
     private StatusVO statusMapVO;
 
-    @ApiModelProperty(value = "问题类型DTO")
-    private IssueTypeVO issueTypeVO;
-
-    @ApiModelProperty(value = "创建时间")
-    private Date creationDate;
-
-    @ApiModelProperty(value = "最后更新时间")
-    private Date lastUpdateDate;
-
     @Encrypt(ignoreValue = {"0"})
     private Long parentId;
 
@@ -133,19 +77,8 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "评论列表")
     private List<IssueComponentBriefVO> issueComponentBriefVOS;
 
-    @ApiModelProperty(value = "自定义字段kv")
-    private Map<String, Object> foundationFieldValue;
-
     @ApiModelProperty("项目信息")
     private ProjectVO projectVO;
-
-    private Date estimatedStartTime;
-
-    private Date estimatedEndTime;
-
-    private Date actualStartTime;
-
-    private Date actualEndTime;
 
     @ApiModelProperty("项目名")
     private String projectName;
@@ -173,10 +106,6 @@ public class IssueListFieldKVVO {
 
     @ApiModelProperty(value = "影响的版本")
     private List<VersionIssueRelVO> influenceVersionIssueRelVOS;
-    @ApiModelProperty(value = "创建人")
-    private UserMessageDTO createUser;
-    @ApiModelProperty(value = "更新人")
-    private UserMessageDTO updateUser;
 
     @ApiModelProperty("已耗费时间")
     private BigDecimal spentWorkTime;
@@ -184,12 +113,8 @@ public class IssueListFieldKVVO {
     @ApiModelProperty("总预估时间")
     private BigDecimal allEstimateTime;
 
-    @ApiModelProperty("tags")
-    private List<TagVO> tags;
     @ApiModelProperty(value = "项目集")
     private List<ProjectVO> projectVOList;
-    @ApiModelProperty(value = "史诗自己的名字")
-    private String epicSelfName;
 
     @ApiModelProperty("参与人")
     private List<UserMessageDTO> participants;
@@ -220,11 +145,6 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "第三方实例关联关系")
     private List<InstanceOpenRelVO> instanceOpenRelList;
 
-    @ApiModelProperty(value = "关联需求")
-    private List<BacklogInfoVO> relateBacklogs;
-    @ApiModelProperty(value = "来源需求")
-    private List<BacklogInfoVO> sourceBacklogs;
-
     public List<InstanceOpenRelVO> getInstanceOpenRelList() {
         return instanceOpenRelList;
     }
@@ -241,28 +161,12 @@ public class IssueListFieldKVVO {
         this.progress = progress;
     }
 
-    public String getEpicSelfName() {
-        return epicSelfName;
-    }
-
-    public void setEpicSelfName(String epicSelfName) {
-        this.epicSelfName = epicSelfName;
-    }
-
     public List<ProjectVO> getProjectVOList() {
         return projectVOList;
     }
 
     public void setProjectVOList(List<ProjectVO> projectVOList) {
         this.projectVOList = projectVOList;
-    }
-
-    public List<TagVO> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<TagVO> tags) {
-        this.tags = tags;
     }
 
     public Boolean getStarBeacon() {
@@ -287,22 +191,6 @@ public class IssueListFieldKVVO {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public Date getEstimatedStartTime() {
-        return estimatedStartTime;
-    }
-
-    public void setEstimatedStartTime(Date estimatedStartTime) {
-        this.estimatedStartTime = estimatedStartTime;
-    }
-
-    public Date getEstimatedEndTime() {
-        return estimatedEndTime;
-    }
-
-    public void setEstimatedEndTime(Date estimatedEndTime) {
-        this.estimatedEndTime = estimatedEndTime;
     }
 
     public Long getParentId() {
@@ -337,101 +225,12 @@ public class IssueListFieldKVVO {
         this.issueComponentBriefVOS = issueComponentBriefVOS;
     }
 
-    public Long getEpicId() {
-        return epicId;
-    }
-
-    public void setEpicId(Long epicId) {
-        this.epicId = epicId;
-    }
-
-    public Long getIssueTypeId() {
-        return issueTypeId;
-    }
-
-    public void setIssueTypeId(Long issueTypeId) {
-        this.issueTypeId = issueTypeId;
-
-    }
-
-    public String getEpicColor() {
-        return epicColor;
-    }
-
-    public void setEpicColor(String epicColor) {
-        this.epicColor = epicColor;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public Date getLastUpdateDate() {
-        return lastUpdateDate;
-    }
-
-    public void setLastUpdateDate(Date lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
-    }
-
-    public Long getReporterId() {
-        return reporterId;
-    }
-
-    public void setReporterId(Long reporterId) {
-        this.reporterId = reporterId;
-    }
-
-    public String getReporterName() {
-        return reporterName;
-    }
-
-    public void setReporterName(String reporterName) {
-        this.reporterName = reporterName;
-    }
-
     public List<VersionIssueRelVO> getVersionIssueRelVOS() {
         return versionIssueRelVOS;
     }
 
     public void setVersionIssueRelVOS(List<VersionIssueRelVO> versionIssueRelVOS) {
         this.versionIssueRelVOS = versionIssueRelVOS;
-    }
-
-    public Long getIssueId() {
-        return issueId;
-    }
-
-    public void setIssueId(Long issueId) {
-        this.issueId = issueId;
-    }
-
-    public String getIssueNum() {
-        return issueNum;
-    }
-
-    public void setIssueNum(String issueNum) {
-        this.issueNum = issueNum;
-    }
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
     }
 
     public Long getAssigneeId() {
@@ -458,14 +257,6 @@ public class IssueListFieldKVVO {
         this.assigneeName = assigneeName;
     }
 
-    public String getReporterImageUrl() {
-        return reporterImageUrl;
-    }
-
-    public void setReporterImageUrl(String reporterImageUrl) {
-        this.reporterImageUrl = reporterImageUrl;
-    }
-
     public String getAssigneeImageUrl() {
         return assigneeImageUrl;
     }
@@ -474,28 +265,12 @@ public class IssueListFieldKVVO {
         this.assigneeImageUrl = assigneeImageUrl;
     }
 
-    public void setStoryPoints(BigDecimal storyPoints) {
-        this.storyPoints = storyPoints;
-    }
-
-    public BigDecimal getStoryPoints() {
-        return storyPoints;
-    }
-
     public Boolean getAddIssue() {
         return addIssue;
     }
 
     public void setAddIssue(Boolean addIssue) {
         this.addIssue = addIssue;
-    }
-
-    public String getEpicName() {
-        return epicName;
-    }
-
-    public void setEpicName(String epicName) {
-        this.epicName = epicName;
     }
 
     public BigDecimal getRemainingTime() {
@@ -522,14 +297,6 @@ public class IssueListFieldKVVO {
         return statusMapVO;
     }
 
-    public void setIssueTypeVO(IssueTypeVO issueTypeVO) {
-        this.issueTypeVO = issueTypeVO;
-    }
-
-    public IssueTypeVO getIssueTypeVO() {
-        return issueTypeVO;
-    }
-
     public String getAssigneeLoginName() {
         return assigneeLoginName;
     }
@@ -546,36 +313,12 @@ public class IssueListFieldKVVO {
         this.assigneeRealName = assigneeRealName;
     }
 
-    public String getReporterLoginName() {
-        return reporterLoginName;
-    }
-
-    public void setReporterLoginName(String reporterLoginName) {
-        this.reporterLoginName = reporterLoginName;
-    }
-
-    public String getReporterRealName() {
-        return reporterRealName;
-    }
-
-    public void setReporterRealName(String reporterRealName) {
-        this.reporterRealName = reporterRealName;
-    }
-
     public void setFeatureType(String featureType) {
         this.featureType = featureType;
     }
 
     public String getFeatureType() {
         return featureType;
-    }
-
-    public Map<String, Object> getFoundationFieldValue() {
-        return foundationFieldValue;
-    }
-
-    public void setFoundationFieldValue(Map<String, Object> foundationFieldValue) {
-        this.foundationFieldValue = foundationFieldValue;
     }
 
     public String getFeatureName() {
@@ -647,22 +390,6 @@ public class IssueListFieldKVVO {
         this.influenceVersionIssueRelVOS = influenceVersionIssueRelVOS;
     }
 
-    public UserMessageDTO getCreateUser() {
-        return createUser;
-    }
-
-    public void setCreateUser(UserMessageDTO createUser) {
-        this.createUser = createUser;
-    }
-
-    public UserMessageDTO getUpdateUser() {
-        return updateUser;
-    }
-
-    public void setUpdateUser(UserMessageDTO updateUser) {
-        this.updateUser = updateUser;
-    }
-
     public UserMessageDTO getMainResponsibleUser() {
         return mainResponsibleUser;
     }
@@ -693,22 +420,6 @@ public class IssueListFieldKVVO {
 
     public void setAllEstimateTime(BigDecimal allEstimateTime) {
         this.allEstimateTime = allEstimateTime;
-    }
-
-    public Date getActualStartTime() {
-        return actualStartTime;
-    }
-
-    public void setActualStartTime(Date actualStartTime) {
-        this.actualStartTime = actualStartTime;
-    }
-
-    public Date getActualEndTime() {
-        return actualEndTime;
-    }
-
-    public void setActualEndTime(Date actualEndTime) {
-        this.actualEndTime = actualEndTime;
     }
 
     public List<UserMessageDTO> getParticipants() {
@@ -791,19 +502,4 @@ public class IssueListFieldKVVO {
         this.completedSubIssues = completedSubIssues;
     }
 
-    public List<BacklogInfoVO> getRelateBacklogs() {
-        return relateBacklogs;
-    }
-
-    public void setRelateBacklogs(List<BacklogInfoVO> relateBacklogs) {
-        this.relateBacklogs = relateBacklogs;
-    }
-
-    public List<BacklogInfoVO> getSourceBacklogs() {
-        return sourceBacklogs;
-    }
-
-    public void setSourceBacklogs(List<BacklogInfoVO> sourceBacklogs) {
-        this.sourceBacklogs = sourceBacklogs;
-    }
 }
