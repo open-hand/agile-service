@@ -6,19 +6,23 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.ibatis.annotations.Param;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.hzero.core.util.Pair;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.api.vo.business.AllDataLogVO;
+import io.choerodon.agile.api.vo.business.BacklogIssueRelVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
+import io.choerodon.agile.api.vo.business.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import org.hzero.core.util.Pair;
 
 /**
  * @author zhaotianxin 2020-09-22 16:27
@@ -285,4 +289,6 @@ public interface BacklogExpandService {
      * @param issues
      */
     void addIssueBacklogInfo(Long organizationId, Long projectId, List<? extends BaseIssueVO> issues);
+
+    List<IssueDTO> listIssuesByFeatureIds(@Param("featureIds") List<Long> featureIds);
 }
