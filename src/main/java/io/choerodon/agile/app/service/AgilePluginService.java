@@ -694,4 +694,12 @@ public interface AgilePluginService {
      * @return resultList
      */
     List<IssueVO> handleParentId(Long organizationId, List<IssueVO> issueVOS);
+
+    /**
+     * 查询已在项目群版本中发布过了的特性ID集合
+     * @param projectId         项目群ID
+     * @param organizationId    组织ID
+     * @return                  查询结果
+     */
+    Set<Long> listPublishedFeatureIds(Long projectId, Long organizationId);
 }
