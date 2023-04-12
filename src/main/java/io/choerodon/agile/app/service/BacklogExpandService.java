@@ -289,6 +289,4 @@ public interface BacklogExpandService {
      * @param issues
      */
     void addIssueBacklogInfo(Long organizationId, Long projectId, List<? extends BaseIssueVO> issues);
-
-    List<IssueDTO> listIssuesByFeatureIds(@Param("featureIds") List<Long> featureIds);
 }
