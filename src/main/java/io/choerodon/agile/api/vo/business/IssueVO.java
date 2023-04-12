@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.infra.dto.business.PiNameDTO;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.*;
@@ -328,9 +329,14 @@ public class IssueVO {
     @ApiModelProperty("所有父级工作项Id的集合")
     @Encrypt
     private List<Long> parentIssueIds;
+    @ApiModelProperty("冲刺列表")
+    private List<IssueSprintVO> issueSprintVOS;
 
     @ApiModelProperty("创建人")
     private UserMessageDTO createUser;
+
+    @ApiModelProperty("pi列表")
+    private List<PiNameDTO> piNameDTOList;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1148,5 +1154,21 @@ public class IssueVO {
 
     public void setCreateUser(UserMessageDTO createUser) {
         this.createUser = createUser;
+    }
+
+    public List<IssueSprintVO> getIssueSprintVOS() {
+        return issueSprintVOS;
+    }
+
+    public void setIssueSprintVOS(List<IssueSprintVO> issueSprintVOS) {
+        this.issueSprintVOS = issueSprintVOS;
+    }
+
+    public List<PiNameDTO> getPiNameDTOList() {
+        return piNameDTOList;
+    }
+
+    public void setPiNameDTOList(List<PiNameDTO> piNameDTOList) {
+        this.piNameDTOList = piNameDTOList;
     }
 }
