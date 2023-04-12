@@ -464,6 +464,8 @@
         aisr.sprint_id,
         asp.status_code as sp_status_code,
         asp.sprint_name,
+        asp.start_date as sprint_start_date,
+        asp.end_date as sprint_end_date,
         aic.name as component_name,
         acir.component_id,
         ail.label_name,
