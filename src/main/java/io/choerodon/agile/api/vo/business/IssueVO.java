@@ -338,6 +338,9 @@ public class IssueVO {
     @ApiModelProperty("pi列表")
     private List<PiNameDTO> piNameDTOList;
 
+    @ApiModelProperty("区分特性还是史能")
+    private String featureType;
+
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
     }
@@ -1170,5 +1173,13 @@ public class IssueVO {
 
     public void setPiNameDTOList(List<PiNameDTO> piNameDTOList) {
         this.piNameDTOList = piNameDTOList;
+    }
+
+    public String getFeatureType() {
+        return featureType;
+    }
+
+    public void setFeatureType(String featureType) {
+        this.featureType = featureType;
     }
 }
