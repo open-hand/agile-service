@@ -3,13 +3,37 @@
 <mapper namespace="io.choerodon.agile.infra.mapper.PersonalFilterMapper">
 
     <select id="queryByProjectIdAndUserId" resultType="io.choerodon.agile.infra.dto.PersonalFilterDTO">
-        SELECT *
+        SELECT
+        filter_id,
+        project_id,
+        name,
+        user_id,
+        <if test="version == 'v1'">
+            filter_json,
+        </if>
+        <if test="version == 'v2'">
+            advanced_filter_json,
+        </if>
+        object_version_number,
+        created_by,
+        creation_date,
+        last_updated_by,
+        last_update_date,
+        is_default,
+        organization_id,
+        filter_type_code
         FROM
         agile_personal_filter
         WHERE project_id = #{projectId}
         AND organization_id = #{organizationId}
         AND user_id = #{userId}
         AND filter_type_code = #{filterTypeCode}
+        <if test="version == 'v1'">
+            and filter_json != ''
+        </if>
+        <if test="version == 'v2'">
+            and advanced_filter_json != ''
+        </if>
         <if test='searchStr != null and searchStr != "" '>
             AND name LIKE concat('%',#{searchStr},'%')
         </if>

@@ -6,6 +6,10 @@ import java.util.Optional;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.core.base.BaseController;
+import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.core.IEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +26,6 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-
-import org.hzero.core.base.BaseController;
-import org.hzero.core.util.Results;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.core.IEncryptionService;
 
 /**
  * 根据项目id获取对应数据
@@ -64,13 +63,15 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询项目的问题类型列表，带对应的状态机id")
     @GetMapping(value = "/schemes/query_issue_types_with_sm_id")
     public ResponseEntity<List<IssueTypeWithStateMachineIdVO>> queryIssueTypesWithStateMachineIdByProjectId(@ApiParam(value = "项目id", required = true)
-                                                                                                            @PathVariable("project_id") Long projectId,
+                                                                                                                @PathVariable("project_id") Long projectId,
+                                                                                                            @ApiParam(value = "查询信息的项目id")
+                                                                                                                @RequestParam(name = "target_project_id", required = false) Long targetProjectId,
                                                                                                             @ApiParam(value = "应用编码")
-                                                                                                            @RequestParam(value = "apply_type", required = false) String applyType,
+                                                                                                                @RequestParam(value = "apply_type", required = false) String applyType,
                                                                                                             @ApiParam(value = "是否只查询启用的")
-                                                                                                            @RequestParam(value = "only_enabled", defaultValue = "false",
-                                                                                                                    required = false) Boolean onlyEnabled) {
-        return Results.success(projectConfigService.queryIssueTypesWithStateMachineIdByProjectId(projectId, applyType, onlyEnabled));
+                                                                                                                @RequestParam(value = "only_enabled", defaultValue = "false",
+                                                                                                                        required = false) Boolean onlyEnabled) {
+        return Results.success(projectConfigService.queryIssueTypesWithStateMachineIdByProjectId(projectId, targetProjectId, applyType, onlyEnabled));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -92,12 +93,12 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目下所有问题类型所有状态对应的转换")
     @GetMapping(value = "/schemes/query_transforms_map")
-    public ResponseEntity<Map<String, Map<String,  List<TransformVO>>>> queryTransformsMapByProjectId(@ApiParam(value = "项目id", required = true)
-                                                                                        @PathVariable("project_id") Long projectId,
-                                                                                        @ApiParam(value = "看版id")
-                                                                                        @RequestParam(required = false) @Encrypt Long boardId,
-                                                                                        @ApiParam(value = "应用类型", required = true)
-                                                                                        @RequestParam("apply_type") String applyType) {
+    public ResponseEntity<Map<String, Map<String, List<TransformVO>>>> queryTransformsMapByProjectId(@ApiParam(value = "项目id", required = true)
+                                                                                                     @PathVariable("project_id") Long projectId,
+                                                                                                     @ApiParam(value = "看版id")
+                                                                                                     @RequestParam(required = false) @Encrypt Long boardId,
+                                                                                                     @ApiParam(value = "应用类型", required = true)
+                                                                                                     @RequestParam("apply_type") String applyType) {
 
         return Results.success(EncryptionUtils.encryptMapValueMap(projectConfigService.queryTransformsMapByProjectId(projectId, boardId, applyType)));
     }
@@ -118,10 +119,12 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询项目下的所有状态")
     @GetMapping(value = "/schemes/query_status_by_project_id")
     public ResponseEntity<List<StatusVO>> queryStatusByProjectId(@ApiParam(value = "项目id", required = true)
-                                                                 @PathVariable("project_id") Long projectId,
+                                                                     @PathVariable("project_id") Long projectId,
+                                                                 @ApiParam(value = "查询信息的项目id")
+                                                                     @RequestParam(name = "target_project_id", required = false) Long targetProjectId,
                                                                  @ApiParam(value = "应用类型")
-                                                                 @RequestParam(value = "apply_type", required = false) String applyType) {
-        return Results.success(projectConfigService.queryStatusByProjectId(projectId, applyType));
+                                                                     @RequestParam(value = "apply_type", required = false) String applyType) {
+        return Results.success(projectConfigService.queryStatusByProjectId(projectId, targetProjectId, applyType));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -196,13 +199,13 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询工作流第一个状态")
     @GetMapping("/status/query_first_status")
     public ResponseEntity<String> queryWorkFlowFirstStatus(@ApiParam(value = "项目id", required = true)
-                                                         @PathVariable("project_id") Long projectId,
-                                                         @ApiParam(value = "applyType", required = true)
-                                                         @RequestParam String applyType,
-                                                         @ApiParam(value = "issueTypeId", required = true)
-                                                         @RequestParam @Encrypt Long issueTypeId,
-                                                         @ApiParam(value = "organizationId", required = true)
-                                                         @RequestParam Long organizationId) {
+                                                           @PathVariable("project_id") Long projectId,
+                                                           @ApiParam(value = "applyType", required = true)
+                                                           @RequestParam String applyType,
+                                                           @ApiParam(value = "issueTypeId", required = true)
+                                                           @RequestParam @Encrypt Long issueTypeId,
+                                                           @ApiParam(value = "organizationId", required = true)
+                                                           @RequestParam Long organizationId) {
         return Optional.ofNullable(projectConfigService.queryWorkFlowFirstStatus(projectId, applyType, issueTypeId, organizationId))
                 .map(initStatusId -> encryptionService.encrypt(initStatusId.toString(), EncryptionUtils.BLANK_KEY))
                 .map(Results::success)
@@ -239,13 +242,13 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "设置状态机的默认状态")
     @PutMapping(value = "/status_transform/setting_default_status")
     public ResponseEntity<Void> settingDefaultStatus(@ApiParam(value = "项目id", required = true)
-                                               @PathVariable("project_id") Long projectId,
-                                               @ApiParam(value = "问题类型id", required = true)
-                                               @RequestParam @Encrypt Long issueTypeId,
-                                               @ApiParam(value = "状态机id", required = true)
-                                               @RequestParam @Encrypt Long stateMachineId,
-                                               @ApiParam(value = "状态id", required = true)
-                                               @RequestParam @Encrypt Long statusId) {
+                                                     @PathVariable("project_id") Long projectId,
+                                                     @ApiParam(value = "问题类型id", required = true)
+                                                     @RequestParam @Encrypt Long issueTypeId,
+                                                     @ApiParam(value = "状态机id", required = true)
+                                                     @RequestParam @Encrypt Long stateMachineId,
+                                                     @ApiParam(value = "状态id", required = true)
+                                                     @RequestParam @Encrypt Long statusId) {
         projectConfigService.defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
         return Results.success();
     }
@@ -306,15 +309,15 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "删除状态机里面的node")
     @DeleteMapping(value = "/state_machine_node/delete")
     public ResponseEntity<Void> deleteNode(@ApiParam(value = "项目id", required = true)
-                                     @PathVariable("project_id") Long projectId,
-                                     @ApiParam(value = "问题类型id", required = true)
-                                     @RequestParam @Encrypt Long issueTypeId,
-                                     @ApiParam(value = "应用类型", required = true)
-                                     @RequestParam String applyType,
-                                     @ApiParam(value = "节点id", required = true)
-                                     @RequestParam @Encrypt Long nodeId,
-                                     @ApiParam(value = "状态id")
-                                     @RequestParam(required = false) @Encrypt Long statusId) {
+                                           @PathVariable("project_id") Long projectId,
+                                           @ApiParam(value = "问题类型id", required = true)
+                                           @RequestParam @Encrypt Long issueTypeId,
+                                           @ApiParam(value = "应用类型", required = true)
+                                           @RequestParam String applyType,
+                                           @ApiParam(value = "节点id", required = true)
+                                           @RequestParam @Encrypt Long nodeId,
+                                           @ApiParam(value = "状态id")
+                                           @RequestParam(required = false) @Encrypt Long statusId) {
         projectConfigService.deleteNode(projectId, issueTypeId, applyType, nodeId, statusId);
         return Results.success();
     }
@@ -323,17 +326,17 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "自定义流转列表")
     @GetMapping(value = "/status_transform_setting/list")
     public ResponseEntity<Page<StatusSettingVO>> statusTransformSettingList(@ApiParam(value = "项目id", required = true)
-                                                                            @PathVariable("project_id") Long projectId,
+                                                                                @PathVariable("project_id") Long projectId,
                                                                             @SortDefault(value = "smn.rank, smn.id", direction = Sort.Direction.ASC)
-                                                                                    PageRequest pageRequest,
+                                                                                PageRequest pageRequest,
                                                                             @ApiParam(value = "问题类型id", required = true)
-                                                                            @RequestParam @Encrypt Long issueTypeId,
+                                                                                @RequestParam @Encrypt Long issueTypeId,
                                                                             @ApiParam(value = "模糊查询")
-                                                                            @RequestParam(required = false) String param,
+                                                                                @RequestParam(required = false) String param,
                                                                             @ApiParam(value = "应用类型", required = true)
-                                                                            @RequestParam String applyType,
+                                                                                @RequestParam String applyType,
                                                                             @ApiParam(value = "编码", required = true)
-                                                                            @RequestParam String schemeCode) {
+                                                                                @RequestParam String schemeCode) {
         return Results.success(projectConfigService.statusTransformSettingList(projectId, issueTypeId, pageRequest, param, applyType, schemeCode));
     }
 }

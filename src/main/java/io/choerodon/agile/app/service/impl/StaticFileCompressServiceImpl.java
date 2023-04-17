@@ -1,21 +1,28 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.junrar.Archive;
 import com.github.junrar.exception.RarException;
 import com.github.junrar.rarfile.FileHeader;
-import io.choerodon.agile.app.service.FilePathService;
-import io.choerodon.agile.infra.enums.FileUploadBucket;
-import io.choerodon.core.client.MessageClientC7n;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.lang.StringUtils;
-import org.hzero.boot.file.FileClient;
-import org.hzero.boot.file.dto.FileDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -27,30 +34,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import io.choerodon.agile.api.vo.StaticFileOperationHistorySocketVO;
+import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.StaticFileCompressService;
 import io.choerodon.agile.infra.dto.StaticFileCompressDTO;
 import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.agile.infra.dto.StaticFileLineDTO;
 import io.choerodon.agile.infra.dto.StaticFileOperationHistoryDTO;
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.helper.snowflake.SnowflakeHelper;
+
+import org.hzero.boot.file.FileClient;
+import org.hzero.boot.file.dto.FileDTO;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -98,7 +97,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private FileClient fileClient;
     @Autowired
@@ -513,7 +512,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error", e);
         }
-        messageClientC7n.sendByUserId(userId, messageCode, message);
+        socketSendHelper.sendByUserId(userId, messageCode, message);
     }
 
     private String getSuffix(String fileName) {

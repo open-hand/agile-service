@@ -1,14 +1,20 @@
 package io.choerodon.agile.api.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.report.CustomChartDataVO;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author chihao.ran@hand-china.com
  * 2021/06/21 16:40
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomChartVO {
+
+    @Encrypt
     @ApiModelProperty(value = "主键id")
     private Long id;
     @ApiModelProperty(value = "自定义报表名称")

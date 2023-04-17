@@ -4,6 +4,15 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
@@ -21,15 +30,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.hzero.core.message.MessageAccessor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -487,24 +489,23 @@ public class StatusServiceImpl implements StatusService {
             Long newProjectId = projectId == null ? 0L : projectId;
             IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
             issueTypeSearchVO.setEnabled(true);
-            issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO)
-                    .forEach(x -> {
-                        if (Objects.equals(x.getTypeCode(), "feature")) {
-                            filterIssueType.add(x.getId());
-                        }
-                    });
+            for (IssueTypeVO issueType : issueTypeMapper.selectByOptions(organizationId, newProjectId, issueTypeSearchVO)) {
+                if (IssueTypeCode.FEATURE.value().equals(issueType.getTypeCode())) {
+                    filterIssueType.add(issueType.getId());
+                }
+            }
         }
         return filterIssueType;
     }
 
     private void checkInitStatus(Long projectId, List<String> applyTypes, Long statusId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<Long> filterIssueType = filterIssueType(projectId, applyTypes);
+        List<Long> filterIssueTypeIds = filterIssueType(projectId, applyTypes);
         List<StatusMachineSchemeConfigVO> list = nodeDeployMapper.selectInitNode(organizationId, projectId, applyTypes, statusId);
         if(CollectionUtils.isEmpty(list)){
             return;
         }
-        list = list.stream().filter(v -> !(Objects.equals(SchemeApplyType.AGILE, v.getApplyType()) && filterIssueType.contains(v.getIssueTypeId()))).collect(Collectors.toList());
+        list = list.stream().filter(v -> !filterIssueTypeIds.contains(v.getIssueTypeId())).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(list)) {
             throw new CommonException("error.delete.init.status");
         }

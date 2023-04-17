@@ -1,12 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.base.BaseConstants;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.app.service.*;
@@ -25,6 +29,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
+import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -35,10 +40,6 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import org.hzero.core.base.BaseConstants;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 
 
 /**
@@ -127,7 +128,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private TestServiceClientOperator testServiceClientOperator;
     @Autowired
     private StatusBranchMergeSettingMapper statusBranchMergeSettingMapper;
-    
+
     @Autowired
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
     @Autowired
@@ -141,6 +142,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Autowired
     private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
+    @Autowired
+    private RemoteIamOperator remoteIamOperator;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -216,8 +219,13 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<IssueTypeWithStateMachineIdVO> queryIssueTypesWithStateMachineIdByProjectId(Long projectId,
+                                                                                            Long targetProjectId,
                                                                                             String applyType,
                                                                                             Boolean onlyEnabled) {
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
+            remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
+            projectId = targetProjectId;
+        }
         // 获取项目的 applyTypes
         List<String> applyTypes = new ArrayList<>();
         if (ObjectUtils.isEmpty(applyType)) {
@@ -266,7 +274,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public List<StatusVO> queryStatusByProjectId(Long projectId, String applyType) {
+    public List<StatusVO> queryStatusByProjectId(Long projectId, Long targetProjectId, String applyType) {
+        if (!Objects.equals(projectId, targetProjectId) && targetProjectId != null) {
+            remoteIamOperator.checkTargetProjectPermission(projectId, targetProjectId, true);
+            projectId = targetProjectId;
+        }
         List<String> applyTypes = new ArrayList<>();
         if (ObjectUtils.isEmpty(applyType)) {
             applyTypes = ProjectCategory.getProjectApplyType(projectId);
@@ -545,7 +557,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         // 关联状态机
         if (!CollectionUtils.isEmpty(issueTypeIds)) {
-            List<IssueTypeWithStateMachineIdVO> issueTypes = queryIssueTypesWithStateMachineIdByProjectId(projectId, null, false);
+            List<IssueTypeWithStateMachineIdVO> issueTypes = queryIssueTypesWithStateMachineIdByProjectId(projectId, null, null, false);
             Map<Long, String> issueTypeApplyTypeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeWithStateMachineIdVO::getId, IssueTypeWithStateMachineIdVO::getApplyType));
             statusVO.setId(status.getId());
             for (Long issueTypeId:issueTypeIds) {
@@ -823,7 +835,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 throw new CommonException("error.status.branch_merge_setting_exist");
             }
         }
-        
+
         // 校验是否存在关联问题联动设置
         List<LinkIssueStatusLinkageDTO> statusLinkageDTOS = linkIssueStatusLinkageMapper.selectAllLinkStatusSetting(projectId, issueTypeId, currentStatusId);
         if (!CollectionUtils.isEmpty(statusLinkageDTOS)) {
@@ -972,8 +984,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public void initIssueTypeStatusMachine(Long projectId, String applyType) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+    public void initIssueTypeStatusMachine(ProjectEvent projectEvent, String applyType) {
+        Long projectId = projectEvent.getProjectId();
+        Long organizationId = projectEvent.getOrganizationId();
         ProjectConfigDTO projectConfigDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
         ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType);
         if (ObjectUtils.isEmpty(projectConfigDTO)) {

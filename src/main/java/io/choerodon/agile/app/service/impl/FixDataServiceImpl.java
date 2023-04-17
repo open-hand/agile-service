@@ -25,6 +25,7 @@ import org.springframework.util.ObjectUtils;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.v2.FixPersonalFilterService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
@@ -109,6 +110,8 @@ public class FixDataServiceImpl implements FixDataService {
     private IssueMapper issueMapper;
     @Autowired
     private PriorityMapper priorityMapper;
+    @Autowired
+    private FixPersonalFilterService fixPersonalFilterService;
 
     @Override
     public void fixCreateProject() {
@@ -120,7 +123,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("查询出有问题的项目共有{}个，开始修复数据", projectIds.size());
         int count = 0;
         for (Long projectId : projectIds) {
-            ProjectVO project = remoteIamOperator.queryProject(projectId);
+            ProjectVO project = ConvertUtil.queryProject(projectId);
             LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
             if (
                     project == null
@@ -151,7 +154,7 @@ public class FixDataServiceImpl implements FixDataService {
             LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
             return;
         }
-        ProjectVO project = remoteIamOperator.queryProject(projectId);
+        ProjectVO project = ConvertUtil.queryProject(projectId);
         LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
         if (
                 project == null
@@ -204,7 +207,7 @@ public class FixDataServiceImpl implements FixDataService {
         //创建项目时创建默认状态机方案
         stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
         //创建项目时创建默认问题类型方案
-        issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
+        issueTypeSchemeService.initByConsumeCreateProject(projectEvent, projectEvent.getProjectCode());
         LOGGER.info("已修复数据，项目id:{}", projectId);
     }
     @Override
@@ -334,6 +337,14 @@ public class FixDataServiceImpl implements FixDataService {
         fixStatusTransferSetting();
         fixStatusNoticeSetting();
         migrateWorkGroupData();
+    }
+
+    @Override
+    public void fixPersonalFilter(Set<String> typeCodes) {
+        fixPersonalFilterService.fix(typeCodes);
+        if(backlogExpandService != null) {
+            backlogExpandService.fixPersonalFilter();
+        }
     }
 
     private void migrateWorkGroupData() {

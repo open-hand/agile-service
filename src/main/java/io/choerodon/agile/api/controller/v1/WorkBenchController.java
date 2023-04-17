@@ -3,6 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import java.util.List;
 import java.util.Optional;
 
+import static io.choerodon.agile.app.service.impl.PersonalFilterServiceImpl.V1;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.*;
@@ -176,11 +178,12 @@ public class WorkBenchController {
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("工作台创建我的筛选")
     @PostMapping("/personal_filter")
+    @Deprecated
     public ResponseEntity<PersonalFilterVO> create(@ApiParam(value = "组织id", required = true)
                                                    @PathVariable(name = "organization_id") Long organizationId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.create(organizationId, 0L, personalFilterVO))
+        return Optional.ofNullable(personalFilterService.create(organizationId, 0L, personalFilterVO, V1))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
@@ -188,13 +191,14 @@ public class WorkBenchController {
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @ApiOperation("工作台修改我的筛选")
     @PutMapping(value = "/personal_filter/{filterId}")
+    @Deprecated
     public ResponseEntity<PersonalFilterVO> update(@ApiParam(value = "组织id", required = true)
                                                    @PathVariable(name = "organization_id") Long organizationId,
                                                    @ApiParam(value = "filter id", required = true)
                                                    @PathVariable @Encrypt Long filterId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.update(organizationId, 0L, filterId, personalFilterVO))
+        return Optional.ofNullable(personalFilterService.update(organizationId, 0L, filterId, personalFilterVO, V1))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
@@ -221,7 +225,7 @@ public class WorkBenchController {
                                                                   @RequestParam(name = "searchStr", required = false) String searchStr,
                                                                   @ApiParam(value = "类型code", required = true)
                                                                   @RequestParam(name = "filterTypeCode") String filterTypeCode) {
-        return Optional.ofNullable(personalFilterService.listByUserId(organizationId, 0L, userId, searchStr, filterTypeCode))
+        return Optional.ofNullable(personalFilterService.listByUserId(organizationId, 0L, userId, searchStr, filterTypeCode, V1))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.list"));
     }

@@ -30,7 +30,8 @@ import java.util.Objects;
 @Transactional(rollbackFor = Exception.class)
 public class PersonalTemplateServiceImpl implements PersonalTemplateService {
 
-    private static final String[] AGILE_PERSONAL_TEMPLATE_ACTIONS = {"agile_import_issue","agile_export_issue","agile_export_feature", "agile_export_backlog","agile_import_backlog"};
+    private static final String[] AGILE_PERSONAL_TEMPLATE_ACTIONS = {"agile_import_issue","agile_export_issue","agile_export_feature"};
+    private static final String[] BACKLOG_PERSONAL_TEMPLATE_ACTIONS = {"agile_export_backlog","agile_import_backlog"};
     private static final String[] PROGRAM_PERSONAL_TEMPLATE_ACTIONS = {"program_import_feature","program_export_feature", "program_export_backlog","program_import_backlog"};
     private static final String[] PERSONAL_TEMPLATE_TYPES = {"excel"};
     @Autowired
@@ -129,8 +130,12 @@ public class PersonalTemplateServiceImpl implements PersonalTemplateService {
         boolean containsAgile =
                 categories.contains(ProjectCategory.MODULE_AGILE) || categories.contains(ProjectCategory.MODULE_WATERFALL_AGILE);
         boolean containsProgram = categories.contains(ProjectCategory.MODULE_PROGRAM);
+        boolean containsBacklog = categories.contains(ProjectCategory.MODULE_BACKLOG);
         if (containsAgile) {
             actions.addAll(Arrays.asList(AGILE_PERSONAL_TEMPLATE_ACTIONS));
+        }
+        if (containsBacklog) {
+            actions.addAll(Arrays.asList(BACKLOG_PERSONAL_TEMPLATE_ACTIONS));
         }
         if (containsProgram) {
             actions.addAll(Arrays.asList(PROGRAM_PERSONAL_TEMPLATE_ACTIONS));

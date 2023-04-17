@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/3/29
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ObjectSchemeFieldVO {
     @ApiModelProperty(value = "字段id")
     @Encrypt
@@ -231,5 +233,33 @@ public class ObjectSchemeFieldVO {
 
     public void setIssueTypeIds(List<Long> issueTypeIds) {
         this.issueTypeIds = issueTypeIds;
+    }
+
+    @Override
+    public String toString() {
+        return "ObjectSchemeFieldVO{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", fieldType='" + fieldType + '\'' +
+                ", fieldTypeName='" + fieldTypeName + '\'' +
+                ", system=" + system +
+                ", required=" + required +
+                ", requiredScope='" + requiredScope + '\'' +
+                ", context='" + context + '\'' +
+                ", contextName='" + contextName + '\'' +
+                ", schemeCode='" + schemeCode + '\'' +
+                ", defaultValue='" + defaultValue + '\'' +
+                ", projectId=" + projectId +
+                ", organizationId=" + organizationId +
+                ", objectVersionNumber=" + objectVersionNumber +
+                ", fieldOptions=" + fieldOptions +
+                ", defaultValueObj=" + defaultValueObj +
+                ", contexts=" + contexts +
+                ", extraConfig=" + extraConfig +
+                ", issueTypeVOList=" + issueTypeVOList +
+                ", issueTypeIds=" + issueTypeIds +
+                '}';
     }
 }

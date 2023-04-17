@@ -117,7 +117,6 @@ public class ReportServiceImpl implements ReportService {
     private static final String FIELD_REMAINING_TIME_NAME = "remaining_time";
     private static final String FIELD_STORY_POINTS_NAME = "story_points";
     private static final String SPRINT_CLOSED = "closed";
-    private static final String VERSION_ARCHIVED_CODE = "archived";
     private static final String VERSION_REPORT_ERROR = "error.report.version";
     private static final String ISSUE_STORY_CODE = "story";
     private static final String ASSIGNEE = "assignee";
@@ -448,7 +447,7 @@ public class ReportServiceImpl implements ReportService {
         versionDO.setProjectId(projectId);
         versionDO.setVersionId(versionId);
         versionDO = versionMapper.selectOne(versionDO);
-        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), VERSION_ARCHIVED_CODE)) {
+        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED)) {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
         Map<String, String> orders = new HashMap<>();
@@ -470,7 +469,7 @@ public class ReportServiceImpl implements ReportService {
         versionDO.setProjectId(projectId);
         versionDO.setVersionId(versionId);
         versionDO = versionMapper.selectOne(versionDO);
-        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), VERSION_ARCHIVED_CODE)) {
+        if (versionDO == null || Objects.equals(versionDO.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED)) {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
         List<VersionReportVO> versionReport = new ArrayList<>();
@@ -1678,8 +1677,8 @@ public class ReportServiceImpl implements ReportService {
         String filterSql;
         List<Long> assigneeFilterIds = null;
         StringBuilder selectSql = new StringBuilder();
-        StringBuilder groupSql = new StringBuilder();
-        StringBuilder linkSql = new StringBuilder();
+        LinkedHashSet<String> groupSql = new LinkedHashSet<>();
+        LinkedHashSet<String> linkSql = new LinkedHashSet<>();
         FieldSql analysisFieldSql = null;
         FieldSql comparedFieldSql = null;
 
@@ -1712,8 +1711,8 @@ public class ReportServiceImpl implements ReportService {
                 filterSql,
                 assigneeFilterIds,
                 selectSql.toString(),
-                groupSql.toString(),
-                linkSql.toString());
+                String.join(",\n", groupSql),
+                String.join("\n", linkSql));
         dealCustomChartIdDataAndPercent(result, analysisFieldSql, comparedFieldSql);
         return result;
     }
@@ -1814,8 +1813,8 @@ public class ReportServiceImpl implements ReportService {
             Boolean predefined,
             String type,
             StringBuilder selectSql,
-            StringBuilder groupSql,
-            StringBuilder linkSql,
+            LinkedHashSet<String> groupSqlSet,
+            LinkedHashSet<String>  linkSqlSet,
             Long organizationId,
             Long projectId) {
         FieldSql fieldSql;
@@ -1833,19 +1832,15 @@ public class ReportServiceImpl implements ReportService {
             if (fieldSql == null) {
                 throw new CommonException("error.customReport.field.not.support");
             }
-            linkSql.append("\n")
-                    .append(CustomFieldSql.getDefaultSql(fieldCode, type));
+            linkSqlSet.add(CustomFieldSql.getDefaultSql(fieldCode, type));
         }
         selectSql.append(", ")
                 .append(fieldSql.getValueSql())
                 .append(" AS ").append(type).append("_value, ")
                 .append(fieldSql.getIdSql())
                 .append(" AS ").append(type).append("_id");
-        if (groupSql.length() > 0) {
-            groupSql.append(", ");
-        }
-        groupSql.append(fieldSql.getGroupSql());
-        linkSql.append("\n").append(fieldSql.getLinkSql());
+        groupSqlSet.add(fieldSql.getGroupSql());
+        linkSqlSet.add(fieldSql.getLinkSql());
         return fieldSql;
     }
 

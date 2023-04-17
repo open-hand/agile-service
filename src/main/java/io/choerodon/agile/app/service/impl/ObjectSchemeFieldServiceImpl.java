@@ -1930,7 +1930,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         break;
                     //多选
                     case FieldCode.FIX_VERSION:
-                        List<ProductVersionNameVO> fixVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, Collections.singletonList("version_planning")), new TypeToken<List<ProductVersionNameVO>>() {
+                        List<ProductVersionNameVO> fixVersionList = modelMapper.map(productVersionMapper.queryNameByOptions(projectId, Collections.singletonList(ProductVersionService.VERSION_STATUS_CODE_PLANNING)), new TypeToken<List<ProductVersionNameVO>>() {
                         }.getType());
                         Map<Long, Object> fixVersionMap = fixVersionList.stream().collect(Collectors.toMap(ProductVersionNameVO::getVersionId, Function.identity()));
                         setDefaultValueObjsOfMultiple(defaultValue, fixVersionMap, view);

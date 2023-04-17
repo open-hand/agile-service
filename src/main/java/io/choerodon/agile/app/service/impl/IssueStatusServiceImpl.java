@@ -1,20 +1,9 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.validator.IssueStatusValidator;
-import io.choerodon.agile.api.vo.IssueStatusVO;
-import io.choerodon.agile.api.vo.StatusAndIssuesVO;
-import io.choerodon.agile.api.vo.StatusMoveVO;
-import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.api.vo.event.AddStatusWithProject;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.mapper.ColumnStatusRelMapper;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.IssueStatusMapper;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.core.exception.CommonException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +12,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import io.choerodon.agile.api.validator.IssueStatusValidator;
+import io.choerodon.agile.api.vo.IssueStatusVO;
+import io.choerodon.agile.api.vo.StatusAndIssuesVO;
+import io.choerodon.agile.api.vo.StatusMoveVO;
+import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.event.AddStatusWithProject;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
+import io.choerodon.agile.infra.dto.ColumnStatusRelDTO;
+import io.choerodon.agile.infra.dto.IssueStatusDTO;
+import io.choerodon.agile.infra.dto.StatusAndIssuesDTO;
+import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.mapper.ColumnStatusRelMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
+import io.choerodon.agile.infra.utils.RedisUtil;
+import io.choerodon.core.exception.CommonException;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -139,7 +143,7 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         // 判断是否在同一列中操作，更新列中position
         Boolean sameRow = statusMoveVO.getColumnId().equals(statusMoveVO.getOriginColumnId());
         deleteColumnStatusRel(0L, projectId, statusId, statusMoveVO.getOriginColumnId());
-        updateColumnPosition(0L, projectId, statusId, statusMoveVO,sameRow);
+        updateColumnPosition(0L, projectId, statusId, statusMoveVO, sameRow);
         return modelMapper.map(issueStatusMapper.selectByStatusId(projectId, statusId), IssueStatusVO.class);
     }
 
@@ -155,7 +159,7 @@ public class IssueStatusServiceImpl implements IssueStatusService {
 
     @Override
     public List<StatusAndIssuesVO> queryUnCorrespondStatus(Long projectId, Long boardId, String applyType) {
-        List<StatusVO> statusMapVOList = projectConfigService.queryStatusByProjectId(projectId, applyType);
+        List<StatusVO> statusMapVOList = projectConfigService.queryStatusByProjectId(projectId, null, applyType);
         List<Long> realStatusIds = new ArrayList<>();
         for (StatusVO statusMapVO : statusMapVOList) {
             realStatusIds.add(statusMapVO.getId());
@@ -254,28 +258,28 @@ public class IssueStatusServiceImpl implements IssueStatusService {
     }
 
     @Override
-    public void updateColumnPosition(Long organizationId, Long projectId, Long statusId, StatusMoveVO statusMoveVO,Boolean sameRow) {
+    public void updateColumnPosition(Long organizationId, Long projectId, Long statusId, StatusMoveVO statusMoveVO, Boolean sameRow) {
         //查询移动到目的列的已有的所有状态
-        List<ColumnStatusRelDTO> collect = columnStatusRelMapper.selectStatusRel(organizationId, projectId,statusMoveVO.getColumnId(),statusId);
+        List<ColumnStatusRelDTO> collect = columnStatusRelMapper.selectStatusRel(organizationId, projectId, statusMoveVO.getColumnId(), statusId);
         // 如果不是移动到同一个列，对原列中的状态重新改变position
-        if(Boolean.FALSE.equals(sameRow)){
-            updateOlderColumn(organizationId, projectId,statusId,statusMoveVO);
+        if (Boolean.FALSE.equals(sameRow)) {
+            updateOlderColumn(organizationId, projectId, statusId, statusMoveVO);
         }
         // 拥有的所有状态为空，直接接创建一个
         if (CollectionUtils.isEmpty(collect)) {
-            createColumnStatusRel(organizationId, projectId,statusId,statusMoveVO);
+            createColumnStatusRel(organizationId, projectId, statusId, statusMoveVO);
             return;
         }
         int size = collect.size() + 1;
         // 对指定列进行排序，新增传过来的状态
-        cycleUpdate(organizationId, projectId,statusId,size,statusMoveVO,collect);
+        cycleUpdate(organizationId, projectId, statusId, size, statusMoveVO, collect);
     }
 
-    private void updateOlderColumn(Long organizationId, Long projectId,Long statusId,StatusMoveVO statusMoveVO){
+    private void updateOlderColumn(Long organizationId, Long projectId, Long statusId, StatusMoveVO statusMoveVO) {
         // 查询当前列中的状态，按position升序排列
         List<ColumnStatusRelDTO> columnStatusRelDTOS = columnStatusRelMapper.selectStatusRel(organizationId, projectId, statusMoveVO.getOriginColumnId(), statusId);
-        if(!CollectionUtils.isEmpty(columnStatusRelDTOS)){
-            for (int i=0;i<columnStatusRelDTOS.size();i++){
+        if (!CollectionUtils.isEmpty(columnStatusRelDTOS)) {
+            for (int i = 0; i < columnStatusRelDTOS.size(); i++) {
                 ColumnStatusRelDTO columnStatusRelDTO = columnStatusRelDTOS.get(i);
                 columnStatusRelDTO.setPosition(i);
                 baseUpdatePosition(columnStatusRelDTO);
@@ -283,23 +287,22 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         }
     }
 
-    private void cycleUpdate(Long organizationId, Long projectId,Long statusId,int size,StatusMoveVO statusMoveVO,List<ColumnStatusRelDTO> columnStatusRelDTOS){
-        if(CollectionUtils.isEmpty(columnStatusRelDTOS)){
+    private void cycleUpdate(Long organizationId, Long projectId, Long statusId, int size, StatusMoveVO statusMoveVO, List<ColumnStatusRelDTO> columnStatusRelDTOS) {
+        if (CollectionUtils.isEmpty(columnStatusRelDTOS)) {
             return;
         }
         boolean isInsert = false;
-        for(int i= 0; i<size;i++){
-            if(statusMoveVO.getPosition() == i){
+        for (int i = 0; i < size; i++) {
+            if (statusMoveVO.getPosition() == i) {
                 isInsert = true;
-                createColumnStatusRel(organizationId, projectId,statusId,statusMoveVO);
-            }
-            else {
+                createColumnStatusRel(organizationId, projectId, statusId, statusMoveVO);
+            } else {
                 int position = i;
-                if(Boolean.TRUE.equals(isInsert)){
-                    position = position -1;
+                if (Boolean.TRUE.equals(isInsert)) {
+                    position = position - 1;
                 }
                 ColumnStatusRelDTO columnStatusRelDTO = columnStatusRelDTOS.get(position);
-                if(ObjectUtils.isEmpty(columnStatusRelDTO)){
+                if (ObjectUtils.isEmpty(columnStatusRelDTO)) {
                     break;
                 }
                 columnStatusRelDTO.setPosition(i);
@@ -309,8 +312,8 @@ public class IssueStatusServiceImpl implements IssueStatusService {
     }
 
     @Override
-    public void baseUpdatePosition(ColumnStatusRelDTO columnStatusRelDTO){
-        if(columnStatusRelMapper.updatePosition(columnStatusRelDTO) != 1){
+    public void baseUpdatePosition(ColumnStatusRelDTO columnStatusRelDTO) {
+        if (columnStatusRelMapper.updatePosition(columnStatusRelDTO) != 1) {
             throw new CommonException("error.update.position");
         }
     }

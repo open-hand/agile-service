@@ -50,143 +50,161 @@ public class ObjectSchemeFieldDTO extends AuditDomain {
         return pages;
     }
 
-    public void setPages(List<PageFieldDTO> pages) {
+    public ObjectSchemeFieldDTO setPages(List<PageFieldDTO> pages) {
         this.pages = pages;
+        return this;
     }
 
     public String getRank() {
         return rank;
     }
 
-    public void setRank(String rank) {
+    public ObjectSchemeFieldDTO setRank(String rank) {
         this.rank = rank;
+        return this;
     }
 
     public String getCreatedLevel() {
         return createdLevel;
     }
 
-    public void setCreatedLevel(String createdLevel) {
+    public ObjectSchemeFieldDTO setCreatedLevel(String createdLevel) {
         this.createdLevel = createdLevel;
+        return this;
     }
 
     public List<ObjectSchemeFieldExtendDTO> getExtendFields() {
         return extendFields;
     }
 
-    public void setExtendFields(List<ObjectSchemeFieldExtendDTO> extendFields) {
+    public ObjectSchemeFieldDTO setExtendFields(List<ObjectSchemeFieldExtendDTO> extendFields) {
         this.extendFields = extendFields;
+        return this;
     }
 
     public String getFieldTypeName() {
         return fieldTypeName;
     }
 
-    public void setFieldTypeName(String fieldTypeName) {
+    public ObjectSchemeFieldDTO setFieldTypeName(String fieldTypeName) {
         this.fieldTypeName = fieldTypeName;
+        return this;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public ObjectSchemeFieldDTO setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public ObjectSchemeFieldDTO setCode(String code) {
         this.code = code;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public ObjectSchemeFieldDTO setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public ObjectSchemeFieldDTO setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public String getFieldType() {
         return fieldType;
     }
 
-    public void setFieldType(String fieldType) {
+    public ObjectSchemeFieldDTO setFieldType(String fieldType) {
         this.fieldType = fieldType;
+        return this;
     }
 
     public String getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public ObjectSchemeFieldDTO setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+        return this;
     }
 
     public Boolean getExtraConfig() {
         return extraConfig;
     }
 
-    public void setExtraConfig(Boolean extraConfig) {
+    public ObjectSchemeFieldDTO setExtraConfig(Boolean extraConfig) {
         this.extraConfig = extraConfig;
+        return this;
     }
 
     public Boolean getSystem() {
         return system;
     }
 
-    public void setSystem(Boolean system) {
+    public ObjectSchemeFieldDTO setSystem(Boolean system) {
         this.system = system;
+        return this;
     }
 
     public Boolean getRequired() {
         return required;
     }
 
-    public void setRequired(Boolean required) {
+    public ObjectSchemeFieldDTO setRequired(Boolean required) {
         this.required = required;
+        return this;
     }
 
     public String getContext() {
         return context;
     }
 
-    public void setContext(String context) {
+    public ObjectSchemeFieldDTO setContext(String context) {
         this.context = context;
+        return this;
     }
 
     public String getSchemeCode() {
         return schemeCode;
     }
 
-    public void setSchemeCode(String schemeCode) {
+    public ObjectSchemeFieldDTO setSchemeCode(String schemeCode) {
         this.schemeCode = schemeCode;
+        return this;
     }
 
     public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public ObjectSchemeFieldDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Long organizationId) {
+    public ObjectSchemeFieldDTO setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+        return this;
     }
 }

@@ -1,15 +1,20 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.search.Condition;
+import io.choerodon.agile.api.vo.search.Field;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
+import io.choerodon.agile.api.vo.search.Value;
 import io.choerodon.agile.app.assembler.BoardAssembler;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.GanttChartService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.OrganizationGanttChartService;
+import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.GanttDimension;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
@@ -22,6 +27,8 @@ import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +58,10 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     private BoardAssembler boardAssembler;
     @Autowired
     private IssueService issueService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired
+    private AdvancedParamParserService advancedParamParserService;
 
     private static final String ERROR_GANTT_DIMENSION_NOT_SUPPORT = "error.gantt.dimension.not.support";
 
@@ -74,6 +85,27 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         Map<Long, ProjectVO> newProjectMap = new HashMap<>();
         newProjectMap.put(projectId, project);
         return ganttChartService.listByProjectIdAndSearch(newProjectMap, searchVO, pageRequest, organizationId, false);
+    }
+
+    @Override
+    public Page<GanttChartVO> pagedQueryV2(Long organizationId,
+                                           SearchParamVO searchParamVO,
+                                           PageRequest pageRequest) {
+        Long projectId = getSubProjectId(searchParamVO);
+        AssertUtilsForCommonException.notNull(projectId, "error.gantt.subProject.null");
+        List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
+        if (ObjectUtils.isEmpty(projects)) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
+        Map<Long, ProjectVO> projectMap =
+                projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+        ProjectVO project = projectMap.get(projectId);
+        if (ObjectUtils.isEmpty(project)) {
+            throw new CommonException("error.gantt.illegal.project.id");
+        }
+        Map<Long, ProjectVO> newProjectMap = new HashMap<>();
+        newProjectMap.put(projectId, project);
+        return ganttChartService.listByProjectIdAndSearchV2(newProjectMap, searchParamVO, pageRequest, organizationId, false);
     }
 
     @Override
@@ -178,6 +210,37 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         return result;
     }
 
+    @Override
+    public List<EstimatedTimeConflictVO> queryEstimatedTimeConflictV2(Long organizationId, SearchParamVO searchParamVO) {
+        String dimension = searchParamVO.getDimension();
+        if (!GanttDimension.isAssignee(dimension)) {
+            throw new CommonException(ERROR_GANTT_DIMENSION_NOT_SUPPORT);
+        }
+        Set<Long> userIds = new HashSet<>();
+        List<IssueDTO> issues = queryConflictIssuesV2(organizationId, searchParamVO, userIds);
+        if (ObjectUtils.isEmpty(userIds) || ObjectUtils.isEmpty(issues)) {
+            return Collections.emptyList();
+        }
+        Map<Long, List<IssueDTO>> assigneeMap = issues.stream().collect(Collectors.groupingBy(IssueDTO::getAssigneeId));
+        List<EstimatedTimeConflictVO> result = new ArrayList<>();
+        userIds.forEach(userId -> {
+            EstimatedTimeConflictVO vo = new EstimatedTimeConflictVO();
+            result.add(vo);
+            vo.setUserId(userId);
+            boolean isConflicted = !ObjectUtils.isEmpty(assigneeMap.get(userId));
+            vo.setConflicted(isConflicted);
+        });
+        return result;
+    }
+
+    /**
+     * @param organizationId
+     * @param searchVO
+     * @param userIds
+     * @return
+     * @see OrganizationGanttChartServiceImpl#queryConflictIssuesV2(Long, SearchParamVO, Set)
+     */
+    @Deprecated
     private List<IssueDTO> queryConflictIssues(Long organizationId,
                                                SearchVO searchVO,
                                                Set<Long> userIds) {
@@ -198,6 +261,36 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         return issueMapper.selectConflictEstimatedTime(new HashSet<>(projectIds), userIds, null, null, null, null);
     }
 
+    private List<IssueDTO> queryConflictIssuesV2(Long organizationId,
+                                                 SearchParamVO searchParamVO,
+                                                 Set<Long> userIds) {
+        Long projectId = getSubProjectId(searchParamVO);
+        AssertUtilsForCommonException.notNull(projectId, "error.gantt.subProject.null");
+        searchParamVO.addGanttTypeCodes(
+                Arrays.asList(
+                        IssueTypeCode.STORY.value(),
+                        IssueTypeCode.BUG.value(),
+                        IssueTypeCode.TASK.value(),
+                        IssueTypeCode.SUB_TASK.value()));
+        String quickFilterSql = issueService.getQuickFilter(searchParamVO.getQuickFilterIds());
+        Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
+        if (agilePluginService != null) {
+            predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
+        }
+        Set<Long> projectIdSet = SetUtils.unmodifiableSet(projectId);
+        String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIdSet, predefinedFieldMap);
+        userIds.addAll(issueMapper.queryAssigneeIdsBySearchParamVO(projectIdSet, quickFilterSql, advancedSql));
+        if (ObjectUtils.isEmpty(userIds)) {
+            return Collections.emptyList();
+        }
+        List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
+        List<Long> projectIds = projects.stream().map(ProjectVO::getId).collect(Collectors.toList());
+        if (projectIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return issueMapper.selectConflictEstimatedTimeV2(new HashSet<>(projectIds), userIds, null, null, null);
+    }
+
     @Override
     public Page<GanttChartVO> queryEstimatedTimeConflictDetails(Long organizationId,
                                                                 SearchVO searchVO,
@@ -213,7 +306,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         String filterSql = ganttChartService.getFilterSql(searchVO);
         boardAssembler.handleOtherArgs(searchVO);
         addProjectSortIfNotExisted(pageRequest);
-        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId);
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }
@@ -244,9 +337,69 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
     }
 
     @Override
+    public Page<GanttChartVO> queryEstimatedTimeConflictDetailsV2(Long organizationId,
+                                                                  SearchParamVO searchParamVO,
+                                                                  Long assigneeId,
+                                                                  PageRequest pageRequest) {
+        List<ProjectVO> projects = listAgileProjects(organizationId, null, null, null);
+        Map<Long, ProjectVO> projectMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+        Set<Long> projectIds = projectMap.keySet();
+        if (ObjectUtils.isEmpty(projectIds)) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
+        searchParamVO.addGanttTypeCodes(
+                Arrays.asList(
+                        IssueTypeCode.STORY.value(),
+                        IssueTypeCode.BUG.value(),
+                        IssueTypeCode.TASK.value(),
+                        IssueTypeCode.SUB_TASK.value()));
+        String quickFilterSql = issueService.getQuickFilter(searchParamVO.getQuickFilterIds());
+        addProjectSortIfNotExisted(pageRequest);
+        Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId, TableAliasConstant.DEFAULT_ALIAS);
+        if (ObjectUtils.isEmpty(projectIds)) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
+        Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
+        if (agilePluginService != null) {
+            predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
+        }
+        String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
+        Page<IssueDTO> issuePage =
+                PageHelper.doPage(pageRequest, () -> issueMapper.selectConflictEstimatedTimeV2(
+                        projectIds,
+                        new HashSet<>(Arrays.asList(assigneeId)),
+                        quickFilterSql,
+                        advancedSql,
+                        sortMap));
+        List<IssueDTO> issues = issuePage.getContent();
+        if (issues.isEmpty()) {
+            return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
+        }
+        Set<Long> filterProjectIds = filterByTeamProjectIdsV2(projectIds, searchParamVO);
+        Map<Long, ProjectVO> filterProjectMap = new HashMap<>();
+        projectMap.forEach((k, v) -> {
+            if (filterProjectIds.contains(k)) {
+                filterProjectMap.put(k, v);
+            }
+        });
+        List<Long> issueIds = issues.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+
+        List<IssueDTO> issueList = ganttChartService.querySubByIssueIds(filterProjectIds, issueIds, sortMap, false, null);
+        List<GanttChartVO> result = ganttChartService.buildGanttList(filterProjectMap, issueIds, issueList, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyList(), organizationId, null);
+        return PageUtils.copyPropertiesAndResetContent(issuePage, result);
+    }
+
+    @Override
     public Boolean isEstimatedTimeConflicted(Long organizationId, SearchVO searchVO) {
         Set<Long> userIds = new HashSet<>();
         List<IssueDTO> issues = queryConflictIssues(organizationId, searchVO, userIds);
+        return !issues.isEmpty();
+    }
+
+    @Override
+    public Boolean isEstimatedTimeConflictedV2(Long organizationId, SearchParamVO searchParamVO) {
+        Set<Long> userIds = new HashSet<>();
+        List<IssueDTO> issues = queryConflictIssuesV2(organizationId, searchParamVO, userIds);
         return !issues.isEmpty();
     }
 
@@ -284,6 +437,26 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         return result;
     }
 
+    private Set<Long> filterByTeamProjectIdsV2(Set<Long> projectIds, SearchParamVO searchParamVO) {
+        List<Long> filterProjectIds = getSubProjectIds(searchParamVO);
+        if (filterProjectIds.isEmpty()) {
+            return projectIds;
+        }
+        Set<Long> result = new HashSet<>();
+        filterProjectIds.forEach(id -> {
+            if (projectIds.contains(id)) {
+                result.add(id);
+            }
+        });
+        return result;
+    }
+
+    /**
+     * @param searchVO
+     * @return
+     * @see OrganizationGanttChartServiceImpl#getSubProjectId(SearchParamVO)
+     */
+    @Deprecated
     private Long getTeamProjectId(SearchVO searchVO) {
         Map<String, Object> searchArgs = searchVO.getSearchArgs();
         if (ObjectUtils.isEmpty(searchArgs)) {
@@ -294,5 +467,30 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
             return null;
         }
         return Long.valueOf(teamProjectIds.get(0));
+    }
+
+    private Long getSubProjectId(SearchParamVO searchParamVO) {
+        Long projectId = null;
+        List<Long> projectIds = getSubProjectIds(searchParamVO);
+        if (!projectIds.isEmpty()) {
+            projectId = projectIds.get(0);
+        }
+        return projectId;
+    }
+
+    private List<Long> getSubProjectIds(SearchParamVO searchParamVO) {
+        List<Condition> conditions = Optional.ofNullable(searchParamVO.getConditions()).orElse(new ArrayList<>());
+        conditions.addAll(Optional.ofNullable(searchParamVO.getAdvancedConditions()).orElse(new ArrayList<>()));
+        List<Long> projectIds = new ArrayList<>();
+        for (Condition condition : conditions) {
+            Field field = condition.getField();
+            if (field != null) {
+                String fieldCode = field.getFieldCode();
+                if (FieldCode.SUB_PROJECT.equals(fieldCode)) {
+                    projectIds.addAll(Optional.ofNullable(condition.getValue()).map(Value::getNoEncryptIdList).orElse(Collections.emptyList()));
+                }
+            }
+        }
+        return projectIds;
     }
 }

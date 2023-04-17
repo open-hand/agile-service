@@ -1,7 +1,21 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import io.choerodon.agile.api.vo.BatchUpdateFieldStatusVO;
 import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
 import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
@@ -12,23 +26,11 @@ import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.EnumUtil;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author zhaotianxin
@@ -44,7 +46,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     private FieldValueService fieldValueService;
 
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
 
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
@@ -71,7 +73,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
-            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
             }
@@ -84,6 +86,10 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             customFields = filterNotExistFields(customFields);
             JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
             int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size());
+            if (ObjectUtils.isEmpty(predefinedFields) && !ObjectUtils.isEmpty(customFields)) {
+                //如果只有自定义字段，allCount = issueId size
+                allCount = issueIds.size();
+            }
             double incrementalValue = 1.0 / (allCount == 0 ? 1 : allCount);
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
             Map<Long, TriggerCarrierVO> triggerCarrierMap = new HashMap<>();
@@ -98,7 +104,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             throw new CommonException("update field failed, exception: {}", e);
         }
         finally {
-            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 

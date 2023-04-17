@@ -8,6 +8,19 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.DataLog;
@@ -21,18 +34,6 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * 日志切面
@@ -55,7 +56,7 @@ public class DataLogAspect {
     private static final String LABEL_CREATE = "labelCreate";
     private static final String VERSION_DELETE = "versionDelete";
     private static final String BATCH_DELETE_VERSION = "batchDeleteVersion";
-    private static final String BATCH_DELETE_BY_VERSIONID = "batchDeleteByVersionId";
+    private static final String BATCH_DELETE_BY_VERSION_ID = "batchDeleteByVersionId";
     private static final String BATCH_UPDATE_ISSUE_EPIC_ID = "batchUpdateIssueEpicId";
     private static final String BATCH_VERSION_DELETE_BY_IN_COMPLETE_ISSUE = "batchVersionDeleteByIncompleteIssue";
     private static final String BATCH_DELETE_VERSION_BY_VERSION = "batchDeleteVersionByVersion";
@@ -76,8 +77,8 @@ public class DataLogAspect {
     private static final String UPDATE_COMMENT = "updateComment";
     private static final String DELETE_COMMENT = "deleteComment";
     private static final String DELETE_COMMENT_REPLY = "deleteCommentReply";
-    private static final String CREATE_WORKLOG = "createWorkLog";
-    private static final String DELETE_WORKLOG = "deleteWorkLog";
+    private static final String CREATE_WORK_LOG = "createWorkLog";
+    private static final String DELETE_WORK_LOG = "deleteWorkLog";
     private static final String EPIC_NAME_FIELD = "epicName";
     private static final String FIELD_EPIC_NAME = "Epic Name";
     private static final String SUMMARY_FIELD = "summary";
@@ -99,7 +100,7 @@ public class DataLogAspect {
     private static final String FIELD_EPIC_LINK = "Epic Link";
     private static final String FIELD_EPIC_CHILD = "Epic Child";
     private static final String REMAIN_TIME_FIELD = "remainingTime";
-    private static final String FIELD_TIMEESTIMATE = "timeestimate";
+    private static final String FIELD_TIME_ESTIMATE = "timeestimate";
     private static final String FIELD_ESTIMATE_TIME = "Estimate Time";
     private static final String STATUS_ID = "statusId";
     private static final String FIELD_STATUS = "status";
@@ -111,21 +112,20 @@ public class DataLogAspect {
     private static final String FIELD_RANK = "Rank";
     private static final String RANK_HIGHER = "评级更高";
     private static final String RANK_LOWER = "评级更低";
-    private static final String FIELD_ISSUETYPE = "issuetype";
+    private static final String FIELD_ISSUE_TYPE = "issuetype";
     private static final String FIELD_FIX_VERSION = "Fix Version";
-    private static final String FIX_VERSION = "fix";
     private static final String FIELD_VERSION = "Version";
     private static final String FIELD_COMPONENT = "Component";
     private static final String FIELD_LABELS = "labels";
     private static final String FIELD_ATTACHMENT = "Attachment";
     private static final String FIELD_COMMENT = "Comment";
-    private static final String FIELD_TIMESPENT = "timespent";
-    private static final String FIELD_WORKLOGID = "WorklogId";
+    private static final String FIELD_TIME_SPENT = "timespent";
+    private static final String FIELD_WORK_LOG_ID = "WorklogId";
     private static final String FIELD_KNOWLEDGE_RELATION = "Knowledge Relation";
     private static final String ERROR_UPDATE = "error.LogDataAspect.update";
     private static final String AGILE = "Agile::";
     private static final String VERSION_CHART = AGILE + "VersionChart";
-    private static final String PIECHART = AGILE + "PieChart";
+    private static final String PIE_CHART = AGILE + "PieChart";
     private static final String BURN_DOWN_COORDINATE_BY_TYPE = AGILE + "BurnDownCoordinateByType";
     private static final String VERSION = "Version";
     private static final String EPIC = "Epic";
@@ -278,10 +278,10 @@ public class DataLogAspect {
                     case DELETE_COMMENT_REPLY:
                         handleDeleteCommentReplyDataLog(args);
                         break;
-                    case CREATE_WORKLOG:
+                    case CREATE_WORK_LOG:
                         result = handleCreateWorkLogDataLog(args, pjp);
                         break;
-                    case DELETE_WORKLOG:
+                    case DELETE_WORK_LOG:
                         result = handleDeleteWorkLogDataLog(args);
                         break;
                     case KNOWLEDGE_RELATION_CREATE:
@@ -358,7 +358,7 @@ public class DataLogAspect {
                     case BATCH_VERSION_DELETE_BY_IN_COMPLETE_ISSUE:
                         batchVersionDeleteByInCompleteIssue(args);
                         break;
-                    case BATCH_DELETE_BY_VERSIONID:
+                    case BATCH_DELETE_BY_VERSION_ID:
                         batchDeleteByVersionId(args);
                         break;
                     case BATCH_UPDATE_ISSUE_EPIC_ID:
@@ -617,7 +617,7 @@ public class DataLogAspect {
             query.setLogId(logId);
             WorkLogDTO workLogDTO = workLogMapper.selectOne(query);
             if (workLogDTO != null) {
-                DataLogDTO dataLogDTO = dataLogMapper.selectLastWorkLogById(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_TIMESPENT);
+                DataLogDTO dataLogDTO = dataLogMapper.selectLastWorkLogById(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_TIME_SPENT);
                 if (!ObjectUtils.isEmpty(dataLogDTO)) {
                     String oldString = null;
                     String newString;
@@ -628,10 +628,10 @@ public class DataLogAspect {
                     BigDecimal newTime = new BigDecimal(dataLogDTO.getNewValue());
                     newValue = newTime.subtract(workLogDTO.getWorkTime()).toString();
                     newString = newTime.subtract(workLogDTO.getWorkTime()).toString();
-                    createDataLog(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_TIMESPENT,
+                    createDataLog(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_TIME_SPENT,
                             oldString, newString, oldValue, newValue);
                 }
-                createDataLog(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_WORKLOGID,
+                createDataLog(workLogDTO.getProjectId(), workLogDTO.getIssueId(), FIELD_WORK_LOG_ID,
                         workLogDTO.getLogId().toString(), null, workLogDTO.getLogId().toString(), null);
             }
         }
@@ -736,7 +736,7 @@ public class DataLogAspect {
                 StringBuilder newSprintIdStr = new StringBuilder();
                 StringBuilder newSprintNameStr = new StringBuilder();
                 List<SprintNameDTO> sprintNames = issueMapper.querySprintNameByIssueId(issueId);
-                handleBatchCreateDataLogForSpring(sprintNames, sprintNameDTO, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
+                handleBatchCreateDataLogForSprint(sprintNames, sprintNameDTO, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
             }
             dataLogRedisUtil.deleteByBatchRemoveSprintToTarget(sprintId, projectId, null);
         }
@@ -776,7 +776,7 @@ public class DataLogAspect {
     private void handleBatchDeleteVersion(List<VersionIssueDTO> versionIssues, Long projectId, Long versionId) {
         if (versionIssues != null && !versionIssues.isEmpty()) {
             versionIssues.forEach(versionIssueDO -> {
-                String field = FIX_VERSION.equals(versionIssueDO.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
+                String field = ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(versionIssueDO.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
                 createDataLog(projectId, versionIssueDO.getIssueId(), field,
                         versionIssueDO.getName(), null, versionIssueDO.getVersionId().toString(), null);
             });
@@ -836,7 +836,7 @@ public class DataLogAspect {
             try {
                 result = pjp.proceed();
                 workLog = (WorkLogDTO) result;
-                DataLogDTO dataLogDTO = dataLogMapper.selectLastWorkLogById(workLog.getProjectId(), workLog.getIssueId(), FIELD_TIMESPENT);
+                DataLogDTO dataLogDTO = dataLogMapper.selectLastWorkLogById(workLog.getProjectId(), workLog.getIssueId(), FIELD_TIME_SPENT);
                 String oldString = null;
                 String newString;
                 String oldValue = null;
@@ -851,9 +851,9 @@ public class DataLogAspect {
                     newValue = workLog.getWorkTime().toString();
                     newString = workLog.getWorkTime().toString();
                 }
-                createDataLog(workLog.getProjectId(), workLog.getIssueId(), FIELD_TIMESPENT,
+                createDataLog(workLog.getProjectId(), workLog.getIssueId(), FIELD_TIME_SPENT,
                         oldString, newString, oldValue, newValue);
-                createDataLog(workLog.getProjectId(), workLog.getIssueId(), FIELD_WORKLOGID,
+                createDataLog(workLog.getProjectId(), workLog.getIssueId(), FIELD_WORK_LOG_ID,
                         null, workLog.getLogId().toString(), null, workLog.getLogId().toString());
             } catch (Throwable e) {
                 throw new CommonException(ERROR_METHOD_EXECUTE, e);
@@ -952,7 +952,7 @@ public class DataLogAspect {
             List<ProductVersionDTO> productVersionDTOS = productVersionMapper.queryVersionRelByIssueIdAndTypeArchivedExceptInfluence(
                     versionIssueRel.getProjectId(), versionIssueRel.getIssueId(), versionIssueRel.getRelationType());
             Long issueId = versionIssueRel.getIssueId();
-            String field = FIX_VERSION.equals(versionIssueRel.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
+            String field = ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(versionIssueRel.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
             productVersionDTOS.forEach(productVersionDO -> createDataLog(productVersionDO.getProjectId(), issueId, field,
                     productVersionDO.getName(), null, productVersionDO.getVersionId().toString(), null));
             dataLogRedisUtil.deleteByBatchDeleteVersionDataLog(versionIssueRel.getProjectId(), productVersionDTOS);
@@ -971,7 +971,7 @@ public class DataLogAspect {
             if (versionIssueRelDTO.getRelationType() == null) {
                 field = FIELD_FIX_VERSION;
             } else {
-                field = FIX_VERSION.equals(versionIssueRelDTO.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
+                field = ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(versionIssueRelDTO.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
             }
             createDataLog(versionIssueRelDTO.getProjectId(), versionIssueRelDTO.getIssueId(), field,
                     productVersionMapper.selectByPrimaryKey(versionIssueRelDTO.getVersionId()).getName(), null,
@@ -1080,11 +1080,11 @@ public class DataLogAspect {
             StringBuilder newSprintIdStr = new StringBuilder();
             StringBuilder newSprintNameStr = new StringBuilder();
             List<SprintNameDTO> sprintNames = issueMapper.querySprintNameByIssueId(issueId);
-            handleBatchCreateDataLogForSpring(sprintNames, activeSprintName, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
+            handleBatchCreateDataLogForSprint(sprintNames, activeSprintName, newSprintNameStr, newSprintIdStr, sprintDTO, projectId, issueId);
         }
     }
 
-    private void handleBatchCreateDataLogForSpring(List<SprintNameDTO> sprintNames, SprintNameDTO activeSprintName,
+    private void handleBatchCreateDataLogForSprint(List<SprintNameDTO> sprintNames, SprintNameDTO activeSprintName,
                                                    StringBuilder newSprintNameStr, StringBuilder newSprintIdStr,
                                                    SprintDTO sprintDTO, Long projectId, Long issueId) {
         String oldSprintIdStr = sprintNames.stream().map(sprintName -> sprintName.getSprintId().toString()).collect(Collectors.joining(","));
@@ -1200,7 +1200,7 @@ public class DataLogAspect {
             if (versionIssueRel.getRelationType() == null) {
                 field = FIELD_FIX_VERSION;
             } else {
-                field = FIX_VERSION.equals(versionIssueRel.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
+                field = ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(versionIssueRel.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
             }
             dataLogRedisUtil.deleteByHandleBatchDeleteVersion(versionIssueRel.getProjectId(), versionIssueRel.getVersionId());
             createDataLog(versionIssueRel.getProjectId(), versionIssueRel.getIssueId(), field,
@@ -1240,7 +1240,7 @@ public class DataLogAspect {
                 if (productVersionDTO.getRelationType() == null) {
                     field = FIELD_FIX_VERSION;
                 } else {
-                    field = FIX_VERSION.equals(productVersionDTO.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
+                    field = ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(productVersionDTO.getRelationType()) ? FIELD_FIX_VERSION : FIELD_VERSION;
                 }
                 createDataLog(projectId, issueId, field, productVersionDTO.getName(),
                         null, productVersionDTO.getVersionId().toString(), null);
@@ -1418,7 +1418,7 @@ public class DataLogAspect {
         if (field.contains(ISSUE_TYPE_ID) && !Objects.equals(originIssueDTO.getIssueTypeId(), issueConvertDTO.getIssueTypeId())) {
             String originTypeName = issueTypeService.queryById(originIssueDTO.getIssueTypeId(), projectId).getName();
             String currentTypeName = issueTypeService.queryById(issueConvertDTO.getIssueTypeId(), projectId).getName();
-            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_ISSUETYPE, originTypeName, currentTypeName,
+            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_ISSUE_TYPE, originTypeName, currentTypeName,
                     originIssueDTO.getIssueTypeId().toString(), issueConvertDTO.getIssueTypeId().toString());
             dataLogRedisUtil.deleteByHandleType(issueConvertDTO, originIssueDTO);
         }
@@ -1510,7 +1510,7 @@ public class DataLogAspect {
             oldData = originIssueDTO.getRemainingTime() == null ? null : originIssueDTO.getRemainingTime().toString();
             newData = zero.toString();
         }
-        createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_TIMEESTIMATE, oldData, newData, oldData, newData);
+        createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_TIME_ESTIMATE, oldData, newData, oldData, newData);
         dataLogRedisUtil.deleteByHandleCalculateRemainData(issueConvertDTO, originIssueDTO);
     }
 
@@ -1753,7 +1753,7 @@ public class DataLogAspect {
                 newString = currentStatusVO.getName();
             }
             createDataLog(projectId, issueId, isTrue(autoTranferFlag)? FIELD_AUTO_RESOLUTION : FIELD_RESOLUTION, oldString, newString, oldValue, newValue);
-            redisUtil.deleteRedisCache(new String[]{PIECHART + projectId + ':' + FIELD_RESOLUTION + "*"});
+            redisUtil.deleteRedisCache(new String[]{PIE_CHART + projectId + ':' + FIELD_RESOLUTION + "*"});
         }
     }
 

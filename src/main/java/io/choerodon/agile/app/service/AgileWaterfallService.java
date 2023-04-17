@@ -11,6 +11,7 @@ import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.infra.dto.StatusDTO;
@@ -18,6 +19,8 @@ import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+
+import org.hzero.core.util.Pair;
 
 /**
  * @author superlee
@@ -107,9 +110,24 @@ public interface AgileWaterfallService {
 
     void deleteByWorkSpaceId(Long projectId, Long workSpaceId);
 
+    String parseWaterfallSql(FieldTableVO fieldTable,
+                             Condition condition,
+                             Set<Long> projectIds,
+                             List<? extends Object> values,
+                             Pair<String, String> dataPair,
+                             boolean isSelector);
+
     void copyPredecessorIssueStatusLinkage(List<PredecessorIssueStatusLinkageVO> predecessorIssueStatusLinkages,
                                            Long projectId,
                                            Long issueTypeId,
                                            Long statusId);
 
+    /**
+     * 判断瀑布项目的所有后代是否全部已完成
+     *
+     * @param issueDTO
+     * @param projectId
+     * @return
+     */
+    boolean validateAllSubIssueUnCompleted(IssueDTO issueDTO, Long projectId);
 }

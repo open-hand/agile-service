@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.yqcloud.core.oauth.ZKnowDetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
@@ -150,6 +151,7 @@ public class IssueDelaySendMessageTask {
     private String domainUrl;
 
     @JobTask(
+            productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
             maxRetryCount = 3,
             code = "issueDelaySendMessage",
             description = "问题延期，发送消息给指定人"

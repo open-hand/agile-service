@@ -1,12 +1,12 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 /**
  * @author superlee
@@ -16,6 +16,13 @@ import javax.persistence.Table;
 @ModifyAudit
 @VersionAudit
 public class IssuePersonalSortDTO extends AuditDomain {
+
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_USER_ID = "userId";
+    public static final String FIELD_SORT_JSON = "sortJson";
+    public static final String FIELD_PROJECT_ID = "projectId";
+    public static final String FIELD_ORGANIZATION_ID = "organizationId";
+    public static final String FIELD_BUSINESS_TYPE = "businessType";
 
     @Id
     @GeneratedValue

@@ -41,13 +41,13 @@ import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author zhaotianxin 2021-01-05 13:38
@@ -136,7 +136,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
     @Autowired
     private IssueSprintRelMapper issueSprintRelMapper;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private ProjectInfoService projectInfoService;
     @Autowired(required = false)
@@ -231,7 +231,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setStatus("success");
-            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             return;
         }
         // 处理问题类型-状态映射
@@ -245,7 +245,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             batchUpdateFieldStatusVO.setProcess(0.0);
             batchUpdateFieldStatusVO.setSuccessCount(0);
             batchUpdateFieldStatusVO.setFailedCount(0);
-            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (ObjectUtils.isEmpty(targetProjectId)) {
                 throw new CommonException("error.transfer.project.is.null");
             }
@@ -270,7 +270,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
                 double progress = currentProgress * 1.0 / issueDTOS.size();
                 if (progress - lastProcess >= 0.1) {
                     batchUpdateFieldStatusVO.setProcess(progress);
-                    messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+                    socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
                     lastProcess = progress;
                 }
                 currentProgress++;
@@ -293,7 +293,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             batchUpdateFieldStatusVO.setError(e.getMessage());
             throw new CommonException("update field failed, exception: {}", e);
         } finally {
-            messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
+            socketSendHelper.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 
@@ -605,7 +605,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             if (!ObjectUtils.isEmpty(influenceVersions)) {
                 List<VersionIssueRelVO> list = EncryptionUtils.jsonToList(influenceVersions, VersionIssueRelVO.class);
                 fieldList.add("versionId");
-                issueService.handleUpdateVersionIssueRelWithoutRuleNotice(list, targetProjectVO.getId(), issueDTO.getIssueId(), "influence");
+                issueService.handleUpdateVersionIssueRelWithoutRuleNotice(list, targetProjectVO.getId(), issueDTO.getIssueId(), ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             }
         }
         issueService.addCollectionFieldIfNotNull(issueUpdateVO, fieldList);
@@ -728,12 +728,12 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
             }
             if (!CollectionUtils.isEmpty(issueDTO.getVersionIssueRelDTOList())) {
                 issueUpdateVO.setVersionIssueRelVOList(new ArrayList<>());
-                issueUpdateVO.setVersionType("fix");
+                issueUpdateVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             }
         }
         issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO, field);
         if (Objects.equals(issueDTO.getTypeCode(), "bug")) {
-            issueService.handleUpdateVersionIssueRelWithoutRuleNotice(new ArrayList<>(), projectId, issueDTO.getIssueId(), "influence");
+            issueService.handleUpdateVersionIssueRelWithoutRuleNotice(new ArrayList<>(), projectId, issueDTO.getIssueId(), ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
         }
         // 清空原项目和冲刺的关系
         IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();

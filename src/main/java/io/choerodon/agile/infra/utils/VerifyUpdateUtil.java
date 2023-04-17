@@ -1,24 +1,26 @@
 package io.choerodon.agile.infra.utils;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.app.service.AgilePluginService;
-import io.choerodon.agile.infra.annotation.Update;
-import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.ArrayUtils;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.infra.annotation.Update;
+import io.choerodon.core.exception.CommonException;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -40,19 +42,21 @@ public class VerifyUpdateUtil {
      */
     public List<String> verifyUpdateData(JSONObject updateMap, Object objectUpdate) {
         List<String> fieldList = new ArrayList<>();
-        Class objectClass = objectUpdate.getClass();
-        updateMap.forEach((String k, Object v) -> {
+        Class<?> objectClass = objectUpdate.getClass();
+        for (Map.Entry<String, Object> entry : updateMap.entrySet()) {
+            String fieldCode = entry.getKey();
+            Object fieldValue = entry.getValue();
             try {
-                Field field = objectClass.getDeclaredField(k);
+                Field field = objectClass.getDeclaredField(fieldCode);
                 field.setAccessible(true);
                 Boolean flag = true;
                 Update update = field.getAnnotation(Update.class);
                 if (update != null && update.temp()) {
                     flag = false;
                 }
-                flag = handleFieldType(field, objectUpdate, v, flag);
+                flag = handleFieldType(field, objectUpdate, fieldValue, flag);
                 if (flag && update == null) {
-                    fieldList.add(k);
+                    fieldList.add(fieldCode);
                 }
                 if (update != null && !Objects.equals(update.name(), "")) {
                     fieldList.add(update.name());
@@ -60,7 +64,7 @@ public class VerifyUpdateUtil {
             } catch (Exception e) {
                 throw new CommonException("error.verifyUpdateData.noField", e);
             }
-        });
+        }
         if (agilePluginService != null) {
             agilePluginService.verifyUpdateData(updateMap, fieldList);
         }
@@ -151,7 +155,8 @@ public class VerifyUpdateUtil {
                         field1.setAccessible(true);
                         handleFieldType(field1, obj, value, false);
                     } catch (Exception e) {
-                        LOGGER.error("reflect error: {}", e);
+                        LOGGER.error("reflect error");
+                        LOGGER.error(e.getMessage(), e);
                     }
                 });
                 list.add(obj);

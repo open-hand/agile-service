@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.enums;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -40,6 +41,13 @@ public enum FieldTypeCnName {
     String name;
     String code;
 
+    public static final List<String> OPTION_TYPES =
+            Arrays.asList(MEMBER.code, MULTI_MEMBER.code, MULTIPLE.code, SINGLE.code, RADIO.code, CHECKBOX.code);
+    public static final List<String> TIME_TYPES =
+            Arrays.asList(TIME.code, DATETIME.code, DATE.code);
+    public static final List<String> NUMBER_TYPES =
+            Arrays.asList(NUMBER.code);
+
     FieldTypeCnName(String name, String code) {
         this.name = name;
         this.code = code;
@@ -59,6 +67,15 @@ public enum FieldTypeCnName {
         }
         return Arrays.stream(FieldTypeCnName.values())
                 .filter(typeCnName -> name.equals(typeCnName.getName()))
+                .findFirst();
+    }
+
+    public static Optional<FieldTypeCnName> ofCode(String code) {
+        if (code == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(FieldTypeCnName.values())
+                .filter(typeCnName -> code.equals(typeCnName.getCode()))
                 .findFirst();
     }
 

@@ -2,15 +2,22 @@ package io.choerodon.agile.app.service.impl;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.core.util.JsonUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -34,9 +41,6 @@ import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
-
 /**
  * @author shinan.chen 2018/8/8
  */
@@ -44,6 +48,8 @@ import org.hzero.mybatis.util.Sqls;
 @RefreshScope
 @Transactional(rollbackFor = Exception.class)
 public class IssueTypeServiceImpl implements IssueTypeService {
+
+    private static final String ISSUE_TYPE_REDIS_KEY = "issue-type:project:%s";
 
     @Autowired
     private IssueTypeMapper issueTypeMapper;
@@ -92,7 +98,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Autowired
     private StateMachineNodeService stateMachineNodeService;
-    
+
     @Autowired
     private IssueStatusService issueStatusService;
 
@@ -123,13 +129,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Autowired
     private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
 
-    private static final List<String> AGILE_CREATE_ISSUE_TYPES =
-            Arrays.asList(
-                    IssueTypeCode.STORY.value(),
-                    IssueTypeCode.SUB_TASK.value(),
-                    IssueTypeCode.TASK.value(),
-                    IssueTypeCode.BUG.value()
-            );
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final List<String> AGILE_CREATE_ISSUE_TYPES = Arrays.asList(IssueTypeCode.STORY.value(), IssueTypeCode.SUB_TASK.value(), IssueTypeCode.TASK.value(), IssueTypeCode.BUG.value());
 
 
     private static final List<String> IGNORED_ISSUE_TYPES =
@@ -239,7 +245,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         // 查询要复制的系统问题类型
         IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, result.getTypeCode());
         // 查询问题类型的所有字段
-        List<PageConfigFieldVO> fields  = objectSchemeFieldService.queryPageConfigFields(organizationId, projectId, issueTypeDTO.getId());
+        List<PageConfigFieldVO> fields = objectSchemeFieldService.queryPageConfigFields(organizationId, projectId, issueTypeDTO.getId());
         if (!CollectionUtils.isEmpty(fields)) {
             String rank = RankUtil.mid();
             for (PageConfigFieldVO field : fields) {
@@ -282,7 +288,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     private void initFieldRel(Long organizationId,
                               Long projectId,
-                              IssueTypeVO result){
+                              IssueTypeVO result) {
         ObjectSchemeFieldDTO field = new ObjectSchemeFieldDTO();
         field.setSystem(true);
         String typeCode = result.getTypeCode();
@@ -292,22 +298,22 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             fields = objectSchemeFieldMapper.selectByOptions(organizationId, null, null, null, result.getReferenceId(), Collections.singletonList(typeCode));
         } else {
             fields =
-                objectSchemeFieldMapper.select(field)
-                    .stream()
-                    .filter(x -> {
-                        String context = AgileSystemFieldContext.getContextByFieldCode(x.getCode());
-                        if (context != null) {
-                            for (String str : context.split(",")) {
-                                if (str.trim().equals(typeCode)) {
-                                    return true;
+                    objectSchemeFieldMapper.select(field)
+                            .stream()
+                            .filter(x -> {
+                                String context = AgileSystemFieldContext.getContextByFieldCode(x.getCode());
+                                if (context != null) {
+                                    for (String str : context.split(",")) {
+                                        if (str.trim().equals(typeCode)) {
+                                            return true;
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                        return false;
-                    }).collect(Collectors.toList());
+                                return false;
+                            }).collect(Collectors.toList());
         }
         Map<Long, ObjectSchemeFieldExtendDTO> referencedSystemFieldExtendMap = objectSchemeFieldExtendMapper.selectExtendFieldByOptions(Collections.singletonList(result.getReferenceId()), organizationId, null, null)
-                        .stream().collect(Collectors.toMap(ObjectSchemeFieldExtendDTO::getFieldId, Function.identity()));
+                .stream().collect(Collectors.toMap(ObjectSchemeFieldExtendDTO::getFieldId, Function.identity()));
         fields.forEach(x -> {
             Boolean required = x.getRequired();
             SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(x.getCode());
@@ -346,11 +352,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         });
     }
 
-    private IssueTypeDTO querySystemIssueTypeByCode(Long organizationId, String typeCode){
+    private IssueTypeDTO querySystemIssueTypeByCode(Long organizationId, String typeCode) {
         // 查询系统问题类型的状态机id
         List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectSystemIssueTypeByOrganizationIds(new HashSet<>(Collections.singletonList(organizationId)));
         IssueTypeDTO issueTypeDTO = issueTypeDTOS.stream().filter(v -> Objects.equals(typeCode, v.getTypeCode())).findAny().orElse(null);
-        if(ObjectUtils.isEmpty(issueTypeDTO)){
+        if (ObjectUtils.isEmpty(issueTypeDTO)) {
             throw new CommonException("error.system.issueType.not.found");
         }
         return issueTypeDTO;
@@ -370,7 +376,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             String rank = issueTypeExtendMapper.selectMaxRank(organizationId, projectId, null);
             if (!StringUtils.hasText(rank)) {
                 rank = RankUtil.mid();
-            }else {
+            } else {
                 rank = RankUtil.genNext(rank);
             }
             dto.setRank(rank);
@@ -466,7 +472,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         }
     }
 
-    private Long defaultHandlerStateMachine(Long organizationId, String typeCode, Long stateMachineSchemeId){
+    private Long defaultHandlerStateMachine(Long organizationId, String typeCode, Long stateMachineSchemeId) {
         // 查询系统问题类型的状态机id
         IssueTypeDTO issueTypeDTO = querySystemIssueTypeByCode(organizationId, typeCode);
         // 查询系统问题类型的状态机
@@ -793,17 +799,19 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             Set<Long> issueTypeIds =
                     issueTypeMapper.selectByReferenceId(new HashSet<>(Collections.singletonList(issueTypeId)), organizationId)
                             .stream().map(IssueTypeDTO::getId).collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(issueTypeIds)) {
+                return emptyPage;
+            }
             Page<IssueTypeExtendDTO> page =
                     PageHelper.doPageAndSort(pageRequest, () -> issueTypeExtendMapper.selectByIssueTypeIds(issueTypeIds, null, organizationId));
-            List<IssueTypeExtendDTO> list = page.getContent();
-            if (list.isEmpty()) {
+            if (page.isEmpty()) {
                 return emptyPage;
             }
             Map<Long, Boolean> projectEnableMap =
-                    list.stream()
+                    page.stream()
                             .collect(Collectors.toMap(IssueTypeExtendDTO::getProjectId, IssueTypeExtendDTO::getEnabled));
             Set<Long> projectIds =
-                    list.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
+                    page.stream().map(IssueTypeExtendDTO::getProjectId).collect(Collectors.toSet());
             List<ProjectVO> projects = Optional.ofNullable(remoteIamOperator.queryProjectByIds(projectIds)).orElse(Collections.emptyList());
             List<ProjectIssueTypeVO> result = buildProjectIssueType(projects, projectEnableMap);
             return PageUtils.copyPropertiesAndResetContent(page, result);
@@ -1085,7 +1093,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public IssueTypeVO query(Long organizationId, Long projectId, Long issueTypeId) {
-        IssueTypeDTO result =  issueTypeMapper.selectWithAlias(issueTypeId, projectId);
+        IssueTypeDTO result = issueTypeMapper.selectWithAlias(issueTypeId, projectId);
         if (result != null) {
             return modelMapper.map(result, IssueTypeVO.class);
         } else {
@@ -1163,24 +1171,38 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId,
-                                                   Long projectId) {
+    public Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId, Long projectId) {
         if (projectId == null) {
             projectId = ZERO;
         }
-        return issueTypeMapper.selectByOptions(organizationId, projectId, null)
-                .stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+        return issueTypeMapper.selectByOptions(organizationId, projectId, null).stream().collect(Collectors.toMap(IssueTypeVO::getId, Function.identity()));
+    }
+
+    @Override
+    public Map<Long, Map<Long, IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, Set<Long> projectIds) {
+        Map<Long, Map<Long, IssueTypeVO>> issueTypeMapByProjectIds = new HashMap<>();
+        projectIds.forEach(projectId -> {
+            String cache = stringRedisTemplate.opsForValue().get(String.format(ISSUE_TYPE_REDIS_KEY, projectId));
+            if (ObjectUtils.isEmpty(cache)) {
+                Map<Long, IssueTypeVO> issueTypeVOMap = listIssueTypeMap(organizationId, projectId);
+                stringRedisTemplate.opsForValue().set(String.format(ISSUE_TYPE_REDIS_KEY, projectId), JsonUtils.toJson(issueTypeVOMap), 60, TimeUnit.SECONDS);
+                issueTypeMapByProjectIds.put(projectId, issueTypeVOMap);
+            } else {
+                stringRedisTemplate.opsForValue().set(String.format(ISSUE_TYPE_REDIS_KEY, projectId), cache, 60, TimeUnit.SECONDS);
+                issueTypeMapByProjectIds.put(projectId, JsonUtils.fromJson(cache, new TypeReference<Map<Long, IssueTypeVO>>() {
+                }));
+            }
+        });
+        return issueTypeMapByProjectIds;
     }
 
     @Override
     public Map<Long, List<IssueTypeVO>> listIssueTypeMapByProjectIds(Long organizationId, List<Long> projectIds) {
-        return issueTypeMapper.selectByProjectIds(organizationId, projectIds)
-                .stream().collect(Collectors.groupingBy(IssueTypeVO::getId));
+        return issueTypeMapper.selectByProjectIds(organizationId, projectIds).stream().collect(Collectors.groupingBy(IssueTypeVO::getId));
     }
 
     @Override
-    public void updateRank(Long projectId,
-                           Long organizationId,
+    public void updateRank(Long projectId, Long organizationId,
                            Long issueTypeId,
                            IssueTypeRankVO issueTypeRankVO) {
         Map<Long, IssueTypeVO> issueTypeMap = initRankIfNull(organizationId, projectId);
@@ -1219,7 +1241,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         Set<Long> projectIds = CollectionUtils.isEmpty(issueTypeSearchVO.getProjectIds()) ? new HashSet<>() : new HashSet<>(issueTypeSearchVO.getProjectIds());
         if (CollectionUtils.isEmpty(projectIds)) {
             Long userId = DetailsHelper.getUserDetails().getUserId();
-            projects = remoteIamOperator.listProjectsByUserIdForSimple(organizationId, userId,  null, true);
+            projects = remoteIamOperator.listProjectsByUserIdForSimple(organizationId, userId, null, true);
             if (CollectionUtils.isEmpty(projects)) {
                 return new Page<>();
             }
@@ -1241,7 +1263,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             List<IssueTypeDTO> issueTypeDTOS = issueTypeMapper.selectByCondition(Condition.builder(IssueTypeDTO.class).andWhere(Sqls.custom()
                     .andIn(IssueTypeDTO.FIELD_ID, filterIssueTypeIds)
             ).build());
-            actualResult.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>() {}.getType()));
+            actualResult.addAll(modelMapper.map(issueTypeDTOS, new TypeToken<List<IssueTypeVO>>() {
+            }.getType()));
         }
         if (CollectionUtils.isNotEmpty(resultsInDb.getContent())) {
             actualResult.addAll(resultsInDb.getContent());
@@ -1249,7 +1272,7 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         // 填充项目信息
         for (IssueTypeVO issueType : actualResult) {
             final Long projectId = issueType.getProjectId();
-            if(projectId != null && !projectId.equals(ZERO)) {
+            if (projectId != null && !projectId.equals(ZERO)) {
                 issueType.setProjectInfo(projectIdToEntityMap.get(projectId));
             }
         }

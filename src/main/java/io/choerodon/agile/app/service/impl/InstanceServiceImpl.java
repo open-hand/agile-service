@@ -43,7 +43,6 @@ import io.choerodon.core.exception.CommonException;
 public class InstanceServiceImpl implements InstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
-    private static final String EXCEPTION = "Exception:{}";
     @Autowired
     private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired
@@ -98,7 +97,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public List<TransformInfo> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId) {
-        Boolean isNeedFilter = false;
+        boolean isNeedFilter = false;
         List<StatusMachineTransformDTO> stateMachineTransforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, statusId);
         //获取节点信息
         List<StatusMachineNodeDTO> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
@@ -110,7 +109,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
         Map<Long, List<StateMachineConfigVO>> configMaps = configs.stream().collect(Collectors.groupingBy(StateMachineConfigVO::getTransformId));
         List<TransformInfo> transformInfos = new ArrayList<>(stateMachineTransforms.size());
-        Boolean hasRankNull = false;
+        boolean hasRankNull = false;
         for (StatusMachineTransformDTO transform : stateMachineTransforms) {
             TransformInfo transformInfo = modelMapper.map(transform, TransformInfo.class);
             transformInfo.setStartStatusId(nodeMap.get(transform.getStartNodeId()));
@@ -131,7 +130,7 @@ public class InstanceServiceImpl implements InstanceService {
             transformInfos.add(transformInfo);
         }
         if (Boolean.FALSE.equals(hasRankNull)) {
-            Collections.sort(transformInfos, (transformInfo1, transformInfo2) -> transformInfo1.getRank().compareTo(transformInfo2.getRank()));
+            transformInfos.sort(Comparator.comparing(TransformInfo::getRank));
         }
         //调用对应服务，根据条件校验转换，过滤掉不可用的转换
         if (Boolean.TRUE.equals(isNeedFilter)) {
@@ -140,7 +139,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }.getType())), new TypeToken<List<TransformInfo>>() {
                 }.getType());
             } catch (Exception e) {
-                LOGGER.error(EXCEPTION, e);
+                LOGGER.error(e.getMessage(), e);
                 transformInfos = Collections.emptyList();
             }
         }
@@ -166,7 +165,7 @@ public class InstanceServiceImpl implements InstanceService {
                 executeResult = stateMachineClientService.configExecuteValidator(null, modelMapper.map(inputDTO, InputDTO.class));
             }
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION, e);
+            LOGGER.error(e.getMessage(), e);
             executeResult = new ExecuteResult(false, null, "验证调用失败");
         }
 
@@ -195,7 +194,7 @@ public class InstanceServiceImpl implements InstanceService {
                 executeResult = new ExecuteResult(false, null, "后置动作调用失败");
             }
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION, e);
+            LOGGER.error(e.getMessage(), e);
             executeResult = new ExecuteResult(false, null, "后置动作调用失败");
         }
         Map<Object, Object> variables = context.getExtendedState().getVariables();

@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service;
 
+import java.util.Set;
+
 public interface FixDataService {
 
     void fixCreateProject();
@@ -27,4 +29,12 @@ public interface FixDataService {
      * 2.2-修复之前导入BUG导致的工作项优先级为空的数据
      */
     void fixEmptyIssuePriority();
+
+
+    /**
+     * 高级筛选修数据
+     *
+     * @param typeCodes
+     */
+    void fixPersonalFilter(Set<String> typeCodes);
 }

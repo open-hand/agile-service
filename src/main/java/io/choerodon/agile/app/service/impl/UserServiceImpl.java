@@ -3,6 +3,11 @@ package io.choerodon.agile.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
 import io.choerodon.agile.api.vo.RoleVO;
@@ -11,14 +16,11 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 
 /**
@@ -44,38 +46,51 @@ public class UserServiceImpl implements UserService {
             UserDTO userDTO = remoteIamOperator.query(customUserDetails.getOrganizationId(), userId);
             if (withId) {
                 userDTO.setRealName(userDTO.getLoginName() + userDTO.getRealName());
-                return userDTO;
-            } else {
-                return userDTO;
             }
+            return userDTO;
         }
     }
 
     @Override
     public Map<Long, UserMessageDTO> queryUsersMap(List<Long> assigneeIdList, Boolean withLoginName) {
-        if (assigneeIdList == null) {
+        if (CollectionUtils.isEmpty(assigneeIdList)) {
             return new HashMap<>();
         }
         Map<Long, UserMessageDTO> userMessageMap = new HashMap<>(assigneeIdList.size());
-        if (!assigneeIdList.isEmpty()) {
-            Long[] assigneeIds = new Long[assigneeIdList.size()];
-            assigneeIdList.toArray(assigneeIds);
-            List<UserDTO> userDTOS = remoteIamOperator.listUsersByIds(assigneeIds, false);
-            if (withLoginName) {
-                userDTOS.forEach(userDO -> {
-                    String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
-                    String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
-                    userMessageMap.put(userDO.getId(),
-                            new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
-                                    userDO.getLoginName(),
-                                    userDO.getRealName(),
-                                    userDO.getImageUrl(),
-                                    userDO.getEmail(),
-                                    userDO.getLdap(),
-                                    userDO.getId()));
-                });
-            } else {
-                userDTOS.forEach(userDO -> userMessageMap.put(userDO.getId(), new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())));
+        Long[] assigneeIds = new Long[assigneeIdList.size()];
+        assigneeIdList.toArray(assigneeIds);
+        List<UserDTO> userDTOS = remoteIamOperator.listUsersByIds(assigneeIds, false);
+        if (withLoginName) {
+            for (UserDTO userDTO : userDTOS) {
+                String ldapName = userDTO.getRealName() + "（" + userDTO.getLoginName() + "）";
+                String noLdapName = userDTO.getRealName() + "（" + userDTO.getEmail() + "）";
+                UserMessageDTO userMessageDTO = new UserMessageDTO(
+                        userDTO.getLdap() ? ldapName : noLdapName,
+                        userDTO.getLoginName(),
+                        userDTO.getRealName(),
+                        userDTO.getImageUrl(),
+                        userDTO.getEmail(),
+                        userDTO.getLdap(),
+                        userDTO.getId()
+                );
+                userMessageDTO.setAttribute14(userDTO.getAttribute14());
+                userMessageDTO.setAttribute15(userDTO.getAttribute15());
+                userMessageMap.put(userDTO.getId(), userMessageDTO);
+            }
+        } else {
+            for (UserDTO userDTO : userDTOS) {
+                UserMessageDTO userMessageDTO = new UserMessageDTO(
+                        userDTO.getRealName(),
+                        userDTO.getLoginName(),
+                        userDTO.getRealName(),
+                        userDTO.getImageUrl(),
+                        userDTO.getEmail(),
+                        userDTO.getLdap(),
+                        userDTO.getId()
+                );
+                userMessageDTO.setAttribute14(userDTO.getAttribute14());
+                userMessageDTO.setAttribute15(userDTO.getAttribute15());
+                userMessageMap.put(userDTO.getId(), userMessageDTO);
             }
         }
         return userMessageMap;
@@ -197,7 +212,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserVO> listProjectAdminUsersByProjectId(Long projectId) {
         List<UserVO> users = remoteIamOperator.listProjectOwnerById(projectId);
-        return !CollectionUtils.isEmpty(users) ? users : new ArrayList<>();
+        return CollectionUtils.isEmpty(users) ? new ArrayList<>() : users;
     }
 
     @Override
@@ -212,7 +227,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ProjectVO queryProject(Long projectId) {
-        return remoteIamOperator.queryProject(projectId);
+        return ConvertUtil.queryProject(projectId);
     }
 
     @Override

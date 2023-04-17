@@ -366,6 +366,7 @@ public class OrganizationConfigController {
         return new ResponseEntity<>(organizationConfigService.updateSort(organizationId, statusMachineId, nodeSortVO), HttpStatus.OK);
     }
 
+
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询前置项类型")
     @GetMapping(value = "/issue_predecessor/types")

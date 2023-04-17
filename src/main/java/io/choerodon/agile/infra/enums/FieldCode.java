@@ -61,7 +61,7 @@ public class FieldCode {
     public static final String PROGRESS_FEEDBACK = "progressFeedback";
     public static final String EMAIL = "email";
     public static final String BELONG_TO_BACKLOG = "belongToBacklog";
-    public static final String PARENT = "parent";
+
     public static final String PROGRESS = "progress";
     // 风险字段：风险分类、影响度、发生概率、临近度、应对策略、预计解决日期、实际解决日期、相关方、发现日期
     public static final String RISK_CATEGORY = "riskCategory";
@@ -75,6 +75,9 @@ public class FieldCode {
     public static final String DISCOVERY_DATE = "discoveryDate";
 
     public static final String ISSUE_STATUS = "issueStatus";
+
+    public static final String PARENT = "parent";
+
     public static final String ISSUE_NUM = "issueNum";
 
     private static final List<String> FIELD_CODE_LIST = new ArrayList<>();

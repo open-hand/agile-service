@@ -181,28 +181,43 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     }
 
     @Override
-    public Boolean verifyStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId){
+    public Boolean verifyStatusTransferSetting(Long projectId, IssueDTO issueDTO, Long endStatusId) {
         List<StatusTransferSettingDTO> statusTransferSettingList = query(projectId, issueDTO.getIssueTypeId(), endStatusId);
         if (CollectionUtils.isEmpty(statusTransferSettingList)) {
-            return Boolean.FALSE;
+            return false;
         }
         Pair<Boolean, Boolean> pair = isCurrentAllowedAndIsVerifySub(projectId, statusTransferSettingList, issueDTO);
         Boolean isCurrentAllowed = pair.getFirst();
         Boolean verifySubIssueCompleted = pair.getSecond();
         if (!isCurrentAllowed) {
-            return Boolean.TRUE;
+            return true;
         }
         // 校验当前问题的子级任务是否都是已解决状态
+        boolean result = false;
         if (Boolean.TRUE.equals(verifySubIssueCompleted)) {
-            Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
-            if (Boolean.FALSE.equals(subIssue)) {
-                IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueDTO.getIssueId());
-                if (!Objects.equals(0, issueCountDTO.getIssueCount()) && !Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
-                    return Boolean.TRUE;
+            String typeCode = issueDTO.getTypeCode();
+            if (WATERFALL_ISSUE_TYPES.contains(typeCode)) {
+                //瀑布类型
+                if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+                    result = agileWaterfallService.validateAllSubIssueUnCompleted(issueDTO, projectId);
                 }
+            } else {
+                result = validateAgileSubIssueUnCompleted(issueDTO, projectId);
             }
         }
-        return Boolean.FALSE;
+        return result;
+    }
+
+    private boolean validateAgileSubIssueUnCompleted(IssueDTO issueDTO,
+                                                     Long projectId) {
+        Boolean subIssue = ("sub_task".equals(issueDTO.getTypeCode())) || ("bug".equals(issueDTO.getTypeCode()) && !ObjectUtils.isEmpty(issueDTO.getRelateIssueId()) && !Objects.equals(0L, issueDTO.getRelateIssueId()));
+        if (Boolean.FALSE.equals(subIssue)) {
+            IssueCountDTO issueCountDTO = issueMapper.querySubIssueCount(projectId, issueDTO.getIssueId());
+            if (!Objects.equals(0, issueCountDTO.getIssueCount()) && !Objects.equals(issueCountDTO.getSuccessIssueCount(), issueCountDTO.getIssueCount())) {
+                return Boolean.TRUE;
+            }
+        }
+        return false;
     }
 
     private void queryUserIdsByRoleIds(Long projectId, Set<Long> userIds, Set<Long> roleIds) {

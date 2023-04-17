@@ -1,12 +1,15 @@
 package io.choerodon.agile.infra.dto;
 
+import java.util.Date;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.
@@ -16,6 +19,10 @@ import java.util.Date;
 @ModifyAudit
 @VersionAudit
 public class ProductVersionDTO extends AuditDomain {
+
+    public static final String FIELD_VERSION_ID = "versionId";
+    public static final String FIELD_STATUS_CODE = "statusCode";
+
     @Id
     @GeneratedValue
     private Long versionId;

@@ -1,5 +1,16 @@
 package io.choerodon.agile.api.controller.v1;
 
+import java.util.List;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.GanttChartService;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
@@ -7,16 +18,9 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
+import org.hzero.core.base.BaseConstants;
+import org.hzero.core.util.Results;
 
 
 /**
@@ -41,7 +45,7 @@ public class GanttChartController {
                                                          @ApiParam(value = "查询参数", required = true)
                                                          @RequestBody(required = false) SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return ResponseEntity.ok(ganttChartService.pagedQuery(projectId, searchVO, pageRequest));
+        return Results.success(ganttChartService.pagedQuery(projectId, searchVO, pageRequest));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -53,19 +57,20 @@ public class GanttChartController {
                                                         @RequestBody GanttChartSearchVO ganttChartSearchVO,
                                                         @ApiParam(value = "纬度", required = true)
                                                         @RequestParam String dimension) {
-        return ResponseEntity.ok(ganttChartService.listByIds(projectId, ganttChartSearchVO, dimension));
+        return Results.success(ganttChartService.listByIds(projectId, ganttChartSearchVO, dimension));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("移动甘特图issue")
     @PostMapping(value = "/move")
-    public ResponseEntity move(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> move(@ApiParam(value = "项目id", required = true)
                                @PathVariable(name = "project_id") Long projectId,
                                @ApiParam(value = "移动的甘特图对象", required = true)
                                @RequestBody @Validated GanttMoveVO ganttMoveVO) {
+        Assert.notNull(ganttMoveVO.getSearchVO(), BaseConstants.ErrorCode.NOT_NULL);
         EncryptionUtils.decryptSearchVO(ganttMoveVO.getSearchVO());
         ganttChartService.move(projectId, ganttMoveVO);
-        return new ResponseEntity(HttpStatus.OK);
+        return Results.success();
     }
 
 
@@ -77,38 +82,20 @@ public class GanttChartController {
                                                                    @ApiParam(value = "查询参数", required = true)
                                                                    @RequestBody(required = false) SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        return ResponseEntity.ok(ganttChartService.ganttDimensionList(projectId, searchVO));
+        return Results.success(ganttChartService.ganttDimensionList(projectId, searchVO));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("移动甘特图冲刺/经办人")
     @PostMapping(value = "/move_dimension")
-    public ResponseEntity moveDimension(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> moveDimension(@ApiParam(value = "项目id", required = true)
                                         @PathVariable(name = "project_id") Long projectId,
                                         @ApiParam(value = "移动的冲刺/经办人对象", required = true)
                                         @RequestBody @Validated GanttDimensionMoveVO ganttDimensionMoveVO) {
+        Assert.notNull(ganttDimensionMoveVO.getSearchVO(), BaseConstants.ErrorCode.NOT_NULL);
         EncryptionUtils.decryptSearchVO(ganttDimensionMoveVO.getSearchVO());
         ganttChartService.moveDimension(projectId, ganttDimensionMoveVO);
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("保存上次查询甘特图的排序规则")
-    @PostMapping(value = "/save/sort")
-    public ResponseEntity saveSort(@ApiParam(value = "项目id", required = true)
-                                   @PathVariable(name = "project_id") Long projectId,
-                                   @ApiParam(value = "上次查询甘特图的排序规则", required = true)
-                                   @RequestBody @Validated List<IssuePersonalSortVO> issuePersonalSorts) {
-        ganttChartService.saveSort(projectId, issuePersonalSorts);
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查询上次查询甘特图的排序规则")
-    @GetMapping(value = "/latest_sort")
-    public ResponseEntity<List<IssuePersonalSortVO>> listLatestSort(@ApiParam(value = "项目id", required = true)
-                                                                    @PathVariable(name = "project_id") Long projectId) {
-        return ResponseEntity.ok(ganttChartService.listLatestSort(projectId));
+        return Results.success();
     }
 
 }

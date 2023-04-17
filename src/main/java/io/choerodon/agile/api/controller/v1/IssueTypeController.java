@@ -1,36 +1,36 @@
 package io.choerodon.agile.api.controller.v1;
 
 
+import java.util.List;
+import java.util.Map;
+import javax.validation.Valid;
+
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
-import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.base.BaseController;
-import io.choerodon.agile.api.vo.IssueTypeSearchVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.app.service.IssueTypeService;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
+import io.choerodon.agile.api.vo.IssueTypeSearchVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.ProjectIssueTypeVO;
+import io.choerodon.agile.app.service.IssueTypeService;
+import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.Permission;
+
+import org.hzero.core.base.BaseController;
+import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
- * @author shinan.chen
- * @date 2018/8/8
+ * @author shinan.chen 2018/8/8
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/issue_type")
@@ -50,7 +50,7 @@ public class IssueTypeController extends BaseController {
                                                                 @PathVariable("organization_id") Long organizationId,
                                                                 @ApiParam(value = "issueTypeSearch", required = true)
                                                                 @RequestBody IssueTypeSearchVO issueTypeSearchVO) {
-        return ResponseEntity.ok(issueTypeService.pagedQuery(pageRequest, organizationId, 0L, issueTypeSearchVO));
+        return Results.success(issueTypeService.pagedQuery(pageRequest, organizationId, 0L, issueTypeSearchVO));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -62,7 +62,7 @@ public class IssueTypeController extends BaseController {
                                               @RequestBody @Valid IssueTypeVO issueTypeVO) {
         issueTypeVO.setSource(null);
         issueTypeVO.setReferenceId(null);
-        return ResponseEntity.ok(issueTypeService.create(organizationId, 0L, issueTypeVO));
+        return Results.success(issueTypeService.create(organizationId, 0L, issueTypeVO));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -72,7 +72,7 @@ public class IssueTypeController extends BaseController {
                                              @PathVariable("organization_id") Long organizationId,
                                              @ApiParam(value = "问题类型id", required = true)
                                              @PathVariable("id") @Encrypt Long issueTypeId) {
-        return ResponseEntity.ok(issueTypeService.query(organizationId, 0L, issueTypeId));
+        return Results.success(issueTypeService.query(organizationId, 0L, issueTypeId));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -89,7 +89,7 @@ public class IssueTypeController extends BaseController {
         issueTypeVO.setId(issueTypeId);
         issueTypeVO.setOrganizationId(organizationId);
         issueTypeVO.setProjectId(0L);
-        return new ResponseEntity<>(issueTypeService.update(issueTypeVO, fieldList), HttpStatus.OK);
+        return Results.success(issueTypeService.update(issueTypeVO, fieldList));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -101,31 +101,31 @@ public class IssueTypeController extends BaseController {
                                              @RequestParam("name") String name,
                                              @ApiParam(value = "问题类型id")
                                              @RequestParam(value = "id", required = false) @Encrypt Long id) {
-        return new ResponseEntity<>(issueTypeService.checkName(organizationId, 0L, name, id), HttpStatus.OK);
+        return Results.success(issueTypeService.checkName(organizationId, 0L, name, id));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除问题类型")
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity delete(@ApiParam(value = "组织id", required = true)
+    public ResponseEntity<Void> delete(@ApiParam(value = "组织id", required = true)
                                  @PathVariable("organization_id") Long organizationId,
                                  @ApiParam(value = "问题类型id", required = true)
                                  @PathVariable("id") @Encrypt Long issueTypeId) {
         issueTypeService.delete(organizationId, 0L, issueTypeId);
-        return new ResponseEntity(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新组织问题类型是否可以被引用")
     @PutMapping(value = "/{id}/update_referenced")
-    public ResponseEntity updateReferenced(@ApiParam(value = "组织id", required = true)
+    public ResponseEntity<Void> updateReferenced(@ApiParam(value = "组织id", required = true)
                                            @PathVariable("organization_id") Long organizationId,
                                            @ApiParam(value = "问题类型id", required = true)
                                            @PathVariable(value = "id") @Encrypt Long issueTypeId,
                                            @ApiParam(value = "是否可以被引用", required = true)
                                            @RequestParam Boolean referenced) {
         issueTypeService.updateReferenced(organizationId, issueTypeId, referenced);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -137,7 +137,7 @@ public class IssueTypeController extends BaseController {
                                                                 @PathVariable(value = "id") @Encrypt Long issueTypeId,
                                                                 @ApiParam(value = "分页参数", required = true)
                                                                         PageRequest pageRequest) {
-        return ResponseEntity.ok(issueTypeService.usageDetail(organizationId, issueTypeId, pageRequest));
+        return Results.success(issueTypeService.usageDetail(organizationId, issueTypeId, pageRequest));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -147,7 +147,7 @@ public class IssueTypeController extends BaseController {
                                                                           @PathVariable("organization_id") Long organizationId,
                                                                           @ApiParam(value = "组织id集合", required = true)
                                                                           @RequestBody List<Long> orgIds) {
-        return new ResponseEntity<>(issueTypeService.initIssueTypeData(organizationId, orgIds), HttpStatus.OK);
+        return Results.success(issueTypeService.initIssueTypeData(organizationId, orgIds));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -159,6 +159,6 @@ public class IssueTypeController extends BaseController {
                                              @RequestParam("icon") String icon,
                                              @ApiParam(value = "问题类型id")
                                              @RequestParam(value = "id", required = false) @Encrypt Long id) {
-        return new ResponseEntity<>(issueTypeService.checkIcon(organizationId, 0L, icon, id), HttpStatus.OK);
+        return Results.success(issueTypeService.checkIcon(organizationId, 0L, icon, id));
     }
 }

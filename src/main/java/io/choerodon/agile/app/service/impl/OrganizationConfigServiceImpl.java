@@ -4,6 +4,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
@@ -20,17 +29,10 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.apache.commons.lang3.StringUtils;
+
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author zhaotianxin
@@ -326,7 +328,6 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
         if (agileWaterfallService != null) {
             predecessorIssueMap = agileWaterfallService.listPredecessorIssueMapByIssueTypeAndStatusIds(0L, organizationId, issueTypeId, statusIds);
         }
-
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
         Map<Long, List<StatusNoticeSettingVO>> statusNoticSettingMap = statusNoticeSettingVOS.stream()
@@ -357,7 +358,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
     @Override
     public void syncStatusMachineTemplate(ProjectEvent projectEvent, String applyType) {
         Long projectId = projectEvent.getProjectId();
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long organizationId = projectEvent.getOrganizationId();
         ProjectConfigDTO projectConfigDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
         ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType);
         if (ObjectUtils.isEmpty(projectConfigDTO)) {
@@ -697,7 +698,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                                 .map(StatusTransferSettingVO::getUserId)
                                 .filter(userIdInProject::contains)
                                 .collect(Collectors.toList());
-                if (!org.apache.commons.collections4.CollectionUtils.isEmpty(userIds)) {
+                if (!CollectionUtils.isEmpty(userIds)) {
                     settingCreateVO.setUserIds(userIds);
                     result.add(settingCreateVO);
                 }
@@ -706,7 +707,7 @@ public class OrganizationConfigServiceImpl implements OrganizationConfigService 
                         settings.stream()
                                 .map(StatusTransferSettingVO::getUserId)
                                 .collect(Collectors.toList());
-                if (!org.apache.commons.collections4.CollectionUtils.isEmpty(roleIds)) {
+                if (!CollectionUtils.isEmpty(roleIds)) {
                     settingCreateVO.setUserIds(roleIds);
                     result.add(settingCreateVO);
                 }

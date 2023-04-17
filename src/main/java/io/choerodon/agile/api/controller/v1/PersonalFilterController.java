@@ -3,6 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import java.util.List;
 import java.util.Optional;
 
+import static io.choerodon.agile.app.service.impl.PersonalFilterServiceImpl.V1;
+
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +34,12 @@ public class PersonalFilterController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建我的筛选")
     @PostMapping
+    @Deprecated
     public ResponseEntity<PersonalFilterVO> create(@ApiParam(value = "项目id", required = true)
                                                    @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.create(0L, projectId, personalFilterVO))
+        return Optional.ofNullable(personalFilterService.create(0L, projectId, personalFilterVO, V1))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
@@ -44,13 +47,14 @@ public class PersonalFilterController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("修改我的筛选")
     @PutMapping(value = "/{filterId}")
+    @Deprecated
     public ResponseEntity<PersonalFilterVO> update(@ApiParam(value = "项目id", required = true)
                                                    @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "filter id", required = true)
                                                    @PathVariable  @Encrypt Long filterId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody  @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.update(0L, projectId, filterId, personalFilterVO))
+        return Optional.ofNullable(personalFilterService.update(0L, projectId, filterId, personalFilterVO, V1))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
@@ -69,6 +73,7 @@ public class PersonalFilterController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询我的筛选列表")
     @GetMapping(value = "/query_all/{userId}")
+    @Deprecated
     public ResponseEntity<List<PersonalFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
                                                                   @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "用户id", required = true)
@@ -77,7 +82,7 @@ public class PersonalFilterController {
                                                                   @RequestParam(name = "searchStr", required = false) String searchStr,
                                                                   @ApiParam(value = "问题类型编码")
                                                                   @RequestParam(name = "filterTypeCode") String filterTypeCode) {
-        return Optional.ofNullable(personalFilterService.listByUserId(0L, projectId, userId, searchStr, filterTypeCode))
+        return Optional.ofNullable(personalFilterService.listByUserId(0L, projectId, userId, searchStr, filterTypeCode, V1))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.list"));
     }
@@ -89,7 +94,7 @@ public class PersonalFilterController {
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "filter id", required = true)
                                                       @PathVariable @Encrypt Long filterId) {
-        return Optional.ofNullable(personalFilterService.queryById(0L, projectId, filterId))
+        return Optional.ofNullable(personalFilterService.queryById(0L, projectId, filterId, V1))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));
     }

@@ -43,14 +43,15 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.boot.file.FileClient;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author huaxin.deng@hand-china.com
@@ -64,9 +65,6 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
 
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
-    private static final String VERSION_PLANNING = "version_planning";
-    private static final String FIX_RELATION_TYPE = "fix";
-    private static final String INFLUENCE_RELATION_TYPE = "influence";
     private static final String MULTIPART_NAME = "file";
     private static final String ORIGINAL_FILE_NAME = ".xlsx";
     private static final String FILE_NAME = "error.xlsx";
@@ -134,7 +132,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private PageFieldService pageFieldService;
     @Autowired
@@ -329,7 +327,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> versionList = new ArrayList<>();
         productVersionCommons.forEach(p -> {
             String statusCode = p.getStatusCode();
-            if (VERSION_PLANNING.equals(statusCode)) {
+            if (ProductVersionService.VERSION_STATUS_CODE_PLANNING.equals(statusCode)) {
                 versionList.add(p.getName());
             }
         });
@@ -353,7 +351,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         List<String> versionList = new ArrayList<>();
         productVersionCommons.forEach(p -> {
             String statusCode = p.getStatusCode();
-            if (VERSION_PLANNING.equals(statusCode)) {
+            if (ProductVersionService.VERSION_STATUS_CODE_PLANNING.equals(statusCode)) {
                 versionList.add(p.getName());
             }
         });
@@ -643,7 +641,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             LOGGER.error("object to json error");
             LOGGER.error(e.getMessage(), e);
         }
-        messageClientC7n.sendByUserId(userId, websocketKey, message);
+        socketSendHelper.sendByUserId(userId, websocketKey, message);
     }
 
     @Override
@@ -1244,18 +1242,19 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     }
 
     private void processVersion(Long projectId, ExcelColumnVO excelColumnVO) {
-        List<ProductVersionCommonDTO> productVersionCommons = productVersionMapper.listByProjectId(projectId);
-        Map<String, Long> map = new HashMap<>();
-        List<String> values = new ArrayList<>();
-        productVersionCommons.forEach(p -> {
-            String statusCode = p.getStatusCode();
-            if (VERSION_PLANNING.equals(statusCode)) {
-                values.add(p.getName());
-                map.put(p.getName(), p.getVersionId());
-            }
-        });
-        excelColumnVO.setValueIdMap(map);
-        excelColumnVO.setPredefinedValues(values);
+        final List<ProductVersionCommonDTO> productVersionCommons = productVersionMapper.listByProjectId(projectId);
+        final Map<String, Long> nameToIdMap = new HashMap<>();
+        final List<String> names = new ArrayList<>();
+        final Map<String, String> nameToStatusMap = new HashMap<>();
+        for (ProductVersionCommonDTO version : productVersionCommons) {
+            final String versionName = version.getName();
+            names.add(versionName);
+            nameToIdMap.put(versionName, version.getVersionId());
+            nameToStatusMap.put(versionName, version.getStatusCode());
+        }
+        excelColumnVO.setValueIdMap(nameToIdMap);
+        excelColumnVO.setOtherMap(nameToStatusMap);
+        excelColumnVO.setPredefinedValues(names);
     }
 
     private void processComponent(Long projectId, ExcelColumnVO excelColumnVO) {
@@ -1395,7 +1394,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
             List<String> valueList = new ArrayList<>();
             if (multiValue) {
-                valueList.addAll(splitByRegex(stringValue));
+                valueList.addAll(splitByComma(stringValue));
             }
             List<String> values = excelColumn.getPredefinedValues();
             if (values == null) {
@@ -1464,7 +1463,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             List<String> valueList = new ArrayList<>();
             Object customFieldValue = null;
             if (multiValue) {
-                valueList.addAll(splitByRegex(value));
+                valueList.addAll(splitByComma(value));
             }
             List<String> values = excelColumn.getPredefinedValues();
             if (!ObjectUtils.isEmpty(values)) {
@@ -1512,8 +1511,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 PageFieldViewVO pageFieldViewVO = pageFieldViewVOMap.get(pageFieldViewUpdateVO.getFieldId());
                 String oldStr = ObjectUtils.isEmpty(pageFieldViewVO.getValue()) ? "" : pageFieldViewVO.getValue().toString();
                 if (excelColumn.isMultiValue()) {
-                    List<String> oldValue = splitByRegex(oldStr);
-                    List<String> newValue = splitByRegex(customFieldValue.toString());
+                    List<String> oldValue = splitByComma(oldStr);
+                    List<String> newValue = splitByComma(customFieldValue.toString());
                     if (oldValue.size() == newValue.size()) {
                         boolean updateFlag = false;
                         for (String val : newValue) {
@@ -1611,8 +1610,24 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         columns.add(col);
     }
 
-    private List<String> splitByRegex(String value) {
-        String regex1 = ",";
+    @Override
+    public void handlerRequireFiled(ExcelColumnVO excelColumn, Map<Long, List<String>> requireFieldMap, IssueExcelImportVO issueExcelImportVO, Long projectId) {
+        if ("issueType".equals(excelColumn.getFieldCode()) && !ObjectUtils.isEmpty(issueExcelImportVO.getIssueTypeId())) {
+            List<String> list = requireFieldMap.get(issueExcelImportVO.getIssueTypeId());
+            if (CollectionUtils.isEmpty(list)) {
+                PageFieldViewParamVO pageFieldViewParamVO = new PageFieldViewParamVO();
+                pageFieldViewParamVO.setPageCode(PageCode.AGILE_ISSUE_CREATE);
+                pageFieldViewParamVO.setSchemeCode(ObjectSchemeCode.AGILE_ISSUE);
+                pageFieldViewParamVO.setIssueTypeId(issueExcelImportVO.getIssueTypeId());
+                List<PageFieldViewVO> pageFieldViewVOS = pageFieldService.queryPageFieldViewList(ConvertUtil.getOrganizationId(projectId), projectId, pageFieldViewParamVO);
+                List<String> fieldCodes = pageFieldViewVOS.stream().filter(v -> Boolean.TRUE.equals(v.getRequired())).map(PageFieldViewVO::getFieldCode).collect(Collectors.toList());
+                requireFieldMap.put(issueExcelImportVO.getIssueTypeId(), fieldCodes);
+            }
+        }
+    }
+
+    private List<String> splitByComma(String value) {
+        String regex1 = BaseConstants.Symbol.COMMA;
         String regex2 = "，";
         List<String> result = new ArrayList<>();
         String[] array = value.split(regex1);
@@ -1620,22 +1635,6 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             result.addAll(Arrays.asList(str.split(regex2)));
         }
         return result;
-    }
-
-    @Override
-    public void handlerRequireFiled(ExcelColumnVO excelColumn, Map<Long, List<String>> requireFieldMap, IssueExcelImportVO issueExcelImportVO, Long projectId) {
-        if ("issueType".equals(excelColumn.getFieldCode()) && !ObjectUtils.isEmpty(issueExcelImportVO.getIssueTypeId())) {
-            List<String> list = requireFieldMap.get(issueExcelImportVO.getIssueTypeId());
-            if (CollectionUtils.isEmpty(list)) {
-                PageFieldViewParamVO pageFieldViewParamVO = new PageFieldViewParamVO();
-                pageFieldViewParamVO.setPageCode("agile_issue_create");
-                pageFieldViewParamVO.setSchemeCode("agile_issue");
-                pageFieldViewParamVO.setIssueTypeId(issueExcelImportVO.getIssueTypeId());
-                List<PageFieldViewVO> pageFieldViewVOS = pageFieldService.queryPageFieldViewList(ConvertUtil.getOrganizationId(projectId), projectId, pageFieldViewParamVO);
-                List<String> fieldCodes = pageFieldViewVOS.stream().filter(v -> Boolean.TRUE.equals(v.getRequired())).map(PageFieldViewVO::getFieldCode).collect(Collectors.toList());
-                requireFieldMap.put(issueExcelImportVO.getIssueTypeId(), fieldCodes);
-            }
-        }
     }
 
     @Override
@@ -2034,7 +2033,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 List<VersionIssueRelVO> versionIssueRelList = new ArrayList<>();
                 VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
                 versionIssueRelVO.setVersionId(valueIdMap.get(value));
-                versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
+                versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
                 versionIssueRelList.add(versionIssueRelVO);
                 issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
             }
@@ -2064,7 +2063,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 }
                 VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
                 versionIssueRelVO.setVersionId(valueIdMap.get(value));
-                versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
+                versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
                 versionIssueRelList.add(versionIssueRelVO);
                 issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
             }
@@ -2273,7 +2272,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 String value = cell.toString();
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-                List<String> list = splitByRegex(value);
+                List<String> list = splitByComma(value);
                 List<ComponentIssueRelVO> componentIssueRelVOS = new ArrayList<>();
                 for (String val : list) {
                     if (!values.contains(val)) {
@@ -2395,14 +2394,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
                 relatedIssueVO.setRow(rowNum);
                 Set<Long> relatedIssueIds = new HashSet<>();
                 Set<Integer> relatedRows = new HashSet<>();
-                List<String> values = splitByRegex(value);
+                List<String> values = splitByComma(value);
                 boolean ok = true;
                 for (String str : values) {
                     if (str.startsWith("！") || str.startsWith("!")) {
                         relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
                     } else {
                         int num = Integer.parseInt(str);
-                        String issueNum = projectCode + "-" + num;
+                        String issueNum = projectCode + BaseConstants.Symbol.MIDDLE_LINE + num;
                         IssueVO issueVO = issueMapper.selectByIssueNum(projectId, issueNum);
                         if (issueVO == null) {
                             ok = false;
@@ -2482,7 +2481,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
-            StatusVO statusVO = issueStatusMap.get(issueType + "-" + value);
+            // issueType表中没有"使能"这个类型, 视为"特性处理"
+            final String finalIssueType = Objects.equals("使能", issueType) ? "特性" : issueType;
+            StatusVO statusVO = issueStatusMap.get(finalIssueType + BaseConstants.Symbol.MIDDLE_LINE + value);
             if (statusVO == null) {
                 cell.setCellValue(buildWithErrorMsg(value, "状态输入错误"));
                 addErrorColumn(rowNum, col, errorRowColMap);
@@ -2536,7 +2537,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<Long> participantIds = new ArrayList<>();
-            List<String> list = splitByRegex(value);
+            List<String> list = splitByComma(value);
             for (String participant : list) {
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -2577,7 +2578,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (!SheetUtils.isCellEmpty(cell)) {
             String value = cell.toString();
             List<Long> productIds = new ArrayList<>();
-            List<String> list = splitByRegex(value);
+            List<String> list = splitByComma(value);
             for (String product : list) {
                 List<String> values = excelColumn.getPredefinedValues();
                 Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -2864,23 +2865,30 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         String value = cellJson.getString(ExcelSheetData.STRING_CELL);
-        if (ObjectUtils.isEmpty(value)) {
+        if (StringUtils.isBlank(value)) {
             return;
         }
-        List<String> values = excelColumn.getPredefinedValues();
+        List<String> predefinedValues = excelColumn.getPredefinedValues();
         Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-        List<String> list = splitByRegex(value);
+        final Map<String, String> valueStatusMap = excelColumn.getOtherMap();
+        List<String> versionNameList = splitByComma(value);
         List<VersionIssueRelVO> versionIssueRelList = new ArrayList<>();
         List<Long> versions = new ArrayList<>();
-        for (String version : list) {
-            if (!values.contains(version)) {
-                String errorMsg = buildWithErrorMsg(value, "请输入正确的版本");
+        for (String version : versionNameList) {
+            if (!predefinedValues.contains(version)) {
+                String errorMsg = buildWithErrorMsg(value, "版本不存在, 请输入正确的版本");
+                putErrorMsg(rowJson, cellJson, errorMsg);
+                return;
+            }
+            final String statusCode = valueStatusMap.getOrDefault(version, ProductVersionService.VERSION_STATUS_CODE_PLANNING);
+            if(!ProductVersionService.VERSION_STATUS_CODE_PLANNING.equals(statusCode)) {
+                String errorMsg = buildWithErrorMsg(value, "版本已发布或已归档, 请输入正确的版本");
                 putErrorMsg(rowJson, cellJson, errorMsg);
                 return;
             }
             VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
             versionIssueRelVO.setVersionId(valueIdMap.get(version));
-            versionIssueRelVO.setRelationType(FIX_RELATION_TYPE);
+            versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             versionIssueRelList.add(versionIssueRelVO);
             versions.add(valueIdMap.get(version));
         }
@@ -2888,11 +2896,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         final IssueVO oldIssue = issueExcelImportVO.getOldIssue();
         final List<VersionIssueRelVO> oldVersionIssueRelVOList = oldIssue == null ? Collections.emptyList() : oldIssue.getVersionIssueRelVOList();
         if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) && !CollectionUtils.isEmpty(oldVersionIssueRelVOList)) {
-            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> FIX_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_FIX.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
         }
         if (needUpdateMultiValueField(issueExcelImportVO.getUpdate(), versions, oldIds)) {
             issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
-            issueExcelImportVO.setVersionType(FIX_RELATION_TYPE);
+            issueExcelImportVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             excelColumn.setValues(versions);
         }
     }
@@ -2914,18 +2922,18 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         }
         List<String> values = excelColumn.getPredefinedValues();
         Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
-        List<String> list = splitByRegex(value);
+        List<String> list = splitByComma(value);
         List<VersionIssueRelVO> versionIssueRelList = CollectionUtils.isEmpty(issueExcelImportVO.getVersionIssueRelVOList()) ? new ArrayList<>() : issueExcelImportVO.getVersionIssueRelVOList();
         List<Long> versions = new ArrayList<>();
         for (String version : list) {
             if (!values.contains(version)) {
-                String errorMsg = buildWithErrorMsg(value, "请输入正确的影响版本");
+                String errorMsg = buildWithErrorMsg(value, "版本不存在, 请输入正确的版本");
                 putErrorMsg(rowJson, cellJson, errorMsg);
                 return;
             }
             VersionIssueRelVO versionIssueRelVO = new VersionIssueRelVO();
             versionIssueRelVO.setVersionId(valueIdMap.get(version));
-            versionIssueRelVO.setRelationType(INFLUENCE_RELATION_TYPE);
+            versionIssueRelVO.setRelationType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             versionIssueRelList.add(versionIssueRelVO);
             versions.add(valueIdMap.get(value));
         }
@@ -2933,11 +2941,11 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         final IssueVO oldIssue = issueExcelImportVO.getOldIssue();
         final List<VersionIssueRelVO> oldVersionIssueRelVOList = oldIssue == null ? Collections.emptyList() : oldIssue.getVersionIssueRelVOList();
         if (Boolean.TRUE.equals(issueExcelImportVO.getUpdate()) && !CollectionUtils.isEmpty(oldVersionIssueRelVOList)) {
-            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> INFLUENCE_RELATION_TYPE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
+            oldIds.addAll(oldVersionIssueRelVOList.stream().filter(v -> ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE.equals(v.getRelationType())).map(VersionIssueRelVO::getVersionId).collect(Collectors.toList()));
         }
         if (needUpdateMultiValueField(issueExcelImportVO.getUpdate(), versions, oldIds)) {
             issueExcelImportVO.setVersionIssueRelVOList(versionIssueRelList);
-            issueExcelImportVO.setVersionType(INFLUENCE_RELATION_TYPE);
+            issueExcelImportVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             excelColumn.setValues(versions);
         }
     }
@@ -3203,7 +3211,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             if (ObjectUtils.isEmpty(value)) {
                 return;
             }
-            List<String> components = splitByRegex(value);
+            List<String> components = splitByComma(value);
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
             List<ComponentIssueRelVO> componentIssueRelVOS = new ArrayList<>();
             List<Long> componentNames = new ArrayList<>();
@@ -3297,7 +3305,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (ObjectUtils.isEmpty(value)) {
             return;
         }
-        List<String> list = splitByRegex(value);
+        List<String> list = splitByComma(value);
         List<LabelIssueRelVO> labelIssueRelVOList = new ArrayList<>();
         for (String labelStr : list) {
             if (labelStr.length() > 20) {
@@ -3464,14 +3472,14 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             relatedIssueVO.setRow(rowJson.getInteger(ExcelSheetData.JSON_KEY_ROW_NUM));
             Set<Long> relatedIssueIds = new HashSet<>();
             Set<Integer> relatedRows = new HashSet<>();
-            List<String> values = splitByRegex(value);
+            List<String> values = splitByComma(value);
             boolean ok = true;
             for (String str : values) {
                 if (str.startsWith("！") || str.startsWith("!")) {
                     relatedRows.add(Integer.valueOf(str.substring(1)) - 1);
                 } else {
                     int num = Integer.parseInt(str);
-                    String issueNum = projectCode + "-" + num;
+                    String issueNum = projectCode + BaseConstants.Symbol.MIDDLE_LINE + num;
                     IssueVO issueVO = issueMapper.selectByIssueNum(projectId, issueNum);
                     if (issueVO == null) {
                         ok = false;
@@ -3568,7 +3576,9 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         Map<String, StatusVO> issueStatusMap = excelColumn.getIssueStatusMap();
-        StatusVO statusVO = issueStatusMap.get(issueType + "-" + value);
+        // issueType表中没有"使能"这个类型, 视为"特性处理"
+        final String finalIssueType = Objects.equals("使能", issueType) ? "特性" : issueType;
+        StatusVO statusVO = issueStatusMap.get(finalIssueType + BaseConstants.Symbol.MIDDLE_LINE + value);
         if (statusVO == null) {
             String errorMsg = buildWithErrorMsg(value, "状态输入错误");
             putErrorMsg(rowJson, cellJson, errorMsg);
@@ -3634,7 +3644,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         List<Long> participantIds = new ArrayList<>();
-        List<String> list = splitByRegex(value);
+        List<String> list = splitByComma(value);
         for (String participant : list) {
             List<String> values = excelColumn.getPredefinedValues();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -3688,7 +3698,7 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
             return;
         }
         List<Long> productIds = new ArrayList<>();
-        List<String> list = splitByRegex(value);
+        List<String> list = splitByComma(value);
         for (String product : list) {
             List<String> values = excelColumn.getPredefinedValues();
             Map<String, Long> valueIdMap = excelColumn.getValueIdMap();
@@ -3721,12 +3731,12 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
         if (StringUtils.isEmpty(value)) {
             return;
         }
-        if (value.lastIndexOf("-") == -1) {
+        if (value.lastIndexOf(BaseConstants.Symbol.MIDDLE_LINE) == -1) {
             putNumError(rowJson, cellJson, value);
             return;
         }
         IssueNumDTO issueNumDTO = issueService.queryIssueByIssueNum(issueExcelImportVO.getProjectId(),
-                value.substring(value.lastIndexOf("-") + 1), true);
+                value.substring(value.lastIndexOf(BaseConstants.Symbol.MIDDLE_LINE) + 1), true);
         if (issueNumDTO == null) {
             putNumError(rowJson, cellJson, value);
             return;

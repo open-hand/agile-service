@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.yqcloud.core.oauth.ZKnowDetailsHelper;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.slf4j.Logger;
@@ -147,7 +148,7 @@ public class IssueDailyWorkSendMessageTask {
     @Value("${services.domain.url}")
     private String domainUrl;
 
-    @JobTask(
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
             maxRetryCount = 3,
             code = "issueDailyWorkSendMessage",
             description = "每日工作提醒"

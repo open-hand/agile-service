@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.infra.dto.IssueNumDTO;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.dto.TestCaseDTO;
@@ -28,6 +29,11 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  * @since 2018-05-14 20:30:48
  */
 public interface IssueService {
+
+    String CLONE_ISSUE_KEY = "cloneIssue:";
+    String DOING_STATUS = "doing";
+    String FAILED_STATUS = "failed";
+    String SUCCEED_STATUS = "succeed";
 
     void setIssueMapper(IssueMapper issueMapper);
 
@@ -56,8 +62,20 @@ public interface IssueService {
      * @param pageRequest pageRequest
      * @return IssueListVO
      */
+    @Deprecated
     Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
+    /**
+     * @see IssueService#pagedQueryRoot(PageRequest, Long, String, String, Long, boolean, boolean, String)
+     * @param pageRequest
+     * @param projectIds
+     * @param searchVO
+     * @param searchSql
+     * @param sortMap
+     * @param isTreeView
+     * @return
+     */
+    @Deprecated
     Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
                                     Set<Long> projectIds,
                                     SearchVO searchVO,
@@ -65,11 +83,29 @@ public interface IssueService {
                                     Map<String, Object> sortMap,
                                     boolean isTreeView);
 
+    /**
+     * @see IssueService#listByTreeViewV2(Set, String, String, Map, boolean, boolean, String)
+     * @param projectIds
+     * @param searchVO
+     * @param searchSql
+     * @param sortMap
+     * @param isTreeView
+     * @return
+     */
+    @Deprecated
     List<Long> listByTreeView(Set<Long> projectIds,
                               SearchVO searchVO,
                               String searchSql,
                               Map<String, Object> sortMap,
                               boolean isTreeView);
+
+    List<Long> listByTreeViewV2(Set<Long> projectIds,
+                                String quickFilterSql,
+                                String advancedSql,
+                                Map<String, Object> sortMap,
+                                boolean isTreeView,
+                                boolean ganttDefaultOrder,
+                                String dimension);
 
     List<EpicDataVO> listEpic(Long projectId);
 
@@ -463,7 +499,7 @@ public interface IssueService {
 
     void handleUpdateComponentIssueRelWithoutRuleNotice(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId);
 
-    void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType);
+    void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> targetVOList, Long projectId, Long issueId, String versionType);
 
     IssueVO doStateMachineCustomFlowAndRuleNotice(Long projectId, Long issueId, String applyType, Set<Long> influenceIssueIds, Boolean isDemo, Long transformId, InputDTO inputDTO);
 
@@ -488,7 +524,8 @@ public interface IssueService {
 
     Map<String, Object> processSortMap(PageRequest pageRequest,
                                        Long projectId,
-                                       Long organizationId);
+                                       Long organizationId,
+                                       String alias);
 
     void splitIssueNumProjectCodePrefix(SearchVO searchVO, Set<Long> projectIds);
 
@@ -513,11 +550,25 @@ public interface IssueService {
 
     List<IssueRequiredFields> listAllRequiredField(Long projectId, Long organizationId, Long issueId, Boolean subTask);
 
-    void copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId);
+    IssueDTO copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId);
 
     String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId);
 
     void setProgress(List<IssueListFieldKVVO> waterfallIssues,
                      List<IssueListFieldKVVO> agileIssues,
                      Set<Long> projectIds);
+
+    Page<IssueListFieldKVVO> pagedQueryWorkList(Long projectId,
+                                                SearchParamVO searchParamVO,
+                                                PageRequest pageRequest,
+                                                Long organizationId);
+
+    Page<Long> pagedQueryRoot(PageRequest pageRequest,
+                              Long projectId,
+                              String quickFilterSql,
+                              String advancedSql,
+                              Map<String, Object> sortMap,
+                              boolean isTreeView,
+                              boolean ganttDefaultOrder,
+                              String dimension);
 }

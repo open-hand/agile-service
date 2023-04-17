@@ -158,172 +158,194 @@ public class IssueDetailDTO {
         return priorityCode;
     }
 
-    public void setPriorityCode(String priorityCode) {
+    public IssueDetailDTO setPriorityCode(String priorityCode) {
         this.priorityCode = priorityCode;
+        return this;
     }
 
     public List<TagVO> getTags() {
         return tags;
     }
 
-    public void setTags(List<TagVO> tags) {
+    public IssueDetailDTO setTags(List<TagVO> tags) {
         this.tags = tags;
+        return this;
     }
 
     public String getParentRelateDescription() {
         return parentRelateDescription;
     }
 
-    public void setParentRelateDescription(String parentRelateDescription) {
+    public IssueDetailDTO setParentRelateDescription(String parentRelateDescription) {
         this.parentRelateDescription = parentRelateDescription;
+        return this;
     }
 
     public String getParentIssueDescription() {
         return parentIssueDescription;
     }
 
-    public void setParentIssueDescription(String parentIssueDescription) {
+    public IssueDetailDTO setParentIssueDescription(String parentIssueDescription) {
         this.parentIssueDescription = parentIssueDescription;
+        return this;
     }
 
     public List<IssueDTO> getSameParentIssueDTOList() {
         return sameParentIssueDTOList;
     }
 
-    public void setSameParentIssueDTOList(List<IssueDTO> sameParentIssueDTOList) {
+    public IssueDetailDTO setSameParentIssueDTOList(List<IssueDTO> sameParentIssueDTOList) {
         this.sameParentIssueDTOList = sameParentIssueDTOList;
+        return this;
     }
 
     public List<IssueDTO> getSameParentBugDOList() {
         return sameParentBugDOList;
     }
 
-    public void setSameParentBugDOList(List<IssueDTO> sameParentBugDOList) {
+    public IssueDetailDTO setSameParentBugDOList(List<IssueDTO> sameParentBugDOList) {
         this.sameParentBugDOList = sameParentBugDOList;
+        return this;
     }
 
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
     }
 
-    public void setEstimatedStartTime(Date estimatedStartTime) {
+    public IssueDetailDTO setEstimatedStartTime(Date estimatedStartTime) {
         this.estimatedStartTime = estimatedStartTime;
+        return this;
     }
 
     public Date getEstimatedEndTime() {
         return estimatedEndTime;
     }
 
-    public void setEstimatedEndTime(Date estimatedEndTime) {
+    public IssueDetailDTO setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+        return this;
     }
 
     public String getIssueTypeCode() {
         return issueTypeCode;
     }
 
-    public void setIssueTypeCode(String issueTypeCode) {
+    public IssueDetailDTO setIssueTypeCode(String issueTypeCode) {
         this.issueTypeCode = issueTypeCode;
+        return this;
     }
 
     public StatusVO getStatusVO() {
         return statusVO;
     }
 
-    public void setStatusVO(StatusVO statusVO) {
+    public IssueDetailDTO setStatusVO(StatusVO statusVO) {
         this.statusVO = statusVO;
+        return this;
     }
 
     public Long getIssueId() {
         return issueId;
     }
 
-    public void setIssueId(Long issueId) {
+    public IssueDetailDTO setIssueId(Long issueId) {
         this.issueId = issueId;
+        return this;
     }
 
     public String getIssueNum() {
         return issueNum;
     }
 
-    public void setIssueNum(String issueNum) {
+    public IssueDetailDTO setIssueNum(String issueNum) {
         this.issueNum = issueNum;
+        return this;
     }
 
     public String getTypeCode() {
         return typeCode;
     }
 
-    public void setTypeCode(String typeCode) {
+    public IssueDetailDTO setTypeCode(String typeCode) {
         this.typeCode = typeCode;
+        return this;
     }
 
     public Long getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(Long statusId) {
+    public IssueDetailDTO setStatusId(Long statusId) {
         this.statusId = statusId;
+        return this;
     }
 
     public String getSummary() {
         return summary;
     }
 
-    public void setSummary(String summary) {
+    public IssueDetailDTO setSummary(String summary) {
         this.summary = summary;
+        return this;
     }
 
     public Long getReporterId() {
         return reporterId;
     }
 
-    public void setReporterId(Long reporterId) {
+    public IssueDetailDTO setReporterId(Long reporterId) {
         this.reporterId = reporterId;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public IssueDetailDTO setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public Long getAssigneeId() {
         return assigneeId;
     }
 
-    public void setAssigneeId(Long assigneeId) {
+    public IssueDetailDTO setAssigneeId(Long assigneeId) {
         this.assigneeId = assigneeId;
+        return this;
     }
 
     public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueDetailDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getEpicId() {
         return epicId;
     }
 
-    public void setEpicId(Long epicId) {
+    public IssueDetailDTO setEpicId(Long epicId) {
         this.epicId = epicId;
+        return this;
     }
 
     public Long getParentIssueId() {
         return parentIssueId;
     }
 
-    public void setParentIssueId(Long parentIssueId) {
+    public IssueDetailDTO setParentIssueId(Long parentIssueId) {
         this.parentIssueId = parentIssueId;
+        return this;
     }
 
-    public void setStoryPoints(BigDecimal storyPoints) {
+    public IssueDetailDTO setStoryPoints(BigDecimal storyPoints) {
         this.storyPoints = storyPoints;
+        return this;
     }
 
     public BigDecimal getStoryPoints() {
@@ -334,108 +356,122 @@ public class IssueDetailDTO {
         return objectVersionNumber;
     }
 
-    public void setObjectVersionNumber(Long objectVersionNumber) {
+    public IssueDetailDTO setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+        return this;
     }
 
     public List<VersionIssueRelDTO> getVersionIssueRelDTOList() {
         return versionIssueRelDTOList;
     }
 
-    public void setVersionIssueRelDTOList(List<VersionIssueRelDTO> versionIssueRelDTOList) {
+    public IssueDetailDTO setVersionIssueRelDTOList(List<VersionIssueRelDTO> versionIssueRelDTOList) {
         this.versionIssueRelDTOList = versionIssueRelDTOList;
+        return this;
     }
 
     public List<LabelIssueRelDTO> getLabelIssueRelDTOList() {
         return labelIssueRelDTOList;
     }
 
-    public void setLabelIssueRelDTOList(List<LabelIssueRelDTO> labelIssueRelDTOList) {
+    public IssueDetailDTO setLabelIssueRelDTOList(List<LabelIssueRelDTO> labelIssueRelDTOList) {
         this.labelIssueRelDTOList = labelIssueRelDTOList;
+        return this;
     }
 
     public List<ComponentIssueRelDTO> getComponentIssueRelDTOList() {
         return componentIssueRelDTOList;
     }
 
-    public void setComponentIssueRelDTOList(List<ComponentIssueRelDTO> componentIssueRelDTOList) {
+    public IssueDetailDTO setComponentIssueRelDTOList(List<ComponentIssueRelDTO> componentIssueRelDTOList) {
         this.componentIssueRelDTOList = componentIssueRelDTOList;
+        return this;
     }
 
     public List<IssueLinkDTO> getIssueLinkDTOList() {
         return issueLinkDTOList;
     }
 
-    public void setIssueLinkDTOList(List<IssueLinkDTO> issueLinkDTOList) {
+    public IssueDetailDTO setIssueLinkDTOList(List<IssueLinkDTO> issueLinkDTOList) {
         this.issueLinkDTOList = issueLinkDTOList;
+        return this;
     }
 
     public List<IssueCommentDTO> getIssueCommentDTOList() {
         return issueCommentDTOList;
     }
 
-    public void setIssueCommentDTOList(List<IssueCommentDTO> issueCommentDTOList) {
+    public IssueDetailDTO setIssueCommentDTOList(List<IssueCommentDTO> issueCommentDTOList) {
         this.issueCommentDTOList = issueCommentDTOList;
+        return this;
     }
 
     public List<IssueAttachmentDTO> getIssueAttachmentDTOList() {
         return issueAttachmentDTOList;
     }
 
-    public void setIssueAttachmentDTOList(List<IssueAttachmentDTO> issueAttachmentDTOList) {
+    public IssueDetailDTO setIssueAttachmentDTOList(List<IssueAttachmentDTO> issueAttachmentDTOList) {
         this.issueAttachmentDTOList = issueAttachmentDTOList;
+        return this;
     }
 
     public List<IssueDTO> getSubIssueDTOList() {
         return subIssueDTOList;
     }
 
-    public void setSubIssueDTOList(List<IssueDTO> subIssueDTOList) {
+    public IssueDetailDTO setSubIssueDTOList(List<IssueDTO> subIssueDTOList) {
         this.subIssueDTOList = subIssueDTOList;
+        return this;
     }
 
     public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public IssueDetailDTO setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+        return this;
     }
 
     public Date getLastUpdateDate() {
         return lastUpdateDate;
     }
 
-    public void setLastUpdateDate(Date lastUpdateDate) {
+    public IssueDetailDTO setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+        return this;
     }
 
     public BigDecimal getEstimateTime() {
         return estimateTime;
     }
 
-    public void setEstimateTime(BigDecimal estimateTime) {
+    public IssueDetailDTO setEstimateTime(BigDecimal estimateTime) {
         this.estimateTime = estimateTime;
+        return this;
     }
 
     public BigDecimal getRemainingTime() {
         return remainingTime;
     }
 
-    public void setRemainingTime(BigDecimal remainingTime) {
+    public IssueDetailDTO setRemainingTime(BigDecimal remainingTime) {
         this.remainingTime = remainingTime;
+        return this;
     }
 
     public String getEpicName() {
         return epicName;
     }
 
-    public void setEpicName(String epicName) {
+    public IssueDetailDTO setEpicName(String epicName) {
         this.epicName = epicName;
+        return this;
     }
 
-    public void setIssueEpicName(String issueEpicName) {
+    public IssueDetailDTO setIssueEpicName(String issueEpicName) {
         this.issueEpicName = issueEpicName;
+        return this;
     }
 
     public String getIssueEpicName() {
@@ -446,36 +482,41 @@ public class IssueDetailDTO {
         return color;
     }
 
-    public void setColor(String color) {
+    public IssueDetailDTO setColor(String color) {
         this.color = color;
+        return this;
     }
 
     public String getEpicColor() {
         return epicColor;
     }
 
-    public void setEpicColor(String epicColor) {
+    public IssueDetailDTO setEpicColor(String epicColor) {
         this.epicColor = epicColor;
+        return this;
     }
 
     public String getRank() {
         return rank;
     }
 
-    public void setRank(String rank) {
+    public IssueDetailDTO setRank(String rank) {
         this.rank = rank;
+        return this;
     }
 
     public String getParentIssueNum() {
         return parentIssueNum;
     }
 
-    public void setParentIssueNum(String parentIssueNum) {
+    public IssueDetailDTO setParentIssueNum(String parentIssueNum) {
         this.parentIssueNum = parentIssueNum;
+        return this;
     }
 
-    public void setParentIssueSummary(String parentIssueSummary) {
+    public IssueDetailDTO setParentIssueSummary(String parentIssueSummary) {
         this.parentIssueSummary = parentIssueSummary;
+        return this;
     }
 
     public String getParentIssueSummary() {
@@ -486,52 +527,59 @@ public class IssueDetailDTO {
         return activeSprint;
     }
 
-    public void setActiveSprint(SprintNameDTO activeSprint) {
+    public IssueDetailDTO setActiveSprint(SprintNameDTO activeSprint) {
         this.activeSprint = activeSprint;
+        return this;
     }
 
     public List<SprintNameDTO> getCloseSprint() {
         return closeSprint;
     }
 
-    public void setCloseSprint(List<SprintNameDTO> closeSprint) {
+    public IssueDetailDTO setCloseSprint(List<SprintNameDTO> closeSprint) {
         this.closeSprint = closeSprint;
+        return this;
     }
 
-    public void setPriorityId(Long priorityId) {
+    public IssueDetailDTO setPriorityId(Long priorityId) {
         this.priorityId = priorityId;
+        return this;
     }
 
     public Long getPriorityId() {
         return priorityId;
     }
 
-    public void setPriorityVO(PriorityVO priorityVO) {
+    public IssueDetailDTO setPriorityVO(PriorityVO priorityVO) {
         this.priorityVO = priorityVO;
+        return this;
     }
 
     public PriorityVO getPriorityVO() {
         return priorityVO;
     }
 
-    public void setIssueTypeId(Long issueTypeId) {
+    public IssueDetailDTO setIssueTypeId(Long issueTypeId) {
         this.issueTypeId = issueTypeId;
+        return this;
     }
 
     public Long getIssueTypeId() {
         return issueTypeId;
     }
 
-    public void setIssueTypeVO(IssueTypeVO issueTypeVO) {
+    public IssueDetailDTO setIssueTypeVO(IssueTypeVO issueTypeVO) {
         this.issueTypeVO = issueTypeVO;
+        return this;
     }
 
     public IssueTypeVO getIssueTypeVO() {
         return issueTypeVO;
     }
 
-    public void setCreatedBy(Long createdBy) {
+    public IssueDetailDTO setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
+        return this;
     }
 
     public Long getCreatedBy() {
@@ -542,12 +590,14 @@ public class IssueDetailDTO {
         return applyType;
     }
 
-    public void setApplyType(String applyType) {
+    public IssueDetailDTO setApplyType(String applyType) {
         this.applyType = applyType;
+        return this;
     }
 
-    public void setFeatureDTO(FeatureDTO featureDTO) {
+    public IssueDetailDTO setFeatureDTO(FeatureDTO featureDTO) {
         this.featureDTO = featureDTO;
+        return this;
     }
 
     public FeatureDTO getFeatureDTO() {
@@ -558,60 +608,68 @@ public class IssueDetailDTO {
         return featureId;
     }
 
-    public void setFeatureId(Long featureId) {
+    public IssueDetailDTO setFeatureId(Long featureId) {
         this.featureId = featureId;
+        return this;
     }
 
     public String getFeatureName() {
         return featureName;
     }
 
-    public void setFeatureName(String featureName) {
+    public IssueDetailDTO setFeatureName(String featureName) {
         this.featureName = featureName;
+        return this;
     }
 
-    public void setActivePi(PiNameDTO activePi) {
+    public IssueDetailDTO setActivePi(PiNameDTO activePi) {
         this.activePi = activePi;
+        return this;
     }
 
     public PiNameDTO getActivePi() {
         return activePi;
     }
 
-    public void setClosePi(List<PiNameDTO> closePi) {
+    public IssueDetailDTO setClosePi(List<PiNameDTO> closePi) {
         this.closePi = closePi;
+        return this;
     }
 
     public List<PiNameDTO> getClosePi() {
         return closePi;
     }
 
-    public void setRelateIssueId(Long relateIssueId) {
+    public IssueDetailDTO setRelateIssueId(Long relateIssueId) {
         this.relateIssueId = relateIssueId;
+        return this;
     }
 
     public Long getRelateIssueId() {
         return relateIssueId;
     }
 
-    public void setSubBugDOList(List<IssueDTO> subBugDOList) {
+    public IssueDetailDTO setSubBugDOList(List<IssueDTO> subBugDOList) {
         this.subBugDOList = subBugDOList;
+        return this;
     }
 
     public List<IssueDTO> getSubBugDOList() {
         return subBugDOList;
     }
 
-    public void setRelateIssueNum(String relateIssueNum) {
+    public IssueDetailDTO setRelateIssueNum(String relateIssueNum) {
         this.relateIssueNum = relateIssueNum;
+        return this;
     }
 
     public String getRelateIssueNum() {
         return relateIssueNum;
     }
 
-    public void setParentRelateSummary(String parentRelateSummary) {
+    public IssueDetailDTO setParentRelateSummary(String parentRelateSummary) {
         this.parentRelateSummary = parentRelateSummary;
+        return this;
     }
 
     public String getParentRelateSummary() {
@@ -627,71 +685,80 @@ public class IssueDetailDTO {
         return wsjf;
     }
 
-    public void setWsjf(WsjfDTO wsjf) {
+    public IssueDetailDTO setWsjf(WsjfDTO wsjf) {
         this.wsjf = wsjf;
+        return this;
     }
 
     public Set<Long> getProjectIds() {
         return projectIds;
     }
 
-    public void setProjectIds(Set<Long> projectIds) {
+    public IssueDetailDTO setProjectIds(Set<Long> projectIds) {
         this.projectIds = projectIds;
+        return this;
     }
 
     public Long getMainResponsibleId() {
         return mainResponsibleId;
     }
 
-    public void setMainResponsibleId(Long mainResponsibleId) {
+    public IssueDetailDTO setMainResponsibleId(Long mainResponsibleId) {
         this.mainResponsibleId = mainResponsibleId;
+        return this;
     }
 
     public String getEnvironment() {
         return environment;
     }
 
-    public void setEnvironment(String environment) {
+    public IssueDetailDTO setEnvironment(String environment) {
         this.environment = environment;
+        return this;
     }
 
     public Long getLastUpdatedBy() {
         return lastUpdatedBy;
     }
 
-    public void setLastUpdatedBy(Long lastUpdatedBy) {
+    public IssueDetailDTO setLastUpdatedBy(Long lastUpdatedBy) {
         this.lastUpdatedBy = lastUpdatedBy;
+        return this;
     }
 
     public Date getActualStartTime() {
         return actualStartTime;
     }
 
-    public void setActualStartTime(Date actualStartTime) {
+    public IssueDetailDTO setActualStartTime(Date actualStartTime) {
         this.actualStartTime = actualStartTime;
+        return this;
     }
 
     public Date getActualEndTime() {
         return actualEndTime;
     }
 
-    public void setActualEndTime(Date actualEndTime) {
+    public IssueDetailDTO setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+        return this;
     }
 
     public List<Long> getParticipantIds() {
         return participantIds;
     }
 
-    public void setParticipantIds(List<Long> participantIds) {
+    public IssueDetailDTO setParticipantIds(List<Long> participantIds) {
         this.participantIds = participantIds;
+        return this;
     }
 
     public List<Long> getProductIds() {
         return productIds;
     }
 
-    public void setProductIds(List<Long> productIds) {
+    public IssueDetailDTO setProductIds(List<Long> productIds) {
         this.productIds = productIds;
+        return this;
     }
 }

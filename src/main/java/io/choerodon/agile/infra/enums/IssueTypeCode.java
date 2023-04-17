@@ -32,7 +32,7 @@ public enum IssueTypeCode {
 
     public static List<String> AGILE_PARENT_ISSUE_TYPES = Arrays.asList(STORY.value, TASK.value, BUG.value);
 
-    public static List<String> YQY_NOT_ASSOCIATION_TYPES = Arrays.asList(ISSUE_EPIC.value, RISK.value, SUB_TASK.value, ISSUE_TEST.value, ISSUE_AUTO_TEST.value);
+    public static List<String> YQY_NOT_ASSOCIATION_TYPES = Arrays.asList(ISSUE_EPIC.value, RISK.value, ISSUE_TEST.value, ISSUE_AUTO_TEST.value);
 
     private String value;
 

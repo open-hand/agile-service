@@ -10,12 +10,15 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.*;
 import io.choerodon.agile.infra.enums.FieldSql;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.core.util.Pair;
 
 /**
  * @author zhaotianxin 2020-10-12 10:35
@@ -655,5 +658,33 @@ public interface AgilePluginService {
      * @param instanceOpenRelVOCollection 由需求生成的关系VO集合
      */
     void afterBackLogMoveProject(Long organizationId, Collection<? extends InstanceOpenRelVO> instanceOpenRelVOCollection);
+
+    /**
+     * 高级筛选查商业版字段和表映射关系
+     *
+     * @return
+     */
+    Map<String, FieldTableVO> queryAdvanceParamFieldTableMap();
+
+    /**
+     * 项目群字段生成sql
+     *
+     * @param fieldTable
+     * @param condition
+     * @param projectIds
+     * @param values
+     * @param dataPair
+     * @param isSelector
+     * @return
+     */
+    String parseProgramSql(FieldTableVO fieldTable,
+                           Condition condition,
+                           Set<Long> projectIds,
+                           List<? extends Object> values,
+                           Pair<String, String> dataPair,
+                           boolean isSelector);
+
+    List<InstanceOpenRelVO> listByInstanceIds(List<Long> projectIds, List<Long> instanceIds, String instanceType, String source);
+
 
 }

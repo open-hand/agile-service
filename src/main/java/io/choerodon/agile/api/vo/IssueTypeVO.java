@@ -5,7 +5,6 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -72,6 +71,16 @@ public class IssueTypeVO {
     private String rank;
     @ApiModelProperty(value = "项目信息")
     private ProjectVO projectInfo;
+    @ApiModelProperty(value = "扩展信息所属项目id")
+    private Long issueTypeExtendProjectId;
+
+    public Long getIssueTypeExtendProjectId() {
+        return issueTypeExtendProjectId;
+    }
+
+    public void setIssueTypeExtendProjectId(Long issueTypeExtendProjectId) {
+        this.issueTypeExtendProjectId = issueTypeExtendProjectId;
+    }
 
     public String getRank() {
         return rank;

@@ -150,7 +150,7 @@ public class AgileEventHandler {
                 //创建项目时创建默认状态机方案
                 stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
                 //创建项目时创建默认问题类型方案
-                issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
+                issueTypeSchemeService.initByConsumeCreateProject(projectEvent, projectEvent.getProjectCode());
                 // 同步状态机模板和看板模板
                 handlerOrganizationTemplate(projectEvent);
             } else if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
@@ -161,7 +161,7 @@ public class AgileEventHandler {
 
             if (backlogExpandService != null && codes.contains(ProjectCategory.MODULE_BACKLOG)) {
                 // 选择需求管理后默认开启需求池
-                backlogExpandService.startBacklog(projectEvent.getProjectId());
+                backlogExpandService.startBacklog(projectEvent);
             }
         }
     }
@@ -174,7 +174,7 @@ public class AgileEventHandler {
             boardTemplateService.syncBoardTemplate(projectEvent, SchemeApplyType.AGILE);
         } else {
             // 初始化问题类型状态机
-            projectConfigService.initIssueTypeStatusMachine(projectEvent.getProjectId(), SchemeApplyType.AGILE);
+            projectConfigService.initIssueTypeStatusMachine(projectEvent, SchemeApplyType.AGILE);
         }
     }
 
@@ -189,14 +189,14 @@ public class AgileEventHandler {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
         LOGGER.info("接受更新项目消息{}", message);
         Long projectId = projectEvent.getProjectId();
+        // 删除redis的缓存
+        SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:" + projectId);
         List<ProjectEventCategory> projectEventCategories = projectEvent.getNewProjectCategoryVOS();
         if (!CollectionUtils.isEmpty(projectEventCategories)) {
             initIfAgileProject(projectEvent, projectEventCategories);
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }
-        // 删除redis的缓存
-        SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:" + projectId);
         return message;
     }
 

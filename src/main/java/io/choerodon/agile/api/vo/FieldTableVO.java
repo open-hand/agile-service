@@ -8,6 +8,12 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class FieldTableVO {
 
+    public static final String TYPE_BASE = "base";
+    public static final String TYPE_PROGRAM = "program";
+    public static final String TYPE_BACKLOG = "backlog";
+    public static final String TYPE_TRIGGER = "trigger";
+    public static final String TYPE_WATERFALL = "waterfall";
+
     public FieldTableVO() {
     }
 
@@ -16,12 +22,31 @@ public class FieldTableVO {
         this.field = field;
         this.table = table;
     }
+    public FieldTableVO(String name,
+                        String field,
+                        String table,
+                        String type) {
+        this.name = name;
+        this.field = field;
+        this.table = table;
+        this.type = type;
+    }
     @ApiModelProperty(value = "名称")
     private String name;
     @ApiModelProperty(value = "字段")
     private String field;
     @ApiModelProperty(value = "表")
     private String table;
+
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getName() {
         return name;

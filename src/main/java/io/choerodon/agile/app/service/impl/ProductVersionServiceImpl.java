@@ -1,5 +1,11 @@
 package io.choerodon.agile.app.service.impl;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.Lists;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -8,12 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.vo.*;
@@ -44,9 +44,8 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     private static final String INSERT_ERROR = "error.version.insert";
     private static final String UPDATE_ERROR = "error.version.update";
     private static final String AGILE = "Agile:";
-    private static final String PIECHART = AGILE + "PieChart";
+    private static final String PIE_CHART = AGILE + "PieChart";
     private static final String FIX_VERSION = "fixVersion";
-    private static final String VERSION_STATUS_PLAN_CODE = "version_planning";
     private static final String CUSTOM_CHART = AGILE + "CustomChart";
 
     @Autowired
@@ -87,19 +86,14 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Autowired
     private UserService userService;
 
-    private static final String VERSION_PLANNING = "version_planning";
     private static final String NOT_EQUAL_ERROR = "error.projectId.notEqual";
     private static final String NOT_FOUND = "error.version.notFound";
     private static final String CATEGORY_DONE_CODE = "done";
     private static final String CATEGORY_TODO_CODE = "todo";
     private static final String CATEGORY_DOING_CODE = "doing";
-    private static final String VERSION_ARCHIVED_CODE = "archived";
     private static final String REVOKE_ARCHIVED_ERROR = "error.productVersion.revokeArchived";
     private static final String ARCHIVED_ERROR = "error.productVersion.archived";
-    private static final String VERSION_STATUS_RELEASE_CODE = "released";
     private static final String REVOKE_RELEASE_ERROR = "error.productVersion.revokeRelease";
-    private static final String FIX_RELATION_TYPE = "fix";
-    private static final String INFLUENCE_RELATION_TYPE = "influence";
 
     private SagaClient sagaClient;
     @Autowired
@@ -124,7 +118,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             productVersionValidator.checkDate(productVersionDTO);
             productVersionValidator.judgeName(productVersionDTO.getProjectId(), productVersionDTO.getVersionId(), productVersionDTO.getName());
             //设置状态
-            productVersionDTO.setStatusCode(VERSION_PLANNING);
+            productVersionDTO.setStatusCode(ProductVersionService.VERSION_STATUS_CODE_PLANNING);
             //设置编号
             Integer sequence = productVersionMapper.queryMaxSequenceByProject(projectId);
             productVersionDTO.setSequence(sequence == null ? 0 : sequence + 1);
@@ -143,11 +137,11 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         productVersionValidator.judgeExist(projectId, targetVersionId);
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         if (targetVersionId != null && !Objects.equals(targetVersionId, 0L)) {
-            List<VersionIssueDTO> versionFixIssues = productVersionMapper.queryIssuesByRelationType(projectId, versionId, FIX_RELATION_TYPE);
+            List<VersionIssueDTO> versionFixIssues = productVersionMapper.queryIssuesByRelationType(projectId, versionId, VERSION_RELATION_TYPE_FIX);
             if (versionFixIssues != null && !versionFixIssues.isEmpty()) {
                 iProductVersionService.batchIssueToDestination(projectId, targetVersionId, versionFixIssues, new Date(), customUserDetails.getUserId());
             }
-            List<VersionIssueDTO> versionInfIssues = productVersionMapper.queryIssuesByRelationType(projectId, versionId, INFLUENCE_RELATION_TYPE);
+            List<VersionIssueDTO> versionInfIssues = productVersionMapper.queryIssuesByRelationType(projectId, versionId, VERSION_RELATION_TYPE_INFLUENCE);
             if (versionInfIssues != null && !versionInfIssues.isEmpty()) {
                 iProductVersionService.batchIssueToDestination(projectId, targetVersionId, versionInfIssues, new Date(), customUserDetails.getUserId());
             }
@@ -225,7 +219,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         List<ProductVersionDataVO> productVersions = versionDataAssembler.toTargetList(productVersionMapper.queryVersionByProjectId(projectId), ProductVersionDataVO.class);
         if (!productVersions.isEmpty()) {
             List<Long> productVersionIds = productVersions.stream().map(ProductVersionDataVO::getVersionId).collect(toList());
-            Map<String, List<Long>> statusMap = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE)
+            Map<String, List<Long>> statusMap = projectConfigService.queryStatusByProjectId(projectId, null, SchemeApplyType.AGILE)
                     .stream().collect(Collectors.groupingBy(StatusVO::getType, Collectors.mapping(StatusVO::getId, Collectors.toList())));
             List<Long> done = statusMap.get(CATEGORY_DONE_CODE);
             Boolean condition = done != null && !done.isEmpty();
@@ -246,7 +240,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Override
     public ProductVersionStatisticsVO queryVersionStatisticsByVersionId(Long projectId, Long versionId) {
         ProductVersionStatisticsVO productVersionStatisticsVO = versionStatisticsAssembler.toTarget(productVersionMapper.queryVersionStatisticsByVersionId(projectId, versionId), ProductVersionStatisticsVO.class);
-        List<StatusVO> statusMapVOS = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE);
+        List<StatusVO> statusMapVOS = projectConfigService.queryStatusByProjectId(projectId, null, SchemeApplyType.AGILE);
         Map<String, List<Long>> statusIdMap = statusMapVOS.stream().collect(Collectors.groupingBy(StatusVO::getType, Collectors.mapping(StatusVO::getId, Collectors.toList())));
         Map<String, List<StatusVO>> statusMap = statusMapVOS.stream().collect(Collectors.groupingBy(StatusVO::getType));
         UserDTO userDTO = userService.queryUserNameByOption(productVersionStatisticsVO.getCreatedBy(), false);
@@ -317,11 +311,11 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         versionDTO.setProjectId(projectId);
         versionDTO.setVersionId(versionId);
         ProductVersionDTO version = productVersionCreateAssembler.toTarget(productVersionMapper.selectOne(versionDTO), ProductVersionDTO.class);
-        if (version == null || !Objects.equals(version.getStatusCode(), VERSION_STATUS_RELEASE_CODE)) {
+        if (version == null || !Objects.equals(version.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_RELEASED)) {
             throw new CommonException(REVOKE_RELEASE_ERROR);
         }
         version.setOldStatusCode(version.getStatusCode());
-        version.setStatusCode(VERSION_STATUS_PLAN_CODE);
+        version.setStatusCode(VERSION_STATUS_CODE_PLANNING);
         return productVersionUpdateAssembler.toTarget(updateBase(version), ProductVersionDetailVO.class);
     }
 
@@ -352,11 +346,11 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         versionDTO.setProjectId(projectId);
         versionDTO.setVersionId(versionId);
         ProductVersionDTO version = productVersionCreateAssembler.toTarget(productVersionMapper.selectOne(versionDTO), ProductVersionDTO.class);
-        if (version == null || Objects.equals(version.getStatusCode(), VERSION_ARCHIVED_CODE)) {
+        if (version == null || Objects.equals(version.getStatusCode(), VERSION_STATUS_CODE_ARCHIVED)) {
             throw new CommonException(ARCHIVED_ERROR);
         }
         version.setOldStatusCode(version.getStatusCode());
-        version.setStatusCode(VERSION_ARCHIVED_CODE);
+        version.setStatusCode(VERSION_STATUS_CODE_ARCHIVED);
         return productVersionUpdateAssembler.toTarget(updateBase(version), ProductVersionDetailVO.class);
     }
 
@@ -366,11 +360,11 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         versionDTO.setProjectId(projectId);
         versionDTO.setVersionId(versionId);
         ProductVersionDTO version = productVersionCreateAssembler.toTarget(productVersionMapper.selectOne(versionDTO), ProductVersionDTO.class);
-        if (version == null || !Objects.equals(version.getStatusCode(), VERSION_ARCHIVED_CODE)) {
+        if (version == null || !Objects.equals(version.getStatusCode(), VERSION_STATUS_CODE_ARCHIVED)) {
             throw new CommonException(REVOKE_ARCHIVED_ERROR);
         }
         version.setStatusCode(version.getOldStatusCode());
-        version.setOldStatusCode(VERSION_ARCHIVED_CODE);
+        version.setOldStatusCode(VERSION_STATUS_CODE_ARCHIVED);
         return productVersionUpdateAssembler.toTarget(updateBase(version), ProductVersionDetailVO.class);
     }
 
@@ -455,7 +449,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         if (productVersionMapper.insertSelective(versionDTO) != 1) {
             throw new CommonException(INSERT_ERROR);
         }
-        redisUtil.deleteRedisCache(new String[]{PIECHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*"});
+        redisUtil.deleteRedisCache(new String[]{PIE_CHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*"});
         return productVersionMapper.selectByPrimaryKey(versionDTO.getVersionId());
     }
 
@@ -465,7 +459,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             throw new CommonException(UPDATE_ERROR);
         }
         redisUtil.deleteRedisCache(new String[]{
-                PIECHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*",
+                PIE_CHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*",
                 CUSTOM_CHART + versionDTO.getProjectId() + ":" + "*"
         });
         return productVersionMapper.selectByPrimaryKey(versionDTO.getVersionId());
@@ -483,7 +477,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             throw new CommonException(UPDATE_ERROR);
         }
         redisUtil.deleteRedisCache(new String[]{
-                PIECHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*",
+                PIE_CHART + versionDTO.getProjectId() + ':' + FIX_VERSION + "*",
                 CUSTOM_CHART + versionDTO.getProjectId() + ":" + "*"
         });
         return productVersionMapper.selectByPrimaryKey(versionDTO.getVersionId());
@@ -491,7 +485,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
 
     @Override
     public int deleteByVersionIds(Long projectId, List<Long> versionIds) {
-        redisUtil.deleteRedisCache(new String[]{PIECHART + projectId + ':' + FIX_VERSION + "*"});
+        redisUtil.deleteRedisCache(new String[]{PIE_CHART + projectId + ':' + FIX_VERSION + "*"});
         return productVersionMapper.deleteByVersionIds(projectId, versionIds);
     }
 

@@ -16,18 +16,21 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -39,8 +42,10 @@ import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.api.vo.event.IssuePayload;
+import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
@@ -49,6 +54,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
@@ -59,7 +65,6 @@ import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.core.client.MessageClientC7n;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
@@ -75,7 +80,10 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * 敏捷开发Issue
@@ -230,6 +238,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String EPIC_ID_FIELD = "epicId";
     private static final String SPRINT_ID_FIELD = "sprintId";
     private static final String STORY_POINTS_FIELD = "storyPoints";
+    private static final String ESTIMATE_TIME_FIELD = "estimateTime";
     private static final String REMAIN_TIME_FIELD = "remainingTime";
     private static final String STATUS_ID = "statusId";
     private static final String PARENT_ISSUE_ID = "parentIssueId";
@@ -258,11 +267,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String ERROR_ISSUE_NOT_FOUND = "error.Issue.queryIssue";
     private static final String ERROR_ISSUE_TYPE_NOT_ISSUE_TEST= "error.Issue.type.isNotIssueTest";
     private static final String SEARCH = "search";
-    private static final String STORYMAP = "storymap";
+    private static final String STORY_MAP = "storymap";
     private static final String AGILE = "agile";
-//    private static final String BACKETNAME = "agile-service";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
-    private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
+    private static final String AUTO_TRANSFER_FLAG = "autoTranferFlag";
     private static final String STAR_BEACON_TYPE_ISSUE = "issue";
     private static final String CUSTOM_FIELD = "custom_field";
     private static final String BUG_TYPE = "bug";
@@ -276,7 +284,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String[] COPY_PREDEFINED_FIELDS_NAME = new String[]
             {
                     ASSIGNEE_ID, EPIC_ID_FIELD, STORY_POINTS_FIELD, STATUS_ID,
-                    FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, REMAIN_TIME_FIELD,
+                    FEATURE_ID, ENVIRONMENT, MAIN_RESPONSIBLE_ID, ESTIMATE_TIME_FIELD, REMAIN_TIME_FIELD,
                     ESTIMATED_START_TIME, ESTIMATED_END_TIME, REPORTER_ID, PRIORITY_ID,
                     ACTUAL_START_TIME, ACTUAL_END_TIME, PARTICIPANT_IDS, PRODUCT_IDS
             };
@@ -284,10 +292,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String INFLUENCE_VERSION = "influenceVersion";
     private static final String ORDER_STR = "orderStr";
     private static final String WEBSOCKET_COPY_ISSUE_CODE = "agile-clone-issue";
-    private static final String CLONE_ISSUE_KEY = "cloneIssue:";
-    private static final String DOING_STATUS = "doing";
-    private static final String FAILED_STATUS = "failed";
-    private static final String SUCCEED_STATUS = "succeed";
 
 //    @Value("${services.attachment.url}")
 //    private String attachmentUrl;
@@ -353,11 +357,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired(required = false)
     protected AgileWaterfallService agileWaterfallService;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private DevopsClientOperator devopsClientOperator;
+    @Autowired
+    private AdvancedParamParserService advancedParamParserService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -394,14 +400,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agileWaterfallService == null || !Arrays.asList(IssueTypeCode.WATERFALL_ISSUE_TYPE_CODE).contains(issueConvertDTO.getTypeCode())) {
             return;
         }
-        if(!CollectionUtils.isEmpty(issuePredecessors)) {
+        if(CollectionUtils.isNotEmpty(issuePredecessors)) {
             issuePredecessors.forEach(v -> v.setIssueId(issueId));
             issuePredecessorService.updatePredecessors(projectId, issuePredecessors, issueId);
         }
     }
 
     private void handlerParticipantRel(IssueConvertDTO issueConvertDTO, Long projectId, Long issueId) {
-        if (!CollectionUtils.isEmpty(issueConvertDTO.getParticipantIds())) {
+        if (CollectionUtils.isNotEmpty(issueConvertDTO.getParticipantIds())) {
             issueParticipantRelService.createParticipantRel(issueId, projectId, issueConvertDTO.getParticipantIds());
         }
     }
@@ -433,7 +439,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.handleInitIssue(colorList, issueConvertDTO);
         }
-        if (!CollectionUtils.isEmpty(colorList)) {
+        if (CollectionUtils.isNotEmpty(colorList)) {
             issueConvertDTO.initializationColor(colorList);
             //排序编号
             Integer sequence = issueMapper.queryMaxEpicSequenceByProject(issueConvertDTO.getProjectId());
@@ -453,6 +459,30 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         setRemainingTime(issueConvertDTO);
         // 处理预计、实际时间
         handleEstimateTimeAndActualTime(issueConvertDTO);
+        //处理甘特图创建子缺陷可以选择已关闭冲刺的问题
+        //https://choerodon.com.cn/#/agile/work-list/issue?type=project&id=243303070577803264&name=%E7%94%84%E7%9F%A5%E9%A1%B9%E7%9B%AE%E7%BE%A4&category=AGILE&organizationId=1128&paramIssueId=393079285088505856&paramName=yq-5896
+        resetSubIssueSprintIfClosed(issueConvertDTO);
+    }
+
+    private void resetSubIssueSprintIfClosed(IssueConvertDTO issueConvertDTO) {
+        Long sprintId = issueConvertDTO.getSprintId();
+        if (sprintId == null) {
+            return;
+        }
+        SprintDTO sprint = sprintMapper.selectByPrimaryKey(sprintId);
+        if (sprint == null) {
+            return;
+        }
+        String statusCode = sprint.getStatusCode();
+        Long parentId = issueConvertDTO.getParentIssueId();
+        Long relateIssueId = issueConvertDTO.getRelateIssueId();
+        if ((parentId != null && !Objects.equals(0L, parentId))
+                || (relateIssueId != null && !Objects.equals(0L, relateIssueId))) {
+            if (SprintStatusCode.CLOSED.equals(statusCode)) {
+                //冲刺已关闭，置空
+                issueConvertDTO.setSprintId(null);
+            }
+        }
     }
 
     private void handleEstimateTimeAndActualTime(IssueConvertDTO issueConvertDTO) {
@@ -500,9 +530,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
-        if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
-            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
-                    filePathService.generateFullPath(issueAttachmentDO.getUrl())));
+        final List<IssueAttachmentDTO> issueAttachmentDTOList = issue.getIssueAttachmentDTOList();
+        if (CollectionUtils.isNotEmpty(issueAttachmentDTOList)) {
+            for (IssueAttachmentDTO issueAttachmentDO : issueAttachmentDTOList) {
+                issueAttachmentDO.setUrl(filePathService.generateFullPath(issueAttachmentDO.getUrl()));
+            }
         }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
@@ -679,6 +711,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    @Deprecated
     public Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
         if (organizationId == null) {
             organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -694,7 +727,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             Page<Long> issueIdPage;
             String filterSql = null;
             //处理自定义搜索
-            if (!CollectionUtils.isEmpty(searchVO.getQuickFilterIds())) {
+            if (CollectionUtils.isNotEmpty(searchVO.getQuickFilterIds())) {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             //处理未匹配的筛选
@@ -702,7 +735,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             final String searchSql = filterSql;
             issueIdPage = getIssueIdPage(pageRequest, projectId, searchVO, searchSql, organizationId, isTreeView);
             Page<IssueListFieldKVVO> issueListDTOPage = new Page<>();
-            if (!CollectionUtils.isEmpty(issueIdPage.getContent())) {
+            if (CollectionUtils.isNotEmpty(issueIdPage.getContent())) {
                 List<Long> issueIds = issueIdPage.getContent();
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
@@ -727,7 +760,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), allIssueIds, false);
                 Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                 List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
-                if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
+                if (!ObjectUtils.isEmpty(agilePluginService) && CollectionUtils.isNotEmpty(issueListFieldKVVOS)) {
                     boolean countSubIssue = Boolean.TRUE.equals(Optional.ofNullable(searchVO.getSearchArgs())
                             .map(x -> x.get("countSubIssue"))
                             .orElse(false));
@@ -741,21 +774,94 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
+    @Override
+    public Page<IssueListFieldKVVO> pagedQueryWorkList(Long projectId,
+                                                       SearchParamVO searchParamVO,
+                                                       PageRequest pageRequest,
+                                                       Long organizationId) {
+        if (organizationId == null) {
+            organizationId = ConvertUtil.getOrganizationId(projectId);
+        }
+        //默认为true
+        boolean isTreeView = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getTreeFlag()).orElse(true));
+        String quickFilterSql = getQuickFilter(searchParamVO.getQuickFilterIds());
+        Set<Long> projectIds = SetUtils.unmodifiableSet(projectId);
+        Map<String, FieldTableVO> predefinedFieldMap = new HashMap<>(SearchConstant.PREDEFINED_FIELD_TABLE_MAP);
+        if (agilePluginService != null) {
+            predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
+        }
+        String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
+        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
+        Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, sortMap, isTreeView, false, null);
+        Page<IssueListFieldKVVO> issueListDTOPage = new Page<>();
+        if (!CollectionUtils.isEmpty(issueIdPage.getContent())) {
+            List<Long> issueIds = issueIdPage.getContent();
+            Set<Long> childrenIds = new HashSet<>();
+            if (isTreeView) {
+                List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null, false, null);
+                //todo 支持第三方调用，筛选出父级时同时把所有子级返回
+                boolean withSubIssues = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getWithSubIssues()).orElse(false));
+                // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
+                    childrenIds.add(0L);
+                }
+                childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
+            }
+            List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false, isTreeView);
+            Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
+            Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+            List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+            Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), allIssueIds, false);
+            Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
+            List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
+            if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
+                boolean countSubIssue = Boolean.TRUE.equals(searchParamVO.getCountSubIssue());
+                agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId), issueListFieldKVVOS, countSubIssue);
+            }
+            issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
+        }
+        return issueListDTOPage;
+    }
+
+    @Override
+    public Page<Long> pagedQueryRoot(PageRequest pageRequest,
+                                     Long projectId,
+                                     String quickFilterSql,
+                                     String advancedSql,
+                                     Map<String, Object> sortMap,
+                                     boolean isTreeView,
+                                     boolean ganttDefaultOrder,
+                                     String dimension) {
+        Page<IssueDTO> issuePage;
+        if (isTreeView) {
+            issuePage =
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryRootList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension));
+        } else {
+            issuePage =
+                    PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueList(SetUtils.unmodifiableSet(projectId), quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension));
+        }
+        List<Long> issueIds = issuePage.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        return PageUtil.buildPageInfoWithPageInfoList(issuePage, issueIds);
+    }
+
+
     private Page<Long> getIssueIdPage(PageRequest pageRequest, Long projectId, SearchVO searchVO, String searchSql, Long organizationId, Boolean isTreeView) {
-        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId);
+        Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         return pagedQueryByTreeView(pageRequest, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, sortMap, isTreeView);
     }
 
     @Override
     public Map<String, Object> processSortMap(PageRequest pageRequest,
                                               Long projectId,
-                                              Long organizationId) {
+                                              Long organizationId,
+                                              String alias) {
         Map<String, Object> sortMap = new HashMap<>();
         if (ObjectUtils.isEmpty(pageRequest.getSort())) {
             return sortMap;
         }
         if (!handleSortField(pageRequest).equals(StringUtils.EMPTY)) {
-            setSortMap(organizationId, projectId, pageRequest, sortMap, "ai");
+            setSortMap(organizationId, projectId, pageRequest, sortMap, alias);
         } else {
             String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
             sortMap.put(ORDER_STR, orderStr);
@@ -764,6 +870,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    @Deprecated
     public Page<Long> pagedQueryByTreeView(PageRequest pageRequest,
                                            Set<Long> projectIds,
                                            SearchVO searchVO,
@@ -800,6 +907,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
+    public List<Long> listByTreeViewV2(Set<Long> projectIds,
+                                       String quickFilterSql,
+                                       String advancedSql,
+                                       Map<String, Object> sortMap,
+                                       boolean isTreeView,
+                                       boolean ganttDefaultOrder,
+                                       String dimension) {
+        if (isTreeView) {
+            return issueMapper.queryRootList(projectIds, quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension)
+                    .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        } else {
+            return issueMapper.queryIssueList(projectIds, quickFilterSql, advancedSql, sortMap, ganttDefaultOrder, dimension)
+                    .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        }
+    }
+
+    @Override
     public void splitIssueNumProjectCodePrefix(SearchVO searchVO, Set<Long> projectIds) {
         //去除searchVO.searchArgs.issueNum或searchVO.contents的项目code前缀
         List<ProjectInfoDTO> projectInfos = projectInfoMapper.selectByProjectIds(projectIds);
@@ -812,7 +936,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             List<String> replaceContents = new ArrayList<>();
             contents.forEach(content -> {
                 projectCodes.forEach(projectCode -> {
-                    String prefix = projectCode + "-";
+                    String prefix = projectCode + BaseConstants.Symbol.MIDDLE_LINE;
                     if (content.startsWith(prefix)) {
                         replaceContents.add(content.substring(prefix.length()));
                     } else {
@@ -827,7 +951,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             String issueNum = (String) searchArgs.get("issueNum");
             if (!StringUtils.isEmpty(issueNum)) {
                 projectCodes.forEach(projectCode -> {
-                    String prefix = projectCode + "-";
+                    String prefix = projectCode + BaseConstants.Symbol.MIDDLE_LINE;
                     if (issueNum.startsWith(prefix)) {
                         searchArgs.put("issueNum", issueNum.substring(prefix.length()));
                         return;
@@ -974,7 +1098,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private boolean handlerUserSearch(Long projectId, String userName, SearchVO searchVO, String key) {
         if (StringUtils.isNotBlank(userName)) {
             List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
-            if (!CollectionUtils.isEmpty(userVOS)) {
+            if (CollectionUtils.isNotEmpty(userVOS)) {
                 searchVO.getAdvancedSearchArgs().put(key, userVOS.stream().map(UserVO::getId).collect(Collectors.toList()));
             } else {
                 return false;
@@ -986,8 +1110,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
         validateBeforeUpdate(projectId, issueUpdateVO, fieldList);
-        String issueIdStr = "issueId";
-        String objectVersionNumberStr = "objectVersionNumber";
         if (agilePluginService != null) {
             agilePluginService.buildFieldList(fieldList, issueUpdateVO);
         }
@@ -997,9 +1119,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //更新issue表字段，fieldList包含issueId，objectVersionNumber和一个field
         boolean updateRelationField =
                 fieldList.size() == 2
-                        && fieldList.contains(issueIdStr)
-                        && fieldList.contains(objectVersionNumberStr);
-        if (!fieldList.isEmpty()) {
+                        && fieldList.contains(IssueDTO.FIELD_ISSUE_ID)
+                        && fieldList.contains(IssueDTO.FIELD_OBJECT_VERSION_NUMBER);
+        if (CollectionUtils.isNotEmpty(fieldList)) {
             if (updateRelationField) {
                 handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
             } else {
@@ -1227,19 +1349,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return !ObjectUtils.isEmpty(agilePluginService.getProgram(organizationId, projectId));
     }
 
-    private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO x, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
-        if (Boolean.TRUE.equals(x.getSystem())) {
+    private void handlerSystemAndCustomRequiredField(Map<String, Object> customFieldMap, boolean belongToProgram, PageFieldViewVO pageFieldView, List<PageFieldViewVO> requiredSystemFields, List<PageFieldViewVO> requiredCustomFields, IssueVO issue) {
+        if (Boolean.TRUE.equals(pageFieldView.getSystem())) {
             //系统字段
-            String code = x.getFieldCode();
+            String code = pageFieldView.getFieldCode();
             if (FieldCode.EPIC.equals(code) && belongToProgram) {
                 return;
             }
-            if (isSystemFieldEmpty(x.getFieldCode(), issue)) {
-                requiredSystemFields.add(x);
+            if (isSystemFieldEmpty(pageFieldView.getFieldCode(), issue)) {
+                requiredSystemFields.add(pageFieldView);
             }
         } else {
-            if (ObjectUtils.isEmpty(customFieldMap.get(x.getFieldCode()))) {
-                requiredCustomFields.add(x);
+            if (ObjectUtils.isEmpty(customFieldMap.get(pageFieldView.getFieldCode()))) {
+                requiredCustomFields.add(pageFieldView);
             }
         }
     }
@@ -1273,7 +1395,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         String appleType = projectConfigService.getApplyType(projectId, issueTypeId);
         List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, currentStatusId, issueId, issueTypeId, appleType);
-        if (!CollectionUtils.isEmpty(transformVOS)) {
+        if (CollectionUtils.isNotEmpty(transformVOS)) {
             Map<Long, TransformVO> transformVOMap = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
             TransformVO transformVO = transformVOMap.get(targetStatusId);
             if (!ObjectUtils.isEmpty(transformVO)) {
@@ -1295,8 +1417,19 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 value = issue.getLabelIssueRelVOList();
                 break;
             case FieldCode.FIX_VERSION:
+                value = issue.getVersionIssueRelVOList() == null ?
+                        null :
+                        issue.getVersionIssueRelVOList().stream()
+                                .filter(versionIssueRel -> Objects.equals(versionIssueRel.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_FIX))
+                                .filter(versionIssueRel -> Objects.equals(versionIssueRel.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_PLANNING))
+                                .collect(Collectors.toList());
+                break;
             case FieldCode.INFLUENCE_VERSION:
-                value = issue.getVersionIssueRelVOList();
+                value = issue.getVersionIssueRelVOList() == null ?
+                        null :
+                        issue.getVersionIssueRelVOList().stream()
+                                .filter(versionIssueRel -> Objects.equals(versionIssueRel.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE))
+                                .collect(Collectors.toList());
                 break;
             case FieldCode.SPRINT:
                 List<SprintNameVO> sprints = issue.getCloseSprint();
@@ -1371,9 +1504,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
-                                     String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
+                                     String applyType, IssueDTO triggerIssue, boolean autoTransferFlag) {
         Set<Long> influenceIssueIds = new HashSet<>();
-        IssueVO result = this.self().doStateMachineCustomFlowAndRuleNotice(projectId, issueId, applyType, influenceIssueIds, false, transformId, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
+        IssueVO result = this.self().doStateMachineCustomFlowAndRuleNotice(projectId, issueId, applyType, influenceIssueIds, false, transformId, new InputDTO(issueId, "updateStatus", updateTrigger(autoTransferFlag, triggerIssue)));
         if (backlogExpandService != null) {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
@@ -1458,19 +1591,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroup = issueLinkChangeVOS.stream().collect(Collectors.groupingBy(IssueLinkChangeVO::getIssueId));
         handlerInfluenceMap(allInfluenceMap, issueId, issueDTO.getStatusId(), issueLinkChangeGroup, null, influenceIssueVO, false);
-        if (CollectionUtils.isEmpty(allInfluenceMap) && allInfluenceMap.size() <= 1) {
+        if (MapUtils.isEmpty(allInfluenceMap) && allInfluenceMap.size() <= 1) {
             return;
         }
         Set<Long> linkIssueIds = allInfluenceMap.keySet();
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, new ArrayList<>(linkIssueIds), null);
-        Map<Long, IssueDTO> issueDTOMap = new HashMap<>();
         if (CollectionUtils.isEmpty(issueDTOS)) {
             return;
         }
-        issueDTOMap.putAll(issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
+        Map<Long, IssueDTO> issueDTOMap = new HashMap<>(issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueId, Function.identity())));
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
         Map<Long, IssueStatusLinkageVO> issueStatusLinkageMap = linkIssueStatusLinkageService.queryMapByProject(projectId, ConvertUtil.getOrganizationId(projectId));
-        if (!CollectionUtils.isEmpty(childrenVO)) {
+        if (CollectionUtils.isNotEmpty(childrenVO)) {
             // 处理需要联动的issue
             for (InfluenceIssueVO influenceVO : childrenVO) {
                 try {
@@ -1497,7 +1629,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         this.self().executionUpdateInfluenceIssue(issueId, statusId, influenceIssue, projectId, applyType, influenceIssueVO, isSub, issueStatusLinkageMap, triggerCarrierVO);
         // 处理当前issue会影响的issue
         List<InfluenceIssueVO> childrenVO = influenceIssueVO.getChildrenVO();
-        if (!CollectionUtils.isEmpty(childrenVO)) {
+        if (CollectionUtils.isNotEmpty(childrenVO)) {
             for (InfluenceIssueVO issueVO : childrenVO) {
                 try {
                     this.self().handlerInfluenceIssue(projectId, applyType, issueVO, issueId, issueStatusLinkageMap, influenceIssueIds);
@@ -1681,7 +1813,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         Map<Long, List<IssueLinkChangeVO>> issueLinkChangeGroupByStatus = issueLinkChangeVOS.stream().collect(Collectors.groupingBy(IssueLinkChangeVO::getStatusId));
         List<IssueLinkChangeVO> linkChangeVOS = issueLinkChangeGroupByStatus.get(statusId);
-        if (!CollectionUtils.isEmpty(linkChangeVOS)) {
+        if (CollectionUtils.isNotEmpty(linkChangeVOS)) {
             List<InfluenceIssueVO> influenceIssueVOS = new ArrayList<>();
             Integer level = influenceIssueVO.getLevel() + 1;
             for (IssueLinkChangeVO linkChangeVO : linkChangeVOS) {
@@ -1709,9 +1841,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    private String updateTrigger(boolean autoTranferFlag, IssueDTO triggerIssue) {
+    private String updateTrigger(boolean autoTransferFlag, IssueDTO triggerIssue) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put(AUTO_TRANFER_FLAG, autoTranferFlag);
+        jsonObject.put(AUTO_TRANSFER_FLAG, autoTransferFlag);
         if(Objects.nonNull(triggerIssue)){
             jsonObject.put(TRIGGER_ISSUE_ID, triggerIssue.getIssueId());
         }
@@ -1785,7 +1917,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         handleHistorySprintCompleted(projectId, issueConvertDTO, fieldList, originIssue);
         // 处理预计、实际时间
         handleEstimateTimeAndActualTime(issueConvertDTO);
-        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
+        issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[0]));
     }
 
     private void handleHistorySprintCompleted(Long projectId, IssueConvertDTO issueConvertDTO, List<String> fieldList, IssueDTO originIssue) {
@@ -1871,7 +2003,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 //如果是epic，会把该epic下的issue的epicId置为0
                 issueAccessDataService.batchUpdateIssueEpicId(projectId, issueConvertDTO.getIssueId());
             } else {
-                redisUtil.deleteRedisCache(new String[]{"Agile:EpicChart" + projectId + ":" + issueConvertDTO.getEpicId() + ":" + "*"});
+                redisUtil.deleteRedisCache(new String[]{"Agile:EpicChart" + projectId + BaseConstants.Symbol.COLON + issueConvertDTO.getEpicId() + BaseConstants.Symbol.COLON + "*"});
             }
             List<IssueDTO> issueDTOList = issueMapper.queryIssueSubList(projectId, issueConvertDTO.getIssueId());
             if (issueDTOList != null && !issueDTOList.isEmpty()) {
@@ -2073,16 +2205,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //处理子任务与子缺陷
         List<Long> subTaskIds = issueMapper.querySubIssueIds(projectId, moveIssueIds);
         List<Long> subBugIds = issueMapper.querySubBugIds(projectId, moveIssueIds);
-        if (!CollectionUtils.isEmpty(subTaskIds)) {
+        if (CollectionUtils.isNotEmpty(subTaskIds)) {
             moveIssueIds.addAll(subTaskIds);
         }
-        if (!CollectionUtils.isEmpty(subBugIds)) {
+        if (CollectionUtils.isNotEmpty(subBugIds)) {
             moveIssueIds.addAll(subBugIds);
         }
         //把与现在冲刺与要移动的冲刺相同的issue排除掉
         List<IssueSearchDTO> issueSearchDTOList = issueMapper.queryIssueByIssueIds(projectId, moveIssueVO.getIssueIds()).stream()
                 .filter(issueDO -> issueDO.getSprintId() == null ? sprintId != 0 : !issueDO.getSprintId().equals(sprintId)).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(issueSearchDTOList)) {
+        if (CollectionUtils.isNotEmpty(issueSearchDTOList)) {
             List<Long> moveIssueIdsFilter = issueSearchDTOList.stream().map(IssueSearchDTO::getIssueId).collect(Collectors.toList());
             BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, sprintId, moveIssueIdsFilter);
             issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
@@ -2513,17 +2645,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void handleVersionIssueRel(List<VersionIssueRelDTO> versionIssueRelDTOList, Long projectId, Long issueId) {
-        versionIssueRelDTOList.forEach(versionIssueRel -> {
+        for (VersionIssueRelDTO versionIssueRel : versionIssueRelDTOList) {
             versionIssueRel.setIssueId(issueId);
             versionIssueRel.setProjectId(projectId);
-            versionIssueRel.setRelationType(versionIssueRel.getRelationType() == null ? "fix" : versionIssueRel.getRelationType());
+            versionIssueRel.setRelationType(versionIssueRel.getRelationType() == null ? ProductVersionService.VERSION_RELATION_TYPE_FIX : versionIssueRel.getRelationType());
             issueValidator.verifyVersionIssueRelData(versionIssueRel);
             handleVersionIssueRelCreate(versionIssueRel);
-        });
+        }
     }
 
     private void handleVersionIssueRelCreate(VersionIssueRelDTO versionIssueRelDTO) {
-        if (issueValidator.existVersionIssueRel(versionIssueRelDTO)) {
+        if (issueValidator.notExistVersionIssueRel(versionIssueRelDTO)) {
             versionIssueRelService.create(versionIssueRelDTO);
         }
     }
@@ -2561,7 +2693,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 componentIssueRelDTO.setComponentId(issueComponentDTO.getComponentId());
             }
         }
-        if (issueValidator.existComponentIssueRel(componentIssueRelDTO)) {
+        if (issueValidator.notExistComponentIssueRel(componentIssueRelDTO)) {
             componentIssueRelService.create(componentIssueRelDTO);
         }
     }
@@ -2653,7 +2785,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 labelIssueRelDTO.setLabelId(issueLabelDTO.getLabelId());
             }
         }
-        if (issueValidator.existLabelIssue(labelIssueRelDTO)) {
+        if (issueValidator.notExistLabelIssue(labelIssueRelDTO)) {
             labelIssueRelService.create(labelIssueRelDTO);
         }
     }
@@ -2711,77 +2843,80 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             throw new CommonException("error.applyType.illegal");
         }
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + "-" + asyncTraceId;
+        String websocketKey = WEBSOCKET_COPY_ISSUE_CODE + BaseConstants.Symbol.MIDDLE_LINE + asyncTraceId;
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("projectId", projectId);
         paramsMap.put("userId", EncryptionUtils.encrypt(userId));
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 0);
-        redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
+        redisUtil.set(CLONE_ISSUE_KEY + issueId + BaseConstants.Symbol.COLON + asyncTraceId , DOING_STATUS, 24L, TimeUnit.HOURS);
         IssueDetailDTO issueDetailDTO = issueMapper.queryIssueDetail(projectId, issueId);
+        if (issueDetailDTO == null) {
+            sendCloneProcess(userId, websocketKey, paramsMap, FAILED_STATUS, 100);
+            redisUtil.set(CLONE_ISSUE_KEY + issueId +BaseConstants.Symbol.COLON + asyncTraceId , FAILED_STATUS, 24L, TimeUnit.HOURS);
+            throw new CommonException("error.issue.copyIssueByIssueId");
+        }
         //处理需要复制的预定义字段
         List<String> predefinedFieldNames = copyConditionVO.getPredefinedFieldNames();
-        if (CollectionUtils.isEmpty(predefinedFieldNames)) {
+        if (predefinedFieldNames == null) {
             predefinedFieldNames = new ArrayList<>();
         }
         handleCopyPredefinedFields(organizationId, issueDetailDTO, predefinedFieldNames);
         List<CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOS = copyConditionVO.getCopyIssueRequiredFieldVOS();
         Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap = new HashMap<>();
-        if(!CollectionUtils.isEmpty(copyIssueRequiredFieldVOS)){
+        if(CollectionUtils.isNotEmpty(copyIssueRequiredFieldVOS)){
             copyIssueRequiredFieldVOMap.putAll(copyIssueRequiredFieldVOS.stream().collect(Collectors.toMap(CopyIssueRequiredFieldVO::getIssueId, Function.identity())));
         }
         CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueId, new CopyIssueRequiredFieldVO());
         sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 10);
-        if (issueDetailDTO != null) {
-            Long newIssueId;
-            Long objectVersionNumber;
-            issueDetailDTO.setSummary(copyConditionVO.getSummary());
-            IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
-            List<String> handlerRequireFiled = new ArrayList<>();
-            if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
-                IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO, predefinedFieldNames);
-                handlerRequireFiled = handlerCopyRequirePredefinedField(issueSubCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
-                IssueSubVO newIssue = stateMachineClientService.createSubIssueWithoutRuleNotice(issueSubCreateVO);
-                newIssueId = newIssue.getIssueId();
-                objectVersionNumber = newIssue.getObjectVersionNumber();
-            } else {
-                IssueCreateVO issueCreateVO = issueAssembler.issueDtoToIssueCreateDto(issueDetailDTO, predefinedFieldNames);
-                if (ISSUE_EPIC.equals(issueCreateVO.getTypeCode())) {
-                    setEpicName(projectId, copyConditionVO, issueCreateVO);
-                }
-                handlerRequireFiled = handlerCopyRequirePredefinedField(issueCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
-                IssueVO newIssue = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, applyType);
-                newIssueId = newIssue.getIssueId();
-                objectVersionNumber = newIssue.getObjectVersionNumber();
-            }
-            sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 30);
-            // 复制关联内容
-            copyIssueLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId);
-            sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 50);
-            // 复制项目群的特性和史诗都不会去创建关联关系
-            if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals(ISSUE_EPIC) || issueDetailDTO.getTypeCode().equals("feature")))) {
-                //生成一条复制的关联
-                createCopyIssueLink(issueDetailDTO.getIssueId(), newIssueId, projectId);
-            }
-            // 如果故事点和剩余工作量必填,就不需要在复制原issue的了
-            setCopyRequireField(issueDetailDTO, handlerRequireFiled);
-            //复制故事点和剩余工作量并记录日志
-            copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
-            // 处理冲刺、子任务、自定义字段的值
-            List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
-            sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 80);
-            handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO, copyIssueRequiredFieldVOMap, triggerCarrierVOS);
-            this.self().batchCreateIssueInvokeTrigger(triggerCarrierVOS);
-            if (agileWaterfallService != null) {
-                agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
-            }
-            paramsMap.put("newIssueId", EncryptionUtils.encrypt(newIssueId));
-            sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
-            redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , SUCCEED_STATUS, 24L, TimeUnit.HOURS);
+        final Long newIssueId;
+        Long objectVersionNumber;
+        final String newIssueNum;
+        issueDetailDTO.setSummary(copyConditionVO.getSummary());
+        IssueTypeVO issueTypeVO = issueTypeService.queryById(issueDetailDTO.getIssueTypeId(), projectId);
+        List<String> handlerRequireFiled = new ArrayList<>();
+        if (issueTypeVO.getTypeCode().equals(SUB_TASK)) {
+            IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToIssueSubCreateDto(issueDetailDTO, predefinedFieldNames);
+            handlerRequireFiled = handlerCopyRequirePredefinedField(issueSubCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
+            IssueSubVO newIssue = stateMachineClientService.createSubIssueWithoutRuleNotice(issueSubCreateVO);
+            newIssueId = newIssue.getIssueId();
+            newIssueNum = newIssue.getIssueNum();
+            objectVersionNumber = newIssue.getObjectVersionNumber();
         } else {
-            sendCloneProcess(userId, websocketKey, paramsMap, FAILED_STATUS, 100);
-            redisUtil.set(CLONE_ISSUE_KEY + issueId +":" + asyncTraceId , FAILED_STATUS, 24L, TimeUnit.HOURS);
-            throw new CommonException("error.issue.copyIssueByIssueId");
+            IssueCreateVO issueCreateVO = issueAssembler.issueDtoToIssueCreateDto(issueDetailDTO, predefinedFieldNames);
+            if (ISSUE_EPIC.equals(issueCreateVO.getTypeCode())) {
+                setEpicName(projectId, copyConditionVO, issueCreateVO);
+            }
+            handlerRequireFiled = handlerCopyRequirePredefinedField(issueCreateVO, copyIssueRequiredFieldVO.getPredefinedFields());
+            IssueVO newIssue = stateMachineClientService.createIssueWithoutRuleNotice(issueCreateVO, applyType);
+            newIssueId = newIssue.getIssueId();
+            newIssueNum = newIssue.getIssueNum();
+            objectVersionNumber = newIssue.getObjectVersionNumber();
         }
+        sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 30);
+        // 复制关联内容
+        objectVersionNumber = copyIssueLinkContents(copyConditionVO.getLinkContents(), issueId, newIssueId, projectId).getObjectVersionNumber();
+        sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 50);
+        // 复制项目群的特性和史诗都不会去创建关联关系
+        if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals(ISSUE_EPIC) || issueDetailDTO.getTypeCode().equals("feature")))) {
+            //生成一条复制的关联
+            objectVersionNumber = createCopyIssueLink(issueDetailDTO.getIssueId(), newIssueId, projectId).getObjectVersionNumber();
+        }
+        // 如果故事点和剩余工作量必填,就不需要再复制原issue的了
+        setCopyRequireField(issueDetailDTO, handlerRequireFiled);
+        //复制故事点和剩余工作量并记录日志
+        objectVersionNumber = copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber).getObjectVersionNumber();
+        // 处理冲刺、子任务、自定义字段的值
+        List<TriggerCarrierVO> triggerCarrierVOS = new ArrayList<>();
+        sendCloneProcess(userId, websocketKey, paramsMap, DOING_STATUS, 80);
+        objectVersionNumber = handlerOtherFields(projectId, predefinedFieldNames, issueDetailDTO, newIssueId, copyConditionVO, copyIssueRequiredFieldVOMap, triggerCarrierVOS).getObjectVersionNumber();
+        this.self().batchCreateIssueInvokeTrigger(triggerCarrierVOS);
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handlerCopyIssue(issueDetailDTO, newIssueId, projectId);
+        }
+        paramsMap.put("newIssueId", EncryptionUtils.encrypt(newIssueId));
+        paramsMap.put("newIssueNum", newIssueNum);
+        sendCloneProcess(userId, websocketKey, paramsMap, SUCCEED_STATUS, 100);
+        redisUtil.set(CLONE_ISSUE_KEY + issueId +BaseConstants.Symbol.COLON + asyncTraceId , SUCCEED_STATUS, 24L, TimeUnit.HOURS);
     }
 
     private void sendCloneProcess(Long userId,
@@ -2797,21 +2932,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error: {0}", e);
         }
-        messageClientC7n.sendByUserId(userId, websocketKey, message);
+        socketSendHelper.sendByUserId(userId, websocketKey, message);
     }
 
     @Override
-    public void copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId) {
-        if (!ObjectUtils.isEmpty(linkContents)) {
-            linkContents.forEach(linkContent -> {
-                copyIssueLinkContent(linkContent, oldIssueId, newIssueId, projectId);
-            });
+    public IssueDTO copyIssueLinkContents(List<String> linkContents, Long oldIssueId, Long newIssueId, Long projectId) {
+        IssueDTO issueDTO = this.issueMapper.selectByPrimaryKey(newIssueId);
+        if (CollectionUtils.isNotEmpty(linkContents)) {
+            for (String linkContent : linkContents) {
+                issueDTO = copyIssueLinkContent(linkContent, oldIssueId, newIssueId, projectId);
+            }
         }
+        return issueDTO;
     }
 
     @Override
     public String queryAsyncCloneStatus(Long projectId, Long issueId, String asyncTraceId) {
-        String key = CLONE_ISSUE_KEY + issueId + ":" + asyncTraceId;
+        String key = CLONE_ISSUE_KEY + issueId + BaseConstants.Symbol.COLON + asyncTraceId;
         Object object = redisUtil.get(key);
         String status = StringUtils.EMPTY;
         if (!Objects.isNull(object)) {
@@ -2820,7 +2957,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return ObjectUtils.isEmpty(status) ? "failed" : status;
     }
 
-    private void copyIssueLinkContent(String linkContent, Long issueId, Long newIssueId, Long projectId) {
+    private IssueDTO copyIssueLinkContent(String linkContent, Long issueId, Long newIssueId, Long projectId) {
         switch(linkContent) {
             case IssueCopyLinkContents.ISSUE_LINKS:
                 // 关联工作项
@@ -2859,6 +2996,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             default:
                 break;
         }
+        return this.issueMapper.selectByPrimaryKey(newIssueId);
     }
 
     @Override
@@ -2921,12 +3059,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         for (String field : fields) {
             setValue(field, object, getValue(field, issueUpdateVO));
         }
-        if (!CollectionUtils.isEmpty(fixVersion)) {
-            handlerIssueVersionVO(fixVersion, "fix");
+        if (CollectionUtils.isNotEmpty(fixVersion)) {
+            handlerIssueVersionVO(fixVersion, ProductVersionService.VERSION_RELATION_TYPE_FIX);
             setValue("versionIssueRelVOList", object, fixVersion);
         }
-        if (!CollectionUtils.isEmpty(influenceVersion)) {
-            handlerIssueVersionVO(influenceVersion, "influence");
+        if (CollectionUtils.isNotEmpty(influenceVersion)) {
+            handlerIssueVersionVO(influenceVersion, ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             setValue("versionIssueRelVOList", object, influenceVersion);
         }
         return fieldList;
@@ -2978,18 +3116,18 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return ObjectUtils.isEmpty(object) ? null : EncryptionUtils.jsonToList(object,VersionIssueRelVO.class);
     }
 
-    private void handlerOtherFields(Long projectId, List<String> predefinedFieldNames, IssueDetailDTO issueDetailDTO, Long newIssueId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap, List<TriggerCarrierVO> triggerCarrierVOS) {
+    private IssueDTO handlerOtherFields(Long projectId, List<String> predefinedFieldNames, IssueDetailDTO issueDetailDTO, Long newIssueId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap, List<TriggerCarrierVO> triggerCarrierVOS) {
         //复制冲刺
         if (predefinedFieldNames.contains(SPRINT_ID_FIELD)) {
             handleCreateCopyIssueSprintRel(issueDetailDTO, newIssueId);
         }
-        if (copyConditionVO.getSubTask() && !CollectionUtils.isEmpty(issueDetailDTO.getSubIssueDTOList())) {
+        if (copyConditionVO.getSubTask() && CollectionUtils.isNotEmpty(issueDetailDTO.getSubIssueDTOList())) {
             List<IssueDTO> subIssueDTOList = issueDetailDTO.getSubIssueDTOList();
             subIssueDTOList.forEach(issueDO -> {
                 copySubIssue(issueDO, newIssueId, projectId,copyConditionVO, copyIssueRequiredFieldVOMap);
                 CopyIssueRequiredFieldVO copyIssueRequiredFieldVO = copyIssueRequiredFieldVOMap.getOrDefault(issueDO.getIssueId(), new CopyIssueRequiredFieldVO());
                 List<Long> customFieldIds = new ArrayList<>();
-                if (!CollectionUtils.isEmpty(copyIssueRequiredFieldVO.getCustomFields())) {
+                if (CollectionUtils.isNotEmpty(copyIssueRequiredFieldVO.getCustomFields())) {
                     customFieldIds.addAll(copyIssueRequiredFieldVO.getCustomFields().stream().map(PageFieldViewCreateVO::getFieldId).collect(Collectors.toList()));
                 }
                 buildTriggerCarrierVO(projectId, newIssueId, triggerCarrierVOS, customFieldIds);
@@ -2999,41 +3137,53 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         // 复制自定义字段的值
         fieldValueService.copyCustomFieldValue(projectId, issueDetailDTO, newIssueId, copyConditionVO.getCustomFieldIds(), copyIssueRequiredFieldVO.getCustomFields());
         List<Long> customFieldIds = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(copyIssueRequiredFieldVO.getCustomFields())) {
+        if (CollectionUtils.isNotEmpty(copyIssueRequiredFieldVO.getCustomFields())) {
             customFieldIds.addAll(copyIssueRequiredFieldVO.getCustomFields().stream().map(PageFieldViewCreateVO::getFieldId).collect(Collectors.toList()));
         }
         buildTriggerCarrierVO(projectId, newIssueId, triggerCarrierVOS, customFieldIds);
+        return issueMapper.selectByPrimaryKey(newIssueId);
     }
 
     @Override
-    public void handleCopyPredefinedFields(Long origanizationId, IssueDetailDTO issueDetailDTO, List<String> predefinedFieldNames) {
-        //将不需要复制的预定义字段置空
+    public void handleCopyPredefinedFields(Long organizationId, IssueDetailDTO issueDetail, List<String> predefinedFieldNames) {
+        // 对比前端传入的需要复制的预定义字段和支持复制的预定义字段, 找出不需要复制的字段名
+        // 将不需要复制的预定义字段置空
         for (String fieldName : COPY_PREDEFINED_FIELDS_NAME) {
             if (!predefinedFieldNames.contains(fieldName)) {
-                setFieldValueEmpty(issueDetailDTO, fieldName);
+                setFieldValueEmpty(issueDetail, fieldName);
             }
         }
-
-        //设置报告人为复制人
+        // 不复制报告人, 则将报告人设置为复制人
         if (!predefinedFieldNames.contains(REPORTER_ID)) {
-            issueDetailDTO.setReporterId(DetailsHelper.getUserDetails().getUserId());
+            issueDetail.setReporterId(Optional.ofNullable(DetailsHelper.getUserDetails()).map(CustomUserDetails::getUserId).orElse(null));
         }
-        //设置优先级为默认优先级
+        // 不复制优先级, 则将优先级设置为默认优先级
         if (!predefinedFieldNames.contains(PRIORITY_ID)) {
-            PriorityVO priorityVO = priorityService.queryDefaultByOrganizationId(origanizationId);
-            issueDetailDTO.setPriorityCode("priority-" + priorityVO.getId());
-            issueDetailDTO.setPriorityId(priorityVO.getId());
+            PriorityVO priorityVO = priorityService.queryDefaultByOrganizationId(organizationId);
+            issueDetail.setPriorityCode("priority-" + priorityVO.getId());
+            issueDetail.setPriorityId(priorityVO.getId());
+        }
+        // 过滤掉已归档/已发版的"修复的版本"
+        if (predefinedFieldNames.contains(FIX_VERSION)) {
+            List<VersionIssueRelDTO> versionIssueRelations = issueDetail.getVersionIssueRelDTOList();
+            if(CollectionUtils.isNotEmpty(versionIssueRelations)) {
+                versionIssueRelations = versionIssueRelations.stream().filter(relation -> !(
+                        Objects.equals(relation.getRelationType(), ProductVersionService.VERSION_RELATION_TYPE_FIX)
+                        && !Objects.equals(relation.getStatusCode(), ProductVersionService.VERSION_STATUS_CODE_PLANNING)
+                )).collect(Collectors.toList());
+                issueDetail.setVersionIssueRelDTOList(versionIssueRelations);
+            }
         }
     }
 
     private void setFieldValueEmpty(IssueDetailDTO issueDetailDTO, String fieldName) {
+        // 获得写方法
         Method method;
-        try {
-            PropertyDescriptor pd = new PropertyDescriptor(fieldName, issueDetailDTO.getClass());
-            method = pd.getWriteMethod();//获得写方法
-        } catch (IntrospectionException e) {
+        PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(issueDetailDTO.getClass(), fieldName);
+        if(pd == null) {
             throw new CommonException("error.copy.issue.setFiledValueEmpty");
         }
+        method = pd.getWriteMethod();
         if (!ObjectUtils.isEmpty(method)) {
             try {
                 if (Objects.equals(EPIC_ID_FIELD, fieldName)) {
@@ -3062,9 +3212,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issueCreateVO.setEpicName(epicName);
     }
 
-    protected void copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {
+    protected IssueDTO copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (issueDetailDTO.getStoryPoints() == null && issueDetailDTO.getRemainingTime() == null) {
-            return;
+            return issueDTO;
         }
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         issueUpdateVO.setStoryPoints(issueDetailDTO.getStoryPoints());
@@ -3079,6 +3230,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             fieldList.add(REMAIN_TIME_FIELD);
         }
         updateIssueWithoutRuleNotice(projectId, issueUpdateVO, fieldList);
+        return issueMapper.selectByPrimaryKey(issueId);
     }
 
     protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId, CopyConditionVO copyConditionVO, Map<Long, CopyIssueRequiredFieldVO> copyIssueRequiredFieldVOMap) {
@@ -3128,7 +3280,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
-    protected void createCopyIssueLink(Long issueId, Long newIssueId, Long projectId) {
+    protected IssueDTO createCopyIssueLink(Long issueId, Long newIssueId, Long projectId) {
         IssueLinkTypeDTO query = new IssueLinkTypeDTO();
         query.setProjectId(projectId);
         query.setOutWard("复制");
@@ -3143,6 +3295,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueLinkService.create(issueLink);
             }
         }
+        return this.issueMapper.selectByPrimaryKey(newIssueId);
     }
 
     private void insertSprintWhenTransform(Long issueId, Long sprintId, Long projectId, List<Long> issueIds) {
@@ -3169,7 +3322,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (!issueConvertDTO.getTypeCode().equals(SUB_TASK)) {
                 issueConvertDTO.setObjectVersionNumber(issueTransformSubTask.getObjectVersionNumber());
                 List<Long> subIssueIds = issueMapper.querySubIssueIdsByIssueId(projectId, issueConvertDTO.getIssueId());
-                if (!CollectionUtils.isEmpty(subIssueIds)) {
+                if (CollectionUtils.isNotEmpty(subIssueIds)) {
                     throw new CommonException("error.transformedSubTask.issueHaveSubIssue");
                 }
                 issueConvertDTO.setEpicSequence(null);
@@ -3189,7 +3342,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueValidator.verifySubTask(issueTransformSubTask.getParentIssueId());
                 //删除链接
                 List<IssueLinkDTO> issueLinkDTOS = issueLinkMapper.listIssueLinkByBatch(projectId, Arrays.asList(issueConvertDTO.getIssueId()));
-                if (!CollectionUtils.isEmpty(issueLinkDTOS)) {
+                if (CollectionUtils.isNotEmpty(issueLinkDTOS)) {
                     issueLinkService.deleteIssueLinkByIssueId(issueConvertDTO,issueLinkDTOS);
                 }
                 if (agilePluginService != null) {
@@ -3430,6 +3583,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public String getQuickFilter(List<Long> quickFilterIds) {
+        if (ObjectUtils.isEmpty(quickFilterIds)) {
+            return null;
+        }
         List<String> sqlQuerys = quickFilterMapper.selectSqlQueryByIds(quickFilterIds);
         if (sqlQuerys.isEmpty()) {
             return null;
@@ -3519,7 +3675,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public String querySwimLaneCode(Long projectId) {
         UserSettingDTO userSettingDTO = new UserSettingDTO();
         userSettingDTO.initUserSetting(projectId);
-        userSettingDTO.setTypeCode(STORYMAP);
+        userSettingDTO.setTypeCode(STORY_MAP);
         UserSettingDTO query = userSettingMapper.selectOne(userSettingDTO);
         String result;
         if (query == null) {
@@ -3618,7 +3774,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         pageRequest.setSort(sort);
         Page<IssueDTO> pageInfo = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
         List<IssueDTO> list = pageInfo.getContent();
-        if (!CollectionUtils.isEmpty(list)) {
+        if (CollectionUtils.isNotEmpty(list)) {
             Long organizationId = projectUtil.getOrganizationId(projectId);
             Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
             Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
@@ -3778,6 +3934,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
     }
 
+
     private Page<IssueDTO> queryIssuesByTypeAndUserId(List<Long> projectIds,
                                                       Long userId,
                                                       String searchType,
@@ -3864,7 +4021,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void setIssueTypeVO(IssueListFieldKVVO issueListFieldKVVO, List<IssueTypeVO> issueTypeVOList) {
-        if (!CollectionUtils.isEmpty(issueTypeVOList)) {
+        if (CollectionUtils.isNotEmpty(issueTypeVOList)) {
             Map<Long, IssueTypeVO> issueTypeVOMap = issueTypeVOList.stream().collect(Collectors.toMap(IssueTypeVO::getProjectId, Function.identity()));
             if (issueTypeVOMap.containsKey(issueListFieldKVVO.getProjectId())) {
                 issueListFieldKVVO.setIssueTypeVO(issueTypeVOMap.get(issueListFieldKVVO.getProjectId()));
@@ -3882,10 +4039,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void setListStarBeacon(List<IssueListFieldKVVO> issues, Long userId, List<Long> projectIds) {
-        if (!CollectionUtils.isEmpty(issues)) {
+        if (CollectionUtils.isNotEmpty(issues)) {
             List<Long> issueIds = issues.stream().map(IssueListFieldKVVO::getIssueId).collect(Collectors.toList());
             List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, projectIds, userId);
-            if (!CollectionUtils.isEmpty(starIssueIds)) {
+            if (CollectionUtils.isNotEmpty(starIssueIds)) {
                 issues.forEach(issue -> {
                     if (starIssueIds.contains(issue.getIssueId())) {
                         issue.setStarBeacon(true);
@@ -3915,12 +4072,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     public void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId, String type) {
         if (ObjectUtils.isEmpty(projectId)) {
             List<ProjectVO> projectVOS = remoteIamOperator.listProjectsByUserIdForSimple(organizationId,userId, null, true);
-            if (!CollectionUtils.isEmpty(projectVOS)) {
+            if (CollectionUtils.isNotEmpty(projectVOS)) {
                 projectIds.addAll(projectVOS.stream().map(ProjectVO::getId).collect(Collectors.toList()));
                 projects.addAll(projectVOS);
             }
         } else {
-            ProjectVO projectVO = remoteIamOperator.queryProject(projectId);
+            ProjectVO projectVO = ConvertUtil.queryProject(projectId);
             if (!organizationId.equals(projectVO.getOrganizationId())) {
                 throw new CommonException("error.organization.illegal");
             }
@@ -3943,10 +4100,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Page<UserDTO> page = remoteIamOperator.agileUsersByProjectIds(0L, pageRequest.getPage(), pageRequest.getSize(), agileUserVO);
         Set<Long> ignoredUserIds = agileUserVO.getIgnoredUserIds();
         List<UserDTO> result = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(ignoredUserIds)) {
+        if (CollectionUtils.isNotEmpty(ignoredUserIds)) {
             result.addAll(remoteIamOperator.listUsersByIds(ignoredUserIds.toArray(new Long[ignoredUserIds.size()]), false));
         }
-        if (!CollectionUtils.isEmpty(page.getContent())) {
+        if (CollectionUtils.isNotEmpty(page.getContent())) {
             result.addAll(page.getContent());
         }
         return PageUtil.buildPageInfoWithPageInfoList(page, result);
@@ -4006,33 +4163,83 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
-        if (versionIssueRelVOList != null && versionType != null) {
-            if (!versionIssueRelVOList.isEmpty()) {
-                //归档状态的版本之间的关联不删除
-                List<VersionIssueRelDTO> versionIssueRelDTOS = modelMapper.map(versionIssueRelVOList, new TypeToken<List<VersionIssueRelDTO>>() {
-                }.getType());
-                List<VersionIssueRelDTO> versionIssueRelCreate = versionIssueRelDTOS.stream().filter(versionIssueRel ->
-                        versionIssueRel.getVersionId() != null).collect(Collectors.toList());
-                List<Long> curVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
-                List<Long> createVersionIds = versionIssueRelCreate.stream().map(VersionIssueRelDTO::getVersionId).collect(Collectors.toList());
-                curVersionIds.forEach(id -> {
-                    if (!createVersionIds.contains(id)) {
-                        VersionIssueRelDTO versionIssueRelDTO = new VersionIssueRelDTO();
-                        versionIssueRelDTO.setIssueId(issueId);
-                        versionIssueRelDTO.setVersionId(id);
-                        versionIssueRelDTO.setRelationType(versionType);
-                        versionIssueRelDTO.setProjectId(projectId);
-                        versionIssueRelService.delete(versionIssueRelDTO);
-                    }
-                });
-                versionIssueRelDTOS.forEach(rel -> rel.setRelationType(versionType));
-                handleVersionIssueRel(versionIssueRelDTOS, projectId, issueId);
+    public void handleUpdateVersionIssueRelWithoutRuleNotice(List<VersionIssueRelVO> targetVOList, Long projectId, Long issueId, String versionType) {
+        if(Objects.equals(versionType, ProductVersionService.VERSION_RELATION_TYPE_FIX)) {
+            if (targetVOList == null || versionType == null) {
+                return;
+            }
+            if (CollectionUtils.isNotEmpty(targetVOList)) {
+                // 1. targetList中移除已发布和已归档的，记为realTargetList
+                // 2. 用inDbVersions减去realTarget，记为preDelete
+                // 3. preDelete移除已归档的，记为realDelete
+                // 4. 使用realTarget减去DB，记为realCreate
+                // 5. 删除realDelete, 添加realCreate，得到final
+                List<VersionIssueRelDTO> targetList = modelMapper.map(targetVOList, new TypeToken<List<VersionIssueRelDTO>>() {}.getType());
+                final List<Long> targetVersionIds = targetList.stream()
+                        .map(VersionIssueRelDTO::getVersionId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                List<Long> inDbVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
+                final List<ProductVersionDTO> versions = this.productVersionMapper.selectByCondition(Condition.builder(ProductVersionDTO.class)
+                        .select(ProductVersionDTO.FIELD_VERSION_ID, ProductVersionDTO.FIELD_STATUS_CODE)
+                        .andWhere(Sqls.custom()
+                                .andIn(ProductVersionDTO.FIELD_VERSION_ID, ListUtils.union(targetVersionIds, inDbVersionIds))
+                        ).build());
+                final Map<Long, String> versionIdToStatusMap = versions.stream().collect(Collectors.toMap(ProductVersionDTO::getVersionId, ProductVersionDTO::getStatusCode));
+                final List<Long> realTargetVersionIds = targetVersionIds.stream()
+                        .filter(id -> Objects.equals(versionIdToStatusMap.get(id), ProductVersionService.VERSION_STATUS_CODE_PLANNING))
+                        .collect(Collectors.toList());
+                final List<Long> preDeleteVersionIds = ListUtils.subtract(inDbVersionIds, realTargetVersionIds);
+                final List<Long> realDeleteVersionIds = preDeleteVersionIds.stream()
+                        .filter(id -> !Objects.equals(versionIdToStatusMap.get(id), ProductVersionService.VERSION_STATUS_CODE_ARCHIVED))
+                        .collect(Collectors.toList());
+                final List<Long> realCreateVersionIds = ListUtils.subtract(realTargetVersionIds, inDbVersionIds);
+
+                for (Long realDeleteVersionId : realDeleteVersionIds) {
+                    versionIssueRelService.delete(
+                            new VersionIssueRelDTO()
+                                    .setIssueId(issueId)
+                                    .setVersionId(realDeleteVersionId)
+                                    .setRelationType(versionType)
+                                    .setProjectId(projectId)
+                    );
+                }
+                targetList = targetList.stream()
+                        .filter(rel -> realCreateVersionIds.contains(rel.getVersionId()))
+                        .peek(rel -> rel.setRelationType(versionType))
+                        .collect(Collectors.toList());
+                handleVersionIssueRel(targetList, projectId, issueId);
             } else {
+                // 归档状态的版本之间的关联不删除
                 VersionIssueRelDTO versionIssueRel = new VersionIssueRelDTO();
                 versionIssueRel.createBatchDeleteVersionIssueRel(projectId, issueId, versionType);
                 versionIssueRelService.batchDeleteByIssueIdAndTypeArchivedExceptInfluence(versionIssueRel);
             }
+        } else if(Objects.equals(versionType, ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE)) {
+            List<VersionIssueRelDTO> targetList = modelMapper.map(targetVOList, new TypeToken<List<VersionIssueRelDTO>>() {}.getType());
+            final List<Long> targetVersionIds = targetList.stream()
+                    .map(VersionIssueRelDTO::getVersionId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            List<Long> inDbVersionIds = versionIssueRelMapper.queryByIssueIdAndProjectIdNoArchivedExceptInfluence(projectId, issueId, versionType);
+            final List<Long> realCreateVersionIds = ListUtils.subtract(targetVersionIds, inDbVersionIds);
+            final List<Long> realDeleteVersionIds = ListUtils.subtract(inDbVersionIds, targetVersionIds);
+            for (Long realDeleteVersionId : realDeleteVersionIds) {
+                versionIssueRelService.delete(
+                        new VersionIssueRelDTO()
+                                .setIssueId(issueId)
+                                .setVersionId(realDeleteVersionId)
+                                .setRelationType(versionType)
+                                .setProjectId(projectId)
+                );
+            }
+            targetList = targetList.stream()
+                    .filter(rel -> realCreateVersionIds.contains(rel.getVersionId()))
+                    .peek(rel -> rel.setRelationType(versionType))
+                    .collect(Collectors.toList());
+            handleVersionIssueRel(targetList, projectId, issueId);
+        } else {
+            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
         }
     }
 
@@ -4088,7 +4295,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, isBatch = true)
     public void batchUpdateInvokeTrigger(List<TriggerCarrierVO> triggerCarriers) {
-        // TODO document why this method is empty
+        // 通过切面触发, 无需方法体
     }
 
     @Override
@@ -4154,12 +4361,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (ObjectUtils.isEmpty(issueDTOList)) {
             return new ArrayList<>();
         }
-        Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), issueIds, false);
+        Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Collections.singletonList(projectId), issueIds, false);
         List<Long> issueTypeIds = issueDTOList.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
         List<IssueVO> issueVOList = issueAssembler.issueDOToCopyIssueVOList(issueDTOList, organizationId, projectId, issueIds);
         Map<Long, List<PageFieldViewVO>> issueTypeFieldMap = new HashMap<>();
         boolean belongToProgram = belongToProgram(organizationId, projectId);
-        issueTypeIds.forEach(issueTypeId -> {
+        for (Long issueTypeId : issueTypeIds) {
             PageFieldViewParamVO param = new PageFieldViewParamVO();
             param.setIssueTypeId(issueTypeId);
             param.setSchemeCode(AGILE_SCHEME_CODE);
@@ -4172,16 +4379,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                             .map(PageFieldViewVO::getFieldId)
                             .collect(Collectors.toSet());
             param.setPageCode(PageCode.AGILE_ISSUE_EDIT);
-            pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param)
-                    .forEach(x -> {
-                        Long fieldId = x.getFieldId();
-                        if (!fieldIds.contains(fieldId)) {
-                            createPageFields.add(x);
-                            fieldIds.add(fieldId);
-                        }
-                    });
+            for (PageFieldViewVO pageFieldView : pageFieldService.queryPageFieldViewsNoPermissionFilter(organizationId, projectId, param)) {
+                Long fieldId = pageFieldView.getFieldId();
+                if (!fieldIds.contains(fieldId)) {
+                    createPageFields.add(pageFieldView);
+                    fieldIds.add(fieldId);
+                }
+            }
             issueTypeFieldMap.put(issueTypeId, createPageFields);
-        });
+        }
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
         List<IssueRequiredFields> result = new ArrayList<>();
         for (IssueVO issue : issueVOList) {
@@ -4192,11 +4398,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
             List<PageFieldViewVO> requiredSystemFields = new ArrayList<>();
             List<PageFieldViewVO> requiredCustomFields = new ArrayList<>();
-            createPageFields.forEach(x -> {
-                if (Boolean.TRUE.equals(x.getRequired())) {
-                    handlerSystemAndCustomRequiredField(customFieldMap, belongToProgram, x, requiredSystemFields, requiredCustomFields, issue);
+            for (PageFieldViewVO createPageField : createPageFields) {
+                if (Boolean.TRUE.equals(createPageField.getRequired())) {
+                    handlerSystemAndCustomRequiredField(customFieldMap, belongToProgram, createPageField, requiredSystemFields, requiredCustomFields, issue);
                 }
-            });
+            }
             requiredSystemFields.addAll(requiredCustomFields);
             fieldPermissionService.filterPageFieldViewVO(projectId, organizationId, issue.getIssueTypeId(), requiredSystemFields);
             IssueRequiredFields issueRequiredFields = new IssueRequiredFields()

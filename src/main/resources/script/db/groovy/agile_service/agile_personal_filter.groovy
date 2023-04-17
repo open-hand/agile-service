@@ -45,4 +45,12 @@ databaseChangeLog(logicalFilePath:'script/db/agile_personal_filter.groovy') {
             }
         }
     }
+
+    changeSet(id: '2022-11-28-agile-personal-filter-add-column', author: 'kaiwen.li@zknow.com') {
+        addColumn(tableName: 'agile_personal_filter') {
+            column(name: 'advanced_filter_json', type: 'TEXT', remarks: '高级筛选条件的json', afterColumn: 'filter_json') {
+                constraints(nullable: false)
+            }
+        }
+    }
 }

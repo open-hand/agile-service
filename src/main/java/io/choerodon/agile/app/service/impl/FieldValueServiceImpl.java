@@ -1,7 +1,26 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
@@ -16,32 +35,16 @@ import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
-import io.choerodon.core.client.MessageClientC7n;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.lang3.StringUtils;
-import org.hzero.core.base.AopProxy;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import org.hzero.core.base.AopProxy;
+import org.hzero.core.base.BaseConstants;
+import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
  * @author shinan.chen
@@ -82,7 +85,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
-    private MessageClientC7n messageClientC7n;
+    private SocketSendHelper socketSendHelper;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired(required = false)
@@ -390,13 +393,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
 
     @Override
     public void createFieldValuesWithQuickCreate(Long organizationId, Long projectId, Long instanceId, PageFieldViewParamVO paramDTO) {
-        IssueTypeSearchVO issueTypeSearchVO = new IssueTypeSearchVO();
-        issueTypeSearchVO.setIssueTypeIds(Arrays.asList(paramDTO.getIssueTypeId()));
-        issueTypeSearchVO.setEnabled(true);
-        List<IssueTypeVO> issueTypes = issueTypeMapper.selectByOptions(organizationId, projectId, issueTypeSearchVO);
-        if (issueTypes.isEmpty()) {
-            throw new CommonException("error.issue.type.not.existed");
-        }
+        List<IssueTypeVO> issueTypes = this.issueValidator.checkIssueTypeExists(organizationId, projectId, Collections.singletonList(paramDTO.getIssueTypeId()), true);
         IssueTypeVO issueType = issueTypes.get(0);
         String typeCode = issueType.getTypeCode();
         Long issueTypeId = issueType.getId();
@@ -473,7 +470,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
             fieldListRemove(v, fieldList, issueUpdateVO, programMap);
             if (fixVersion != null) {
-                issueUpdateVO.setVersionType("fix");
+                issueUpdateVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
                 issueUpdateVO.setVersionIssueRelVOList(fixVersion);
             }
             // 获取传入的状态
@@ -513,7 +510,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess(batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
                 if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
-                    messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                    socketSendHelper.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
                     batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
                 }
             }
@@ -545,15 +542,15 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (agilePluginService != null) {
             agilePluginService.handlerProgramPredefinedFields(projectId, predefinedFields, programMap, applyType);
         }
-        issueDTOS.forEach(v -> {
+        for (IssueDTO issue : issueDTOS) {
             try {
-                this.self().handleIssueField(projectId, v, predefinedFields, batchUpdateFieldStatusVO, applyType, sendMsg, schemeCode, issueCustomFieldMap, triggerCarrierMap, programMap, fixVersion, influenceVersion);
+                this.self().handleIssueField(projectId, issue, predefinedFields, batchUpdateFieldStatusVO, applyType, sendMsg, schemeCode, issueCustomFieldMap, triggerCarrierMap, programMap, fixVersion, influenceVersion);
             } catch (Exception e) {
                 LOGGER.info("update issue exception:", e);
-                Integer failedCount = ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getFailedCount()) ? 0 : batchUpdateFieldStatusVO.getFailedCount();
+                int failedCount = ObjectUtils.isEmpty(batchUpdateFieldStatusVO.getFailedCount()) ? 0 : batchUpdateFieldStatusVO.getFailedCount();
                 batchUpdateFieldStatusVO.setFailedCount(failedCount++);
             }
-        });
+        }
     }
 
     @Override
@@ -578,7 +575,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
         fieldListRemove(issueDTO, fieldList, issueUpdateVO, programMap);
         if (fixVersion != null) {
-            issueUpdateVO.setVersionType("fix");
+            issueUpdateVO.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_FIX);
             issueUpdateVO.setVersionIssueRelVOList(fixVersion);
         }
         // 获取传入的状态
@@ -595,6 +592,16 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             fieldList.remove(EPIC_ID);
             issueUpdateVO.setEpicId(null);
             addErrMessage(issueDTO, batchUpdateFieldStatusVO, EPIC_ID);
+        }
+        // 子任务跳过设置史诗, 但是允许清空史诗
+        if(
+                IssueTypeCode.SUB_TASK.value().equals(issueDTO.getTypeCode()) &&
+                        (issueUpdateVO.getEpicId() != null &&
+                                !Objects.equals(BaseConstants.DEFAULT_TENANT_ID, issueUpdateVO.getEpicId())
+                        )
+        ) {
+            fieldList.remove(EPIC_ID);
+            issueUpdateVO.setEpicId(null);
         }
         IssueVO issueVO = issueService.updateIssueWithoutRuleNotice(projectId, issueUpdateVO, fieldList);
         // 处理影响的版本
@@ -626,10 +633,12 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
         if (sendMsg) {
             batchUpdateFieldStatusVO.setProcess(batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
             if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
-                messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                socketSendHelper.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
                 batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
             }
         }
+        //如果只更新自定义字段，同时也要更新最后更新时间
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueDTO.getIssueId(), projectId);
     }
 
     private Map<Long, List<PageFieldViewUpdateVO>> buildIssueCustomFieldMap(Long projectId, List<PageFieldViewUpdateVO> customFields, List<IssueDTO> issueDTOS) {
@@ -689,7 +698,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
     private void handlerBugInfluenceVersion(Long projectId,IssueDTO issueDTO, List<VersionIssueRelVO> influenceVersion, IssueVO issueVO) {
         if ("bug".equals(issueDTO.getTypeCode()) && influenceVersion != null) {
             IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
-            issueUpdateVO1.setVersionType("influence");
+            issueUpdateVO1.setVersionType(ProductVersionService.VERSION_RELATION_TYPE_INFLUENCE);
             issueUpdateVO1.setVersionIssueRelVOList(influenceVersion);
             issueUpdateVO1.setIssueId(issueDTO.getIssueId());
             issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());
@@ -786,7 +795,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             if (sendMsg) {
                 batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
                 if (batchUpdateFieldStatusVO.getProcess() - batchUpdateFieldStatusVO.getLastProcess() >= 0.1) {
-                    messageClientC7n.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
+                    socketSendHelper.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
                     batchUpdateFieldStatusVO.setLastProcess(batchUpdateFieldStatusVO.getProcess());
                 }
             }

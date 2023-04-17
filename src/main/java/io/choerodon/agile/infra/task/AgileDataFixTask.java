@@ -2,10 +2,13 @@ package io.choerodon.agile.infra.task;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.yqcloud.core.oauth.ZKnowDetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import io.choerodon.agile.app.service.FixDataService;
+import io.choerodon.agile.infra.enums.PersonalFilterTypeCode;
 import io.choerodon.asgard.schedule.QuartzDefinition;
 import io.choerodon.asgard.schedule.annotation.JobTask;
 import io.choerodon.asgard.schedule.annotation.TimedTask;
@@ -29,23 +33,27 @@ public class AgileDataFixTask {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @JobTask(maxRetryCount = 3,
-            code = "fixStatusTransferRoleData",
-            description = "升级到2.2.0,修复状态联动角色数据,迁移工作组数据")
-    @TimedTask(name = "fixStatusTransferRoleData",
-            description = "升级到2.2.0,修复状态联动角色数据,迁移工作组数据",
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 3,
+            code = "fixPersonalFilter",
+            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选格式")
+    @TimedTask(name = "fixPersonalFilter",
+            description = "升级到2.3.0,修复工作项/特性/瀑布个人筛选数据到高级筛选格式",
             oneExecution = true,
             repeatCount = 0,
             repeatInterval = 1,
             repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
             params = {})
-    public void fixStatusTransferRoleData(Map<String, Object> map) {
-        LOGGER.info("==============================>>>>>>>> AGILE Data Fix Start, Version: 2.2.0 <<<<<<<<=================================");
-        fixDataService.fixStatusMachineCustomTransferRoleData();
-        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 2.2.0 <<<<<<<<=================================");
+    public void fixPersonalFilter(Map<String, Object> map) {
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fix Start, Version: 2.3.0 <<<<<<<<=================================");
+        Set<String> typeCodes =
+                SetUtils.unmodifiableSet(PersonalFilterTypeCode.AGILE_ISSUE, PersonalFilterTypeCode.FEATURE_ISSUE, PersonalFilterTypeCode.WATERFALL_ISSUE);
+        fixDataService.fixPersonalFilter(typeCodes);
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 2.3.0 <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "fixIssueDuplicateUnclosedSprintRel",
             description = "修复批量编辑BUG造成的工作项同时关联了多个未关闭冲刺的脏数据")
     @TimedTask(name = "fixIssueDuplicateUnclosedSprintRel",
@@ -89,7 +97,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> fixIssueDuplicateUnclosedSprintRel completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.1&2.2-fixIssueSprintRelZeroData",
             description = "修复工作项详情,清空当前活跃冲刺时,向关系表中插入的脏数据")
     @TimedTask(name = "2.1&2.2-fixIssueSprintRelZeroData",
@@ -111,7 +120,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> fixIssueSprintRelZeroData completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.2-clearIssueSprintRelOldDirtyData",
             description = "清除上古时期刚上线项目群的时候,issue冲刺关系表中不存在的冲刺的脏数据")
     @TimedTask(name = "2.2-clearIssueSprintRelOldDirtyData",
@@ -135,7 +145,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> clearIssueSprintRelOldDirtyData completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.2-clearNoIssueWorkLog",
             description = "清除关联的工作项不存在的工时日志数据")
     @TimedTask(name = "2.2-clearNoIssueWorkLog",
@@ -157,7 +168,8 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> clearNoIssueWorkLog completed <<<<<<<<=================================");
     }
 
-    @JobTask(maxRetryCount = 1,
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
             code = "2.2-fixEmptyIssuePriority",
             description = "修复之前导入BUG导致的工作项优先级为空的数据")
     @TimedTask(name = "2.2-fixEmptyIssuePriority",
@@ -171,5 +183,23 @@ public class AgileDataFixTask {
         LOGGER.info("==============================>>>>>>>> fixEmptyIssuePriority start <<<<<<<<=================================");
         this.fixDataService.fixEmptyIssuePriority();
         LOGGER.info("==============================>>>>>>>> fixEmptyIssuePriority completed <<<<<<<<=================================");
+    }
+
+    @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
+            maxRetryCount = 1,
+            code = "2.3-alpha-fixEmptyPersonalFilter",
+            description = "删除路线图个人筛选独立数据修复+v2高级筛选数据修复导致的路线图空个人筛选")
+    @TimedTask(name = "2.3-alpha-fixEmptyPersonalFilter",
+            description = "删除路线图个人筛选独立数据修复+v2高级筛选数据修复导致的路线图空个人筛选",
+            oneExecution = true,
+            repeatCount = 0,
+            repeatInterval = 1,
+            repeatIntervalUnit = QuartzDefinition.SimpleRepeatIntervalUnit.HOURS,
+            params = {})
+    public void fixEmptyPersonalFilter(Map<String, Object> param) {
+        LOGGER.info("==============================>>>>>>>> fixEmptyPersonalFilter start <<<<<<<<=================================");
+        int deleteCount = this.jdbcTemplate.update("delete from agile_personal_filter WHERE filter_type_code = 'feature_issue' AND advanced_filter_json = '{\"conditions\":[]}'");
+        LOGGER.info("==============================>>>>>>>> fixEmptyPersonalFilter remove " + deleteCount + " personal filter <<<<<<<<=================================");
+        LOGGER.info("==============================>>>>>>>> fixEmptyPersonalFilter completed <<<<<<<<=================================");
     }
 }
