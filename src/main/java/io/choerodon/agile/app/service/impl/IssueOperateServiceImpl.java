@@ -71,13 +71,6 @@ public class IssueOperateServiceImpl implements IssueOperateService {
             BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
             batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
-            boolean projectOwner = userService.isProjectOwner(projectId, userId);
-            if (Boolean.FALSE.equals(projectOwner)) {
-                batchUpdateFieldStatusVO.setStatus("failed");
-                batchUpdateFieldStatusVO.setError("您无删除权限");
-                messageClientC7n.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
-                return;
-            }
             Double progress = 0.0;
             double lastSendProcess = 0D;
             try {
