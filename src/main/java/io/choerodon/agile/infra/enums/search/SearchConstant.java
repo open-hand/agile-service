@@ -341,7 +341,7 @@ public class SearchConstant {
 
         public static final String TAG_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and (#{additionalCondition}) ) ";
 
-        public static final String YQ_CLOUD_NUM_LIKE_OR_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and source = 'yqcloud' and instance_type = 'issue' and open_instance_num #{innerOpt} #{value}) ";
+        public static final String YQ_CLOUD_NUM_LIKE_OR_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and open_instance_num #{innerOpt} #{value} #{additionalCondition}) ";
         /**
          * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
          */
