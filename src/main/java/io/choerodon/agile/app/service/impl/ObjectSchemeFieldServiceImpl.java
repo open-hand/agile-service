@@ -2046,9 +2046,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             dto.setProjectId(projectId);
             // 查询是否含有相同的rank，如果有需要重新计算rank
             dto.setRank(f.getRank());
-            if (objectSchemeFieldExtendMapper.selectCount(dto) > 0) {
+            //这里需要排除自己的情况
+            if (objectSchemeFieldExtendMapper.selectCount(dto) > 1) {
                 String nextRank = objectSchemeFieldExtendMapper.selectNextRank(dto);
-                f.setRank(RankUtil.between(dto.getRank(), nextRank));
+                if (nextRank == null) {
+                    f.setRank(RankUtil.genNext(dto.getRank()));
+                } else {
+                    f.setRank(RankUtil.between(dto.getRank(), nextRank));
+                }
             }
             dto.setRank(null);
             //查询字段配置是否存在，存在则更新不存在则创建
