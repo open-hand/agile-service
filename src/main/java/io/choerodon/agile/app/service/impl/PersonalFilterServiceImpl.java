@@ -1,17 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-
 import io.choerodon.agile.api.vo.PersonalFilterVO;
 import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
@@ -22,11 +10,21 @@ import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.JsonUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author shinan.chen
@@ -118,17 +116,20 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
                                    Long filterId,
                                    PersonalFilterVO personalFilterVO,
                                    String version) {
-        PersonalFilterDTO personalFilter = personalFilterMapper.selectByPrimaryKey(filterId);
-        Assert.notNull(personalFilter, NOT_FOUND_ERROR);
+        PersonalFilterDTO personalFilterInDb = personalFilterMapper.selectByPrimaryKey(filterId);
+        Assert.notNull(personalFilterInDb, NOT_FOUND_ERROR);
         Long userId = Optional.ofNullable(DetailsHelper.getUserDetails()).map(CustomUserDetails::getUserId).orElseThrow(() -> new CommonException(BaseConstants.ErrorCode.NOT_LOGIN));
         if (!Objects.isNull(personalFilterVO.getName())) {
-            checkUpdateName(organizationId, projectId, userId, filterId, personalFilterVO.getName(), personalFilter.getFilterTypeCode());
+            checkUpdateName(organizationId, projectId, userId, filterId, personalFilterVO.getName(), personalFilterInDb.getFilterTypeCode());
         }
+        // 经产品讨论, 实现无锁更新
+        final Long originObjectVersionNumber = personalFilterInDb.getObjectVersionNumber();
         personalFilterVO.setFilterId(filterId);
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
         setJsonByVersion(personalFilterVO, version, personalFilterDTO, false);
+        personalFilterDTO.setObjectVersionNumber(originObjectVersionNumber);
         if (!ObjectUtils.isEmpty(personalFilterVO.getDefault()) && Boolean.TRUE.equals(personalFilterVO.getDefault())) {
-            personalFilterMapper.updateDefault(organizationId, projectId, userId, false, null, personalFilter.getFilterTypeCode());
+            personalFilterMapper.updateDefault(organizationId, projectId, userId, false, null, personalFilterInDb.getFilterTypeCode());
         }
         if (personalFilterMapper.updateByPrimaryKeySelective(personalFilterDTO) != 1) {
             throw new CommonException(UPDATE_ERROR);
