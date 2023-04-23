@@ -22,6 +22,7 @@ import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.StatusTransferType;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
@@ -361,6 +362,10 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         String typeCode = issueDTO.getTypeCode();
         Long issueTypeId = issueDTO.getIssueTypeId();
         String applyType = projectConfigService.getApplyTypeByTypeCode(projectId, typeCode);
+        //瀑布+大瀑布小敏捷，先关联故事，然后去掉项目类别的小敏捷，故事问题类型查不到applyType
+        if(applyType == null && IssueTypeCode.AGILE_ISSUE_TYPE_CODE_NO_EPIC.contains(typeCode)) {
+            applyType = SchemeApplyType.AGILE;
+        }
         List<StatusVO> statusList = projectConfigService.queryStatusByIssueTypeId(projectId, issueTypeId, applyType);
         List<Long> statusIds = statusList.stream().map(StatusVO::getId).collect(Collectors.toList());
         List<Long> canTransformStatusIds = checkStatusTransform(projectId, statusIds, issueDTO.getIssueId(), issueTypeId);
