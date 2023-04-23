@@ -81,7 +81,7 @@ public enum SystemBaseFieldSql implements FieldSql {
             "atir.tag_project_id", DEFAULT),
     //主要负责人
     MAIN_RESPONSIBLE("mainResponsible", "", "ai.main_responsible_id",
-            "null", "IFNULL(ai.main_responsible_id, '0L')", USER),
+            "null", "IFNULL(ai.main_responsible_id, '0')", USER),
     //环境
     ENVIRONMENT("environment", "",
             "ai.environment",

@@ -1746,12 +1746,17 @@ public class ExcelServiceImpl implements ExcelService {
             if (CollectionUtils.isNotEmpty(parentIds)) {
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
-                    List<IssueDTO> childIssues = issueMapper.queryChildrenList(parentIds, projectIds, quickFilterSql, advancedSql, null, false, null);
-                    //支持第三方调用，筛选出父级时同时把所有子级返回
                     boolean withSubIssues = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getWithSubIssues()).orElse(false));
-                    // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
-                    if (!withSubIssues && CollectionUtils.isEmpty(childIssues)) {
-                        childrenIds.add(0L);
+                    List<IssueDTO> childIssues;
+                    if (withSubIssues) {
+                        //带上所有的子级
+                        childIssues = issueMapper.queryChildrenList(issueIds, projectIds, null, null, null, false, null);
+                    } else {
+                        childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null, false, null);
+                        if (CollectionUtils.isEmpty(childIssues)) {
+                            // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                            childrenIds.add(0L);
+                        }
                     }
                     childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                 }

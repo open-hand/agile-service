@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
@@ -21,6 +22,7 @@ import io.choerodon.agile.infra.feign.IamFeignClient;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * Copyright (c) 2022. Hand Enterprise Solution Company. All right reserved.
@@ -384,7 +386,8 @@ public class RemoteIamOperator {
         ProjectVO currentProjectVO = queryProject(currentProjectId);
         // 项目属于当前组织
         ProjectVO targetProjectVO = queryProject(targetProjectId);
-        if (!Objects.equals(currentProjectVO.getOrganizationId(), targetProjectVO.getOrganizationId())) {
+        Long organizationId = currentProjectVO.getOrganizationId();
+        if (!Objects.equals(organizationId, targetProjectVO.getOrganizationId())) {
             throw new CommonException("error.link.targetProject.does.not.belong.to.current.organization");
         }
 
@@ -392,9 +395,23 @@ public class RemoteIamOperator {
         if (Boolean.FALSE.equals(targetProjectVO.getEnabled())) {
             throw new CommonException("error.link.targetProject.disable");
         }
-
-        // 允许其他项目关联此项目工作项/需求
-        if (Boolean.TRUE.equals(checkAllowLink) && Boolean.FALSE.equals(targetProjectVO.getAllowLink())) {
+        // 产品修改规则，由只允许公开的项目修改为有权限的项目和公开的项目
+        // 如果不鉴权，则跳过
+        if (Boolean.FALSE.equals(checkAllowLink)) {
+            return;
+        }
+        // 查询当前用户有权限的项目
+        Set<Long> hasPermissionProjectIds =
+                listProjectsByUserIdForSimple(organizationId, DetailsHelper.getUserDetails().getUserId(), null, true)
+                        .stream()
+                        .map(ProjectVO::getId)
+                        .collect(Collectors.toSet());
+        if (hasPermissionProjectIds.contains(targetProjectId)) {
+            //有权限，放行
+            return;
+        }
+        // 没有权限，判断下该项目是否允许关联
+        if (Boolean.FALSE.equals(targetProjectVO.getAllowLink())) {
             throw new CommonException("error.link.targetProject.deny");
         }
     }
