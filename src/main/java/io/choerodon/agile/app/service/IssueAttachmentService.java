@@ -39,6 +39,17 @@ public interface IssueAttachmentService {
      */
     IssueAttachmentDTO dealIssue(Long projectId, Long issueId, String fileName, String url);
 
+    /**
+     * 创建issue和附件的关联关系
+     *
+     * @param projectId projectId
+     * @param issueId   projectId
+     * @param fileName  fileName
+     * @param url       url
+     * @return
+     */
+    IssueAttachmentDTO createIssueAttachment(Long projectId, Long issueId, String fileName, String url);
+
     List<TestCaseAttachmentDTO> migrateIssueAttachment();
 
     /**

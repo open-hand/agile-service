@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.validator.IssueValidator;
+import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.api.vo.IssueSubCreateVO;
 import io.choerodon.agile.api.vo.IssueSubVO;
 import io.choerodon.agile.api.vo.RankVO;
@@ -51,6 +52,9 @@ import io.choerodon.agile.infra.statemachineclient.dto.StateMachineTransformDTO;
 import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+
+import org.hzero.core.base.BaseConstants;
+import org.hzero.core.util.AssertUtils;
 
 /**
  * @author shinan.chen
@@ -113,6 +117,10 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
+    @Autowired
+    private FilePathService filePathService;
+    @Autowired
+    private IssueAttachmentService issueAttachmentService;
 
     private void insertRank(Long projectId, Long issueId, String type, RankVO rankVO) {
         List<RankDTO> rankDTOList = new ArrayList<>();
@@ -260,7 +268,24 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
                 && !CollectionUtils.isEmpty(issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS())) {
             agileWaterfallService.createDeliverableService(issueId, issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS());
         }
+        //根据前端生成的附件链接，保存issue和附件的关联关系
+        createIssueAttachmentRel(projectId, issueId, issueCreateVO.getAttachments());
         return issueId;
+    }
+
+    private void createIssueAttachmentRel(Long projectId, Long issueId, List<IssueAttachmentVO> attachments) {
+        if (CollectionUtils.isEmpty(attachments)) {
+            return;
+        }
+        for (IssueAttachmentVO attachment : attachments) {
+            String fileName = attachment.getFileName();
+            String url = attachment.getUrl();
+            AssertUtils.notNull(fileName, BaseConstants.ErrorCode.DATA_INVALID);
+            AssertUtils.notNull(url, BaseConstants.ErrorCode.DATA_INVALID);
+            //获取相对路径
+            String relativePath = filePathService.generateRelativePath(url);
+            issueAttachmentService.createIssueAttachment(projectId, issueId, fileName, relativePath);
+        }
     }
 
     /**
