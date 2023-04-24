@@ -32,13 +32,22 @@ public class IssueAttachmentController {
 
     private static final String ERROR_ATTACHMENT_UPLOAD = "error.attachment.upload";
 
+    /**
+     * 该接口使用feign调用文件服务创建附件，存在超时和文件上传大小限制，不建议使用，使用直接调hzero文件接口返回url来创建
+     *
+     * @param projectId
+     * @param issueId
+     * @param request
+     * @return
+     */
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("上传附件")
     @PostMapping
+    @Deprecated
     public ResponseEntity<List<IssueAttachmentVO>> uploadAttachment(@ApiParam(value = "项目id", required = true)
-                                                                      @PathVariable(name = "project_id") Long projectId,
+                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                     @ApiParam(value = "issue id", required = true)
-                                                                      @RequestParam @Encrypt Long issueId,
+                                                                    @RequestParam @Encrypt Long issueId,
                                                                     HttpServletRequest request) {
         return Optional.ofNullable(issueAttachmentService.create(projectId, issueId, request))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))

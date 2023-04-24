@@ -67,15 +67,20 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
 
     @Override
     public IssueAttachmentDTO dealIssue(Long projectId, Long issueId, String fileName, String url) {
+        IssueAttachmentDTO result = createIssueAttachment(projectId, issueId, fileName, url);
+        issueMapper.updateIssueLastUpdateInfo(issueId, projectId, DetailsHelper.getUserDetails().getUserId());
+        return result;
+    }
+
+    @Override
+    public IssueAttachmentDTO createIssueAttachment(Long projectId, Long issueId, String fileName, String url) {
         IssueAttachmentDTO issueAttachmentDTO = new IssueAttachmentDTO();
         issueAttachmentDTO.setProjectId(projectId);
         issueAttachmentDTO.setIssueId(issueId);
         issueAttachmentDTO.setFileName(fileName);
         issueAttachmentDTO.setUrl(url);
         issueAttachmentDTO.setCommentId(1L);
-        IssueAttachmentDTO result = iIssueAttachmentService.createBase(issueAttachmentDTO);
-        issueMapper.updateIssueLastUpdateInfo(issueAttachmentDTO.getIssueId(), issueAttachmentDTO.getProjectId(), DetailsHelper.getUserDetails().getUserId());
-        return result;
+        return iIssueAttachmentService.createBase(issueAttachmentDTO);
     }
 
     @Override
