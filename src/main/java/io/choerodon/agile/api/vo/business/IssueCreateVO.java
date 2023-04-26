@@ -166,6 +166,8 @@ public class IssueCreateVO {
 
     @ApiModelProperty(value = "第三方实例关联")
     private InstanceOpenRelVO instanceOpenRelVO;
+    @ApiModelProperty(value = "附件url集合")
+    private List<IssueAttachmentVO> attachments;
 
     public List<TagVO> getTags() {
         return tags;
@@ -563,5 +565,13 @@ public class IssueCreateVO {
 
     public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
         this.instanceOpenRelVO = instanceOpenRelVO;
+    }
+
+    public List<IssueAttachmentVO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<IssueAttachmentVO> attachments) {
+        this.attachments = attachments;
     }
 }
