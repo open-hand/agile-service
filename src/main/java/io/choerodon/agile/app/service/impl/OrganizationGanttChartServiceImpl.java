@@ -1,5 +1,14 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.GanttChartService;
@@ -22,14 +31,6 @@ import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -214,6 +215,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         boardAssembler.handleOtherArgs(searchVO);
         addProjectSortIfNotExisted(pageRequest);
         Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId);
+        issueService.splitIssueNumProjectCodePrefix(searchVO, projectIds);
         if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }

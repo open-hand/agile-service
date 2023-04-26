@@ -809,16 +809,29 @@
             <include refid="filterSqlAndAssigneeIds"/>
             <if test='searchVO.searchArgs != null'>
                 <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                    AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                    <bind name="searchVOSearchArgsIssueNumLike" value="'%' + searchVO.searchArgs.issueNum + '%'"/>
+                    AND ai.issue_num LIKE #{searchVOSearchArgsIssueNumLike}
                 </if>
             </if>
             <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
-                <foreach collection="searchVO.contents" item="content" index="index">
-                    AND (
-                    ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
-                    OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                AND (
+                <foreach collection="searchVO.contents" item="content" separator=" OR ">
+                    (
+                        ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                        OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
                     )
                 </foreach>
+                )
+            </if>
+            <if test='searchVO.issueNumberAndSummaryPairs != null and searchVO.issueNumberAndSummaryPairs.size() != 0'>
+                AND (
+                <foreach collection="searchVO.issueNumberAndSummaryPairs" item="issueNumberAndSummaryPair" separator=" OR ">
+                    (
+                        ai.issue_num LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.first}), '%')
+                        OR ai.summary LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.second}), '%')
+                    )
+                </foreach>
+                )
             </if>
         )
         <if test="sortMap != null and sortMap.orderStr != null">
@@ -856,16 +869,29 @@
                 <include refid="filterSqlAndAssigneeIds"/>
                 <if test='searchVO.searchArgs != null'>
                     <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                        AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                        <bind name="searchVOSearchArgsIssueNumLike" value="'%' + searchVO.searchArgs.issueNum + '%'"/>
+                        AND ai.issue_num LIKE #{searchVOSearchArgsIssueNumLike}
                     </if>
                 </if>
                 <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
-                    <foreach collection="searchVO.contents" item="content" index="index">
-                        AND (
-                        ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
-                        OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                    AND (
+                    <foreach collection="searchVO.contents" item="content" separator=" OR ">
+                        (
+                            ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                            OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
                         )
                     </foreach>
+                    )
+                </if>
+                <if test='searchVO.issueNumberAndSummaryPairs != null and searchVO.issueNumberAndSummaryPairs.size() != 0'>
+                AND (
+                    <foreach collection="searchVO.issueNumberAndSummaryPairs" item="issueNumberAndSummaryPair" separator=" OR ">
+                        (
+                            ai.issue_num LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.first}), '%')
+                            OR ai.summary LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.second}), '%')
+                        )
+                    </foreach>
+                )
                 </if>
             ) temp
             group by temp.issue_id
@@ -941,16 +967,29 @@
             <include refid="filterSqlAndAssigneeIds"/>
             <if test='searchVO.searchArgs != null'>
                 <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                    and ai.issue_num like CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                    <bind name="searchVOSearchArgsIssueNumLike" value="'%' + searchVO.searchArgs.issueNum + '%'"/>
+                    and ai.issue_num like #{searchVOSearchArgsIssueNumLike}
                 </if>
             </if>
             <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
-                <foreach collection="searchVO.contents" item="content" index="index">
-                    and (
-                    ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
-                    or ai.summary like CONCAT(CONCAT('%', #{content}), '%')
+                and (
+                <foreach collection="searchVO.contents" item="content" separator=" OR ">
+                    (
+                        ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
+                        or ai.summary like CONCAT(CONCAT('%', #{content}), '%')
                     )
                 </foreach>
+                )
+            </if>
+            <if test='searchVO.issueNumberAndSummaryPairs != null and searchVO.issueNumberAndSummaryPairs.size() != 0'>
+                and (
+                <foreach collection="searchVO.issueNumberAndSummaryPairs" item="issueNumberAndSummaryPair" separator=" OR ">
+                    (
+                        ai.issue_num like CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.first}), '%')
+                        or ai.summary like CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.second}), '%')
+                    )
+                </foreach>
+                )
             </if>
         ) temp
         join agile_issue ai on ai.issue_id = temp.issue_id
@@ -1028,14 +1067,29 @@
         <include refid="filterSqlAndAssigneeIds"/>
         <if test='searchVO.searchArgs != null'>
             <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                AND ai.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                <bind name="searchVOSearchArgsIssueNumLike" value="'%' + searchVO.searchArgs.issueNum + '%'"/>
+                AND ai.issue_num LIKE  #{searchVOSearchArgsIssueNumLike}
             </if>
         </if>
         <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
-            <foreach collection="searchVO.contents" item="content" index="index">
-                AND (ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
-                OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%'))
+            AND (
+            <foreach collection="searchVO.contents" item="content" separator=" OR ">
+                (
+                    ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                    OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
+                )
             </foreach>
+            )
+        </if>
+        <if test='searchVO.issueNumberAndSummaryPairs != null and searchVO.issueNumberAndSummaryPairs.size() != 0'>
+            AND (
+            <foreach collection="searchVO.issueNumberAndSummaryPairs" item="issueNumberAndSummaryPair" separator=" OR ">
+                (
+                    ai.issue_num LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.first}), '%')
+                    OR ai.summary LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.second}), '%')
+                )
+            </foreach>
+            )
         </if>
         <if test="sortMap != null and sortMap.orderStr != null">
             ORDER BY ${sortMap.orderStr}
@@ -5644,12 +5698,24 @@
                 </if>
             </if>
             <if test='searchVO.contents != null and searchVO.contents.size() != 0'>
-                <foreach collection="searchVO.contents" item="content" index="index">
-                    and (
-                    ai.issue_num like CONCAT(CONCAT('%', #{content}), '%')
-                    or ai.summary like CONCAT(CONCAT('%', #{content}), '%')
+                AND (
+                <foreach collection="searchVO.contents" item="content" separator=" OR ">
+                    (
+                        ai.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%')
+                        OR ai.summary LIKE CONCAT(CONCAT('%', #{content}), '%')
                     )
                 </foreach>
+                )
+            </if>
+            <if test='searchVO.issueNumberAndSummaryPairs != null and searchVO.issueNumberAndSummaryPairs.size() != 0'>
+                AND (
+                <foreach collection="searchVO.issueNumberAndSummaryPairs" item="issueNumberAndSummaryPair" separator=" OR ">
+                    (
+                        ai.issue_num LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.first}), '%')
+                        OR ai.summary LIKE CONCAT(CONCAT('%', #{issueNumberAndSummaryPair.second}), '%')
+                    )
+                </foreach>
+                )
             </if>
         </if>
         <if test="sortMap != null and sortMap.orderStr != null">
