@@ -138,4 +138,12 @@ public interface AgileWaterfallService {
      * @return resultList
      */
     List<IssueVO> handleParentId(Long organizationId, List<IssueVO> issueVOS);
+
+    /**
+     * 瀑布根据模版复制
+     *
+     * @param projectId
+     * @param fromTemplateId
+     */
+    void cloneByTemplate(Long projectId, Long fromTemplateId);
 }

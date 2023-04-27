@@ -49,8 +49,8 @@ public class FixDataController {
     private ProductVersionService productVersionService;
     @Autowired
     private NoticeService noticeService;
-//    @Autowired
-//    private NotifyFeignClient notifyFeignClient;
+    @Autowired
+    private AgileWaterfallService agileWaterfallService;
 
     @Autowired
     private AgileEventHandler agileEventHandler;
@@ -185,6 +185,16 @@ public class FixDataController {
     @PostMapping("/fix_personal_filter")
     public ResponseEntity fixPersonalFilter(@RequestBody Set<String> typeCodes) {
         fixDataService.fixPersonalFilter(typeCodes);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("根据项目复制数据测试接口")
+    @PostMapping("/copy_project_template")
+    public ResponseEntity copyProjectTemplate(@RequestParam Long sourceProjectId,
+                                              @RequestParam Long targetProjectId) {
+        agileWaterfallService.cloneByTemplate(targetProjectId, sourceProjectId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
