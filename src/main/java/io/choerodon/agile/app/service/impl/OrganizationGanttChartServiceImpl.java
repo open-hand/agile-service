@@ -1,5 +1,15 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.SetUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Field;
@@ -27,16 +37,6 @@ import io.choerodon.core.utils.PageUtils;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-
-import org.apache.commons.collections4.SetUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -307,6 +307,7 @@ public class OrganizationGanttChartServiceImpl implements OrganizationGanttChart
         boardAssembler.handleOtherArgs(searchVO);
         addProjectSortIfNotExisted(pageRequest);
         Map<String, Object> sortMap = issueService.processSortMap(pageRequest, 0L, organizationId, TableAliasConstant.DEFAULT_ALIAS);
+        issueService.splitIssueNumProjectCodePrefix(searchVO, projectIds);
         if (ObjectUtils.isEmpty(projectIds)) {
             return PageUtil.emptyPage(pageRequest.getPage(), pageRequest.getSize());
         }

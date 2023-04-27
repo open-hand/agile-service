@@ -80,6 +80,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.core.base.AopProxy;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
+import org.hzero.core.util.Pair;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
@@ -717,7 +718,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             organizationId = ConvertUtil.getOrganizationId(projectId);
         }
         //处理用户搜索
-        Boolean condition = handleSearchUser(searchVO, projectId);
+        boolean condition = handleSearchUser(searchVO, projectId);
         boolean isTreeView =
                 !Boolean.FALSE.equals(
                         Optional.ofNullable(searchVO.getSearchArgs())
@@ -762,14 +763,14 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId, projectId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
                 List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Arrays.asList(projectId), allIssueIds, false);
+                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, Collections.singletonList(projectId), allIssueIds, false);
                 Map<Long, List<WorkLogVO>> workLogVOMap = workLogMapper.queryByIssueIds(Collections.singletonList(projectId), allIssueIds).stream().collect(Collectors.groupingBy(WorkLogVO::getIssueId));
                 List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue, workLogVOMap);
                 if (!ObjectUtils.isEmpty(agilePluginService) && CollectionUtils.isNotEmpty(issueListFieldKVVOS)) {
                     boolean countSubIssue = Boolean.TRUE.equals(Optional.ofNullable(searchVO.getSearchArgs())
                             .map(x -> x.get("countSubIssue"))
                             .orElse(false));
-                    agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId), issueListFieldKVVOS, countSubIssue);
+                    agilePluginService.doToIssueListFieldKVDTO(Collections.singletonList(projectId), issueListFieldKVVOS, countSubIssue);
                 }
                 issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
             }
@@ -947,32 +948,23 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             return;
         }
         List<String> projectCodes = projectInfos.stream().map(ProjectInfoDTO::getProjectCode).collect(Collectors.toList());
-        List<String> contents = searchVO.getContents();
-        if (!ObjectUtils.isEmpty(contents)) {
-            List<String> replaceContents = new ArrayList<>();
-            contents.forEach(content -> {
-                projectCodes.forEach(projectCode -> {
-                    String prefix = projectCode + BaseConstants.Symbol.MIDDLE_LINE;
-                    if (content.startsWith(prefix)) {
-                        replaceContents.add(content.substring(prefix.length()));
-                    } else {
-                        replaceContents.add(content);
-                    }
-                });
-            });
-            searchVO.setContents(replaceContents);
+        if(CollectionUtils.isEmpty(projectCodes)) {
+            return;
+        }
+        for (String projectCode : projectCodes) {
+            searchVO.processContent(projectCode);
         }
         Map<String, Object> searchArgs = searchVO.getSearchArgs();
         if (!ObjectUtils.isEmpty(searchArgs)) {
             String issueNum = (String) searchArgs.get("issueNum");
             if (!StringUtils.isEmpty(issueNum)) {
-                projectCodes.forEach(projectCode -> {
-                    String prefix = projectCode + BaseConstants.Symbol.MIDDLE_LINE;
-                    if (issueNum.startsWith(prefix)) {
-                        searchArgs.put("issueNum", issueNum.substring(prefix.length()));
-                        return;
+                for (String projectCode : projectCodes) {
+                    final Pair<String, String> pair = SearchVO.processOneContent(projectCode, issueNum);
+                    if(pair != null && !Objects.equals(pair.getFirst(), pair.getSecond())) {
+                        searchArgs.put("issueNum", pair.getFirst());
+                        break;
                     }
-                });
+                }
             }
         }
     }

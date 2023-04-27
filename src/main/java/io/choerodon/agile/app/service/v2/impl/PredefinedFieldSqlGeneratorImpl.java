@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import io.choerodon.agile.api.vo.FieldTableVO;
+import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.business.TagVO;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.search.Value;
@@ -213,28 +214,30 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
             return sqlBuilder.toString();
         }
         List<String> projectCodes = projectInfos.stream().map(ProjectInfoDTO::getProjectCode).collect(Collectors.toList());
-        String content = dataPair.getFirst();
-        Pair<String, String> pair = Pair.of(null, null);
-        if (!ObjectUtils.isEmpty(content)) {
-            String substringContent = content;
-            for (String projectCode : projectCodes) {
-                String prefix = SqlUtil.SINGLE_QUOT + projectCode + "-";
-                if (content.startsWith(prefix)) {
-                    substringContent = content.substring(prefix.length());
-                    substringContent = SqlUtil.SINGLE_QUOT + substringContent;
-                    break;
-                }
+        //根据项目集合的前缀，去生成筛选值
+        //这里content之前的代码拼了''，要去除
+        String content = SqlUtil.removeSingleQuot(dataPair.getFirst());
+        Pair<String, String> issueNumAndSummaryPair = null;
+        for(String projectCode : projectCodes) {
+            issueNumAndSummaryPair = SearchVO.processOneContent(projectCode, content);
+            if(issueNumAndSummaryPair != null && !Objects.equals(issueNumAndSummaryPair.getFirst(), issueNumAndSummaryPair.getSecond())) {
+                break;
             }
-            pair = Pair.of(substringContent, null);
         }
+        if (issueNumAndSummaryPair == null) {
+            issueNumAndSummaryPair =  Pair.of(content, content);
+        }
+        //这里拼上''，后面的like需要用
+        issueNumAndSummaryPair.setFirst(SqlUtil.appendSingleQuot(issueNumAndSummaryPair.getFirst()));
+        issueNumAndSummaryPair.setSecond(SqlUtil.appendSingleQuot(issueNumAndSummaryPair.getSecond()));
 
         sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
         //content == summary和issueNum
         FieldTableVO summary = SearchConstant.PREDEFINED_FIELD_TABLE_MAP.get(FieldCode.SUMMARY);
-        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, summary, projectIds, "", null, false, InstanceType.ISSUE));
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, Pair.of(issueNumAndSummaryPair.getSecond(), null), summary, projectIds, "", null, false, InstanceType.ISSUE));
         sqlBuilder.append(" or ");
         FieldTableVO issueNum = SearchConstant.PREDEFINED_FIELD_TABLE_MAP.get(FieldCode.ISSUE_NUM);
-        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, pair, issueNum, projectIds, "", null, false, InstanceType.ISSUE));
+        sqlBuilder.append(SqlUtil.appendPredefinedSql(operation, Pair.of(issueNumAndSummaryPair.getFirst(), null), issueNum, projectIds, "", null, false, InstanceType.ISSUE));
 
         sqlBuilder.append(BaseConstants.Symbol.RIGHT_BRACE);
         return sqlBuilder.toString();
