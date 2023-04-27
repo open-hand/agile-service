@@ -39,6 +39,9 @@ public class AgileEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgileEventHandler.class);
 
+    private static final String ACTION_PROJECT_CREATE = "project-create";
+    private static final String ACTION_PROJECT_UPDATE = "project-update";
+
     @Autowired
     private ProjectInfoService projectInfoService;
     @Autowired
@@ -57,6 +60,8 @@ public class AgileEventHandler {
     private InitService initService;
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired
+    private ProjectTemplateService projectTemplateService;
 
     @Autowired
     private ProjectConfigService projectConfigService;
@@ -120,48 +125,56 @@ public class AgileEventHandler {
         LOGGER.info("接受创建项目消息{}", message);
         List<ProjectEventCategory> projectEventCategories = projectEvent.getProjectCategoryVOS();
         if (!ObjectUtils.isEmpty(projectEventCategories)) {
-            initIfAgileProject(projectEvent, projectEventCategories);
+            initIfAgileProject(projectEvent, projectEventCategories, ACTION_PROJECT_CREATE);
         }
         return message;
     }
 
-    public void initIfAgileProject(ProjectEvent projectEvent, List<ProjectEventCategory> projectEventCategories) {
+    public void initIfAgileProject(ProjectEvent projectEvent,
+                                   List<ProjectEventCategory> projectEventCategories,
+                                   String action) {
         Set<String> codes =
                 projectEventCategories
                         .stream()
                         .map(ProjectEventCategory::getCode)
                         .collect(Collectors.toSet());
-        if (ProjectCategory.consumeProjectCreatEvent(codes)) {
-            LOGGER.info("初始化项目{}, code: {}", projectEvent.getProjectId(), projectEvent.getProjectCode());
-            //创建projectInfo
-            projectInfoService.initializationProjectInfo(projectEvent);
-            //创建项目初始化issueLinkType
-            issueLinkTypeService.initIssueLinkType(projectEvent.getProjectId());
-            // 创建项目初始化风险状态机及问题类型方案
-            if (!ObjectUtils.isEmpty(agilePluginService)) {
-                agilePluginService.initProjectRiskIssueTypeScheme(projectEvent, codes);
-            }
-            if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
-                //program + (program & agile)
+        Long fromTemplateId = projectEvent.getFromTemplateId();
+        if (fromTemplateId != null && ACTION_PROJECT_CREATE.equals(action)) {
+            //从模版复制
+            projectTemplateService.cloneByTemplate(projectEvent, codes);
+        } else {
+            if (ProjectCategory.consumeProjectCreatEvent(codes)) {
+                LOGGER.info("初始化项目{}, code: {}", projectEvent.getProjectId(), projectEvent.getProjectCode());
+                //创建projectInfo
+                projectInfoService.initializationProjectInfo(projectEvent);
+                //创建项目初始化issueLinkType
+                issueLinkTypeService.initIssueLinkType(projectEvent.getProjectId());
+                // 创建项目初始化风险状态机及问题类型方案
                 if (!ObjectUtils.isEmpty(agilePluginService)) {
-                    agilePluginService.initProjectIssueTypeSchemeAndArt(projectEvent, codes);
+                    agilePluginService.initProjectRiskIssueTypeScheme(projectEvent, codes);
                 }
-            } else if (codes.contains(ProjectCategory.MODULE_AGILE)) {
-                //创建项目时创建默认状态机方案
-                stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
-                //创建项目时创建默认问题类型方案
-                issueTypeSchemeService.initByConsumeCreateProject(projectEvent, projectEvent.getProjectCode());
-                // 同步状态机模板和看板模板
-                handlerOrganizationTemplate(projectEvent);
-            } else if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
-                if (!ObjectUtils.isEmpty(agileWaterfallService)) {
-                    agileWaterfallService.initProject(projectEvent, codes);
+                if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+                    //program + (program & agile)
+                    if (!ObjectUtils.isEmpty(agilePluginService)) {
+                        agilePluginService.initProjectIssueTypeSchemeAndArt(projectEvent, codes);
+                    }
+                } else if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+                    //创建项目时创建默认状态机方案
+                    stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
+                    //创建项目时创建默认问题类型方案
+                    issueTypeSchemeService.initByConsumeCreateProject(projectEvent, projectEvent.getProjectCode());
+                    // 同步状态机模板和看板模板
+                    handlerOrganizationTemplate(projectEvent);
+                } else if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
+                    if (!ObjectUtils.isEmpty(agileWaterfallService)) {
+                        agileWaterfallService.initProject(projectEvent, codes);
+                    }
                 }
-            }
 
-            if (backlogExpandService != null && codes.contains(ProjectCategory.MODULE_BACKLOG)) {
-                // 选择需求管理后默认开启需求池
-                backlogExpandService.startBacklog(projectEvent);
+                if (backlogExpandService != null && codes.contains(ProjectCategory.MODULE_BACKLOG)) {
+                    // 选择需求管理后默认开启需求池
+                    backlogExpandService.startBacklog(projectEvent);
+                }
             }
         }
     }
@@ -193,7 +206,7 @@ public class AgileEventHandler {
         SpringBeanUtil.getBean(RedisUtil.class).delete("projectInfo:" + projectId);
         List<ProjectEventCategory> projectEventCategories = projectEvent.getNewProjectCategoryVOS();
         if (!CollectionUtils.isEmpty(projectEventCategories)) {
-            initIfAgileProject(projectEvent, projectEventCategories);
+            initIfAgileProject(projectEvent, projectEventCategories, ACTION_PROJECT_UPDATE);
         } else {
             LOGGER.info("项目{}已初始化，跳过项目初始化", projectEvent.getProjectCode());
         }

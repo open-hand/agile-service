@@ -38,6 +38,7 @@ public class ProjectEvent {
 
     private Long workGroupId;
 
+    private Long fromTemplateId;
 
     public List<ProjectEventCategory> getProjectCategoryVOS() {
         return projectCategoryVOS;
@@ -157,5 +158,13 @@ public class ProjectEvent {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getFromTemplateId() {
+        return fromTemplateId;
+    }
+
+    public void setFromTemplateId(Long fromTemplateId) {
+        this.fromTemplateId = fromTemplateId;
     }
 }
