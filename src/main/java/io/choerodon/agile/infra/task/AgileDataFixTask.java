@@ -47,7 +47,7 @@ public class AgileDataFixTask {
     public void fixPersonalFilter(Map<String, Object> map) {
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix Start, Version: 2.3.0 <<<<<<<<=================================");
         Set<String> typeCodes =
-                SetUtils.unmodifiableSet(PersonalFilterTypeCode.AGILE_ISSUE, PersonalFilterTypeCode.FEATURE_ISSUE, PersonalFilterTypeCode.WATERFALL_ISSUE);
+                SetUtils.unmodifiableSet(PersonalFilterTypeCode.AGILE_ISSUE.getTypeCode(), PersonalFilterTypeCode.FEATURE_ISSUE.getTypeCode(), PersonalFilterTypeCode.WATERFALL_ISSUE.getTypeCode());
         fixDataService.fixPersonalFilter(typeCodes);
         LOGGER.info("==============================>>>>>>>> AGILE Data Fix End, Success! Version: 2.3.0 <<<<<<<<=================================");
     }

@@ -34,6 +34,13 @@ public class BacklogInfoVO {
     private Date creationDate;
     @ApiModelProperty(value = "最后更新时间")
     private Date lastUpdateDate;
+    @ApiModelProperty(value = "项目信息")
+    private ProjectVO projectVO;
+    @ApiModelProperty(value = "需求issue关联关系")
+    private String linkType;
+    @Encrypt
+    @ApiModelProperty(value = "issue id")
+    private Long issueId;
 
     public BacklogInfoVO() {
     }
@@ -153,5 +160,29 @@ public class BacklogInfoVO {
 
     public void setBacklogClassificationName(String backlogClassificationName) {
         this.backlogClassificationName = backlogClassificationName;
+    }
+
+    public ProjectVO getProjectVO() {
+        return projectVO;
+    }
+
+    public void setProjectVO(ProjectVO projectVO) {
+        this.projectVO = projectVO;
+    }
+
+    public String getLinkType() {
+        return linkType;
+    }
+
+    public void setLinkType(String linkType) {
+        this.linkType = linkType;
+    }
+
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
     }
 }

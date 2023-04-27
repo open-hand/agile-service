@@ -759,7 +759,7 @@ public class IssueProjectMoveServiceImpl implements IssueProjectMoveService, Aop
         wikiRelationMapper.deleteByIssueId(projectVO.getId(), issueDTO.getIssueId());
         // 问题是否与需求相关联
         if (backlogExpandService != null) {
-            backlogExpandService.deleteIssueBacklogRel(issueDTO.getIssueId());
+            backlogExpandService.deleteIssueBacklogRel(issueDTO.getIssueId(), null);
         }
         // 处理商业版需要清空的值
         if (agilePluginService != null) {

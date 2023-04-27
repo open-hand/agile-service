@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 
 import java.io.Serializable;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,6 +31,12 @@ public class IssueSprintVO implements Serializable {
     @Encrypt
     @ApiModelProperty(value = "问题id")
     private Long issueId;
+
+    private Date startDate;
+
+    private Date endDate;
+
+    private Date actualEndDate;
 
     public String getSprintName() {
         return sprintName;
@@ -66,5 +73,29 @@ public class IssueSprintVO implements Serializable {
 
     public void setIssueId(Long issueId) {
         this.issueId = issueId;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Date getActualEndDate() {
+        return actualEndDate;
+    }
+
+    public void setActualEndDate(Date actualEndDate) {
+        this.actualEndDate = actualEndDate;
     }
 }

@@ -4,8 +4,10 @@ package io.choerodon.agile.api.vo.business;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.infra.dto.business.PiNameDTO;
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.*;
@@ -319,6 +321,25 @@ public class IssueVO {
 
     @ApiModelProperty("工时属性配置")
     private List<WorkHoursConfigAttributeVO> workHoursConfigAttributeVOS;
+
+    @ApiModelProperty("工作项关联的需求池的Id")
+    @Encrypt
+    private Long backlogId;
+
+    @ApiModelProperty("所有父级工作项Id的集合")
+    @Encrypt
+    private List<Long> parentIssueIds;
+    @ApiModelProperty("冲刺列表")
+    private List<IssueSprintVO> issueSprintVOS;
+
+    @ApiModelProperty("创建人")
+    private UserMessageDTO createUser;
+
+    @ApiModelProperty("pi列表")
+    private List<PiNameDTO> piNameDTOList;
+
+    @ApiModelProperty("区分特性还是史能")
+    private String featureType;
 
     public List<Long> getInfluenceIssueIds() {
         return influenceIssueIds;
@@ -1112,5 +1133,53 @@ public class IssueVO {
 
     public void setWorkHoursConfigAttributeVOS(List<WorkHoursConfigAttributeVO> workHoursConfigAttributeVOS) {
         this.workHoursConfigAttributeVOS = workHoursConfigAttributeVOS;
+    }
+
+    public Long getBacklogId() {
+        return backlogId;
+    }
+
+    public void setBacklogId(Long backlogId) {
+        this.backlogId = backlogId;
+    }
+
+    public List<Long> getParentIssueIds() {
+        return parentIssueIds;
+    }
+
+    public void setParentIssueIds(List<Long> parentIssueIds) {
+        this.parentIssueIds = parentIssueIds;
+    }
+
+    public UserMessageDTO getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(UserMessageDTO createUser) {
+        this.createUser = createUser;
+    }
+
+    public List<IssueSprintVO> getIssueSprintVOS() {
+        return issueSprintVOS;
+    }
+
+    public void setIssueSprintVOS(List<IssueSprintVO> issueSprintVOS) {
+        this.issueSprintVOS = issueSprintVOS;
+    }
+
+    public List<PiNameDTO> getPiNameDTOList() {
+        return piNameDTOList;
+    }
+
+    public void setPiNameDTOList(List<PiNameDTO> piNameDTOList) {
+        this.piNameDTOList = piNameDTOList;
+    }
+
+    public String getFeatureType() {
+        return featureType;
+    }
+
+    public void setFeatureType(String featureType) {
+        this.featureType = featureType;
     }
 }

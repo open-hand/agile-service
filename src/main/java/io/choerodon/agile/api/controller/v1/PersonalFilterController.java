@@ -1,20 +1,17 @@
 package io.choerodon.agile.api.controller.v1;
 
-import java.util.List;
-import java.util.Optional;
-
 import static io.choerodon.agile.app.service.impl.PersonalFilterServiceImpl.V1;
+
+import java.util.List;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.agile.api.vo.PersonalFilterVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 
@@ -39,9 +36,7 @@ public class PersonalFilterController {
                                                    @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.create(0L, projectId, personalFilterVO, V1))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.personalFilter.create"));
+        return Results.created(personalFilterService.create(0L, projectId, personalFilterVO, V1));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -54,20 +49,18 @@ public class PersonalFilterController {
                                                    @PathVariable  @Encrypt Long filterId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody  @Encrypt PersonalFilterVO personalFilterVO) {
-        return Optional.ofNullable(personalFilterService.update(0L, projectId, filterId, personalFilterVO, V1))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.personalFilter.create"));
+        return Results.success(personalFilterService.update(0L, projectId, filterId, personalFilterVO, V1));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除我的筛选")
     @DeleteMapping(value = "/{filterId}")
-    public ResponseEntity<PersonalFilterVO> deleteById(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> deleteById(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "filter id", required = true)
                                                        @PathVariable  @Encrypt Long filterId) {
         personalFilterService.deleteById(0L, projectId, filterId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -82,9 +75,7 @@ public class PersonalFilterController {
                                                                   @RequestParam(name = "searchStr", required = false) String searchStr,
                                                                   @ApiParam(value = "问题类型编码")
                                                                   @RequestParam(name = "filterTypeCode") String filterTypeCode) {
-        return Optional.ofNullable(personalFilterService.listByUserId(0L, projectId, userId, searchStr, filterTypeCode, V1))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.personalFilter.list"));
+        return Results.success(personalFilterService.listByUserId(0L, projectId, userId, searchStr, filterTypeCode, V1));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -94,9 +85,7 @@ public class PersonalFilterController {
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "filter id", required = true)
                                                       @PathVariable @Encrypt Long filterId) {
-        return Optional.ofNullable(personalFilterService.queryById(0L, projectId, filterId, V1))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));
+        return Results.success(personalFilterService.queryById(0L, projectId, filterId, V1));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -119,8 +108,6 @@ public class PersonalFilterController {
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "filter Id", required = true)
                                              @RequestParam @Encrypt Long filterId) {
-        return Optional.ofNullable(personalFilterService.setDefault(0L, projectId, filterId))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.personal.filter.set.default"));
+        return Results.success(personalFilterService.setDefault(0L, projectId, filterId));
     }
 }

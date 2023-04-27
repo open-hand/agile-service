@@ -740,16 +740,21 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 List<Long> issueIds = issueIdPage.getContent();
                 Set<Long> childrenIds = new HashSet<>();
                 if (isTreeView) {
-                    List<IssueDTO> childIssues = issueMapper.queryChildrenIdByParentId(issueIds, new HashSet<>(Collections.singletonList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
-                    //支持第三方调用，筛选出父级时同时把所有子级返回
                     boolean withSubIssues =
                             !Boolean.FALSE.equals(
                                     Optional.ofNullable(searchVO.getSearchArgs())
                                             .map(x -> x.get("withSubIssues"))
                                             .orElse(false));
-                    // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
-                    if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
-                        childrenIds.add(0L);
+                    List<IssueDTO> childIssues;
+                    if (withSubIssues) {
+                        //带上所有的子级
+                        childIssues = issueMapper.queryChildrenIdByParentId(issueIds, new HashSet<>(Arrays.asList(projectId)), new SearchVO(), null, null, null);
+                    } else {
+                        childIssues = issueMapper.queryChildrenIdByParentId(issueIds, new HashSet<>(Arrays.asList(projectId)), searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                        if (CollectionUtils.isEmpty(childIssues)) {
+                            // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                            childrenIds.add(0L);
+                        }
                     }
                     childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
                 }
@@ -791,6 +796,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
         }
+        if (backlogExpandService != null) {
+            predefinedFieldMap.putAll(backlogExpandService.queryAdvanceParamFieldTableMap());
+        }
         String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
         Map<String, Object> sortMap = processSortMap(pageRequest, projectId, organizationId, TableAliasConstant.DEFAULT_ALIAS);
         Page<Long> issueIdPage = pagedQueryRoot(pageRequest, projectId, quickFilterSql, advancedSql, sortMap, isTreeView, false, null);
@@ -799,12 +807,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             List<Long> issueIds = issueIdPage.getContent();
             Set<Long> childrenIds = new HashSet<>();
             if (isTreeView) {
-                List<IssueDTO> childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null, false, null);
-                //todo 支持第三方调用，筛选出父级时同时把所有子级返回
                 boolean withSubIssues = Boolean.TRUE.equals(Optional.ofNullable(searchParamVO.getWithSubIssues()).orElse(false));
-                // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
-                if (!withSubIssues && CollectionUtils.isEmpty(childIssues)){
-                    childrenIds.add(0L);
+                List<IssueDTO> childIssues;
+                if (withSubIssues) {
+                    //带上所有的子级
+                    childIssues = issueMapper.queryChildrenList(issueIds, projectIds, null, null, null, false, null);
+                } else {
+                    childIssues = issueMapper.queryChildrenList(issueIds, projectIds, quickFilterSql, advancedSql, null, false, null);
+                    if (CollectionUtils.isEmpty(childIssues)) {
+                        // 如果要求不筛选出所有子级, 且待导出的子级空, 这里需要塞一个不存在的ID到子级列表里, 就能屏蔽掉子级查询了
+                        childrenIds.add(0L);
+                    }
                 }
                 childrenIds.addAll(childIssues.stream().map(IssueDTO::getIssueId).collect(Collectors.toSet()));
             }
@@ -819,6 +832,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (!ObjectUtils.isEmpty(agilePluginService) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
                 boolean countSubIssue = Boolean.TRUE.equals(searchParamVO.getCountSubIssue());
                 agilePluginService.doToIssueListFieldKVDTO(Arrays.asList(projectId), issueListFieldKVVOS, countSubIssue);
+            }
+            if(backlogExpandService != null){
+                backlogExpandService.addIssueBacklogInfo(organizationId, projectId, issueListFieldKVVOS);
             }
             issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
         }
@@ -2011,7 +2027,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             agilePluginService.issueSyncByIssueId(ConvertUtil.getOrganizationId(projectId), issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.DELETE);
         }
         if (backlogExpandService != null) {
-            backlogExpandService.deleteIssueBacklogRel(issueId);
+            backlogExpandService.deleteIssueBacklogRel(issueId, null);
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.deleteIssueForWaterfall(projectId, issueId, issueConvertDTO);
@@ -2967,10 +2983,16 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 // 前置依赖项
                 issuePredecessorService.copyIssuePredecessors(projectId, issueId, newIssueId);
                 break;
-            case IssueCopyLinkContents.RELATED_BACKLOGS:
+            case IssueCopyLinkContents.DECOMPOSE_BACKLOGS:
                 // 关联需求
                 if (backlogExpandService != null) {
-                    backlogExpandService.copyIssueBacklogRel(projectId, issueId, newIssueId);
+                    backlogExpandService.copyIssueBacklogRel(projectId, issueId, newIssueId, BacklogExpandService.BacklogIssueLinkType.DECOMPOSE);
+                }
+                break;
+            case IssueCopyLinkContents.LINK_BACKLOGS:
+                // 关联需求
+                if (backlogExpandService != null) {
+                    backlogExpandService.copyIssueBacklogRel(projectId, issueId, newIssueId, BacklogExpandService.BacklogIssueLinkType.LINK);
                 }
                 break;
             case IssueCopyLinkContents.COMMENTS:
@@ -4302,7 +4324,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         linkContents.setRelatedTestCases(testServiceClientOperator.checkExistTestCaseLink(projectId, issueId));
         // 关联需求
         if (backlogExpandService != null) {
-            linkContents.setRelatedBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId));
+            linkContents.setDecomposeBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId, BacklogExpandService.BacklogIssueLinkType.DECOMPOSE));
+            linkContents.setLinkBacklogs(backlogExpandService.checkExistBacklogRel(projectId, issueId, BacklogExpandService.BacklogIssueLinkType.LINK));
         }
         // 关联分支
         linkContents.setRelatedBranches(devopsClientOperator.checkExistIssueBranchRel(projectId, issueId));
@@ -4312,17 +4335,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private List<String> getLinkContents(IssueCopyLinkContents linkContents) {
         Class<?> clazz = linkContents.getClass();
         List<String> result = new ArrayList<>();
-        IssueCopyLinkContents.ISSUE_COPY_LINK_CONTENTS.forEach(content -> {
+        for (String contentName : IssueCopyLinkContents.ISSUE_COPY_LINK_CONTENTS) {
             try {
-                Field field = clazz.getDeclaredField(content);
+                Field field = clazz.getDeclaredField(contentName);
                 field.setAccessible(true);
-                if (Boolean.TRUE.equals(field.getBoolean(linkContents) )) {
-                    result.add(content);
+                if (Boolean.TRUE.equals(field.getBoolean(linkContents))) {
+                    result.add(contentName);
                 }
             } catch (Exception e) {
                 throw new CommonException("error.get.link.contents");
             }
-        });
+        }
         return result;
     }
 
