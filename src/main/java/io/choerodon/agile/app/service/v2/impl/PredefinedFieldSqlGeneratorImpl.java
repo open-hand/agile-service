@@ -215,7 +215,8 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         }
         List<String> projectCodes = projectInfos.stream().map(ProjectInfoDTO::getProjectCode).collect(Collectors.toList());
         //根据项目集合的前缀，去生成筛选值
-        String content = dataPair.getFirst();
+        //这里content之前的代码拼了''，要去除
+        String content = SqlUtil.removeSingleQuot(dataPair.getFirst());
         Pair<String, String> issueNumAndSummaryPair = null;
         for(String projectCode : projectCodes) {
             issueNumAndSummaryPair = SearchVO.processOneContent(projectCode, content);
@@ -226,6 +227,9 @@ public class PredefinedFieldSqlGeneratorImpl implements PredefinedFieldSqlGenera
         if (issueNumAndSummaryPair == null) {
             issueNumAndSummaryPair =  Pair.of(content, content);
         }
+        //这里拼上''，后面的like需要用
+        issueNumAndSummaryPair.setFirst(SqlUtil.appendSingleQuot(issueNumAndSummaryPair.getFirst()));
+        issueNumAndSummaryPair.setSecond(SqlUtil.appendSingleQuot(issueNumAndSummaryPair.getSecond()));
 
         sqlBuilder.append(BaseConstants.Symbol.LEFT_BRACE);
         //content == summary和issueNum
