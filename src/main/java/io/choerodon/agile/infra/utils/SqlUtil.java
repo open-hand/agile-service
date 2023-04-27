@@ -53,6 +53,16 @@ public class SqlUtil {
         return new StringBuilder(SINGLE_QUOT).append(value).append(SINGLE_QUOT).toString();
     }
 
+    public static String removeSingleQuot(String value) {
+        if (value == null) {
+            return "";
+        }
+        if (value.startsWith(SINGLE_QUOT) && value.endsWith(SINGLE_QUOT)) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
+
     public static String buildMainTableFilterColumn(String column,
                                                     String alias) {
         String mainTableFilterColumn;
