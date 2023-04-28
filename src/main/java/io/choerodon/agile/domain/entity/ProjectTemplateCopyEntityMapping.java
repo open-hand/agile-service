@@ -11,8 +11,12 @@ import java.util.Map;
 public class ProjectTemplateCopyEntityMapping {
 
     public static final String AGILE_ISSUE = "agile_issue";
-
-    private String table;
+    public static final String AGILE_PRODUCT_VERSION = "agile_product_version";
+    public static final String AGILE_ISSUE_COMPONENT = "agile_issue_component";
+    public static final String AGILE_ISSUE_LABEL = "agile_issue_label";
+    public static final String WF_ISSUE_EXTEND = "wf_issue_extend";
+    public static final String WF_ISSUE_SNAPSHOT = "wf_issue_snapshot";
+    public static final String WF_SNAPSHOT = "wf_snapshot";
 
     private Map<String, Map<Long, Long>> sourceTargetMapping = new HashMap<>();
 
@@ -28,14 +32,4 @@ public class ProjectTemplateCopyEntityMapping {
     public Long getByTableAndSourceId(String table, Long sourceId) {
         return sourceTargetMapping.getOrDefault(table, Collections.emptyMap()).get(sourceId);
     }
-
-    public String getTable() {
-        return table;
-    }
-
-    public ProjectTemplateCopyEntityMapping setTable(String table) {
-        this.table = table;
-        return this;
-    }
-
 }
