@@ -39,8 +39,8 @@ public class AgileEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgileEventHandler.class);
 
-    private static final String ACTION_PROJECT_CREATE = "project-create";
-    private static final String ACTION_PROJECT_UPDATE = "project-update";
+    public static final String ACTION_PROJECT_CREATE = "project-create";
+    public static final String ACTION_PROJECT_UPDATE = "project-update";
 
     @Autowired
     private ProjectInfoService projectInfoService;
