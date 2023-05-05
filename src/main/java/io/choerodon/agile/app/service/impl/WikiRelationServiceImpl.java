@@ -1,14 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.KnowledgeRelationVO;
-import io.choerodon.agile.api.vo.WikiRelationVO;
-import io.choerodon.agile.api.vo.WorkSpaceVO;
-import io.choerodon.agile.app.service.IWikiRelationService;
-import io.choerodon.agile.app.service.WikiRelationService;
-import io.choerodon.agile.infra.dto.WikiRelationDTO;
-import io.choerodon.agile.infra.feign.operator.KnowledgebaseClientOperator;
-import io.choerodon.agile.infra.mapper.WikiRelationMapper;
-import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -18,12 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import io.choerodon.agile.api.vo.KnowledgeRelationVO;
+import io.choerodon.agile.api.vo.WikiRelationVO;
+import io.choerodon.agile.api.vo.WorkSpaceVO;
+import io.choerodon.agile.app.service.IWikiRelationService;
+import io.choerodon.agile.app.service.WikiRelationService;
+import io.choerodon.agile.infra.dto.WikiRelationDTO;
+import io.choerodon.agile.infra.feign.operator.KnowledgebaseClientOperator;
+import io.choerodon.agile.infra.mapper.WikiRelationMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/12/03.
@@ -97,7 +98,9 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         wikiRelationDTO.setSpaceId(workSpaceId);
         List<WikiRelationDTO> wikiRelationDTOS = wikiRelationMapper.select(wikiRelationDTO);
         if(!CollectionUtils.isEmpty(wikiRelationDTOS)){
-            wikiRelationDTOS.forEach(v -> iWikiRelationService.deleteBase(wikiRelationDTO));
+            for (WikiRelationDTO wikiRelation : wikiRelationDTOS) {
+                iWikiRelationService.deleteBase(wikiRelation);
+            }
         }
     }
 
