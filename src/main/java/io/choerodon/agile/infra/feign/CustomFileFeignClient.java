@@ -28,4 +28,15 @@ public interface CustomFileFeignClient {
 
     @PostMapping(value = {"/v1/{organizationId}/upload/fragment-combine"})
     ResponseEntity<String> fragmentCombineBlock(@PathVariable Long organizationId, @RequestParam String guid, @RequestParam String fileName, @RequestBody(required = false) Map<String, String> args);
+
+    /**
+     * 根据文件的fileKeys集合 查询文件数据
+     *
+     * @param organizationId
+     * @param fileKeys
+     * @return List&lt;FileVO&gt;
+     */
+    @PostMapping({"/choerodon/v1/{organization_id}/file/list"})
+    ResponseEntity<String> queryFileByFileKeys(@PathVariable("organization_id") Long organizationId,
+                                               @RequestBody List<String> fileKeys);
 }
