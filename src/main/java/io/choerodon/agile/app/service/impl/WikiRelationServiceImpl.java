@@ -101,7 +101,9 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         wikiRelationDTO.setSpaceId(workSpaceId);
         List<WikiRelationDTO> wikiRelationDTOS = wikiRelationMapper.select(wikiRelationDTO);
         if (!CollectionUtils.isEmpty(wikiRelationDTOS)) {
-            wikiRelationDTOS.forEach(v -> iWikiRelationService.deleteBase(wikiRelationDTO));
+            for (WikiRelationDTO wikiRelation : wikiRelationDTOS) {
+                iWikiRelationService.deleteBase(wikiRelation);
+            }
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.deleteByWorkSpaceId(projectId, workSpaceId);
