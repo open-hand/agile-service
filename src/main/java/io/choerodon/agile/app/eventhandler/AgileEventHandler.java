@@ -1,24 +1,14 @@
 package io.choerodon.agile.app.eventhandler;
 
+import static io.choerodon.agile.infra.utils.SagaTopic.Organization.ORG_CREATE;
+import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CREATE;
+import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
-import io.choerodon.agile.api.vo.event.DevopsMergeRequestPayload;
-import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
-import io.choerodon.agile.api.vo.event.ProjectEvent;
-import io.choerodon.agile.api.vo.event.ProjectEventCategory;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
-import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.agile.infra.utils.SpringBeanUtil;
-import io.choerodon.asgard.saga.annotation.SagaTask;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
-import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +16,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import static io.choerodon.agile.infra.utils.SagaTopic.Organization.ORG_CREATE;
-import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CREATE;
-import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
+import io.choerodon.agile.api.vo.event.DevopsMergeRequestPayload;
+import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.api.vo.event.ProjectEventCategory;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.domain.context.ProjectCloneContext;
+import io.choerodon.agile.domain.service.ProjectCloneDomainService;
+import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
+import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
+import io.choerodon.agile.infra.utils.RedisUtil;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.asgard.saga.annotation.SagaTask;
+
+import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.starter.keyencrypt.core.EncryptType;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/22.
@@ -61,7 +65,7 @@ public class AgileEventHandler {
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
-    private ProjectTemplateService projectTemplateService;
+    private ProjectCloneDomainService projectCloneDomainService;
 
     @Autowired
     private ProjectConfigService projectConfigService;
@@ -133,45 +137,47 @@ public class AgileEventHandler {
     public void initIfAgileProject(ProjectEvent projectEvent,
                                    List<ProjectEventCategory> projectEventCategories,
                                    String action) {
-        Set<String> codes =
+        Set<String> categoryCodes =
                 projectEventCategories
                         .stream()
                         .map(ProjectEventCategory::getCode)
                         .collect(Collectors.toSet());
         Long fromTemplateId = projectEvent.getFromTemplateId();
+        final Long projectId = projectEvent.getProjectId();
         if (fromTemplateId != null && ACTION_PROJECT_CREATE.equals(action)) {
             //从模版复制
-            projectTemplateService.cloneByTemplate(projectEvent, codes);
+            ProjectCloneContext cloneContext = new ProjectCloneContext().setCategoryCodes(categoryCodes);
+            projectCloneDomainService.cloneProject(fromTemplateId, projectId, cloneContext);
         } else {
-            if (ProjectCategory.consumeProjectCreatEvent(codes)) {
-                LOGGER.info("初始化项目{}, code: {}", projectEvent.getProjectId(), projectEvent.getProjectCode());
+            if (ProjectCategory.consumeProjectCreatEvent(categoryCodes)) {
+                LOGGER.info("初始化项目{}, code: {}", projectId, projectEvent.getProjectCode());
                 //创建projectInfo
                 projectInfoService.initializationProjectInfo(projectEvent);
                 //创建项目初始化issueLinkType
-                issueLinkTypeService.initIssueLinkType(projectEvent.getProjectId());
+                issueLinkTypeService.initIssueLinkType(projectId);
                 // 创建项目初始化风险状态机及问题类型方案
                 if (!ObjectUtils.isEmpty(agilePluginService)) {
-                    agilePluginService.initProjectRiskIssueTypeScheme(projectEvent, codes);
+                    agilePluginService.initProjectRiskIssueTypeScheme(projectEvent, categoryCodes);
                 }
-                if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
+                if (categoryCodes.contains(ProjectCategory.MODULE_PROGRAM)) {
                     //program + (program & agile)
                     if (!ObjectUtils.isEmpty(agilePluginService)) {
-                        agilePluginService.initProjectIssueTypeSchemeAndArt(projectEvent, codes);
+                        agilePluginService.initProjectIssueTypeSchemeAndArt(projectEvent, categoryCodes);
                     }
-                } else if (codes.contains(ProjectCategory.MODULE_AGILE)) {
+                } else if (categoryCodes.contains(ProjectCategory.MODULE_AGILE)) {
                     //创建项目时创建默认状态机方案
                     stateMachineSchemeService.initByConsumeCreateProject(projectEvent);
                     //创建项目时创建默认问题类型方案
                     issueTypeSchemeService.initByConsumeCreateProject(projectEvent, projectEvent.getProjectCode());
                     // 同步状态机模板和看板模板
                     handlerOrganizationTemplate(projectEvent);
-                } else if (codes.contains(ProjectCategory.MODULE_WATERFALL)) {
+                } else if (categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)) {
                     if (!ObjectUtils.isEmpty(agileWaterfallService)) {
-                        agileWaterfallService.initProject(projectEvent, codes);
+                        agileWaterfallService.initProject(projectEvent, categoryCodes);
                     }
                 }
 
-                if (backlogExpandService != null && codes.contains(ProjectCategory.MODULE_BACKLOG)) {
+                if (backlogExpandService != null && categoryCodes.contains(ProjectCategory.MODULE_BACKLOG)) {
                     // 选择需求管理后默认开启需求池
                     backlogExpandService.startBacklog(projectEvent);
                 }

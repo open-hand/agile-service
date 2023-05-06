@@ -5,11 +5,13 @@ import java.util.Set;
 
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 
+import org.hzero.mybatis.base.BaseRepository;
+
 /**
  * @author superlee
  * @since 2022-08-24
  */
-public interface IssueRepository {
+public interface IssueRepository extends BaseRepository<IssueDTO> {
 
     /**
      * 根据id集合查询

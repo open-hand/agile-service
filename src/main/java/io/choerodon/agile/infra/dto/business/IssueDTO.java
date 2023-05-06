@@ -442,8 +442,9 @@ public class IssueDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getEpicId() {

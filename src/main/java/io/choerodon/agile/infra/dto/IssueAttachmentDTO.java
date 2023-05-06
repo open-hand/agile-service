@@ -1,14 +1,14 @@
 package io.choerodon.agile.infra.dto;
 
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-import io.choerodon.agile.infra.utils.StringUtil;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -79,8 +79,9 @@ public class IssueAttachmentDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueAttachmentDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     @Override

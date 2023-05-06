@@ -1,11 +1,14 @@
 package io.choerodon.agile.infra.dto;
 
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -53,8 +56,9 @@ public class ComponentIssueRelDTO extends AuditDomain {
         this.issueId = issueId;
     }
 
-    public void setProjectId(Long projectId) {
+    public ComponentIssueRelDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getProjectId() {
