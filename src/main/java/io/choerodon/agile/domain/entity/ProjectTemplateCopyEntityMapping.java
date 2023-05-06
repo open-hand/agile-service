@@ -17,6 +17,7 @@ public class ProjectTemplateCopyEntityMapping {
     public static final String WF_ISSUE_EXTEND = "wf_issue_extend";
     public static final String WF_ISSUE_SNAPSHOT = "wf_issue_snapshot";
     public static final String WF_SNAPSHOT = "wf_snapshot";
+    public static final String AGILE_ISSUE_LINK_TYPE = "agile_issue_link_type";
 
     private Map<String, Map<Long, Long>> sourceTargetMapping = new HashMap<>();
 
