@@ -103,8 +103,9 @@ public class IssueLinkDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueLinkDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public String getApplyType() {

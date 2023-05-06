@@ -14,6 +14,7 @@ import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
 import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
+import io.choerodon.agile.domain.context.ProjectCloneContext;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
@@ -140,10 +141,11 @@ public interface AgileWaterfallService {
     List<IssueVO> handleParentId(Long organizationId, List<IssueVO> issueVOS);
 
     /**
-     * 瀑布根据模版复制
+     * 项目复制--瀑布部分
      *
-     * @param projectId
-     * @param fromTemplateId
+     * @param sourceProjectId   源项目ID
+     * @param targetProjectId   目标项目ID
+     * @param context           复制上下文
      */
-    void cloneByTemplate(Long projectId, Long fromTemplateId);
+    void cloneProject(Long sourceProjectId, Long targetProjectId, ProjectCloneContext context);
 }

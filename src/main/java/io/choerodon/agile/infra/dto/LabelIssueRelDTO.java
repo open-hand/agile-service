@@ -1,6 +1,9 @@
 package io.choerodon.agile.infra.dto;
 
-import javax.persistence.*;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import io.choerodon.agile.infra.utils.StringUtil;
@@ -55,8 +58,9 @@ public class LabelIssueRelDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public LabelIssueRelDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public String getLabelName() {

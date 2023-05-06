@@ -13,12 +13,14 @@ import io.choerodon.agile.domain.repository.IssueRepository;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 
+import org.hzero.mybatis.base.impl.BaseRepositoryImpl;
+
 /**
  * @author superlee
  * @since 2022-08-24
  */
 @Repository
-public class IssueRepositoryImpl implements IssueRepository {
+public class IssueRepositoryImpl extends BaseRepositoryImpl<IssueDTO> implements IssueRepository {
 
     @Autowired
     private IssueMapper issueMapper;

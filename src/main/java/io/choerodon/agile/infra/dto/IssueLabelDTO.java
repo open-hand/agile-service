@@ -1,16 +1,16 @@
 package io.choerodon.agile.infra.dto;
 
 
-
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-import io.choerodon.agile.infra.utils.StringUtil;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
 /**
  * 敏捷开发Issue标签
  *
@@ -65,8 +65,9 @@ public class IssueLabelDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueLabelDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     @Override

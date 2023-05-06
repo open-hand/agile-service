@@ -1,13 +1,8 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.eventhandler.AgileEventHandler;
-import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.MessageDetailDTO;
-import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
-import io.choerodon.agile.infra.dto.TestCaseDTO;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.swagger.annotation.Permission;
+import java.util.List;
+import java.util.Set;
+
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
@@ -17,8 +12,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Set;
+import io.choerodon.agile.api.vo.DataLogFixVO;
+import io.choerodon.agile.api.vo.IssueLinkFixVO;
+import io.choerodon.agile.api.vo.ProjectInfoFixVO;
+import io.choerodon.agile.api.vo.TestVersionFixVO;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.MessageDetailDTO;
+import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
+import io.choerodon.agile.infra.dto.TestCaseDTO;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
+
+import org.hzero.core.util.Results;
 
 
 /**
@@ -52,24 +57,21 @@ public class FixDataController {
     @Autowired
     private AgileWaterfallService agileWaterfallService;
 
-    @Autowired
-    private AgileEventHandler agileEventHandler;
-
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复0.19创建项目产生的脏数据【全部】")
     @GetMapping(value = "/fix_create_project_0.19")
-    public ResponseEntity fixCreateProject() {
+    public ResponseEntity<Void> fixCreateProject() {
         fixDataService.fixCreateProject();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复0.19创建项目产生的脏数据【单个】")
     @GetMapping(value = "/fix_create_project_0.19_single")
-    public ResponseEntity fixCreateProjectSingle(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> fixCreateProjectSingle(@ApiParam(value = "项目id", required = true)
                                                  @RequestParam("projectId") Long projectId) {
         fixDataService.fixCreateProjectSingle(projectId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
@@ -134,67 +136,67 @@ public class FixDataController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("【0.20 BASE】启动敏捷迁移到Base的task")
     @GetMapping("/migration_to_base")
-    public ResponseEntity migrateToBase() {
+    public ResponseEntity<Void> migrateToBase() {
         LOGGER.info("==============================>>>>>>>> AGILE Data Migrate Start In Controller <<<<<<<<=================================");
 //        notifyFeignClient.checkLog("0.20.0", "agile");
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("【0.24】修复状态机和页面数据")
     @GetMapping("/fix_data_state_machine_and_page")
-    public ResponseEntity fixDataStateMachineAndPage() {
+    public ResponseEntity<Void> fixDataStateMachineAndPage() {
         fixDataService.fixDateStateMachineAndPage();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("【0.24】修复页面数据")
     @GetMapping("/fix_page")
-    public ResponseEntity fixPage() {
+    public ResponseEntity<Void> fixPage() {
         fixDataService.fixPage();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("【0.25】修复问题类型数据")
     @GetMapping("/fix_issue_type")
-    public ResponseEntity fixIssueType() {
+    public ResponseEntity<Void> fixIssueType() {
         fixDataService.fixIssueTypeData();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复项目群和项目融合数据以及需求状态机数据")
     @GetMapping("/fix_agile_and_program")
-    public ResponseEntity fixDate() {
+    public ResponseEntity<Void> fixDate() {
         fixDataService.fixAgileAndProgram();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复状态机自定义流转角色数据")
     @GetMapping("/fix_status_transfer_role_data")
-    public ResponseEntity fixStatusTransferRoleData() {
+    public ResponseEntity<Void> fixStatusTransferRoleData() {
         fixDataService.fixStatusMachineCustomTransferRoleData();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复高级筛选个人筛选数据")
     @PostMapping("/fix_personal_filter")
-    public ResponseEntity fixPersonalFilter(@RequestBody Set<String> typeCodes) {
+    public ResponseEntity<Void> fixPersonalFilter(@RequestBody Set<String> typeCodes) {
         fixDataService.fixPersonalFilter(typeCodes);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return Results.success();
     }
 
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("根据项目复制数据测试接口")
     @PostMapping("/copy_project_template")
-    public ResponseEntity copyProjectTemplate(@RequestParam Long sourceProjectId,
+    public ResponseEntity<Void> copyProjectTemplate(@RequestParam Long sourceProjectId,
                                               @RequestParam Long targetProjectId) {
-        agileWaterfallService.cloneByTemplate(targetProjectId, sourceProjectId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        agileWaterfallService.cloneProject(sourceProjectId, targetProjectId, null);
+        return Results.success();
     }
 }

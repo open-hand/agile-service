@@ -1,11 +1,14 @@
 package io.choerodon.agile.infra.dto;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.*;
 
 /**
  * @author dinghuang123@gmail.com
@@ -68,8 +71,9 @@ public class IssueLinkTypeDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueLinkTypeDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public void initDuplicate(Long projectId) {

@@ -111,8 +111,9 @@ public class ProductVersionDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public ProductVersionDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public String getOldStatusCode() {
