@@ -3,8 +3,10 @@ package io.choerodon.agile.domain.service.impl;
 import static io.choerodon.agile.domain.context.ProjectCloneContext.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,10 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.boot.file.FileClient;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.AssertUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 
 /**
  * 项目复制 领域Service Impl
@@ -58,6 +63,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private IssueTypeMapper issueTypeMapper;
     @Autowired
     private IssueTypeExtendMapper issueTypeExtendMapper;
+    @Autowired
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private FieldOptionMapper fieldOptionMapper;
     @Autowired
     private LabelIssueRelMapper labelIssueRelMapper;
     @Autowired
@@ -122,6 +131,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         cloneAgileIssueLinkType(sourceProjectId, targetProjectId, context);
         // 复制工作项类型
         this.cloneIssueType(sourceProjectId, targetProjectId, context);
+        // 复制自定义字段
+        this.cloneField(sourceProjectId, targetProjectId, context);
+//        // 复制工作项类型的字段配置
+//        this.cloneIssueTypeFieldConfig(sourceProjectId, targetProjectId, context);
         //复制自定义字段
         copyCustomField(sourceProjectId, targetProjectId, context);
 
@@ -141,13 +154,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         cloneAgileIssuePredecessorTreeClosure(sourceProjectId, targetProjectId, context);
         // 复制工作项附件
         cloneIssueAttachment(sourceProjectId, targetProjectId, context);
+        // 复制工作项自定义字段值
         //自定义字段值
         copyCustomFieldValue(sourceProjectId, targetProjectId, context);
         // TODO
-        //产品暂不支持
-        //tag暂不支持
-        //评论暂不支持
-        //ui&ux文件暂不支持
 
         // 复制瀑布插件数据
         if (categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)) {
@@ -798,6 +808,147 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         }
         this.logger.debug("fd_issue_type_extend 复制完成");
     }
+
+    /**
+     * 复制自定义字段
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context context
+     */
+    private void cloneField(Long sourceProjectId,
+                            Long targetProjectId,
+                            ProjectCloneContext context) {
+        this.cloneFdObjectSchemeField(sourceProjectId, targetProjectId, context);
+        this.cloneFdFieldOption(sourceProjectId, targetProjectId, context);
+        this.cloneFdObjectSchemeFieldDefaultValue(sourceProjectId, targetProjectId, context);
+    }
+
+    /**
+     * 复制自定义字段定义 fd_object_scheme_field
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context context
+     */
+    private void cloneFdObjectSchemeField(Long sourceProjectId,
+                                        Long targetProjectId,
+                                        ProjectCloneContext context) {
+        final List<ObjectSchemeFieldDTO> sourceObjectSchemeFields = this.objectSchemeFieldMapper.select(new ObjectSchemeFieldDTO().setProjectId(sourceProjectId));
+        if(CollectionUtils.isEmpty(sourceObjectSchemeFields)) {
+            this.logger.debug("没有检测到可复制的 fd_object_scheme_field 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_object_scheme_field 数据{}条, 开始复制", sourceObjectSchemeFields.size());
+        for (ObjectSchemeFieldDTO objectSchemeField : sourceObjectSchemeFields) {
+            final Long sourceObjectSchemeFieldId = objectSchemeField.getId();
+            objectSchemeField.setId(null);
+            objectSchemeField.setProjectId(targetProjectId);
+            if (this.objectSchemeFieldMapper.insert(objectSchemeField) != 1) {
+                throw new CommonException("error.insert.fd_object_scheme_field");
+            }
+            context.put(TABLE_FD_OBJECT_SCHEME_FIELD, sourceObjectSchemeFieldId, objectSchemeField.getId());
+        }
+        this.logger.debug("fd_object_scheme_field 复制完成");
+    }
+
+    /**
+     * 复制自定义字段选项 fd_field_option
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context context
+     */
+    private void cloneFdFieldOption(Long sourceProjectId,
+                                    Long targetProjectId,
+                                    ProjectCloneContext context) {
+        final Map<Long, Long> fieldIdMapping = Optional.ofNullable(context.getByTable(TABLE_FD_OBJECT_SCHEME_FIELD)).orElse(Collections.emptyMap());
+        final Set<Long> sourceFieldIds = fieldIdMapping.keySet();
+        if(CollectionUtils.isEmpty(sourceFieldIds)) {
+            this.logger.debug("没有检测到可复制的 fd_field_option 数据, 跳过此步骤");
+            return;
+        }
+        final List<FieldOptionDTO> sourceFieldOpthionList = this.fieldOptionMapper.selectByCondition(Condition.builder(FieldOptionDTO.class).andWhere(Sqls.custom()
+                .andIn(FieldOptionDTO.FIELD_FIELD_ID, sourceFieldIds)
+        ).build());
+        if(CollectionUtils.isEmpty(sourceFieldOpthionList)) {
+            this.logger.debug("没有检测到可复制的 fd_field_option 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_field_option 数据{}条, 开始复制", sourceFieldOpthionList.size());
+        for (FieldOptionDTO fieldOption : sourceFieldOpthionList) {
+            final Long sourceFieldOptionId = fieldOption.getId();
+            fieldOption.setId(null);
+
+            final Long newFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, fieldOption.getFieldId());
+            fieldOption.setFieldId(newFieldId);
+            if (this.fieldOptionMapper.insert(fieldOption) != 1) {
+                throw new CommonException("error.insert.fd_field_option");
+            }
+            context.put(TABLE_FD_FIELD_OPTION, sourceFieldOptionId, fieldOption.getId());
+        }
+        this.logger.debug("fd_field_option 复制完成");
+    }
+
+    /**
+     * 复制自定义字段定义的默认值
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context context
+     */
+    private void cloneFdObjectSchemeFieldDefaultValue(Long sourceProjectId,
+                                                      Long targetProjectId,
+                                                      ProjectCloneContext context) {
+        final List<String> fieldTypeFilter = Arrays.asList(FieldType.RADIO, FieldType.CHECKBOX, FieldType.SINGLE, FieldType.MULTIPLE);
+        final List<ObjectSchemeFieldDTO> objectSchemeFields = this.objectSchemeFieldMapper.selectByCondition(Condition.builder(ObjectSchemeFieldDTO.class).andWhere(Sqls.custom()
+                .andEqualTo(ObjectSchemeFieldDTO.FIELD_PROJECT_ID, targetProjectId)
+                .andIn(ObjectSchemeFieldDTO.FIELD_FIELD_TYPE, fieldTypeFilter)
+        ).build());
+        if(CollectionUtils.isEmpty(objectSchemeFields)) {
+            this.logger.debug("没有检测到可复制默认值的 fd_object_scheme_field 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制默认值的 fd_object_scheme_field 数据{}条, 开始复制", objectSchemeFields.size());
+        for (ObjectSchemeFieldDTO objectSchemeField : objectSchemeFields) {
+            final String sourceDefaultValueCsv = objectSchemeField.getDefaultValue();
+            if(StringUtils.isBlank(sourceDefaultValueCsv)) {
+                continue;
+            }
+            final List<Long> defaultOptionIdList = Arrays.stream(sourceDefaultValueCsv.split(BaseConstants.Symbol.COMMA))
+                    .filter(StringUtils::isNotBlank)
+                    .filter(StringUtils::isNumeric)
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            if(CollectionUtils.isEmpty(defaultOptionIdList)) {
+                continue;
+            }
+            final List<Long> newDefaultOptionIdList = new ArrayList<>(defaultOptionIdList.size());
+            for (Long sourceDefaultOptionId : defaultOptionIdList) {
+                final Long newDefaultOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceDefaultOptionId);
+                if(newDefaultOptionId != null) {
+                    newDefaultOptionIdList.add(newDefaultOptionId);
+                }
+            }
+            String newDefaultValueCsv = null;
+            if(CollectionUtils.isNotEmpty(newDefaultOptionIdList)) {
+                newDefaultValueCsv = newDefaultOptionIdList.stream().map(String::valueOf).collect(Collectors.joining(BaseConstants.Symbol.COMMA));
+            }
+            objectSchemeField.setDefaultValue(newDefaultValueCsv);
+            this.objectSchemeFieldMapper.updateOptional(objectSchemeField, ObjectSchemeFieldDTO.FIELD_DEFAULT_VALUE);
+        }
+        this.logger.debug("fd_object_scheme_field 默认值复制完成");
+    }
+
+//    /**
+//     * 复制自定义字段
+//     * @param sourceProjectId sourceProjectId
+//     * @param targetProjectId targetProjectId
+//     * @param context context
+//     */
+//    private void cloneField(Long sourceProjectId,
+//                            Long targetProjectId,
+//                            ProjectCloneContext context) {
+//        this.cloneFdObjectSchemeField(sourceProjectId, targetProjectId, context);
+//        this.cloneFdFieldOption(sourceProjectId, targetProjectId, context);
+//        this.cloneFdObjectSchemeFieldDefaultValue(sourceProjectId, targetProjectId, context);
+//    }
 
     /**
      * 复制关联工作项 agile_issue_link

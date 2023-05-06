@@ -1,10 +1,13 @@
 package io.choerodon.agile.infra.dto;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.*;
 
 /**
  * @author shinan.chen
@@ -14,6 +17,9 @@ import javax.persistence.*;
 @ModifyAudit
 @VersionAudit
 public class FieldOptionDTO extends AuditDomain {
+
+    public static final String FIELD_FIELD_ID = "fieldId";
+
     @Id
     @GeneratedValue
     private Long id;

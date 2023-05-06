@@ -1,13 +1,14 @@
 package io.choerodon.agile.infra.dto;
 
 
+import java.util.List;
+import javax.persistence.*;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import javax.persistence.*;
-import java.util.List;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -17,6 +18,11 @@ import java.util.List;
 @ModifyAudit
 @VersionAudit
 public class ObjectSchemeFieldDTO extends AuditDomain {
+
+    public static final String FIELD_PROJECT_ID = "projectId";
+    public static final String FIELD_FIELD_TYPE = "fieldType";
+    public static final String FIELD_DEFAULT_VALUE = "defaultValue";
+
     @Id
     @GeneratedValue
     @Encrypt
