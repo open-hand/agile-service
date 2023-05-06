@@ -55,6 +55,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     @Autowired
     private IssueLabelMapper issueLabelMapper;
     @Autowired
+    private IssueTypeMapper issueTypeMapper;
+    @Autowired
+    private IssueTypeExtendMapper issueTypeExtendMapper;
+    @Autowired
     private LabelIssueRelMapper labelIssueRelMapper;
     @Autowired
     private IssueLinkTypeMapper issueLinkTypeMapper;
@@ -116,6 +120,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         cloneAgileIssueLabel(sourceProjectId, targetProjectId, context);
         // 复制问题链接类型
         cloneAgileIssueLinkType(sourceProjectId, targetProjectId, context);
+        // 复制工作项类型
+        this.cloneIssueType(sourceProjectId, targetProjectId, context);
         //复制自定义字段
         copyCustomField(sourceProjectId, targetProjectId, context);
 
@@ -481,8 +487,13 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             Long sourceIssueId = issue.getIssueId();
             issue.setProjectId(targetProjectId);
             issue.setIssueId(null);
-            // TODO 设置问题类型ID
-            // TODO 设置项目状态ID
+            // 设置工作项类型ID
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, issue.getIssueTypeId());
+            if(newIssueTypeId == null) {
+                continue;
+            }
+            issue.setIssueTypeId(newIssueTypeId);
+            // TODO 设置工作项状态ID
             this.issueRepository.insert(issue);
             Long targetIssueId = issue.getIssueId();
             context.put(TABLE_AGILE_ISSUE, sourceIssueId, targetIssueId);
@@ -714,6 +725,78 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context.put(TABLE_AGILE_ISSUE_LINK_TYPE, sourceLinkTypeId, issueLinkTypeDTO.getLinkTypeId());
         }
         this.logger.debug("agile_issue_link_type 复制完成");
+    }
+
+    /**
+     * 复制工作项类型
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context context
+     */
+    private void cloneIssueType(Long sourceProjectId,
+                                Long targetProjectId,
+                                ProjectCloneContext context) {
+        this.cloneFdIssueType(sourceProjectId, targetProjectId, context);
+        this.cloneFdIssueTypeExtend(sourceProjectId, targetProjectId, context);
+    }
+
+    /**
+     * 复制工作项类型本体表 fd_issue_type
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context context
+     */
+    private void cloneFdIssueType(Long sourceProjectId,
+                                  Long targetProjectId,
+                                  ProjectCloneContext context) {
+        final List<IssueTypeDTO> sourceIssueTypes = this.issueTypeMapper.select(new IssueTypeDTO().setProjectId(sourceProjectId));
+        if(CollectionUtils.isEmpty(sourceIssueTypes)) {
+            this.logger.debug("没有检测到可复制的 fd_issue_type 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_issue_type 数据{}条, 开始复制", sourceIssueTypes.size());
+        for (IssueTypeDTO issueTypeDTO : sourceIssueTypes) {
+            final Long sourceIssueTypeId = issueTypeDTO.getId();
+            issueTypeDTO.setId(null);
+            issueTypeDTO.setProjectId(targetProjectId);
+            if (this.issueTypeMapper.insert(issueTypeDTO) != 1) {
+                throw new CommonException("error.insert.fd_issue_type");
+            }
+            context.put(TABLE_FD_ISSUE_TYPE, sourceIssueTypeId, issueTypeDTO.getId());
+        }
+        this.logger.debug("fd_issue_type 复制完成");
+    }
+
+    /**
+     * 复制工作项类型项目扩展表 fd_issue_type_extend
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context context
+     */
+    private void cloneFdIssueTypeExtend(Long sourceProjectId,
+                                         Long targetProjectId,
+                                         ProjectCloneContext context) {
+        final List<IssueTypeExtendDTO> sourceIssueTypeExtends = this.issueTypeExtendMapper.select(new IssueTypeExtendDTO().setProjectId(sourceProjectId));
+        if(CollectionUtils.isEmpty(sourceIssueTypeExtends)) {
+            this.logger.debug("没有检测到可复制的 fd_issue_type_extend 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_issue_type_extend 数据{}条, 开始复制", sourceIssueTypeExtends.size());
+        for (IssueTypeExtendDTO issueTypeExtendDTO : sourceIssueTypeExtends) {
+            final Long sourceIssueTypeExtendId = issueTypeExtendDTO.getId();
+            issueTypeExtendDTO.setId(null);
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, issueTypeExtendDTO.getIssueTypeId());
+            if(newIssueTypeId == null) {
+                continue;
+            }
+            issueTypeExtendDTO.setIssueTypeId(newIssueTypeId);
+            issueTypeExtendDTO.setProjectId(targetProjectId);
+            if (this.issueTypeExtendMapper.insert(issueTypeExtendDTO) != 1) {
+                throw new CommonException("error.insert.fd_issue_type_extend");
+            }
+            context.put(TABLE_FD_ISSUE_TYPE_EXTEND, sourceIssueTypeExtendId, issueTypeExtendDTO.getId());
+        }
+        this.logger.debug("fd_issue_type_extend 复制完成");
     }
 
     /**

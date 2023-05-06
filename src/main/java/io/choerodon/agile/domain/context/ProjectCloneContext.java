@@ -25,8 +25,9 @@ public class ProjectCloneContext {
     public static final String TABLE_WF_ISSUE_SNAPSHOT = "wf_issue_snapshot";
     public static final String TABLE_WF_SNAPSHOT = "wf_snapshot";
     public static final String TABLE_AGILE_ISSUE_LINK_TYPE = "agile_issue_link_type";
-    public static final String TABLE_FD_OBJECT_SCHEME_FIELD = "fd_object_scheme_field";
     public static final String TABLE_FD_ISSUE_TYPE = "fd_issue_type";
+    public static final String TABLE_FD_ISSUE_TYPE_EXTEND = "fd_issue_type_extend";
+    public static final String TABLE_FD_OBJECT_SCHEME_FIELD = "fd_object_scheme_field";
     public static final String TABLE_FD_FIELD_OPTION = "fd_field_option";
     public static final String TABLE_FD_STATE_MACHINE_SCHEME = "fd_state_machine_scheme";
     public static final String TABLE_FD_STATUS_MACHINE = "fd_status_machine";
