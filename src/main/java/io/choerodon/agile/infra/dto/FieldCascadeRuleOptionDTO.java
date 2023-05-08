@@ -55,8 +55,9 @@ public class FieldCascadeRuleOptionDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public FieldCascadeRuleOptionDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getOrganizationId() {

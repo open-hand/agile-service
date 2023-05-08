@@ -24,6 +24,7 @@ import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseDTO;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 
@@ -203,7 +204,10 @@ public class FixDataController {
         projectCloneDomainService.cloneProject(
                 sourceProjectId,
                 targetProjectId,
-                 new ProjectCloneContext().setCategoryCodes(SetUtils.unmodifiableSet(ProjectCategory.MODULE_WATERFALL)));
+                 new ProjectCloneContext()
+                         .setCategoryCodes(SetUtils.unmodifiableSet(ProjectCategory.MODULE_WATERFALL))
+                         .setOrganizationId(ConvertUtil.getOrganizationId(sourceProjectId))
+        );
         return Results.success();
     }
 }

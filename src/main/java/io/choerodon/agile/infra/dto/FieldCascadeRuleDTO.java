@@ -108,7 +108,8 @@ public class FieldCascadeRuleDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public FieldCascadeRuleDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 }

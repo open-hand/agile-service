@@ -20,6 +20,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class ObjectSchemeFieldDTO extends AuditDomain {
 
     public static final String FIELD_PROJECT_ID = "projectId";
+    public static final String FIELD_ORGANIZATION_ID = "organizationId";
     public static final String FIELD_FIELD_TYPE = "fieldType";
     public static final String FIELD_DEFAULT_VALUE = "defaultValue";
 

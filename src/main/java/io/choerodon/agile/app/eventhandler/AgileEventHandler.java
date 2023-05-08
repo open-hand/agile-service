@@ -148,7 +148,9 @@ public class AgileEventHandler {
             //创建projectInfo
             projectInfoService.initializationProjectInfo(projectEvent);
             //从模版复制
-            ProjectCloneContext cloneContext = new ProjectCloneContext().setCategoryCodes(categoryCodes);
+            ProjectCloneContext cloneContext = new ProjectCloneContext()
+                    .setCategoryCodes(categoryCodes)
+                    .setOrganizationId(projectEvent.getOrganizationId());
             projectCloneDomainService.cloneProject(fromTemplateId, projectId, cloneContext);
         } else {
             if (ProjectCategory.consumeProjectCreatEvent(categoryCodes)) {
