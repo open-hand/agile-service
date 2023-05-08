@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.domain.context.ProjectCloneContext;
@@ -21,6 +22,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.feign.operator.CustomFileOperator;
 import io.choerodon.agile.infra.feign.vo.FileVO;
 import io.choerodon.agile.infra.mapper.*;
@@ -29,6 +31,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.boot.file.FileClient;
+import org.hzero.core.util.AssertUtils;
 
 /**
  * 项目复制 领域Service Impl
@@ -79,6 +82,18 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private FieldOptionMapper fieldOptionMapper;
     @Autowired
     private FieldValueMapper fieldValueMapper;
+    @Autowired
+    private ProjectConfigMapper projectConfigMapper;
+    @Autowired
+    private StateMachineSchemeMapper stateMachineSchemeMapper;
+    @Autowired
+    private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
+    @Autowired
+    private StatusMachineMapper statusMachineMapper;
+    @Autowired
+    private StatusMachineNodeMapper statusMachineNodeMapper;
+    @Autowired
+    private StatusMachineTransformMapper statusMachineTransformMapper;
 
     private final Logger logger = LoggerFactory.getLogger(ProjectCloneDomainServiceImpl.class);
 
@@ -92,6 +107,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context = new ProjectCloneContext();
         }
         final Set<String> categoryCodes = context.getCategoryCodes();
+        copyStatusMachine(sourceProjectId, targetProjectId, context);
         // 复制规划的版本
         cloneAgileProductVersion(sourceProjectId, targetProjectId, context);
         // 复制模块
@@ -133,6 +149,172 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 agileWaterfallService.cloneProject(sourceProjectId, targetProjectId, context);
             }
         }
+    }
+
+    private void copyStatusMachine(Long sourceProjectId,
+                                   Long targetProjectId,
+                                   ProjectCloneContext context) {
+        //查项目关联的状态机方案
+        copyFdProjectConfigAndFdStateMachineScheme(sourceProjectId, targetProjectId, context);
+        //复制状态机方案配置、状态机、状态机节点、状态机节点转换
+        copyFdStatusMachineSchemeConfig(sourceProjectId, targetProjectId, context);
+    }
+
+    private void copyFdStatusMachineSchemeConfig(Long sourceProjectId,
+                                                 Long targetProjectId,
+                                                 ProjectCloneContext context) {
+        Set<Long> schemeIds =
+                Optional.ofNullable(context.getByTable(TABLE_FD_STATE_MACHINE_SCHEME)).orElse(Collections.emptyMap()).keySet();
+        for (Long schemeId : schemeIds) {
+            List<StatusMachineSchemeConfigDTO> statusMachineSchemeConfigs = statusMachineSchemeConfigMapper.select(new StatusMachineSchemeConfigDTO().setSchemeId(schemeId));
+            if (CollectionUtils.isEmpty(statusMachineSchemeConfigs)) {
+                this.logger.debug("没有检测到可复制的 fd_status_machine_scheme_config 数据, 跳过此步骤");
+                return;
+            }
+            this.logger.debug("检测到可复制的 fd_status_machine_scheme_config 数据{}条, 开始复制", statusMachineSchemeConfigs.size());
+            for (StatusMachineSchemeConfigDTO statusMachineSchemeConfig : statusMachineSchemeConfigs) {
+                Long sourceStateMachineId = statusMachineSchemeConfig.getStateMachineId();
+                //复制状态机
+                Long targetStateMachineId = copyFdStatusMachine(sourceProjectId, targetProjectId, context, sourceStateMachineId);
+                context.put(TABLE_FD_STATUS_MACHINE, sourceStateMachineId, targetStateMachineId);
+                //复制状态机节点
+                copyFdStatusMachineNode(sourceStateMachineId, targetStateMachineId, context);
+                //复制状态机转换
+                copyFdStatusMachineTransform(sourceStateMachineId, targetStateMachineId, context);
+                Long sourceSchemeId = statusMachineSchemeConfig.getSchemeId();
+                Long targetSchemeId = context.getByTableAndSourceId(TABLE_FD_STATE_MACHINE_SCHEME, sourceSchemeId);
+                AssertUtils.notNull(targetSchemeId, "error.targetSchemeId.not.exist");
+                statusMachineSchemeConfig.setId(null);
+                statusMachineSchemeConfig.setSchemeId(targetSchemeId);
+                statusMachineSchemeConfig.setStateMachineId(targetStateMachineId);
+                Long sourceIssueTypeId = statusMachineSchemeConfig.getIssueTypeId();
+                Long targetIssueTypeId;
+                if (!Objects.equals(0L, sourceIssueTypeId)) {
+                    targetIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceIssueTypeId);
+                    if (targetIssueTypeId == null) {
+                        targetIssueTypeId = sourceIssueTypeId;
+                    }
+                } else {
+                    targetIssueTypeId = sourceIssueTypeId;
+                }
+                statusMachineSchemeConfig.setIssueTypeId(targetIssueTypeId);
+                if (statusMachineSchemeConfigMapper.insert(statusMachineSchemeConfig) != 1) {
+                    throw new CommonException("error.insert.fd_status_machine_scheme_config");
+                }
+            }
+            this.logger.debug("fd_status_machine_scheme_config 复制完成");
+        }
+    }
+
+    private void copyFdStatusMachineTransform(Long sourceStateMachineId,
+                                              Long targetStateMachineId,
+                                              ProjectCloneContext context) {
+        List<StatusMachineTransformDTO> statusMachineTransforms = statusMachineTransformMapper.select(new StatusMachineTransformDTO().setStateMachineId(sourceStateMachineId));
+        if (CollectionUtils.isEmpty(statusMachineTransforms)) {
+            this.logger.debug("没有检测到可复制的 fd_status_machine_transform 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_machine_transform 数据{}条, 开始复制", statusMachineTransforms.size());
+        for (StatusMachineTransformDTO statusMachineTransform : statusMachineTransforms) {
+            statusMachineTransform.setId(null);
+            statusMachineTransform.setStateMachineId(targetStateMachineId);
+            Long sourceStartNodeId = statusMachineTransform.getStartNodeId();
+            if (!Objects.equals(0L, sourceStartNodeId)) {
+                Long targetStartNodeId = context.getByTableAndSourceId(TABLE_FD_STATUS_MACHINE_NODE, sourceStartNodeId);
+                if (targetStartNodeId == null) {
+                    continue;
+                }
+                statusMachineTransform.setStartNodeId(targetStartNodeId);
+            }
+            Long sourceEndNodeId = statusMachineTransform.getEndNodeId();
+            if (!Objects.equals(0L, sourceEndNodeId)) {
+                Long targetEndNodeId = context.getByTableAndSourceId(TABLE_FD_STATUS_MACHINE_NODE, sourceEndNodeId);
+                if (targetEndNodeId == null) {
+                    continue;
+                }
+                statusMachineTransform.setEndNodeId(targetEndNodeId);
+            }
+            if (statusMachineTransformMapper.insert(statusMachineTransform) != 1) {
+                throw new CommonException("error.insert.fd_status_machine_transform");
+            }
+        }
+        this.logger.debug("fd_status_machine_transform 复制完成");
+    }
+
+    private void copyFdStatusMachineNode(Long sourceStateMachineId,
+                                         Long targetStateMachineId,
+                                         ProjectCloneContext context) {
+        List<StatusMachineNodeDTO> statusMachineNodes = statusMachineNodeMapper.select(new StatusMachineNodeDTO().setStateMachineId(sourceStateMachineId));
+        if (CollectionUtils.isEmpty(statusMachineNodes)) {
+            this.logger.debug("没有检测到可复制的 fd_status_machine_node 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_machine_node 数据{}条, 开始复制", statusMachineNodes.size());
+        for (StatusMachineNodeDTO statusMachineNode : statusMachineNodes) {
+            Long sourceId = statusMachineNode.getStatusId();
+            statusMachineNode.setId(null);
+            statusMachineNode.setStateMachineId(targetStateMachineId);
+            if (statusMachineNodeMapper.insert(statusMachineNode) != 1) {
+                throw new CommonException("error.insert.fd_status_machine_node");
+            }
+            context.put(TABLE_FD_STATUS_MACHINE_NODE, sourceId, statusMachineNode.getId());
+        }
+        this.logger.debug("fd_status_machine_node 复制完成");
+    }
+
+    private Long copyFdStatusMachine(Long sourceProjectId, Long targetProjectId, ProjectCloneContext context, Long sourceStateMachineId) {
+        StatusMachineDTO statusMachine = statusMachineMapper.selectByPrimaryKey(sourceStateMachineId);
+        AssertUtils.notNull(statusMachine, "error.statusMachine.not.exist");
+        String newName = rename(sourceProjectId, targetProjectId, context, statusMachine.getName());
+        statusMachine.setId(null);
+        statusMachine.setName(newName);
+        statusMachine.setDescription(newName);
+        if (statusMachineMapper.insert(statusMachine) != 1) {
+            throw new CommonException("error.insert.fd_status_machine");
+        }
+        return statusMachine.getId();
+    }
+
+    private void copyFdProjectConfigAndFdStateMachineScheme(Long sourceProjectId,
+                                                            Long targetProjectId,
+                                                            ProjectCloneContext context) {
+        List<ProjectConfigDTO> projectConfigs = projectConfigMapper.select(new ProjectConfigDTO().setProjectId(sourceProjectId).setSchemeType(SchemeType.STATE_MACHINE));
+        if (CollectionUtils.isEmpty(projectConfigs)) {
+            this.logger.debug("没有检测到可复制的 fd_project_config 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_project_config 数据{}条, 开始复制", projectConfigs.size());
+
+        for (ProjectConfigDTO projectConfig : projectConfigs) {
+            Long sourceSchemeId = projectConfig.getSchemeId();
+            StateMachineSchemeDTO stateMachineScheme = stateMachineSchemeMapper.selectByPrimaryKey(sourceSchemeId);
+            AssertUtils.notNull(stateMachineScheme, "error.stateMachineScheme.not.exist");
+            String newName = rename(sourceProjectId, targetProjectId, context, stateMachineScheme.getName());
+            stateMachineScheme.setId(null);
+            stateMachineScheme.setName(newName);
+            stateMachineScheme.setDescription(newName);
+            if (stateMachineSchemeMapper.insert(stateMachineScheme) != 1) {
+                throw new CommonException("error.insert.fd_state_machine_scheme");
+            }
+            context.put(TABLE_FD_STATE_MACHINE_SCHEME, sourceSchemeId, stateMachineScheme.getId());
+            //插入fd_project_config
+            projectConfig.setId(null);
+            projectConfig.setProjectId(targetProjectId);
+            projectConfig.setSchemeId(stateMachineScheme.getId());
+            if (projectConfigMapper.insert(projectConfig) != 1) {
+                throw new CommonException("error.insert.fd_project_config");
+            }
+        }
+        this.logger.debug("fd_project_config 复制完成");
+    }
+
+    private String rename(Long sourceProjectId, Long targetProjectId, ProjectCloneContext context, String name) {
+        ProjectVO sourceProject = context.queryProject(sourceProjectId, SOURCE_PROJECT);
+        ProjectVO targetProject = context.queryProject(targetProjectId, TARGET_PROJECT);
+        String sourceProjectCode = sourceProject.getCode();
+        String suffix = name.substring(sourceProjectCode.length());
+        String newName = targetProject.getCode() + suffix;
+        return newName;
     }
 
     private void copyCustomFieldValue(Long sourceProjectId,

@@ -48,8 +48,9 @@ public class ProjectConfigDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public ProjectConfigDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getSchemeId() {
@@ -64,8 +65,9 @@ public class ProjectConfigDTO extends AuditDomain {
         return schemeType;
     }
 
-    public void setSchemeType(String schemeType) {
+    public ProjectConfigDTO setSchemeType(String schemeType) {
         this.schemeType = schemeType;
+        return this;
     }
 
     public String getApplyType() {

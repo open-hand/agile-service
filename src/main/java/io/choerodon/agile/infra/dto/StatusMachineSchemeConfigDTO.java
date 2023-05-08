@@ -62,8 +62,9 @@ public class StatusMachineSchemeConfigDTO extends AuditDomain {
         return schemeId;
     }
 
-    public void setSchemeId(Long schemeId) {
+    public StatusMachineSchemeConfigDTO setSchemeId(Long schemeId) {
         this.schemeId = schemeId;
+        return this;
     }
 
     public Long getIssueTypeId() {

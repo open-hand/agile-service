@@ -106,8 +106,9 @@ public class StatusMachineTransformDTO extends AuditDomain {
         return stateMachineId;
     }
 
-    public void setStateMachineId(Long stateMachineId) {
+    public StatusMachineTransformDTO setStateMachineId(Long stateMachineId) {
         this.stateMachineId = stateMachineId;
+        return this;
     }
 
     public String getType() {
