@@ -18,8 +18,13 @@ public class ProjectCloneContext {
     public static final String TABLE_WF_ISSUE_SNAPSHOT = "wf_issue_snapshot";
     public static final String TABLE_WF_SNAPSHOT = "wf_snapshot";
     public static final String TABLE_AGILE_ISSUE_LINK_TYPE = "agile_issue_link_type";
+    public static final String TABLE_FD_OBJECT_SCHEME_FIELD = "fd_object_scheme_field";
+    public static final String TABLE_FD_ISSUE_TYPE = "fd_issue_type";
+    public static final String TABLE_FD_FIELD_OPTION = "fd_field_option";
 
     private final Map<String, Map<Long, Long>> sourceTargetMapping = new HashMap<>();
+
+    private final Map<Long, String> fieldIdTypeMapping = new HashMap<>();
 
     /**
      * 项目类型
@@ -56,5 +61,14 @@ public class ProjectCloneContext {
     public ProjectCloneContext setCategoryCodes(Set<String> categoryCodes) {
         this.categoryCodes = categoryCodes;
         return this;
+    }
+
+    public ProjectCloneContext putFieldType(Long sourceFieldId, String fieldType) {
+        fieldIdTypeMapping.put(sourceFieldId, fieldType);
+        return this;
+    }
+
+    public String getFieldType(Long sourceFieldId) {
+        return fieldIdTypeMapping.get(sourceFieldId);
     }
 }

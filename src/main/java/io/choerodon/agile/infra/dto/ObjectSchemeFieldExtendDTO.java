@@ -114,8 +114,9 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public ObjectSchemeFieldExtendDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getIssueTypeId() {

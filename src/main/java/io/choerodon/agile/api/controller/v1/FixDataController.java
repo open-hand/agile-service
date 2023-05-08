@@ -5,6 +5,7 @@ import java.util.Set;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections4.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,12 @@ import io.choerodon.agile.api.vo.IssueLinkFixVO;
 import io.choerodon.agile.api.vo.ProjectInfoFixVO;
 import io.choerodon.agile.api.vo.TestVersionFixVO;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.domain.context.ProjectCloneContext;
+import io.choerodon.agile.domain.service.ProjectCloneDomainService;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseDTO;
+import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 
@@ -55,7 +59,7 @@ public class FixDataController {
     @Autowired
     private NoticeService noticeService;
     @Autowired
-    private AgileWaterfallService agileWaterfallService;
+    private ProjectCloneDomainService projectCloneDomainService;
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修复0.19创建项目产生的脏数据【全部】")
@@ -196,7 +200,10 @@ public class FixDataController {
     @PostMapping("/copy_project_template")
     public ResponseEntity<Void> copyProjectTemplate(@RequestParam Long sourceProjectId,
                                               @RequestParam Long targetProjectId) {
-        agileWaterfallService.cloneProject(sourceProjectId, targetProjectId, null);
+        projectCloneDomainService.cloneProject(
+                sourceProjectId,
+                targetProjectId,
+                 new ProjectCloneContext().setCategoryCodes(SetUtils.unmodifiableSet(ProjectCategory.MODULE_WATERFALL)));
         return Results.success();
     }
 }
