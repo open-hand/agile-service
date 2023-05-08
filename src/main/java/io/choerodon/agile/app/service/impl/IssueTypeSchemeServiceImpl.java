@@ -26,7 +26,6 @@ import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.IssueTypeSchemeConfigMapper;
 import io.choerodon.agile.infra.mapper.IssueTypeSchemeMapper;
 import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
@@ -289,7 +288,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         List<IssueTypeSchemeDTO> issueTypeSchemes = issueTypeSchemeMapper.select(issueTypeScheme);
         if (issueTypeSchemes.isEmpty()) {
             baseCreate(issueTypeScheme);
-            Integer sequence = 0;
+            int sequence = 0;
             for (InitIssueType initIssueType : InitIssueType.listByApplyType(schemeApplyType)) {
                 sequence++;
                 IssueTypeDTO issueType = issueTypeMap.get(initIssueType.getTypeCode());
@@ -316,7 +315,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
         List<IssueTypeSchemeDTO> issueTypeSchemes = issueTypeSchemeMapper.select(issueTypeScheme);
         if (issueTypeSchemes.isEmpty()) {
             baseCreate(issueTypeScheme);
-            Integer sequence = 0;
+            int sequence = 0;
             List<InitIssueType> initIssueTypes = InitIssueType.listByApplyType(schemeApplyType);
             if (codes.contains(ProjectCategory.MODULE_PROGRAM)) {
                 initIssueTypes = initIssueTypes.stream().filter(v -> !Objects.equals(InitIssueType.EPIC.getTypeCode(), v.getTypeCode())).collect(Collectors.toList());

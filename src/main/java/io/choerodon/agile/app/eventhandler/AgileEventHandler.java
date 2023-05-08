@@ -145,8 +145,12 @@ public class AgileEventHandler {
         Long fromTemplateId = projectEvent.getFromTemplateId();
         final Long projectId = projectEvent.getProjectId();
         if (fromTemplateId != null && ACTION_PROJECT_CREATE.equals(action)) {
+            //创建projectInfo
+            projectInfoService.initializationProjectInfo(projectEvent);
             //从模版复制
-            ProjectCloneContext cloneContext = new ProjectCloneContext().setCategoryCodes(categoryCodes);
+            ProjectCloneContext cloneContext = new ProjectCloneContext()
+                    .setCategoryCodes(categoryCodes)
+                    .setOrganizationId(projectEvent.getOrganizationId());
             projectCloneDomainService.cloneProject(fromTemplateId, projectId, cloneContext);
         } else {
             if (ProjectCategory.consumeProjectCreatEvent(categoryCodes)) {

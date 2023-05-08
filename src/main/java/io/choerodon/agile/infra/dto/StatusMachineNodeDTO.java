@@ -95,8 +95,9 @@ public class StatusMachineNodeDTO extends AuditDomain {
         return stateMachineId;
     }
 
-    public void setStateMachineId(Long stateMachineId) {
+    public StatusMachineNodeDTO setStateMachineId(Long stateMachineId) {
         this.stateMachineId = stateMachineId;
+        return this;
     }
 
     public Long getStatusId() {

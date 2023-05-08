@@ -133,8 +133,9 @@ public class FieldValueDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public FieldValueDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public String getSchemeCode() {
