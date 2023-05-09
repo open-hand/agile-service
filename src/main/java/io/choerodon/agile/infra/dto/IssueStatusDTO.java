@@ -43,8 +43,9 @@ public class IssueStatusDTO extends AuditDomain {
         return id;
     }
 
-    public void setProjectId(Long projectId) {
+    public IssueStatusDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getProjectId() {
