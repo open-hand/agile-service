@@ -45,7 +45,7 @@ public class ProjectCloneContext {
     public static final String TABLE_FD_ISSUE_TYPE_SCHEME_CONFIG = "fd_issue_type_scheme_config";
 
     public static final String SOURCE_PROJECT = "source_project";
-    public static final String TARGET_PROJECT = "source_project";
+    public static final String TARGET_PROJECT = "target_project";
 
     private final Map<String, Map<Long, Long>> sourceTargetMapping = new HashMap<>();
 
@@ -129,14 +129,14 @@ public class ProjectCloneContext {
         if (SOURCE_PROJECT.equals(sourceProject)) {
             projectVO = this.sourceProject;
             if (projectVO == null) {
-                RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBean(RemoteIamOperator.class);
+                RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class);
                 projectVO = remoteIamOperator.queryProject(projectId);
                 this.sourceProject = projectVO;
             }
         } else if (TARGET_PROJECT.equals(sourceProject)) {
             projectVO = this.targetProject;
             if (projectVO == null) {
-                RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBean(RemoteIamOperator.class);
+                RemoteIamOperator remoteIamOperator = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class);
                 projectVO = remoteIamOperator.queryProject(projectId);
                 this.targetProject = projectVO;
             }
