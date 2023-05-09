@@ -1224,6 +1224,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 throw new CommonException("error.insert.fd_field_cascade_rule");
             }
             context.put(TABLE_FD_FIELD_CASCADE_RULE, sourceFieldCascadeRuleId, fieldCascadeRule.getId());
+            fieldCascadeRule.setId(sourceFieldCascadeRuleId);
         }
         this.logger.debug("fd_field_cascade_rule 复制完成");
         return sourceFieldCascadeRuleList;
