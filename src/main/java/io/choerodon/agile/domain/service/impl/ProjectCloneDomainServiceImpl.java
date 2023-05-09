@@ -302,7 +302,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         }
         this.logger.debug("检测到可复制的 fd_status_machine_node 数据{}条, 开始复制", statusMachineNodes.size());
         for (StatusMachineNodeDTO statusMachineNode : statusMachineNodes) {
-            Long sourceId = statusMachineNode.getStatusId();
+            Long sourceId = statusMachineNode.getId();
             statusMachineNode.setId(null);
             statusMachineNode.setStateMachineId(targetStateMachineId);
             if (statusMachineNodeMapper.insert(statusMachineNode) != 1) {
