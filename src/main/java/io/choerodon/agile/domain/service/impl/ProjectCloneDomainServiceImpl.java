@@ -147,13 +147,13 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         // 复制问题链接类型
         cloneAgileIssueLinkType(sourceProjectId, targetProjectId, context);
         // 复制工作项类型
-//        this.cloneIssueType(sourceProjectId, targetProjectId, context);
+        this.cloneIssueType(sourceProjectId, targetProjectId, context);
         // 复制自定义字段
         this.cloneField(sourceProjectId, targetProjectId, context);
         // 复制工作项类型的字段配置
         this.cloneIssueTypeFieldConfig(sourceProjectId, targetProjectId, context);
         // 复制状态和项目关系
-//        cloneAgileIssueStatus(sourceProjectId, targetProjectId, context);
+        cloneAgileIssueStatus(sourceProjectId, targetProjectId, context);
         // 复制状态机
         cloneStatusMachine(sourceProjectId, targetProjectId, context);
         // 复制issue本体
