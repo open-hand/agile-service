@@ -135,6 +135,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         if (context == null) {
             context = new ProjectCloneContext();
         }
+        renameSchemeName(sourceProjectId, targetProjectId, context, "aaaa");
         final Set<String> categoryCodes = context.getCategoryCodes();
         // 复制规划的版本
         cloneAgileProductVersion(sourceProjectId, targetProjectId, context);
