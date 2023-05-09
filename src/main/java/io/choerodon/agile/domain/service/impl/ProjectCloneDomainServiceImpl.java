@@ -170,7 +170,6 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         cloneIssueAttachment(sourceProjectId, targetProjectId, context);
         // 复制工作项自定义字段值
         copyCustomFieldValue(sourceProjectId, targetProjectId, context);
-        // TODO
 
         // 复制瀑布插件数据
         if (categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)) {
@@ -451,11 +450,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             issue.setIssueId(null);
             // 设置工作项类型ID
             final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, issue.getIssueTypeId());
-            if(newIssueTypeId == null) {
-                continue;
+            if(newIssueTypeId != null) {
+                issue.setIssueTypeId(newIssueTypeId);
             }
-            issue.setIssueTypeId(newIssueTypeId);
-            // TODO 设置工作项状态ID
+            // 设置工作项状态ID
             this.issueRepository.insert(issue);
             Long targetIssueId = issue.getIssueId();
             context.put(TABLE_AGILE_ISSUE, sourceIssueId, targetIssueId);
@@ -748,10 +746,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             final Long sourceIssueTypeExtendId = issueTypeExtendDTO.getId();
             issueTypeExtendDTO.setId(null);
             final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, issueTypeExtendDTO.getIssueTypeId());
-            if(newIssueTypeId == null) {
-                continue;
+            // extend表里操作的issueType不一定都是本项目下的
+            if(newIssueTypeId != null) {
+                issueTypeExtendDTO.setIssueTypeId(newIssueTypeId);
             }
-            issueTypeExtendDTO.setIssueTypeId(newIssueTypeId);
             issueTypeExtendDTO.setProjectId(targetProjectId);
             if (this.issueTypeExtendMapper.insert(issueTypeExtendDTO) != 1) {
                 throw new CommonException("error.insert.fd_issue_type_extend");
@@ -839,6 +837,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             fieldOption.setId(null);
 
             final Long newFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, fieldOption.getFieldId());
+            // 只处理源项目自定义的选项, 其余的不复制
             if(newFieldId == null) {
                 continue;
             }
@@ -943,17 +942,15 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             objectSchemeFieldExtend.setId(null);
 
             final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, objectSchemeFieldExtend.getIssueTypeId());
-            if(newIssueTypeId == null) {
-                continue;
+            if(newIssueTypeId != null) {
+                objectSchemeFieldExtend.setIssueTypeId(newIssueTypeId);
             }
-            objectSchemeFieldExtend.setIssueTypeId(newIssueTypeId);
 
             final Long sourceFieldId = objectSchemeFieldExtend.getFieldId();
             final Long newFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceFieldId);
-            if(newFieldId == null) {
-                continue;
+            if(newFieldId != null) {
+                objectSchemeFieldExtend.setFieldId(newFieldId);
             }
-            objectSchemeFieldExtend.setFieldId(newFieldId);
 
             // 处理默认值
             final String sourceDefaultValue = objectSchemeFieldExtend.getDefaultValue();
@@ -1090,10 +1087,9 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             issueTypeField.setId(null);
 
             final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, issueTypeField.getIssueTypeId());
-            if(newIssueTypeId == null) {
-                continue;
+            if(newIssueTypeId != null) {
+                issueTypeField.setIssueTypeId(newIssueTypeId);
             }
-            issueTypeField.setIssueTypeId(newIssueTypeId);
 
             issueTypeField.setProjectId(targetProjectId);
             if (this.issueTypeFieldMapper.insert(issueTypeField) != 1) {
@@ -1494,7 +1490,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             Long sourceFieldId = fieldValue.getFieldId();
             Long targetFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceFieldId);
             if (targetFieldId == null) {
-                continue;
+                targetFieldId = sourceFieldId;
             }
             String fieldType = fieldIdToTypeMap.get(sourceFieldId);
             Long sourceOptionId = fieldValue.getOptionId();
@@ -1508,7 +1504,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 } else {
                     Long targetOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceOptionId);
                     if (targetOptionId == null) {
-                        continue;
+                        targetOptionId = sourceOptionId;
                     }
                     fieldValue.setOptionValue(targetOptionId.toString());
                 }
