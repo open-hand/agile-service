@@ -108,6 +108,7 @@ public class SearchConstant {
             , new ObjectSchemeFieldDTO().setCode(Field.SOURCE).setFieldType(FieldTypeCnName.SINGLE.getCode())
             , new ObjectSchemeFieldDTO().setCode(Field.RELATE_BACKLOG).setFieldType(FieldTypeCnName.MULTIPLE.getCode())
             , new ObjectSchemeFieldDTO().setCode(Field.SOURCE_BACKLOG).setFieldType(FieldTypeCnName.MULTIPLE.getCode())
+            , new ObjectSchemeFieldDTO().setCode(Field.DECOMPOSE_ISSUE_SUMMARY_OR_NUM).setFieldType(FieldTypeCnName.INPUT.getCode())
     );
 
     public class Field {
@@ -163,6 +164,10 @@ public class SearchConstant {
          * 来源需求
          */
         public static final String SOURCE_BACKLOG = "sourceBacklog";
+        /**
+         * 分解工作项的概要或编号
+         */
+        public static final String DECOMPOSE_ISSUE_SUMMARY_OR_NUM = "decomposeIssueSummaryOrNum";
     }
 
 
@@ -342,6 +347,8 @@ public class SearchConstant {
         public static final String TAG_IN_OR_NOT_IN = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and (#{additionalCondition}) ) ";
 
         public static final String YQ_CLOUD_NUM_LIKE_OR_EQUAL = " #{mainTableCol} #{opt} ( select #{innerCol} from #{table} where project_id in (#{projectIdStr}) and open_instance_num #{innerOpt} #{value} #{additionalCondition}) ";
+
+        public static final String DECOMPOSE_ISSUE_SUMMARY_OR_NUM_LIKE_OR_EQUAL = " #{mainTableCol} #{opt} ( select bir.backlog_id from backlog_issue_rel bir join agile_issue ai on ai.issue_id = bir.issue_id where bir.link_type = '#{first}' and ai.project_id in (#{projectIdStr}) and ai.#{innerCol} #{innerOpt} #{value}) ";
         /**
          * issue_id in ( select instance_id from fd_field_value where project_id in ( 1 ) and field_id = 1 and option_id in ( 1 ) and scheme_code = 'agile_issue')
          */
