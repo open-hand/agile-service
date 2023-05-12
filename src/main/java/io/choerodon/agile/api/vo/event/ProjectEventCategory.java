@@ -24,63 +24,71 @@ public class ProjectEventCategory {
         return id;
     }
 
-    public void setId(Long id) {
+    public ProjectEventCategory setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public ProjectEventCategory setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public ProjectEventCategory setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public ProjectEventCategory setCode(String code) {
         this.code = code;
+        return this;
     }
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Long organizationId) {
+    public ProjectEventCategory setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+        return this;
     }
 
     public Boolean getDisplayFlag() {
         return displayFlag;
     }
 
-    public void setDisplayFlag(Boolean displayFlag) {
+    public ProjectEventCategory setDisplayFlag(Boolean displayFlag) {
         this.displayFlag = displayFlag;
+        return this;
     }
 
     public Boolean getBuiltInFlag() {
         return builtInFlag;
     }
 
-    public void setBuiltInFlag(Boolean builtInFlag) {
+    public ProjectEventCategory setBuiltInFlag(Boolean builtInFlag) {
         this.builtInFlag = builtInFlag;
+        return this;
     }
 
     public String getLabelCode() {
         return labelCode;
     }
 
-    public void setLabelCode(String labelCode) {
+    public ProjectEventCategory setLabelCode(String labelCode) {
         this.labelCode = labelCode;
+        return this;
     }
 }
