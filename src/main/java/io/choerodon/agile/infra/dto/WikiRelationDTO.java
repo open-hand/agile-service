@@ -27,10 +27,16 @@ public class WikiRelationDTO extends AuditDomain {
     private Long issueId;
 
     private String wikiName;
-
-    private String wikiUrl;
-
+    private String sourceType;
     private Long spaceId;
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
 
     public Long getId() {
         return id;
@@ -62,14 +68,6 @@ public class WikiRelationDTO extends AuditDomain {
 
     public void setWikiName(String wikiName) {
         this.wikiName = wikiName;
-    }
-
-    public String getWikiUrl() {
-        return wikiUrl;
-    }
-
-    public void setWikiUrl(String wikiUrl) {
-        this.wikiUrl = wikiUrl;
     }
 
     public void setSpaceId(Long spaceId) {

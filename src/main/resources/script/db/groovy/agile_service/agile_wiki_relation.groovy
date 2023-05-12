@@ -40,4 +40,15 @@ databaseChangeLog(logicalFilePath:'agile_wiki_relation.groovy') {
             column(name: 'issue_id')
         }
     }
+    changeSet(id: '2023-05-12-agile-wiki-relation-add-column', author: 'wanghao') {
+        addColumn(tableName: 'agile_wiki_relation') {
+            column(name: 'source_type', type: 'VARCHAR(30)', defaultValue: "choerodon", remarks: '该篇知识来自燕千云还是猪齿鱼系统（choerodon,zknow）')
+        }
+    }
+    changeSet(id: '2023-05-12-agile-wiki-relation-drop-column', author: 'wanghao') {
+        dropColumn(tableName: 'agile_wiki_relation') {
+            column(name: 'wiki_url')
+        }
+    }
+
 }
