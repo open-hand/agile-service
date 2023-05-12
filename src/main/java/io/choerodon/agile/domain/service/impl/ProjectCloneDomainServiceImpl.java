@@ -119,6 +119,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private IssueStatusMapper issueStatusMapper;
     @Autowired
     private StatusBranchMergeSettingMapper statusBranchMergeSettingMapper;
+    @Autowired
+    private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
 
@@ -1554,6 +1556,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                                               Long targetProjectId,
                                               ProjectCloneContext context) {
         this.cloneFdStatusBranchMergeSetting(sourceProjectId, targetProjectId, context);
+        this.cloneFdStatusTransferSetting(sourceProjectId, targetProjectId, context);
     }
 
     /**
@@ -1579,9 +1582,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             if(newIssueTypeId != null) {
                 sourceStatusBranchMergeSetting.setIssueTypeId(newIssueTypeId);
             }
-
             // statusId都是组织层的, 不用复制
-
 
             sourceStatusBranchMergeSetting.setId(null);
             sourceStatusBranchMergeSetting.setProjectId(targetProjectId);
@@ -1591,6 +1592,41 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context.put(TABLE_FD_STATUS_BRANCH_MERGE_SETTING, sourceStatusBranchMergeSettingId, sourceStatusBranchMergeSetting.getId());
         }
         this.logger.debug("fd_status_branch_merge_setting 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--流转条件 fd_status_transfer_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdStatusTransferSetting(Long sourceProjectId,
+                                              Long targetProjectId,
+                                              ProjectCloneContext context) {
+        List<StatusTransferSettingDTO> sourceStatusTransferSettingList = this.statusTransferSettingMapper.select(new StatusTransferSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusTransferSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_transfer_setting 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_transfer_setting 数据{}条, 开始复制", sourceStatusTransferSettingList.size());
+        for (StatusTransferSettingDTO sourceStatusTransferSetting : sourceStatusTransferSettingList) {
+            final Long sourceStatusTransferSettingId = sourceStatusTransferSetting.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_STATUS_BRANCH_MERGE_SETTING, sourceStatusTransferSetting.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusTransferSetting.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+
+            sourceStatusTransferSetting.setId(null);
+            sourceStatusTransferSetting.setProjectId(targetProjectId);
+            if (this.statusTransferSettingMapper.insert(sourceStatusTransferSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_transfer_setting");
+            }
+            context.put(TABLE_FD_STATUS_TRANSFER_SETTING, sourceStatusTransferSettingId, sourceStatusTransferSetting.getId());
+        }
+        this.logger.debug("fd_status_transfer_setting 复制完成");
     }
 
 }
