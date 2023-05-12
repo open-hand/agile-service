@@ -121,6 +121,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private StatusBranchMergeSettingMapper statusBranchMergeSettingMapper;
     @Autowired
     private StatusTransferSettingMapper statusTransferSettingMapper;
+    @Autowired
+    private StatusLinkageMapper statusLinkageMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
 
@@ -1557,6 +1559,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                                               ProjectCloneContext context) {
         this.cloneFdStatusBranchMergeSetting(sourceProjectId, targetProjectId, context);
         this.cloneFdStatusTransferSetting(sourceProjectId, targetProjectId, context);
+        this.cloneFdStatusLinkage(sourceProjectId, targetProjectId, context);
     }
 
     /**
@@ -1578,7 +1581,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             final Long sourceStatusBranchMergeSettingId = sourceStatusBranchMergeSetting.getId();
 
             // issueTypeId可能不是本项目的, 所以无法映射时就不处理
-            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_STATUS_BRANCH_MERGE_SETTING, sourceStatusBranchMergeSetting.getIssueTypeId());
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusBranchMergeSetting.getIssueTypeId());
             if(newIssueTypeId != null) {
                 sourceStatusBranchMergeSetting.setIssueTypeId(newIssueTypeId);
             }
@@ -1613,7 +1616,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             final Long sourceStatusTransferSettingId = sourceStatusTransferSetting.getId();
 
             // issueTypeId可能不是本项目的, 所以无法映射时就不处理
-            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_STATUS_BRANCH_MERGE_SETTING, sourceStatusTransferSetting.getIssueTypeId());
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusTransferSetting.getIssueTypeId());
             if(newIssueTypeId != null) {
                 sourceStatusTransferSetting.setIssueTypeId(newIssueTypeId);
             }
@@ -1627,6 +1630,47 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context.put(TABLE_FD_STATUS_TRANSFER_SETTING, sourceStatusTransferSettingId, sourceStatusTransferSetting.getId());
         }
         this.logger.debug("fd_status_transfer_setting 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--状态联动--父子级联动 fd_status_linkage
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdStatusLinkage(Long sourceProjectId,
+                                              Long targetProjectId,
+                                              ProjectCloneContext context) {
+        List<StatusLinkageDTO> sourceStatusLinkageList = this.statusLinkageMapper.select(new StatusLinkageDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusLinkageList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_linkage 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_linkage 数据{}条, 开始复制", sourceStatusLinkageList.size());
+        for (StatusLinkageDTO sourceStatusLinkage : sourceStatusLinkageList) {
+            final Long sourceStatusLinkageId = sourceStatusLinkage.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusLinkage.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusLinkage.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+            // parentIssueStatusSetting都是组织层的, 不用复制
+            // parentIssueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newParentIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusLinkage.getParentIssueTypeId());
+            if(newParentIssueTypeId != null) {
+                sourceStatusLinkage.setParentIssueTypeId(newParentIssueTypeId);
+            }
+
+            sourceStatusLinkage.setId(null);
+            sourceStatusLinkage.setProjectId(targetProjectId);
+            if (this.statusLinkageMapper.insert(sourceStatusLinkage) != 1) {
+                throw new CommonException("error.insert.fd_status_linkage");
+            }
+            context.put(TABLE_FD_STATUS_LINKAGE, sourceStatusLinkageId, sourceStatusLinkage.getId());
+        }
+        this.logger.debug("fd_status_linkage 复制完成");
     }
 
 }
