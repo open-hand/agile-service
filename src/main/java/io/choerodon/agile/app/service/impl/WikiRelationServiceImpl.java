@@ -7,16 +7,17 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.yqcloud.core.oauth.ZKnowDetailsHelper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import io.choerodon.agile.api.vo.KnowledgeRelationVO;
 import io.choerodon.agile.api.vo.WikiRelationVO;
 import io.choerodon.agile.api.vo.WorkSpaceVO;
 import io.choerodon.agile.app.service.AgileWaterfallService;
@@ -34,6 +35,9 @@ import io.choerodon.agile.infra.utils.BaseFieldUtil;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class WikiRelationServiceImpl implements WikiRelationService {
+
+    private static final String AGILE_ISSUE_ID_IS_NULL = "agile.issue.id.is.null";
+    private static final String AGILE_WIKI_TYPE_IS_NULL = "agile.wiki.type.is.null";
 
     @Autowired
     private WikiRelationMapper wikiRelationMapper;
@@ -53,6 +57,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         wikiRelation.setProjectId(wikiRelationDTO.getProjectId());
         wikiRelation.setIssueId(wikiRelationDTO.getIssueId());
         wikiRelation.setSpaceId(wikiRelationDTO.getSpaceId());
+        wikiRelation.setSourceType(wikiRelationDTO.getSourceType());
         WikiRelationDTO res = wikiRelationMapper.selectOne(wikiRelation);
         return res != null;
     }
@@ -72,14 +77,42 @@ public class WikiRelationServiceImpl implements WikiRelationService {
     }
 
     @Override
-    public KnowledgeRelationVO queryByIssueId(Long projectId, Long issueId) {
+    public List<WikiRelationVO> queryByIssueId(Long projectId, Long issueId) {
         WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
         wikiRelationDTO.setIssueId(issueId);
         List<WikiRelationDTO> wikiRelationDTOList = wikiRelationMapper.select(wikiRelationDTO);
+
         List<WikiRelationVO> result = new ArrayList<>();
-        if (wikiRelationDTOList != null && !wikiRelationDTOList.isEmpty()) {
-            List<Long> spaceIds = wikiRelationDTOList.stream().map(WikiRelationDTO::getSpaceId).collect(Collectors.toList());
-            List<WorkSpaceVO> workSpaceVOS = knowledgebaseClientOperator.querySpaceByIds(projectId, spaceIds);
+        if (!CollectionUtils.isEmpty(wikiRelationDTOList)) {
+            result.addAll(handlerC7nSpace(projectId, wikiRelationDTOList));
+            result.addAll(handlerZknowSpace(projectId, wikiRelationDTOList));
+        }
+
+        return result;
+    }
+
+    /**
+     * 交由子类实现
+     *
+     * @param projectId
+     * @param wikiRelationDTOList
+     */
+    protected List<WikiRelationVO> handlerZknowSpace(Long projectId, List<WikiRelationDTO> wikiRelationDTOList) {
+        return new ArrayList<>();
+    }
+
+    private List<WikiRelationVO> handlerC7nSpace(Long projectId, List<WikiRelationDTO> wikiRelationDTOList) {
+        List<WikiRelationDTO> c7nWikiRelationDTOList = wikiRelationDTOList
+                .stream()
+                .filter(w -> ZKnowDetailsHelper.VALUE_CHOERODON.equals(w.getSourceType()))
+                .collect(Collectors.toList());
+        List<WikiRelationVO> result = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(c7nWikiRelationDTOList)) {
+            List<Long> c7nSpaceIds = c7nWikiRelationDTOList
+                    .stream()
+                    .map(WikiRelationDTO::getSpaceId)
+                    .collect(Collectors.toList());
+            List<WorkSpaceVO> workSpaceVOS = knowledgebaseClientOperator.querySpaceByIds(projectId, c7nSpaceIds);
             Map<Long, WorkSpaceVO> workSpaceMap = CollectionUtils.isEmpty(workSpaceVOS) ? new HashMap<>()
                     : new HashMap<>(workSpaceVOS.stream().collect(Collectors.toMap(WorkSpaceVO::getId, Function.identity())));
             for (WikiRelationDTO wikiRelation : wikiRelationDTOList) {
@@ -92,7 +125,19 @@ public class WikiRelationServiceImpl implements WikiRelationService {
                 }
             }
         }
-        return KnowledgeRelationVO.of(result);
+        return result;
+    }
+
+    @Override
+    public List<WikiRelationDTO> baseQueryByIssueIdAndType(Long issueId, String type) {
+        Assert.notNull(issueId, AGILE_ISSUE_ID_IS_NULL);
+        Assert.notNull(type, AGILE_WIKI_TYPE_IS_NULL);
+
+        WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
+        wikiRelationDTO.setIssueId(issueId);
+        wikiRelationDTO.setSourceType(type);
+
+        return wikiRelationMapper.select(wikiRelationDTO);
     }
 
     @Override
@@ -140,7 +185,6 @@ public class WikiRelationServiceImpl implements WikiRelationService {
             create.setProjectId(newIssueId);
             create.setSpaceId(v.getSpaceId());
             create.setWikiName(v.getWikiName());
-            create.setWikiUrl(v.getWikiUrl());
             createList.add(create);
         });
         create(projectId, createList);

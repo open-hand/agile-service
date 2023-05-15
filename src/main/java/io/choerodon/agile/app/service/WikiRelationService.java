@@ -1,9 +1,9 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.KnowledgeRelationVO;
-import io.choerodon.agile.api.vo.WikiRelationVO;
-
 import java.util.List;
+
+import io.choerodon.agile.api.vo.WikiRelationVO;
+import io.choerodon.agile.infra.dto.WikiRelationDTO;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/12/03.
@@ -13,7 +13,9 @@ public interface WikiRelationService {
 
     void create(Long projectId, List<WikiRelationVO> wikiRelationVOList);
 
-    KnowledgeRelationVO queryByIssueId(Long projectId, Long issueId);
+    List<WikiRelationVO> queryByIssueId(Long projectId, Long issueId);
+
+    List<WikiRelationDTO> baseQueryByIssueIdAndType(Long issueId, String type);
 
     void deleteById(Long projectId, Long id);
 
