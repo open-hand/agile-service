@@ -123,6 +123,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired
     private StatusLinkageMapper statusLinkageMapper;
+    @Autowired
+    private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
 
@@ -1560,6 +1562,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         this.cloneFdStatusBranchMergeSetting(sourceProjectId, targetProjectId, context);
         this.cloneFdStatusTransferSetting(sourceProjectId, targetProjectId, context);
         this.cloneFdStatusLinkage(sourceProjectId, targetProjectId, context);
+        this.cloneFdLinkIssueStatusLinkage(sourceProjectId, targetProjectId, context);
+        // TODO 复制状态机自定义流转--状态联动--依赖工作项 fd_pred_issue_status_linkage(瀑布插件)
+        // TODO 复制状态机自定义流转--更新属性
+        // TODO 复制状态机自定义流转--通知设置
     }
 
     /**
@@ -1671,6 +1677,54 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context.put(TABLE_FD_STATUS_LINKAGE, sourceStatusLinkageId, sourceStatusLinkage.getId());
         }
         this.logger.debug("fd_status_linkage 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--状态联动--关联工作项 fd_link_issue_status_linkage
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdLinkIssueStatusLinkage(Long sourceProjectId,
+                                               Long targetProjectId,
+                                               ProjectCloneContext context) {
+        List<LinkIssueStatusLinkageDTO> sourceLinkIssueStatusLinkageList = this.linkIssueStatusLinkageMapper.select(new LinkIssueStatusLinkageDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceLinkIssueStatusLinkageList)) {
+            this.logger.debug("没有检测到可复制的 fd_link_issue_status_linkage 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_link_issue_status_linkage 数据{}条, 开始复制", sourceLinkIssueStatusLinkageList.size());
+        for (LinkIssueStatusLinkageDTO sourceLinkIssueStatusLinkage : sourceLinkIssueStatusLinkageList) {
+            final Long sourceLinkIssueStatusLinkageId = sourceLinkIssueStatusLinkage.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceLinkIssueStatusLinkage.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceLinkIssueStatusLinkage.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+            // parentIssueStatusSetting都是组织层的, 不用复制
+            // 工作项关联类型一定是本项目下新复制的, 查不到说明有脏数据
+            final Long newLinkTypeId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_LINK_TYPE, sourceLinkIssueStatusLinkage.getLinkTypeId());
+            if(newLinkTypeId == null) {
+                continue;
+            }
+            sourceLinkIssueStatusLinkage.setLinkTypeId(newLinkTypeId);
+            // linkIssueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newLinkIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceLinkIssueStatusLinkage.getLinkIssueTypeId());
+            if(newLinkIssueTypeId != null) {
+                sourceLinkIssueStatusLinkage.setLinkIssueTypeId(newLinkIssueTypeId);
+            }
+            // linkIssueStatusId都是组织层的, 不用复制
+
+            sourceLinkIssueStatusLinkage.setId(null);
+            sourceLinkIssueStatusLinkage.setProjectId(targetProjectId);
+            if (this.linkIssueStatusLinkageMapper.insert(sourceLinkIssueStatusLinkage) != 1) {
+                throw new CommonException("error.insert.fd_link_issue_status_linkage");
+            }
+            context.put(TABLE_FD_LINK_ISSUE_STATUS_LINKAGE, sourceLinkIssueStatusLinkageId, sourceLinkIssueStatusLinkage.getId());
+        }
+        this.logger.debug("fd_link_issue_status_linkage 复制完成");
     }
 
 }
