@@ -38,8 +38,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.core.base.BaseConstants;
 
 /**
- * @author zhaotianxin
- * @date 2020-08-13 14:51
+ * @author zhaotianxin 2020-08-13 14:51
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -47,21 +46,11 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusFieldSettingServiceImpl.class);
 
-    private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
+    private static final String[] FILTER_FIELD_TYPE = {FieldType.CHECKBOX, FieldType.MULTIPLE, FieldType.MEMBER, FieldType.RADIO, FieldType.SINGLE};
     private static final String[] FEATURE_FIELD = {FieldCode.ACCEPTANCE_CRITERA, FieldCode.BENFIT_HYPOTHESIS, FieldCode.PROGRAM_VERSION, FieldCode.SUB_PROJECT, FieldCode.FEATURE_TYPE};
-    private static final List<String> WATERFALL_FIELD_LIST = Arrays.asList(FieldCode.PROGRESS);
+    private static final List<String> WATERFALL_FIELD_LIST = Collections.singletonList(FieldCode.PROGRESS);
     public static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     public static final Map<String, String> PROGRAM_FIELD_CODE = new LinkedHashMap<>();
-    private static final String CLEAR = "clear";
-    private static final String OPERATOR = "operator";
-    private static final String CREATOR = "creator";
-    private static final String REPORTOR = "reportor";
-    private static final String ASSIGNEE = "assignee";
-    private static final String MAIN_RESPONSIBLE = "mainResponsible";
-    private static final String PARTICIPANT = "participant";
-    private static final String SPECIFIER = "specifier";
-    private static final String COPY_CUSTOM_FIELD = "copy_custom_field";
-    private static final String CURRENT_TIME = "current_time";
     private static final String[] CLEAR_FIELD = {FieldCode.LABEL, FieldCode.COMPONENT, FieldCode.TAG, FieldCode.PARTICIPANT};
     private static final List<String> DATE_FORMAT_FIELD_LIST = Arrays.asList(FieldCode.ACTUAL_START_TIME, FieldCode.ACTUAL_END_TIME, FieldCode.ESTIMATED_START_TIME, FieldCode.ESTIMATED_END_TIME);
     @Autowired
@@ -194,14 +183,13 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
-                if (!Objects.equals(SPECIFIER, statusFieldValueSettingDTOS.get(0).getOperateType())) {
+                if (!Objects.equals(StatusFieldSettingValidator.OPERATE_TYPE_SPECIFIER, statusFieldValueSettingDTOS.get(0).getOperateType())) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
                 if ("member".equals(statusFieldSettingVO.getFieldType())) {
                     // 查询用户信息
-                    List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
-                    List<UserDTO> body = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false);
+                    List<UserDTO> body = remoteIamOperator.listUsersByIds(statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).toArray(Long[]::new), false);
                     if (CollectionUtils.isEmpty(body)) {
                         statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                         return;
@@ -221,7 +209,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     @Override
     public void handlerSettingToUpdateIssue(Long projectId, Long issueId, TriggerCarrierVO triggerCarrierVO) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-        List<StatusFieldSettingVO> fieldSettingList = statusFieldSettingMapper.listByStatusIds(projectId, issueDTO.getIssueTypeId(), Arrays.asList(issueDTO.getStatusId()));
+        List<StatusFieldSettingVO> fieldSettingList = statusFieldSettingMapper.listByStatusIds(projectId, issueDTO.getIssueTypeId(), Collections.singletonList(issueDTO.getStatusId()));
         if (CollectionUtils.isEmpty(fieldSettingList)) {
             return;
         }
@@ -262,7 +250,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         Set<Long> fieldIds =
                 statusFieldValueSettings
                         .stream()
-                        .filter(value -> COPY_CUSTOM_FIELD.equals(value.getOperateType()) && value.getCustomFieldId() != null)
+                        .filter(value -> StatusFieldSettingValidator.OPERATE_TYPE_COPY_CUSTOM_FIELD.equals(value.getOperateType()) && value.getCustomFieldId() != null)
                         .map(StatusFieldValueSettingDTO::getCustomFieldId)
                         .collect(Collectors.toSet());
         if (CollectionUtils.isNotEmpty(fieldIds)) {
@@ -273,14 +261,14 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
             List<StatusFieldValueSettingDTO> result = statusFieldValueSettings.stream()
-                    .filter(statusFieldValueSetting -> !COPY_CUSTOM_FIELD.equals(statusFieldValueSetting.getOperateType()))
+                    .filter(statusFieldValueSetting -> !StatusFieldSettingValidator.OPERATE_TYPE_COPY_CUSTOM_FIELD.equals(statusFieldValueSetting.getOperateType()))
                     .collect(Collectors.toList());
             for (Long userId : userIds) {
                 StatusFieldValueSettingDTO valueSetting = new StatusFieldValueSettingDTO();
                 valueSetting.setUserId(userId);
                 valueSetting.setProjectId(projectId);
                 valueSetting.setFieldType(fieldType);
-                valueSetting.setOperateType(SPECIFIER);
+                valueSetting.setOperateType(StatusFieldSettingValidator.OPERATE_TYPE_SPECIFIER);
                 result.add(valueSetting);
             }
             return result;
@@ -386,14 +374,13 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
-                if (!Objects.equals(SPECIFIER, statusFieldValueSettingDTOS.get(0).getOperateType())) {
+                if (!Objects.equals(StatusFieldSettingValidator.OPERATE_TYPE_SPECIFIER, statusFieldValueSettingDTOS.get(0).getOperateType())) {
                     statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                     return;
                 }
                 if ("member".equals(statusFieldSettingVO.getFieldType())) {
                     // 查询用户信息
-                    List<Long> userIds = statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
-                    List<UserDTO> body = remoteIamOperator.listUsersByIds(userIds.toArray(new Long[userIds.size()]), false);
+                    List<UserDTO> body = remoteIamOperator.listUsersByIds(statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getUserId).toArray(Long[]::new), false);
                     if (CollectionUtils.isEmpty(body)) {
                         statusFieldSettingVO.setFieldValueList(statusFieldValueSettingDTOS);
                         return;
@@ -488,7 +475,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         boolean isVersion = FieldCode.FIX_VERSION.equals(fieldCode) || FieldCode.INFLUENCE_VERSION.equals(fieldCode);
         if (isVersion) {
             List<VersionIssueRelVO> versionIssueRelVOS = new ArrayList<>();
-            if (!CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
+            if (!StatusFieldSettingValidator.OPERATE_TYPE_CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
                 versionIssueRelVOS = statusFieldValueSettingDTOS.stream()
                         .map(settingDTO -> new VersionIssueRelVO().setVersionId(settingDTO.getOptionId()))
                         .collect(Collectors.toList());
@@ -504,13 +491,13 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                                         String fieldCode,
                                         List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS) {
         String fieldName = FIELD_CODE.get(fieldCode);
-        Class clazz = issueUpdateVO.getClass();
+        Class<?> clazz = issueUpdateVO.getClass();
         try {
             Field field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
             fieldList.add(fieldName);
-            if (CLEAR.equals(statusFieldValueSettingDTO.getOperateType())) {
+            if (StatusFieldSettingValidator.OPERATE_TYPE_CLEAR.equals(statusFieldValueSettingDTO.getOperateType())) {
                 if (Arrays.asList(CLEAR_FIELD).contains(fieldCode)) {
                     field.set(issueUpdateVO, new ArrayList<>());
                 } else {
@@ -532,9 +519,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                                   Field field) throws IllegalAccessException {
         switch (fieldCode) {
             case FieldCode.REPORTER:
-                Boolean canSetValue = ((MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId()))
-                        || !(ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) || MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()))
-                        || (ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getAssigneeId())));
+                Boolean canSetValue = ((StatusFieldSettingValidator.OPERATE_TYPE_MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getMainResponsibleId()))
+                        || !(StatusFieldSettingValidator.OPERATE_TYPE_ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) || StatusFieldSettingValidator.OPERATE_TYPE_MAIN_RESPONSIBLE.equals(fieldValueSettingDTO.getOperateType()))
+                        || (StatusFieldSettingValidator.OPERATE_TYPE_ASSIGNEE.equals(fieldValueSettingDTO.getOperateType()) && !ObjectUtils.isEmpty(issueDTO.getAssigneeId())));
                 if (Boolean.TRUE.equals(canSetValue)) {
                     field.set(issueUpdateVO, handlerMember(fieldValueSettingDTO, issueDTO));
                 } else {
@@ -612,7 +599,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_MONTH, dateAddValue.intValue());
             date = cal.getTime();
-        } else if (CURRENT_TIME.equals(fieldValueSettingDTO.getOperateType())) {
+        } else if (StatusFieldSettingValidator.OPERATE_TYPE_CURRENT_TIME.equals(fieldValueSettingDTO.getOperateType())) {
             date = new Date();
         } else {
             date = fieldValueSettingDTO.getDateValue();
@@ -646,7 +633,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                                      PageFieldViewUpdateVO pageFieldViewUpdateVO,
                                      List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS,
                                      Long fieldId) {
-        if (CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
+        if (StatusFieldSettingValidator.OPERATE_TYPE_CLEAR.equals(statusFieldValueSettingDTOS.get(0).getOperateType())) {
             return;
         }
         Long projectId = issueDTO.getProjectId();
@@ -690,7 +677,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             return null;
         }
         StatusFieldValueSettingDTO settingDTO = statusFieldValueSettingDTOS.get(0);
-        if (CLEAR.equals(settingDTO.getOperateType())) {
+        if (StatusFieldSettingValidator.OPERATE_TYPE_CLEAR.equals(settingDTO.getOperateType())) {
             return null;
         }
         Set<Long> userIds = new HashSet<>();
@@ -699,7 +686,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             if (!ObjectUtils.isEmpty(userId)) {
                 userIds.add(userId);
             }
-            if (PARTICIPANT.equals(statusFieldValueSettingDTO.getOperateType())) {
+            if (StatusFieldSettingValidator.OPERATE_TYPE_PARTICIPANT.equals(statusFieldValueSettingDTO.getOperateType())) {
                 List<Long> participants = issueParticipantRelMapper.listByIssueId(issueDTO.getProjectId(), issueDTO.getIssueId());
                 if (CollectionUtils.isNotEmpty(participants)) {
                     userIds.addAll(participants);
@@ -732,15 +719,15 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     private Long handlerMember(StatusFieldValueSettingDTO statusFieldValueSettingDTO, IssueDTO issueDTO) {
         Long userId = null;
         String operateType = statusFieldValueSettingDTO.getOperateType();
-        if (OPERATOR.equals(operateType)) {
+        if (StatusFieldSettingValidator.OPERATE_TYPE_OPERATOR.equals(operateType)) {
             userId = DetailsHelper.getUserDetails().getUserId();
-        } else if (CREATOR.equals(operateType)) {
+        } else if (StatusFieldSettingValidator.OPERATE_TYPE_CREATOR.equals(operateType)) {
             userId = issueDTO.getCreatedBy();
-        } else if (REPORTOR.equals(operateType)) {
+        } else if (StatusFieldSettingValidator.OPERATE_TYPE_REPORTER.equals(operateType)) {
             userId = issueDTO.getReporterId();
-        } else if (ASSIGNEE.equals(operateType)) {
+        } else if (StatusFieldSettingValidator.OPERATE_TYPE_ASSIGNEE.equals(operateType)) {
             userId = issueDTO.getAssigneeId();
-        } else if (MAIN_RESPONSIBLE.equals(operateType)) {
+        } else if (StatusFieldSettingValidator.OPERATE_TYPE_MAIN_RESPONSIBLE.equals(operateType)) {
             userId = issueDTO.getMainResponsibleId();
         } else {
             userId = statusFieldValueSettingDTO.getUserId();
@@ -749,13 +736,13 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
     }
 
     private String handlerTimeField(StatusFieldValueSettingDTO statusFieldValueSettingDTO) {
-        Date date = null;
+        Date date;
         if ("add".equals(statusFieldValueSettingDTO.getOperateType())) {
             BigDecimal dateAddValue = statusFieldValueSettingDTO.getDateAddValue();
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_MONTH, dateAddValue.intValue());
             date = cal.getTime();
-        } else if (CURRENT_TIME.equals(statusFieldValueSettingDTO.getOperateType())) {
+        } else if (StatusFieldSettingValidator.OPERATE_TYPE_CURRENT_TIME.equals(statusFieldValueSettingDTO.getOperateType())) {
             date = new Date();
         } else {
             date = statusFieldValueSettingDTO.getDateValue();
@@ -765,7 +752,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         try {
             dateFormat = dff.format(date.getTime());
         } catch (Exception e) {
-            LOGGER.error("format date error: {}", e);
+            LOGGER.error("format date error");
+            LOGGER.error(e.getMessage(), e);
         }
         return dateFormat;
     }
@@ -886,7 +874,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             userMap = Collections.emptyMap();
         }
         Set<Long> customFieldIds = statusFieldValueSettings.stream().
-                filter(v -> COPY_CUSTOM_FIELD.equals(v.getOperateType()) && v.getCustomFieldId() != null)
+                filter(v -> StatusFieldSettingValidator.OPERATE_TYPE_COPY_CUSTOM_FIELD.equals(v.getOperateType()) && v.getCustomFieldId() != null)
                 .map(StatusFieldValueSettingDTO::getCustomFieldId)
                 .collect(Collectors.toSet());
         final Map<Long, String> customFiledNameMap;
@@ -905,7 +893,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             {
                 statusFieldValueSetting.setName(userMap.get(statusFieldValueSetting.getUserId()));
             }
-            if (COPY_CUSTOM_FIELD.equals(statusFieldValueSetting.getOperateType()) && statusFieldValueSetting.getCustomFieldId() != null) {
+            if (StatusFieldSettingValidator.OPERATE_TYPE_COPY_CUSTOM_FIELD.equals(statusFieldValueSetting.getOperateType()) && statusFieldValueSetting.getCustomFieldId() != null) {
                 statusFieldValueSetting.setName(customFiledNameMap.get(statusFieldValueSetting.getCustomFieldId()));
             }
         }

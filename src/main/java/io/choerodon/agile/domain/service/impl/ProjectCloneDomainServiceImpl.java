@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.choerodon.agile.api.validator.StatusFieldSettingValidator;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.FilePathService;
@@ -125,6 +126,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private StatusLinkageMapper statusLinkageMapper;
     @Autowired
     private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
+    @Autowired
+    private StatusFieldSettingMapper statusFieldSettingMapper;
+    @Autowired
+    private StatusFieldValueSettingMapper statusFieldValueSettingMapper;
     @Autowired
     private StatusNoticeSettingMapper statusNoticeSettingMapper;
     @Autowired(required = false)
@@ -1224,7 +1229,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 fieldCascadeRule.setFieldOptionId(newFieldOptionId);
             }
 
-            final Long newCascadeFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, fieldCascadeRule.getCascadeFieldId());
+            final Long sourceCascadeFieldId = fieldCascadeRule.getCascadeFieldId();
+            final Long newCascadeFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceCascadeFieldId);
             if(newCascadeFieldId != null) {
                 // 项目下可以对非本项目的字段设置级联规则, 所以如果查映射查不到就保持原值
                 fieldCascadeRule.setCascadeFieldId(newCascadeFieldId);
@@ -1237,6 +1243,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             }
             context.put(TABLE_FD_FIELD_CASCADE_RULE, sourceFieldCascadeRuleId, fieldCascadeRule.getId());
             fieldCascadeRule.setId(sourceFieldCascadeRuleId);
+            fieldCascadeRule.setCascadeFieldId(sourceCascadeFieldId);
         }
         this.logger.debug("fd_field_cascade_rule 复制完成");
         return sourceFieldCascadeRuleList;
@@ -1299,7 +1306,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                         continue;
                     }
                     newCascadeOptionId = newProductVersionId;
-                } else if(!Boolean.TRUE.equals(cascadeField.getSystem()) && Objects.equals(cascadeField.getProjectId(),sourceProjectId)) {
+                } else if(!Boolean.TRUE.equals(cascadeField.getSystem()) && Objects.equals(cascadeField.getProjectId(), sourceProjectId)) {
                     // 处理项目层自定义字段
                     final Long newOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceCascadeOptionId);
                     if(newOptionId == null) {
@@ -1565,7 +1572,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         this.cloneFdStatusTransferSetting(sourceProjectId, targetProjectId, context);
         this.cloneFdStatusLinkage(sourceProjectId, targetProjectId, context);
         this.cloneFdLinkIssueStatusLinkage(sourceProjectId, targetProjectId, context);
-        // TODO 复制状态机自定义流转--更新属性
+        final List<StatusFieldSettingDTO> sourceStatusFieldSettingList = this.cloneFdStatusFieldSetting(sourceProjectId, targetProjectId, context);
+        this.cloneFdStatusFieldValueSetting(sourceProjectId, targetProjectId, context, sourceStatusFieldSettingList);
         this.cloneFdStatusNoticeSetting(sourceProjectId, targetProjectId, context);
     }
 
@@ -1726,6 +1734,135 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context.put(TABLE_FD_LINK_ISSUE_STATUS_LINKAGE, sourceLinkIssueStatusLinkageId, sourceLinkIssueStatusLinkage.getId());
         }
         this.logger.debug("fd_link_issue_status_linkage 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--更新属性--字段声明 fd_status_field_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private List<StatusFieldSettingDTO> cloneFdStatusFieldSetting(Long sourceProjectId,
+                                           Long targetProjectId,
+                                           ProjectCloneContext context) {
+        List<StatusFieldSettingDTO> sourceStatusFieldSettingList = this.statusFieldSettingMapper.select(new StatusFieldSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusFieldSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_field_setting 数据, 跳过此步骤");
+            return Collections.emptyList();
+        }
+        this.logger.debug("检测到可复制的 fd_status_field_setting 数据{}条, 开始复制", sourceStatusFieldSettingList.size());
+        for (StatusFieldSettingDTO sourceStatusFieldSetting : sourceStatusFieldSettingList) {
+            final Long sourceStatusFieldSettingId = sourceStatusFieldSetting.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusFieldSetting.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusFieldSetting.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+            // fieldId可能不是本项目的, 所以无法映射时就不处理
+            final Long sourceFieldId = sourceStatusFieldSetting.getFieldId();
+            final Long newFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceFieldId);
+            if(newFieldId != null) {
+                sourceStatusFieldSetting.setFieldId(newFieldId);
+            }
+
+            sourceStatusFieldSetting.setId(null);
+            sourceStatusFieldSetting.setProjectId(targetProjectId);
+            if (this.statusFieldSettingMapper.insert(sourceStatusFieldSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_field_setting");
+            }
+            context.put(TABLE_FD_STATUS_FIELD_SETTING, sourceStatusFieldSettingId, sourceStatusFieldSetting.getId());
+            sourceStatusFieldSetting.setId(sourceStatusFieldSettingId);
+            sourceStatusFieldSetting.setFieldId(sourceFieldId);
+        }
+        this.logger.debug("fd_status_field_setting 复制完成");
+        return sourceStatusFieldSettingList;
+    }
+
+    /**
+     * 复制状态机自定义流转--更新属性--值声明 fd_status_field_value_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param sourceStatusFieldSettingList  源字段声明集合, 用来在处理选项时反查字段定义
+     * @param context         context
+     */
+    private void cloneFdStatusFieldValueSetting(Long sourceProjectId,
+                                                Long targetProjectId,
+                                                ProjectCloneContext context,
+                                                List<StatusFieldSettingDTO> sourceStatusFieldSettingList) {
+        List<StatusFieldValueSettingDTO> sourceStatusFieldValueSettingList = this.statusFieldValueSettingMapper.select(new StatusFieldValueSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusFieldValueSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_field_value_setting 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_field_value_setting 数据{}条, 开始复制", sourceStatusFieldValueSettingList.size());
+        final Set<String> fieldTypeFilter = SetUtils.hashSet(FieldType.RADIO, FieldType.CHECKBOX, FieldType.SINGLE, FieldType.MULTIPLE);
+        final List<ObjectSchemeFieldDTO> mayBeUsedFields = context.getMayBeUsedFields();
+        final Map<Long, ObjectSchemeFieldDTO> fieldIdToEntityMap = mayBeUsedFields.stream()
+                .filter(mayBeUsedField -> fieldTypeFilter.contains(mayBeUsedField.getFieldType()))
+                .collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
+        final Map<Long, Long> statusFieldSettingIdToFieldIdMap = sourceStatusFieldSettingList.stream().collect(Collectors.toMap(StatusFieldSettingDTO::getId, StatusFieldSettingDTO::getFieldId));
+        for (StatusFieldValueSettingDTO sourceStatusFieldValueSetting : sourceStatusFieldValueSettingList) {
+            final Long sourceStatusFieldValueSettingId = sourceStatusFieldValueSetting.getId();
+            final Long sourceStatusFieldSettingId = sourceStatusFieldValueSetting.getStatusFieldSettingId();
+
+            final Long newStatusFieldSettingId = context.getByTableAndSourceId(TABLE_FD_STATUS_FIELD_SETTING, sourceStatusFieldSettingId);
+            if(newStatusFieldSettingId == null) {
+                continue;
+            }
+            sourceStatusFieldValueSetting.setStatusFieldSettingId(newStatusFieldSettingId);
+
+            // 处理选项
+            // 只处理字段类型为选项类型&操作类型为指定值的
+            if(fieldTypeFilter.contains(sourceStatusFieldValueSetting.getFieldType()) && StatusFieldSettingValidator.OPERATE_TYPE_SPECIFIER.equals(sourceStatusFieldValueSetting.getOperateType())) {
+                final Long sourceOptionId = sourceStatusFieldValueSetting.getOptionId();
+                Long newOptionId = sourceOptionId;
+                // 根据ruleId获取对应的级联字段
+                final ObjectSchemeFieldDTO field = Optional.ofNullable(statusFieldSettingIdToFieldIdMap.get(sourceStatusFieldSettingId)).map(fieldIdToEntityMap::get).orElse(null);
+                // 如果找到了, 说明需要处理; 否则不处理
+                if(field != null) {
+                    if(Boolean.TRUE.equals(field.getSystem()) && FIELD_CODE_COMPONENT.equals(field.getCode())) {
+                        // 特殊处理模块
+                        final Long newComponentId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_COMPONENT, sourceOptionId);
+                        if(newComponentId == null) {
+                            continue;
+                        }
+                        newOptionId = newComponentId;
+                    } else if(Boolean.TRUE.equals(field.getSystem()) && (FIELD_CODE_INFLUENCE_VERSION.equals(field.getCode()) || FIELD_CODE_FIX_VERSION.equals(field.getCode()))) {
+                        // 特殊影响/修复的版本
+                        final Long newProductVersionId = context.getByTableAndSourceId(TABLE_AGILE_PRODUCT_VERSION, sourceOptionId);
+                        if(newProductVersionId == null) {
+                            continue;
+                        }
+                        newOptionId = newProductVersionId;
+                    } else if(!Boolean.TRUE.equals(field.getSystem()) && Objects.equals(field.getProjectId(), sourceProjectId)) {
+                        // 处理项目层自定义字段
+                        final Long newFieldOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceOptionId);
+                        if(newFieldOptionId == null) {
+                            continue;
+                        }
+                        newOptionId = newFieldOptionId;
+                    }
+                    // 不满足以上条件的, 暂时不需要处理
+                }
+                sourceStatusFieldValueSetting.setOptionId(newOptionId);
+            }
+
+            // customFieldId可能不是本项目的, 所以无法映射时就不处理
+            final Long newCustomFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceStatusFieldValueSetting.getCustomFieldId());
+            if(newCustomFieldId != null) {
+                sourceStatusFieldValueSetting.setCustomFieldId(newCustomFieldId);
+            }
+
+            sourceStatusFieldValueSetting.setId(null);
+            sourceStatusFieldValueSetting.setProjectId(targetProjectId);
+            if (this.statusFieldValueSettingMapper.insert(sourceStatusFieldValueSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_field_value_setting");
+            }
+            context.put(TABLE_FD_STATUS_FIELD_VALUE_SETTING, sourceStatusFieldValueSettingId, sourceStatusFieldValueSetting.getId());
+        }
+        this.logger.debug("fd_status_field_value_setting 复制完成");
     }
 
 
