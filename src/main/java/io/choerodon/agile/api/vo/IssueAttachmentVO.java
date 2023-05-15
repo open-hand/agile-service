@@ -40,6 +40,26 @@ public class IssueAttachmentVO {
     @Encrypt
     private Long createdBy;
 
+    @ApiModelProperty("fileKey")
+    private String fileKey;
+
+    // 前端onlyoffice展示时需要用到的字段
+    /**
+     * “fileType”：“docx”，
+     * “key”：“Khirz6zTPdfd7”，
+     * title”：“示例文档 Title.docx”，
+     * “url”：“https://example.com/url -to-example-document.docx"
+     */
+    @ApiModelProperty("文件的类型（根据后缀来判断）")
+    private String fileType;
+    @ApiModelProperty("这个就是uuid的那个fileId")
+    private String key;
+    @ApiModelProperty("文件名")
+    private String title;
+
+    @ApiModelProperty("文件的大小")
+    private Long size;
+
     public Long getAttachmentId() {
         return attachmentId;
     }
@@ -109,4 +129,43 @@ public class IssueAttachmentVO {
         return StringUtil.getToString(this);
     }
 
+    public String getFileKey() {
+        return fileKey;
+    }
+
+    public void setFileKey(String fileKey) {
+        this.fileKey = fileKey;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
 }
