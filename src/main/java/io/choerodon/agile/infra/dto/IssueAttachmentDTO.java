@@ -54,7 +54,7 @@ public class IssueAttachmentDTO extends AuditDomain {
     @ApiModelProperty("文件的类型（根据后缀来判断）")
     @Transient
     private String fileType;
-    @ApiModelProperty("这个就是uuid的那个fileId")
+    @ApiModelProperty("onlyOffice用来标识文件的唯一性")
     @Transient
     private String key;
     @ApiModelProperty("文件名")

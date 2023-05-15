@@ -52,7 +52,7 @@ public class IssueAttachmentVO {
      */
     @ApiModelProperty("文件的类型（根据后缀来判断）")
     private String fileType;
-    @ApiModelProperty("这个就是uuid的那个fileId")
+    @ApiModelProperty("onlyOffice用来标识文件的唯一性")
     private String key;
     @ApiModelProperty("文件名")
     private String title;
