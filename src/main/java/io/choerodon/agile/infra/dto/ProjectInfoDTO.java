@@ -63,8 +63,9 @@ public class ProjectInfoDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public ProjectInfoDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public String getProjectCode() {
