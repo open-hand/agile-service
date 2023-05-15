@@ -49,6 +49,7 @@ public class ProjectCloneContext {
     public static final String TABLE_FD_STATUS_LINKAGE = "fd_status_linkage";
     public static final String TABLE_FD_LINK_ISSUE_STATUS_LINKAGE = "fd_link_issue_status_linkage";
     public static final String TABLE_FD_PRED_ISSUE_STATUS_LINKAGE = "fd_pred_issue_status_linkage";
+    public static final String TABLE_FD_STATUS_NOTICE_SETTING = "fd_status_notice_setting";
 
     public static final String SOURCE_PROJECT = "source_project";
     public static final String TARGET_PROJECT = "target_project";

@@ -125,6 +125,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private StatusLinkageMapper statusLinkageMapper;
     @Autowired
     private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
+    @Autowired
+    private StatusNoticeSettingMapper statusNoticeSettingMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
 
@@ -1563,9 +1565,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         this.cloneFdStatusTransferSetting(sourceProjectId, targetProjectId, context);
         this.cloneFdStatusLinkage(sourceProjectId, targetProjectId, context);
         this.cloneFdLinkIssueStatusLinkage(sourceProjectId, targetProjectId, context);
-        // TODO 复制状态机自定义流转--状态联动--依赖工作项 fd_pred_issue_status_linkage(瀑布插件)
         // TODO 复制状态机自定义流转--更新属性
-        // TODO 复制状态机自定义流转--通知设置
+        this.cloneFdStatusNoticeSetting(sourceProjectId, targetProjectId, context);
     }
 
     /**
@@ -1725,6 +1726,42 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context.put(TABLE_FD_LINK_ISSUE_STATUS_LINKAGE, sourceLinkIssueStatusLinkageId, sourceLinkIssueStatusLinkage.getId());
         }
         this.logger.debug("fd_link_issue_status_linkage 复制完成");
+    }
+
+
+    /**
+     * 复制状态机自定义流转--通知设置 fd_status_notice_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdStatusNoticeSetting(Long sourceProjectId,
+                                            Long targetProjectId,
+                                            ProjectCloneContext context) {
+        List<StatusNoticeSettingDTO> sourceStatusNoticeSettingList = this.statusNoticeSettingMapper.select(new StatusNoticeSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusNoticeSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_notice_setting 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_notice_setting 数据{}条, 开始复制", sourceStatusNoticeSettingList.size());
+        for (StatusNoticeSettingDTO sourceStatusNoticeSetting : sourceStatusNoticeSettingList) {
+            final Long sourceStatusNoticeSettingId = sourceStatusNoticeSetting.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusNoticeSetting.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusNoticeSetting.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+
+            sourceStatusNoticeSetting.setId(null);
+            sourceStatusNoticeSetting.setProjectId(targetProjectId);
+            if (this.statusNoticeSettingMapper.insert(sourceStatusNoticeSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_notice_setting");
+            }
+            context.put(TABLE_FD_STATUS_NOTICE_SETTING, sourceStatusNoticeSettingId, sourceStatusNoticeSetting.getId());
+        }
+        this.logger.debug("fd_status_notice_setting 复制完成");
     }
 
 }
