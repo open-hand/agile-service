@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.AgileWaterfallService;
@@ -117,9 +118,10 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
     @Autowired
     private IssueStatusMapper issueStatusMapper;
+    @Autowired
+    private ProjectInfoMapper projectInfoMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
-
 
     private final Logger logger = LoggerFactory.getLogger(ProjectCloneDomainServiceImpl.class);
 
@@ -138,6 +140,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context = new ProjectCloneContext();
         }
         final Set<String> categoryCodes = context.getCategoryCodes();
+        // 复制projectInfo表
+        cloneProjectInfo(sourceProjectId, targetProjectId, context);
         // 复制规划的版本
         cloneAgileProductVersion(sourceProjectId, targetProjectId, context);
         // 复制模块
@@ -181,6 +185,22 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 agileWaterfallService.cloneProject(sourceProjectId, targetProjectId, context);
             }
         }
+    }
+
+    private void cloneProjectInfo(Long sourceProjectId,
+                                  Long targetProjectId,
+                                  ProjectCloneContext context) {
+        ProjectInfoDTO sourceProjectInfo = projectInfoMapper.selectOne(new ProjectInfoDTO().setProjectId(sourceProjectId));
+        Assert.notNull(sourceProjectInfo, "error.source.projectInfo.not.null");
+        this.logger.debug("检测到可复制的 agile_project_info 数据1条, 开始复制");
+        ProjectVO targetProject = context.queryProject(targetProjectId, TARGET_PROJECT);
+        sourceProjectInfo.setInfoId(null);
+        sourceProjectInfo.setProjectId(targetProjectId);
+        sourceProjectInfo.setProjectCode(targetProject.getCode());
+        if (projectInfoMapper.insert(sourceProjectInfo) != 1) {
+            throw new CommonException("error.insert.agile_project_info");
+        }
+        this.logger.debug("agile_project_info 复制完成");
     }
 
     private void cloneAgileIssueStatus(Long sourceProjectId,
