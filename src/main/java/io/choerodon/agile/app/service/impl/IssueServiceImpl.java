@@ -14,12 +14,14 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import io.choerodon.agile.infra.feign.operator.FileClientOperator;
+import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -220,7 +222,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private IWorkLogService workLogService;
     @Autowired
-    private FileClientOperator fileClientOperator;
+    private CustomFileFeignClient customFileFeignClient;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -592,7 +594,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     return issueAttachmentDTO.getUrl();
                 }
             }).collect(Collectors.toList());
-            List<FileVO> fileVOS = fileClientOperator.queryFileDTOByIds(organizationId, fileKeys);
+            List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, fileKeys), new TypeReference<List<FileVO>>() {
+            });
             if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(fileVOS)) {
                 Map<String, FileVO> stringFileVOMap = fileVOS.stream().collect(Collectors.toMap(FileVO::getFileKey, Function.identity()));
                 if (MapUtils.isNotEmpty(stringFileVOMap)) {
@@ -604,7 +607,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                             issueAttachmentDTO.setFileType(FileCommonUtil.getFileType(fileKey));
                             issueAttachmentDTO.setFileKey(fileVO.getFileKey());
                             issueAttachmentDTO.setSize(fileVO.getFileSize());
-                            issueAttachmentDTO.setKey(FileCommonUtil.getFileId(fileKey));
+                            issueAttachmentDTO.setKey(String.valueOf(fileVO.getFileId()));
                             issueAttachmentDTO.setTitle(fileVO.getFileName());
                         }
                     });
