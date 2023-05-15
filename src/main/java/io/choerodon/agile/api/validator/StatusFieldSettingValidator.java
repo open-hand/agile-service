@@ -1,5 +1,15 @@
 package io.choerodon.agile.api.validator;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
 import io.choerodon.agile.api.vo.StatusFieldSettingVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
@@ -8,15 +18,6 @@ import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.exception.CommonException;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author huaxin.deng@hand-china.com 2021-11-11 11:45:23
@@ -24,21 +25,25 @@ import java.util.stream.Collectors;
 @Component
 public class StatusFieldSettingValidator {
 
-    private static final String CLEAR = "clear";
-    private static final String OPERATOR = "operator";
-    private static final String CREATOR = "creator";
-    private static final String REPORTOR = "reportor";
-    private static final String ASSIGNEE = "assignee";
-    private static final String MAIN_RESPONSIBLE = "mainResponsible";
-    private static final String PARTICIPANT = "participant";
-    private static final String SPECIFIER = "specifier";
-    private static final String COPY_CUSTOM_FIELD = "copy_custom_field";
-    private static final String CURRENT_TIME = "current_time";
-    private static final String ADD = "add";
+    public static final String OPERATE_TYPE_CLEAR = "clear";
+    public static final String OPERATE_TYPE_OPERATOR = "operator";
+    public static final String OPERATE_TYPE_CREATOR = "creator";
+    public static final String OPERATE_TYPE_REPORTER = "reportor";
+    public static final String OPERATE_TYPE_ASSIGNEE = "assignee";
+    public static final String OPERATE_TYPE_MAIN_RESPONSIBLE = "mainResponsible";
+    public static final String OPERATE_TYPE_PARTICIPANT = "participant";
+    public static final String OPERATE_TYPE_SPECIFIER = "specifier";
+    public static final String OPERATE_TYPE_COPY_CUSTOM_FIELD = "copy_custom_field";
+    public static final String OPERATE_TYPE_CURRENT_TIME = "current_time";
+    public static final String OPERATE_TYPE_ADD = "add";
 
     private static final List<String> MEMBER_FIELD_TYPES = Arrays.asList(FieldType.MEMBER, FieldType.MULTI_MEMBER);
-    private static final List<String> SYSTEM_MULTI_MEMBER_FIELDS = Arrays.asList(PARTICIPANT);
-    private static final List<String> OPERATE_TYPE = Arrays.asList(CLEAR, OPERATOR, CREATOR, REPORTOR, ASSIGNEE, MAIN_RESPONSIBLE, PARTICIPANT, SPECIFIER, COPY_CUSTOM_FIELD, CURRENT_TIME, ADD);
+    private static final List<String> SYSTEM_MULTI_MEMBER_FIELDS = Collections.singletonList(OPERATE_TYPE_PARTICIPANT);
+    private static final List<String> OPERATE_TYPE = Arrays.asList(
+            OPERATE_TYPE_CLEAR, OPERATE_TYPE_OPERATOR, OPERATE_TYPE_CREATOR, OPERATE_TYPE_REPORTER, OPERATE_TYPE_ASSIGNEE,
+            OPERATE_TYPE_MAIN_RESPONSIBLE, OPERATE_TYPE_PARTICIPANT, OPERATE_TYPE_SPECIFIER, OPERATE_TYPE_COPY_CUSTOM_FIELD,
+            OPERATE_TYPE_CURRENT_TIME, OPERATE_TYPE_ADD
+    );
     private static final String ERROR_FIELD_VALUE_UPDATE_TO_SELF = "error.fieldValue.cannot.update.to.self";
 
     @Autowired
@@ -89,7 +94,7 @@ public class StatusFieldSettingValidator {
                                                  String fieldType,
                                                  StatusFieldValueSettingDTO fieldValue,
                                                  Set<Long> copyFieldIds) {
-        if (COPY_CUSTOM_FIELD.equals(operateType)) {
+        if (OPERATE_TYPE_COPY_CUSTOM_FIELD.equals(operateType)) {
             // 人员类型才能指定自定义字段的值
             if (!MEMBER_FIELD_TYPES.contains(fieldType)) {
                 throw new CommonException("error.illegal.fieldType." + fieldType + ".for.copy_custom_field");
@@ -108,14 +113,14 @@ public class StatusFieldSettingValidator {
                                   List<StatusFieldValueSettingDTO> fieldValueList) {
         if (MEMBER_FIELD_TYPES.contains(fieldType)) {
             String fieldCode = objectSchemeFieldDTO.getCode();
-            if (SPECIFIER.equals(operateType)) {
+            if (OPERATE_TYPE_SPECIFIER.equals(operateType)) {
                 Long userId = fieldValue.getUserId();
                 AssertUtilsForCommonException.notEmpty(userId, "error.fieldValues.userId.empty");
-            } else if (REPORTOR.equals(operateType) && FieldCode.REPORTER.equals(fieldCode)) {
+            } else if (OPERATE_TYPE_REPORTER.equals(operateType) && FieldCode.REPORTER.equals(fieldCode)) {
                 throw new CommonException(ERROR_FIELD_VALUE_UPDATE_TO_SELF);
-            } else if (CREATOR.equals(operateType) && FieldCode.CREATOR.equals(fieldCode)) {
+            } else if (OPERATE_TYPE_CREATOR.equals(operateType) && FieldCode.CREATOR.equals(fieldCode)) {
                 throw new CommonException(ERROR_FIELD_VALUE_UPDATE_TO_SELF);
-            } else if (COPY_CUSTOM_FIELD.equals(operateType) && fieldId.equals(fieldValue.getCustomFieldId())) {
+            } else if (OPERATE_TYPE_COPY_CUSTOM_FIELD.equals(operateType) && fieldId.equals(fieldValue.getCustomFieldId())) {
                 throw new CommonException(ERROR_FIELD_VALUE_UPDATE_TO_SELF);
             } else if (operateType.equals(fieldCode)) {
                 throw new CommonException(ERROR_FIELD_VALUE_UPDATE_TO_SELF);

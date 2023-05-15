@@ -5,14 +5,15 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
-import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.choerodon.mybatis.domain.AuditDomain;
+
 import org.hzero.core.base.BaseConstants;
 
 /**
@@ -105,8 +106,9 @@ public class StatusNoticeSettingDTO extends AuditDomain {
         return projectId;
     }
 
-    public void setProjectId(Long projectId) {
+    public StatusNoticeSettingDTO setProjectId(Long projectId) {
         this.projectId = projectId;
+        return this;
     }
 
     public Long getStatusId() {

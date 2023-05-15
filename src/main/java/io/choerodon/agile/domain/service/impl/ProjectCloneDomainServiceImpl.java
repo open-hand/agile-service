@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import io.choerodon.agile.api.validator.StatusFieldSettingValidator;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.AgileWaterfallService;
 import io.choerodon.agile.app.service.FilePathService;
@@ -120,6 +121,20 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
     private IssueStatusMapper issueStatusMapper;
     @Autowired
     private ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private StatusBranchMergeSettingMapper statusBranchMergeSettingMapper;
+    @Autowired
+    private StatusTransferSettingMapper statusTransferSettingMapper;
+    @Autowired
+    private StatusLinkageMapper statusLinkageMapper;
+    @Autowired
+    private LinkIssueStatusLinkageMapper linkIssueStatusLinkageMapper;
+    @Autowired
+    private StatusFieldSettingMapper statusFieldSettingMapper;
+    @Autowired
+    private StatusFieldValueSettingMapper statusFieldValueSettingMapper;
+    @Autowired
+    private StatusNoticeSettingMapper statusNoticeSettingMapper;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
 
@@ -160,6 +175,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         cloneAgileIssueStatus(sourceProjectId, targetProjectId, context);
         // 复制状态机
         cloneStatusMachine(sourceProjectId, targetProjectId, context);
+        // 复制状态机自定义流转
+        this.cloneStatusMachineCustomFlow(sourceProjectId, targetProjectId, context);
         // 复制issue本体
         cloneAgileIssue(sourceProjectId, targetProjectId, context);
         // 复制规划的版本与issue的关系
@@ -177,7 +194,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         // 复制工作项附件
         cloneIssueAttachment(sourceProjectId, targetProjectId, context);
         // 复制工作项自定义字段值
-        copyCustomFieldValue(sourceProjectId, targetProjectId, context);
+        cloneCustomFieldValue(sourceProjectId, targetProjectId, context);
 
         // 复制瀑布插件数据
         if (categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)) {
@@ -1232,7 +1249,8 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 fieldCascadeRule.setFieldOptionId(newFieldOptionId);
             }
 
-            final Long newCascadeFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, fieldCascadeRule.getCascadeFieldId());
+            final Long sourceCascadeFieldId = fieldCascadeRule.getCascadeFieldId();
+            final Long newCascadeFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceCascadeFieldId);
             if(newCascadeFieldId != null) {
                 // 项目下可以对非本项目的字段设置级联规则, 所以如果查映射查不到就保持原值
                 fieldCascadeRule.setCascadeFieldId(newCascadeFieldId);
@@ -1245,6 +1263,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             }
             context.put(TABLE_FD_FIELD_CASCADE_RULE, sourceFieldCascadeRuleId, fieldCascadeRule.getId());
             fieldCascadeRule.setId(sourceFieldCascadeRuleId);
+            fieldCascadeRule.setCascadeFieldId(sourceCascadeFieldId);
         }
         this.logger.debug("fd_field_cascade_rule 复制完成");
         return sourceFieldCascadeRuleList;
@@ -1307,7 +1326,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                         continue;
                     }
                     newCascadeOptionId = newProductVersionId;
-                } else if(!Boolean.TRUE.equals(cascadeField.getSystem()) && Objects.equals(cascadeField.getProjectId(),sourceProjectId)) {
+                } else if(!Boolean.TRUE.equals(cascadeField.getSystem()) && Objects.equals(cascadeField.getProjectId(), sourceProjectId)) {
                     // 处理项目层自定义字段
                     final Long newOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceCascadeOptionId);
                     if(newOptionId == null) {
@@ -1507,9 +1526,9 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         this.logger.debug("agile_issue_predecessor_tree_closure 复制完成");
     }
 
-    private void copyCustomFieldValue(Long sourceProjectId,
-                                      Long targetProjectId,
-                                      ProjectCloneContext context) {
+    private void cloneCustomFieldValue(Long sourceProjectId,
+                                       Long targetProjectId,
+                                       ProjectCloneContext context) {
         List<FieldValueDTO> fieldValues = fieldValueMapper.select(new FieldValueDTO().setProjectId(sourceProjectId));
         if (CollectionUtils.isEmpty(fieldValues)) {
             this.logger.debug("没有检测到可复制的 fd_field_value 数据, 跳过此步骤");
@@ -1558,6 +1577,348 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             }
         }
         this.logger.debug("fd_field_value 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneStatusMachineCustomFlow(Long sourceProjectId,
+                                              Long targetProjectId,
+                                              ProjectCloneContext context) {
+        this.cloneFdStatusBranchMergeSetting(sourceProjectId, targetProjectId, context);
+        this.cloneFdStatusTransferSetting(sourceProjectId, targetProjectId, context);
+        this.cloneFdStatusLinkage(sourceProjectId, targetProjectId, context);
+        this.cloneFdLinkIssueStatusLinkage(sourceProjectId, targetProjectId, context);
+        final List<StatusFieldSettingDTO> sourceStatusFieldSettingList = this.cloneFdStatusFieldSetting(sourceProjectId, targetProjectId, context);
+        this.cloneFdStatusFieldValueSetting(sourceProjectId, targetProjectId, context, sourceStatusFieldSettingList);
+        this.cloneFdStatusNoticeSetting(sourceProjectId, targetProjectId, context);
+    }
+
+    /**
+     * 复制状态机自定义流转--自动流转 fd_status_branch_merge_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdStatusBranchMergeSetting(Long sourceProjectId,
+                                                 Long targetProjectId,
+                                                 ProjectCloneContext context) {
+        List<StatusBranchMergeSettingDTO> sourceStatusBranchMergeSettingList = this.statusBranchMergeSettingMapper.select(new StatusBranchMergeSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusBranchMergeSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_branch_merge_setting 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_branch_merge_setting 数据{}条, 开始复制", sourceStatusBranchMergeSettingList.size());
+        for (StatusBranchMergeSettingDTO sourceStatusBranchMergeSetting : sourceStatusBranchMergeSettingList) {
+            final Long sourceStatusBranchMergeSettingId = sourceStatusBranchMergeSetting.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusBranchMergeSetting.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusBranchMergeSetting.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+
+            sourceStatusBranchMergeSetting.setId(null);
+            sourceStatusBranchMergeSetting.setProjectId(targetProjectId);
+            if (this.statusBranchMergeSettingMapper.insert(sourceStatusBranchMergeSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_branch_merge_setting");
+            }
+            context.put(TABLE_FD_STATUS_BRANCH_MERGE_SETTING, sourceStatusBranchMergeSettingId, sourceStatusBranchMergeSetting.getId());
+        }
+        this.logger.debug("fd_status_branch_merge_setting 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--流转条件 fd_status_transfer_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdStatusTransferSetting(Long sourceProjectId,
+                                              Long targetProjectId,
+                                              ProjectCloneContext context) {
+        List<StatusTransferSettingDTO> sourceStatusTransferSettingList = this.statusTransferSettingMapper.select(new StatusTransferSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusTransferSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_transfer_setting 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_transfer_setting 数据{}条, 开始复制", sourceStatusTransferSettingList.size());
+        for (StatusTransferSettingDTO sourceStatusTransferSetting : sourceStatusTransferSettingList) {
+            final Long sourceStatusTransferSettingId = sourceStatusTransferSetting.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusTransferSetting.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusTransferSetting.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+
+            sourceStatusTransferSetting.setId(null);
+            sourceStatusTransferSetting.setProjectId(targetProjectId);
+            if (this.statusTransferSettingMapper.insert(sourceStatusTransferSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_transfer_setting");
+            }
+            context.put(TABLE_FD_STATUS_TRANSFER_SETTING, sourceStatusTransferSettingId, sourceStatusTransferSetting.getId());
+        }
+        this.logger.debug("fd_status_transfer_setting 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--状态联动--父子级联动 fd_status_linkage
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdStatusLinkage(Long sourceProjectId,
+                                              Long targetProjectId,
+                                              ProjectCloneContext context) {
+        List<StatusLinkageDTO> sourceStatusLinkageList = this.statusLinkageMapper.select(new StatusLinkageDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusLinkageList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_linkage 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_linkage 数据{}条, 开始复制", sourceStatusLinkageList.size());
+        for (StatusLinkageDTO sourceStatusLinkage : sourceStatusLinkageList) {
+            final Long sourceStatusLinkageId = sourceStatusLinkage.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusLinkage.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusLinkage.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+            // parentIssueStatusSetting都是组织层的, 不用复制
+            // parentIssueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newParentIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusLinkage.getParentIssueTypeId());
+            if(newParentIssueTypeId != null) {
+                sourceStatusLinkage.setParentIssueTypeId(newParentIssueTypeId);
+            }
+
+            sourceStatusLinkage.setId(null);
+            sourceStatusLinkage.setProjectId(targetProjectId);
+            if (this.statusLinkageMapper.insert(sourceStatusLinkage) != 1) {
+                throw new CommonException("error.insert.fd_status_linkage");
+            }
+            context.put(TABLE_FD_STATUS_LINKAGE, sourceStatusLinkageId, sourceStatusLinkage.getId());
+        }
+        this.logger.debug("fd_status_linkage 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--状态联动--关联工作项 fd_link_issue_status_linkage
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdLinkIssueStatusLinkage(Long sourceProjectId,
+                                               Long targetProjectId,
+                                               ProjectCloneContext context) {
+        List<LinkIssueStatusLinkageDTO> sourceLinkIssueStatusLinkageList = this.linkIssueStatusLinkageMapper.select(new LinkIssueStatusLinkageDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceLinkIssueStatusLinkageList)) {
+            this.logger.debug("没有检测到可复制的 fd_link_issue_status_linkage 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_link_issue_status_linkage 数据{}条, 开始复制", sourceLinkIssueStatusLinkageList.size());
+        for (LinkIssueStatusLinkageDTO sourceLinkIssueStatusLinkage : sourceLinkIssueStatusLinkageList) {
+            final Long sourceLinkIssueStatusLinkageId = sourceLinkIssueStatusLinkage.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceLinkIssueStatusLinkage.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceLinkIssueStatusLinkage.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+            // parentIssueStatusSetting都是组织层的, 不用复制
+            // 工作项关联类型一定是本项目下新复制的, 查不到说明有脏数据
+            final Long newLinkTypeId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_LINK_TYPE, sourceLinkIssueStatusLinkage.getLinkTypeId());
+            if(newLinkTypeId == null) {
+                continue;
+            }
+            sourceLinkIssueStatusLinkage.setLinkTypeId(newLinkTypeId);
+            // linkIssueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newLinkIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceLinkIssueStatusLinkage.getLinkIssueTypeId());
+            if(newLinkIssueTypeId != null) {
+                sourceLinkIssueStatusLinkage.setLinkIssueTypeId(newLinkIssueTypeId);
+            }
+            // linkIssueStatusId都是组织层的, 不用复制
+
+            sourceLinkIssueStatusLinkage.setId(null);
+            sourceLinkIssueStatusLinkage.setProjectId(targetProjectId);
+            if (this.linkIssueStatusLinkageMapper.insert(sourceLinkIssueStatusLinkage) != 1) {
+                throw new CommonException("error.insert.fd_link_issue_status_linkage");
+            }
+            context.put(TABLE_FD_LINK_ISSUE_STATUS_LINKAGE, sourceLinkIssueStatusLinkageId, sourceLinkIssueStatusLinkage.getId());
+        }
+        this.logger.debug("fd_link_issue_status_linkage 复制完成");
+    }
+
+    /**
+     * 复制状态机自定义流转--更新属性--字段声明 fd_status_field_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private List<StatusFieldSettingDTO> cloneFdStatusFieldSetting(Long sourceProjectId,
+                                           Long targetProjectId,
+                                           ProjectCloneContext context) {
+        List<StatusFieldSettingDTO> sourceStatusFieldSettingList = this.statusFieldSettingMapper.select(new StatusFieldSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusFieldSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_field_setting 数据, 跳过此步骤");
+            return Collections.emptyList();
+        }
+        this.logger.debug("检测到可复制的 fd_status_field_setting 数据{}条, 开始复制", sourceStatusFieldSettingList.size());
+        for (StatusFieldSettingDTO sourceStatusFieldSetting : sourceStatusFieldSettingList) {
+            final Long sourceStatusFieldSettingId = sourceStatusFieldSetting.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusFieldSetting.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusFieldSetting.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+            // fieldId可能不是本项目的, 所以无法映射时就不处理
+            final Long sourceFieldId = sourceStatusFieldSetting.getFieldId();
+            final Long newFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceFieldId);
+            if(newFieldId != null) {
+                sourceStatusFieldSetting.setFieldId(newFieldId);
+            }
+
+            sourceStatusFieldSetting.setId(null);
+            sourceStatusFieldSetting.setProjectId(targetProjectId);
+            if (this.statusFieldSettingMapper.insert(sourceStatusFieldSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_field_setting");
+            }
+            context.put(TABLE_FD_STATUS_FIELD_SETTING, sourceStatusFieldSettingId, sourceStatusFieldSetting.getId());
+            sourceStatusFieldSetting.setId(sourceStatusFieldSettingId);
+            sourceStatusFieldSetting.setFieldId(sourceFieldId);
+        }
+        this.logger.debug("fd_status_field_setting 复制完成");
+        return sourceStatusFieldSettingList;
+    }
+
+    /**
+     * 复制状态机自定义流转--更新属性--值声明 fd_status_field_value_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param sourceStatusFieldSettingList  源字段声明集合, 用来在处理选项时反查字段定义
+     * @param context         context
+     */
+    private void cloneFdStatusFieldValueSetting(Long sourceProjectId,
+                                                Long targetProjectId,
+                                                ProjectCloneContext context,
+                                                List<StatusFieldSettingDTO> sourceStatusFieldSettingList) {
+        List<StatusFieldValueSettingDTO> sourceStatusFieldValueSettingList = this.statusFieldValueSettingMapper.select(new StatusFieldValueSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusFieldValueSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_field_value_setting 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_field_value_setting 数据{}条, 开始复制", sourceStatusFieldValueSettingList.size());
+        final Set<String> fieldTypeFilter = SetUtils.hashSet(FieldType.RADIO, FieldType.CHECKBOX, FieldType.SINGLE, FieldType.MULTIPLE);
+        final List<ObjectSchemeFieldDTO> mayBeUsedFields = context.getMayBeUsedFields();
+        final Map<Long, ObjectSchemeFieldDTO> fieldIdToEntityMap = mayBeUsedFields.stream()
+                .filter(mayBeUsedField -> fieldTypeFilter.contains(mayBeUsedField.getFieldType()))
+                .collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
+        final Map<Long, Long> statusFieldSettingIdToFieldIdMap = sourceStatusFieldSettingList.stream().collect(Collectors.toMap(StatusFieldSettingDTO::getId, StatusFieldSettingDTO::getFieldId));
+        for (StatusFieldValueSettingDTO sourceStatusFieldValueSetting : sourceStatusFieldValueSettingList) {
+            final Long sourceStatusFieldValueSettingId = sourceStatusFieldValueSetting.getId();
+            final Long sourceStatusFieldSettingId = sourceStatusFieldValueSetting.getStatusFieldSettingId();
+
+            final Long newStatusFieldSettingId = context.getByTableAndSourceId(TABLE_FD_STATUS_FIELD_SETTING, sourceStatusFieldSettingId);
+            if(newStatusFieldSettingId == null) {
+                continue;
+            }
+            sourceStatusFieldValueSetting.setStatusFieldSettingId(newStatusFieldSettingId);
+
+            // 处理选项
+            // 只处理字段类型为选项类型&操作类型为指定值的
+            if(fieldTypeFilter.contains(sourceStatusFieldValueSetting.getFieldType()) && StatusFieldSettingValidator.OPERATE_TYPE_SPECIFIER.equals(sourceStatusFieldValueSetting.getOperateType())) {
+                final Long sourceOptionId = sourceStatusFieldValueSetting.getOptionId();
+                Long newOptionId = sourceOptionId;
+                // 根据ruleId获取对应的级联字段
+                final ObjectSchemeFieldDTO field = Optional.ofNullable(statusFieldSettingIdToFieldIdMap.get(sourceStatusFieldSettingId)).map(fieldIdToEntityMap::get).orElse(null);
+                // 如果找到了, 说明需要处理; 否则不处理
+                if(field != null) {
+                    if(Boolean.TRUE.equals(field.getSystem()) && FIELD_CODE_COMPONENT.equals(field.getCode())) {
+                        // 特殊处理模块
+                        final Long newComponentId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_COMPONENT, sourceOptionId);
+                        if(newComponentId == null) {
+                            continue;
+                        }
+                        newOptionId = newComponentId;
+                    } else if(Boolean.TRUE.equals(field.getSystem()) && (FIELD_CODE_INFLUENCE_VERSION.equals(field.getCode()) || FIELD_CODE_FIX_VERSION.equals(field.getCode()))) {
+                        // 特殊影响/修复的版本
+                        final Long newProductVersionId = context.getByTableAndSourceId(TABLE_AGILE_PRODUCT_VERSION, sourceOptionId);
+                        if(newProductVersionId == null) {
+                            continue;
+                        }
+                        newOptionId = newProductVersionId;
+                    } else if(!Boolean.TRUE.equals(field.getSystem()) && Objects.equals(field.getProjectId(), sourceProjectId)) {
+                        // 处理项目层自定义字段
+                        final Long newFieldOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceOptionId);
+                        if(newFieldOptionId == null) {
+                            continue;
+                        }
+                        newOptionId = newFieldOptionId;
+                    }
+                    // 不满足以上条件的, 暂时不需要处理
+                }
+                sourceStatusFieldValueSetting.setOptionId(newOptionId);
+            }
+
+            // customFieldId可能不是本项目的, 所以无法映射时就不处理
+            final Long newCustomFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceStatusFieldValueSetting.getCustomFieldId());
+            if(newCustomFieldId != null) {
+                sourceStatusFieldValueSetting.setCustomFieldId(newCustomFieldId);
+            }
+
+            sourceStatusFieldValueSetting.setId(null);
+            sourceStatusFieldValueSetting.setProjectId(targetProjectId);
+            if (this.statusFieldValueSettingMapper.insert(sourceStatusFieldValueSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_field_value_setting");
+            }
+            context.put(TABLE_FD_STATUS_FIELD_VALUE_SETTING, sourceStatusFieldValueSettingId, sourceStatusFieldValueSetting.getId());
+        }
+        this.logger.debug("fd_status_field_value_setting 复制完成");
+    }
+
+
+    /**
+     * 复制状态机自定义流转--通知设置 fd_status_notice_setting
+     * @param sourceProjectId sourceProjectId
+     * @param targetProjectId targetProjectId
+     * @param context         context
+     */
+    private void cloneFdStatusNoticeSetting(Long sourceProjectId,
+                                            Long targetProjectId,
+                                            ProjectCloneContext context) {
+        List<StatusNoticeSettingDTO> sourceStatusNoticeSettingList = this.statusNoticeSettingMapper.select(new StatusNoticeSettingDTO().setProjectId(sourceProjectId));
+        if (CollectionUtils.isEmpty(sourceStatusNoticeSettingList)) {
+            this.logger.debug("没有检测到可复制的 fd_status_notice_setting 数据, 跳过此步骤");
+            return;
+        }
+        this.logger.debug("检测到可复制的 fd_status_notice_setting 数据{}条, 开始复制", sourceStatusNoticeSettingList.size());
+        for (StatusNoticeSettingDTO sourceStatusNoticeSetting : sourceStatusNoticeSettingList) {
+            final Long sourceStatusNoticeSettingId = sourceStatusNoticeSetting.getId();
+
+            // issueTypeId可能不是本项目的, 所以无法映射时就不处理
+            final Long newIssueTypeId = context.getByTableAndSourceId(TABLE_FD_ISSUE_TYPE, sourceStatusNoticeSetting.getIssueTypeId());
+            if(newIssueTypeId != null) {
+                sourceStatusNoticeSetting.setIssueTypeId(newIssueTypeId);
+            }
+            // statusId都是组织层的, 不用复制
+
+            sourceStatusNoticeSetting.setId(null);
+            sourceStatusNoticeSetting.setProjectId(targetProjectId);
+            if (this.statusNoticeSettingMapper.insert(sourceStatusNoticeSetting) != 1) {
+                throw new CommonException("error.insert.fd_status_notice_setting");
+            }
+            context.put(TABLE_FD_STATUS_NOTICE_SETTING, sourceStatusNoticeSettingId, sourceStatusNoticeSetting.getId());
+        }
+        this.logger.debug("fd_status_notice_setting 复制完成");
     }
 
 }
