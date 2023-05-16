@@ -5,7 +5,9 @@ import static io.choerodon.agile.infra.utils.SagaTopic.Organization.TASK_ORG_CRE
 import static io.choerodon.agile.infra.utils.SagaTopic.Project.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
@@ -25,8 +27,6 @@ import io.choerodon.agile.domain.context.ProjectCloneContext;
 import io.choerodon.agile.domain.service.ProjectCloneDomainService;
 import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
-import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.asgard.saga.annotation.SagaTask;
@@ -46,10 +46,10 @@ public class AgileEventHandler {
     public static final String ACTION_PROJECT_CREATE = "project-create";
     public static final String ACTION_PROJECT_UPDATE = "project-update";
 
+    public static final String AGILE_INIT_WATERFALL_DATA = "agile_init_waterfall_data";
+
     @Autowired
     private ProjectInfoService projectInfoService;
-    @Autowired
-    private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private IssueLinkTypeService issueLinkTypeService;
     @Autowired
@@ -71,9 +71,6 @@ public class AgileEventHandler {
     private ProjectConfigService projectConfigService;
 
     @Autowired
-    private TestServiceClientOperator testServiceClientOperator;
-
-    @Autowired
     private OrganizationConfigService organizationConfigService;
 
     @Autowired
@@ -86,6 +83,8 @@ public class AgileEventHandler {
     private AgileWaterfallService agileWaterfallService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private List<DemoService> demoServices;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -184,6 +183,26 @@ public class AgileEventHandler {
                     backlogExpandService.startBacklog(projectEvent);
                 }
             }
+        }
+        //创建项目，是模版项目，且要后置初始化数据，则执行后置操作
+        projectTemplatePostAction(projectEvent, categoryCodes);
+    }
+
+    private void projectTemplatePostAction(ProjectEvent projectEvent,
+                                           Set<String> categoryCodes) {
+        Boolean templateFlag = projectEvent.getTemplateFlag();
+        List<String> postAction = projectEvent.getPostAction();
+        if (Boolean.TRUE.equals(templateFlag)
+                && categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)
+                && postAction.contains(AGILE_INIT_WATERFALL_DATA)) {
+            // 如果是瀑布模板项目，且需要初始化瀑布数据，则执行后置操作
+            Map<String, DemoService> demoServiceMap = demoServices.stream().collect(Collectors.toMap(DemoService::handleProjectCategory, Function.identity()));
+            DemoService demoService = demoServiceMap.get(ProjectCategory.MODULE_WATERFALL_AGILE);
+            if (demoService == null) {
+                LOGGER.warn("瀑布插件不存在，大瀑布小敏捷demo项目初始化数据取消");
+                return;
+            }
+            demoService.initProjectTemplateData(projectEvent.getProjectId());
         }
     }
 
