@@ -1,9 +1,10 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -53,7 +54,7 @@ public class IssueAttachmentVO {
     @ApiModelProperty("文件的类型（根据后缀来判断）")
     private String fileType;
     @ApiModelProperty("onlyOffice用来标识文件的唯一性")
-    private String key;
+    private String fileId;
     @ApiModelProperty("文件的大小")
     private Long size;
     @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
@@ -146,12 +147,12 @@ public class IssueAttachmentVO {
         this.fileType = fileType;
     }
 
-    public String getKey() {
-        return key;
+    public String getFileId() {
+        return fileId;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 
 

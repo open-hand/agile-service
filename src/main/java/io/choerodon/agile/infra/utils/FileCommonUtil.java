@@ -2,9 +2,7 @@ package io.choerodon.agile.infra.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import org.hzero.core.base.BaseConstants;
 
 /**
  * 项目字段
@@ -15,13 +13,13 @@ public class FileCommonUtil {
 
     public static String getFileType(String fileKey) {
         if (StringUtils.isEmpty(fileKey)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        int index = fileKey.lastIndexOf(".");
+        int index = fileKey.lastIndexOf(BaseConstants.Symbol.POINT);
         if (index > -1) {
             return fileKey.substring(index + 1);
         } else {
-            return "";
+            return StringUtils.EMPTY;
         }
     }
 
