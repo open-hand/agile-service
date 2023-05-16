@@ -169,6 +169,16 @@ public class IssueCreateVO {
     @ApiModelProperty(value = "附件url集合")
     private List<IssueAttachmentVO> attachments;
 
+    private List<IssueCreateVO> children;
+
+    public List<IssueCreateVO> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<IssueCreateVO> children) {
+        this.children = children;
+    }
+
     public List<TagVO> getTags() {
         return tags;
     }
