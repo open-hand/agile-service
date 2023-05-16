@@ -13,4 +13,10 @@ public interface DemoService {
 
     void demoInit(OrganizationRegisterEventPayload demoProjectPayload, ProjectVO projectVO);
 
+    /**
+     * 初始化项目模板数据
+     *
+     * @param projectId
+     */
+    void initProjectTemplateData(Long projectId);
 }

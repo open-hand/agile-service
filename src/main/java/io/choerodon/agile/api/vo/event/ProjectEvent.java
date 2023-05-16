@@ -40,6 +40,26 @@ public class ProjectEvent {
 
     private Long fromTemplateId;
 
+    private Boolean templateFlag;
+
+    private List<String> postAction;
+
+    public List<String> getPostAction() {
+        return postAction;
+    }
+
+    public void setPostAction(List<String> postAction) {
+        this.postAction = postAction;
+    }
+
+    public Boolean getTemplateFlag() {
+        return templateFlag;
+    }
+
+    public void setTemplateFlag(Boolean templateFlag) {
+        this.templateFlag = templateFlag;
+    }
+
     public List<ProjectEventCategory> getProjectCategoryVOS() {
         return projectCategoryVOS;
     }
