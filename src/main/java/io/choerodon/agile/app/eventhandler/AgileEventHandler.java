@@ -195,6 +195,7 @@ public class AgileEventHandler {
         if (Boolean.TRUE.equals(templateFlag)
                 && categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)
                 && postAction.contains(AGILE_INIT_WATERFALL_DATA)) {
+            LOGGER.info("初始化模板项目数据{}, code: {}", projectEvent.getProjectId(), projectEvent.getProjectCode());
             // 如果是瀑布模板项目，且需要初始化瀑布数据，则执行后置操作
             Map<String, DemoService> demoServiceMap = demoServices.stream().collect(Collectors.toMap(DemoService::handleProjectCategory, Function.identity()));
             DemoService demoService = demoServiceMap.get(ProjectCategory.MODULE_WATERFALL_AGILE);
@@ -203,6 +204,7 @@ public class AgileEventHandler {
                 return;
             }
             demoService.initProjectTemplateData(projectEvent.getProjectId());
+            LOGGER.info("初始化模板项目数据完成{}, code: {}", projectEvent.getProjectId(), projectEvent.getProjectCode());
         }
     }
 
