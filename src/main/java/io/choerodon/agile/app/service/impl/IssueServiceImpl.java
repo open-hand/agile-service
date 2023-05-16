@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -49,6 +51,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
@@ -76,6 +79,7 @@ import org.hzero.core.base.AopProxy;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.Pair;
+import org.hzero.core.util.ResponseUtils;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
@@ -217,6 +221,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private WikiRelationService wikiRelationService;
     @Autowired
     private IWorkLogService workLogService;
+    @Autowired
+    private CustomFileFeignClient customFileFeignClient;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -580,6 +586,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issue.setSameParentBugDOList(Objects.nonNull(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)?
                 issueMapper.querySubBugByIssueId(issue.getRelateIssueId()): null);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
+            // 填充wps onlyOffice预览所需要的信息
+            List<String> fileKeys = getFileKeys(issue);
+            List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, fileKeys), new TypeReference<List<FileVO>>() {});
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(fileVOS)) {
+                fillAttachmentFileAttribute(issue, fileVOS);
+            }
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
                     filePathService.generateFullPath(issueAttachmentDO.getUrl())));
         }
@@ -601,6 +613,38 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //设置星标
         setStarBeacon(issueVO);
         return issueVO;
+    }
+
+    private static void fillAttachmentFileAttribute(IssueDetailDTO issue, List<FileVO> fileVOS) {
+        Map<String, FileVO> stringFileVOMap = fileVOS.stream().collect(Collectors.toMap(FileVO::getFileKey, Function.identity()));
+        if (MapUtils.isNotEmpty(stringFileVOMap)) {
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDTO -> {
+                String fileKey = issueAttachmentDTO.getUrl().startsWith("/") ? issueAttachmentDTO.getUrl().substring(1) : issueAttachmentDTO.getUrl();
+                FileVO fileVO = stringFileVOMap.get(fileKey);
+                if (fileVO != null) {
+                    issueAttachmentDTO.setFileName(fileVO.getFileName());
+                    issueAttachmentDTO.setFileType(FileCommonUtil.getFileType(fileKey));
+                    issueAttachmentDTO.setFileKey(fileVO.getFileKey());
+                    issueAttachmentDTO.setSize(fileVO.getFileSize());
+                    issueAttachmentDTO.setFileId(String.valueOf(fileVO.getFileId()));
+                    issueAttachmentDTO.setSupportWps(true);
+                }
+                else {
+                    issueAttachmentDTO.setSupportWps(false);
+                }
+            });
+        }
+    }
+
+    private static List<String> getFileKeys(IssueDetailDTO issue) {
+        List<String> fileKeys = issue.getIssueAttachmentDTOList().stream().map(issueAttachmentDTO -> {
+            if (StringUtils.isNotEmpty(issueAttachmentDTO.getUrl()) && issueAttachmentDTO.getUrl().startsWith("/")) {
+                return issueAttachmentDTO.getUrl().substring(1);
+            } else {
+                return issueAttachmentDTO.getUrl();
+            }
+        }).collect(Collectors.toList());
+        return fileKeys;
     }
 
     private void setStarBeacon(IssueVO issue) {
