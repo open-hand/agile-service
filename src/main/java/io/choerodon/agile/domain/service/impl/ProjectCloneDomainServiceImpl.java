@@ -11,6 +11,7 @@ import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -850,11 +851,14 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
         ).build());
         context.addMayBeUsedFields(allOrganizationFields);
         final List<ObjectSchemeFieldDTO> sourceObjectSchemeFields = this.objectSchemeFieldMapper.select(new ObjectSchemeFieldDTO().setProjectId(sourceProjectId));
-        context.addMayBeUsedFields(sourceObjectSchemeFields);
         if(CollectionUtils.isEmpty(sourceObjectSchemeFields)) {
             this.logger.debug("没有检测到可复制的 fd_object_scheme_field 数据, 跳过此步骤");
             return;
         }
+        // 复制一份ObjectSchemeFieldDTO对象放入mayBeUsedFields中
+        // 不然后续处理之后fieldId会变成新插入的ID
+        // 导致后续根据源fieldId查询field信息时查不到
+        context.addMayBeUsedFields(sourceObjectSchemeFields.stream().map(field -> {ObjectSchemeFieldDTO res = new ObjectSchemeFieldDTO(); BeanUtils.copyProperties(field, res); return res;}).collect(Collectors.toList()));
         this.logger.debug("检测到可复制的 fd_object_scheme_field 数据{}条, 开始复制", sourceObjectSchemeFields.size());
         for (ObjectSchemeFieldDTO objectSchemeField : sourceObjectSchemeFields) {
             final Long sourceObjectSchemeFieldId = objectSchemeField.getId();
