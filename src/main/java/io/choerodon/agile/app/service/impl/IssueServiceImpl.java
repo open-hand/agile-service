@@ -630,6 +630,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     issueAttachmentDTO.setSupportWps(true);
                 }
                 else {
+                    issueAttachmentDTO.setFileType(FileCommonUtil.getFileType(fileKey));
+                    issueAttachmentDTO.setFileId(UUID.randomUUID().toString());
+                    issueAttachmentDTO.setFileName(issueAttachmentDTO.getFileName());
                     issueAttachmentDTO.setSupportWps(false);
                 }
             });
