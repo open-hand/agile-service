@@ -587,31 +587,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 issueMapper.querySubBugByIssueId(issue.getRelateIssueId()): null);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             // 填充wps onlyOffice预览所需要的信息
-            List<String> fileKeys = issue.getIssueAttachmentDTOList().stream().map(issueAttachmentDTO -> {
-                if (StringUtils.isNotEmpty(issueAttachmentDTO.getUrl()) && issueAttachmentDTO.getUrl().startsWith("/")) {
-                    return issueAttachmentDTO.getUrl().substring(1);
-                } else {
-                    return issueAttachmentDTO.getUrl();
-                }
-            }).collect(Collectors.toList());
+            List<String> fileKeys = getFileKeys(issue);
             List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, fileKeys), new TypeReference<List<FileVO>>() {
             });
             if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(fileVOS)) {
-                Map<String, FileVO> stringFileVOMap = fileVOS.stream().collect(Collectors.toMap(FileVO::getFileKey, Function.identity()));
-                if (MapUtils.isNotEmpty(stringFileVOMap)) {
-                    issue.getIssueAttachmentDTOList().forEach(issueAttachmentDTO -> {
-                        String fileKey = issueAttachmentDTO.getUrl().startsWith("/") ? issueAttachmentDTO.getUrl().substring(1) : issueAttachmentDTO.getUrl();
-                        FileVO fileVO = stringFileVOMap.get(fileKey);
-                        if (fileVO != null) {
-                            issueAttachmentDTO.setFileName(fileVO.getFileName());
-                            issueAttachmentDTO.setFileType(FileCommonUtil.getFileType(fileKey));
-                            issueAttachmentDTO.setFileKey(fileVO.getFileKey());
-                            issueAttachmentDTO.setSize(fileVO.getFileSize());
-                            issueAttachmentDTO.setKey(String.valueOf(fileVO.getFileId()));
-                            issueAttachmentDTO.setTitle(fileVO.getFileName());
-                        }
-                    });
-                }
+                fillAttachmentFileAttribute(issue, fileVOS);
             }
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
                     filePathService.generateFullPath(issueAttachmentDO.getUrl())));
@@ -634,6 +614,39 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //设置星标
         setStarBeacon(issueVO);
         return issueVO;
+    }
+
+    private static void fillAttachmentFileAttribute(IssueDetailDTO issue, List<FileVO> fileVOS) {
+        Map<String, FileVO> stringFileVOMap = fileVOS.stream().collect(Collectors.toMap(FileVO::getFileKey, Function.identity()));
+        if (MapUtils.isNotEmpty(stringFileVOMap)) {
+            issue.getIssueAttachmentDTOList().forEach(issueAttachmentDTO -> {
+                String fileKey = issueAttachmentDTO.getUrl().startsWith("/") ? issueAttachmentDTO.getUrl().substring(1) : issueAttachmentDTO.getUrl();
+                FileVO fileVO = stringFileVOMap.get(fileKey);
+                if (fileVO != null) {
+                    issueAttachmentDTO.setFileName(fileVO.getFileName());
+                    issueAttachmentDTO.setFileType(FileCommonUtil.getFileType(fileKey));
+                    issueAttachmentDTO.setFileKey(fileVO.getFileKey());
+                    issueAttachmentDTO.setSize(fileVO.getFileSize());
+                    issueAttachmentDTO.setKey(String.valueOf(fileVO.getFileId()));
+                    issueAttachmentDTO.setTitle(fileVO.getFileName());
+                    issueAttachmentDTO.setSupportWps(true);
+                }
+                else {
+                    issueAttachmentDTO.setSupportWps(false);
+                }
+            });
+        }
+    }
+
+    private static List<String> getFileKeys(IssueDetailDTO issue) {
+        List<String> fileKeys = issue.getIssueAttachmentDTOList().stream().map(issueAttachmentDTO -> {
+            if (StringUtils.isNotEmpty(issueAttachmentDTO.getUrl()) && issueAttachmentDTO.getUrl().startsWith("/")) {
+                return issueAttachmentDTO.getUrl().substring(1);
+            } else {
+                return issueAttachmentDTO.getUrl();
+            }
+        }).collect(Collectors.toList());
+        return fileKeys;
     }
 
     private void setStarBeacon(IssueVO issue) {
