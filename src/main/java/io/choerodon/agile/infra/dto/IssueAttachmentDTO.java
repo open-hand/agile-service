@@ -57,9 +57,7 @@ public class IssueAttachmentDTO extends AuditDomain {
     @ApiModelProperty("onlyOffice用来标识文件的唯一性")
     @Transient
     private String key;
-    @ApiModelProperty("文件名")
-    @Transient
-    private String title;
+
     @Transient
     @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
     private Boolean supportWps;
@@ -158,14 +156,6 @@ public class IssueAttachmentDTO extends AuditDomain {
 
     public void setKey(String key) {
         this.key = key;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public Boolean getSupportWps() {

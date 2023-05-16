@@ -54,9 +54,6 @@ public class IssueAttachmentVO {
     private String fileType;
     @ApiModelProperty("onlyOffice用来标识文件的唯一性")
     private String key;
-    @ApiModelProperty("文件名")
-    private String title;
-
     @ApiModelProperty("文件的大小")
     private Long size;
     @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
@@ -157,13 +154,6 @@ public class IssueAttachmentVO {
         this.key = key;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     public Long getSize() {
         return size;
