@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import java.util.List;
 import java.util.Optional;
+import javax.validation.Valid;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -32,9 +33,9 @@ public class WikiRelationController {
     @ApiOperation("添加knowledge relation")
     @PostMapping
     public ResponseEntity<Void> create(@ApiParam(value = "项目id", required = true)
-                                 @PathVariable(name = "project_id") Long projectId,
-                                 @ApiParam(value = "knowledge relation vo list", required = true)
-                                 @RequestBody List<WikiRelationVO> wikiRelationVOList) {
+                                       @PathVariable(name = "project_id") Long projectId,
+                                       @ApiParam(value = "knowledge relation vo list", required = true)
+                                       @RequestBody @Valid List<WikiRelationVO> wikiRelationVOList) {
         wikiRelationService.create(projectId, wikiRelationVOList);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
