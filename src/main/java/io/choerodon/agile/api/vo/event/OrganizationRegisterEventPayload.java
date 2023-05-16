@@ -20,21 +20,10 @@ public class OrganizationRegisterEventPayload {
     private User userB;
     @ApiModelProperty(value = "项目")
     private Project project;
-
     @ApiModelProperty(value = "瀑布项目")
     private Project waterfallProject;
-    @ApiModelProperty(value = "瀑布模板项目")
-    private Project waterfallProjectTemplate;
     @ApiModelProperty(value = "测试数据")
     private TestData testData;
-
-    public Project getWaterfallProjectTemplate() {
-        return waterfallProjectTemplate;
-    }
-
-    public void setWaterfallProjectTemplate(Project waterfallProjectTemplate) {
-        this.waterfallProjectTemplate = waterfallProjectTemplate;
-    }
 
     public Organization getOrganization() {
         return organization;
