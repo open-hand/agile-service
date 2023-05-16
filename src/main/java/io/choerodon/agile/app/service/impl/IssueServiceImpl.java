@@ -17,11 +17,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hzero.core.util.ResponseUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -53,6 +51,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
@@ -80,6 +79,7 @@ import org.hzero.core.base.AopProxy;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.Pair;
+import org.hzero.core.util.ResponseUtils;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 
 /**
@@ -588,8 +588,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             // 填充wps onlyOffice预览所需要的信息
             List<String> fileKeys = getFileKeys(issue);
-            List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, fileKeys), new TypeReference<List<FileVO>>() {
-            });
+            List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, fileKeys), new TypeReference<List<FileVO>>() {});
             if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(fileVOS)) {
                 fillAttachmentFileAttribute(issue, fileVOS);
             }
@@ -627,7 +626,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     issueAttachmentDTO.setFileType(FileCommonUtil.getFileType(fileKey));
                     issueAttachmentDTO.setFileKey(fileVO.getFileKey());
                     issueAttachmentDTO.setSize(fileVO.getFileSize());
-                    issueAttachmentDTO.setKey(String.valueOf(fileVO.getFileId()));
+                    issueAttachmentDTO.setFileId(String.valueOf(fileVO.getFileId()));
                     issueAttachmentDTO.setSupportWps(true);
                 }
                 else {
