@@ -588,10 +588,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             // 填充wps onlyOffice预览所需要的信息
             List<String> fileKeys = getFileKeys(issue);
-            List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, fileKeys), new TypeReference<List<FileVO>>() {});
-            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(fileVOS)) {
-                fillAttachmentFileAttribute(issue, fileVOS);
-            }
+            List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, fileKeys), new TypeReference<List<FileVO>>() {
+            });
+            fillAttachmentFileAttribute(issue, fileVOS);
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(
                     filePathService.generateFullPath(issueAttachmentDO.getUrl())));
         }
@@ -616,6 +615,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private static void fillAttachmentFileAttribute(IssueDetailDTO issue, List<FileVO> fileVOS) {
+        if (CollectionUtils.isEmpty(fileVOS)) {
+            for (IssueAttachmentDTO issueAttachmentDTO : issue.getIssueAttachmentDTOList()) {
+                String fileKey = issueAttachmentDTO.getUrl().startsWith("/") ? issueAttachmentDTO.getUrl().substring(1) : issueAttachmentDTO.getUrl();
+                fillDefaultValue(issueAttachmentDTO, fileKey);
+            }
+            return;
+        }
         Map<String, FileVO> stringFileVOMap = fileVOS.stream().collect(Collectors.toMap(FileVO::getFileKey, Function.identity()));
         if (MapUtils.isNotEmpty(stringFileVOMap)) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDTO -> {
@@ -630,10 +636,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                     issueAttachmentDTO.setSupportWps(true);
                 }
                 else {
-                    issueAttachmentDTO.setSupportWps(false);
+                    fillDefaultValue(issueAttachmentDTO, fileKey);
                 }
             });
         }
+    }
+
+    private static void fillDefaultValue(IssueAttachmentDTO issueAttachmentDTO, String fileKey) {
+        issueAttachmentDTO.setFileType(FileCommonUtil.getFileType(fileKey));
+        issueAttachmentDTO.setFileId(UUID.randomUUID().toString());
+        issueAttachmentDTO.setFileName(issueAttachmentDTO.getFileName());
+        issueAttachmentDTO.setSupportWps(false);
     }
 
     private static List<String> getFileKeys(IssueDetailDTO issue) {
