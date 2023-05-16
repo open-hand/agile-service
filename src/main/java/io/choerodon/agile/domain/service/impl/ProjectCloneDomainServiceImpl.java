@@ -1066,7 +1066,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                         }
                     }
                 } else if(Boolean.TRUE.equals(sourceField.getSystem()) && (FIELD_CODE_INFLUENCE_VERSION.equals(sourceField.getCode()) || FIELD_CODE_FIX_VERSION.equals(sourceField.getCode()))) {
-                    // 特殊影响/修复的版本
+                    // 特殊处理影响/修复的版本
                     if(StringUtils.isNotBlank(sourceDefaultValue)) {
                         final List<Long> sourceProductVersionIds = Arrays.stream(sourceDefaultValue.split(BaseConstants.Symbol.COMMA))
                                 .filter(StringUtils::isNotBlank)
@@ -1231,6 +1231,11 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             return Collections.emptyList();
         }
         this.logger.debug("检测到可复制的 fd_field_cascade_rule 数据{}条, 开始复制", sourceFieldCascadeRuleList.size());
+        final Set<String> fieldTypeFilter = SetUtils.unmodifiableSet(FieldType.RADIO, FieldType.CHECKBOX, FieldType.SINGLE, FieldType.MULTIPLE);
+        final List<ObjectSchemeFieldDTO> mayBeUsedFields = context.getMayBeUsedFields();
+        final Map<Long, ObjectSchemeFieldDTO> fieldIdToEntityMap = mayBeUsedFields.stream()
+                .filter(mayBeUsedField -> fieldTypeFilter.contains(mayBeUsedField.getFieldType()))
+                .collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
         for (FieldCascadeRuleDTO fieldCascadeRule : sourceFieldCascadeRuleList) {
             final Long sourceFieldCascadeRuleId = fieldCascadeRule.getId();
             fieldCascadeRule.setId(null);
@@ -1241,17 +1246,23 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 fieldCascadeRule.setIssueTypeId(newIssueTypeId);
             }
 
-            final Long newFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, fieldCascadeRule.getFieldId());
+            final Long sourceFiledId = fieldCascadeRule.getFieldId();
+            final Long newFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceFiledId);
             if(newFieldId != null) {
                 // 项目下可以对非本项目的字段设置级联规则, 所以如果查映射查不到就保持原值
                 fieldCascadeRule.setFieldId(newFieldId);
             }
 
-            final Long newFieldOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, fieldCascadeRule.getFieldOptionId());
-            if(newFieldOptionId != null) {
-                // 项目下可以对非本项目的字段选项设置级联规则, 所以如果查映射查不到就保持原值
-                fieldCascadeRule.setFieldOptionId(newFieldOptionId);
+            // 处理optionId
+            final Long sourceFieldOptionId = fieldCascadeRule.getFieldOptionId();
+            Long newFieldOptionId = sourceFieldOptionId;
+            // 根据ruleId获取对应的级联字段
+            final ObjectSchemeFieldDTO optionField = fieldIdToEntityMap.get(sourceFiledId);
+            // 如果找到了, 说明需要处理; 否则不处理
+            if(optionField != null) {
+                newFieldOptionId = this.mapSourceOptionIdToNewOptionId(sourceProjectId, optionField, sourceFieldOptionId, context);
             }
+            fieldCascadeRule.setFieldOptionId(newFieldOptionId);
 
             final Long sourceCascadeFieldId = fieldCascadeRule.getCascadeFieldId();
             final Long newCascadeFieldId = context.getByTableAndSourceId(TABLE_FD_OBJECT_SCHEME_FIELD, sourceCascadeFieldId);
@@ -1316,29 +1327,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             final ObjectSchemeFieldDTO cascadeField = Optional.ofNullable(ruleIdToCascadeFieldIdMap.get(sourceRuleId)).map(fieldIdToEntityMap::get).orElse(null);
             // 如果找到了, 说明需要处理; 否则不处理
             if(cascadeField != null) {
-                if(Boolean.TRUE.equals(cascadeField.getSystem()) && FIELD_CODE_COMPONENT.equals(cascadeField.getCode())) {
-                    // 特殊处理模块
-                    final Long newComponentId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_COMPONENT, sourceCascadeOptionId);
-                    if(newComponentId == null) {
-                        continue;
-                    }
-                    newCascadeOptionId = newComponentId;
-                } else if(Boolean.TRUE.equals(cascadeField.getSystem()) && (FIELD_CODE_INFLUENCE_VERSION.equals(cascadeField.getCode()) || FIELD_CODE_FIX_VERSION.equals(cascadeField.getCode()))) {
-                    // 特殊影响/修复的版本
-                    final Long newProductVersionId = context.getByTableAndSourceId(TABLE_AGILE_PRODUCT_VERSION, sourceCascadeOptionId);
-                    if(newProductVersionId == null) {
-                        continue;
-                    }
-                    newCascadeOptionId = newProductVersionId;
-                } else if(!Boolean.TRUE.equals(cascadeField.getSystem()) && Objects.equals(cascadeField.getProjectId(), sourceProjectId)) {
-                    // 处理项目层自定义字段
-                    final Long newOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceCascadeOptionId);
-                    if(newOptionId == null) {
-                        continue;
-                    }
-                    newCascadeOptionId = newOptionId;
-                }
-                // 不满足以上条件的, 暂时不需要处理
+                newCascadeOptionId = this.mapSourceOptionIdToNewOptionId(sourceProjectId, cascadeField, sourceCascadeOptionId, context );
             }
             fieldCascadeRuleOption.setCascadeOptionId(newCascadeOptionId);
 
@@ -1846,29 +1835,7 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
                 final ObjectSchemeFieldDTO field = Optional.ofNullable(statusFieldSettingIdToFieldIdMap.get(sourceStatusFieldSettingId)).map(fieldIdToEntityMap::get).orElse(null);
                 // 如果找到了, 说明需要处理; 否则不处理
                 if(field != null) {
-                    if(Boolean.TRUE.equals(field.getSystem()) && FIELD_CODE_COMPONENT.equals(field.getCode())) {
-                        // 特殊处理模块
-                        final Long newComponentId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_COMPONENT, sourceOptionId);
-                        if(newComponentId == null) {
-                            continue;
-                        }
-                        newOptionId = newComponentId;
-                    } else if(Boolean.TRUE.equals(field.getSystem()) && (FIELD_CODE_INFLUENCE_VERSION.equals(field.getCode()) || FIELD_CODE_FIX_VERSION.equals(field.getCode()))) {
-                        // 特殊影响/修复的版本
-                        final Long newProductVersionId = context.getByTableAndSourceId(TABLE_AGILE_PRODUCT_VERSION, sourceOptionId);
-                        if(newProductVersionId == null) {
-                            continue;
-                        }
-                        newOptionId = newProductVersionId;
-                    } else if(!Boolean.TRUE.equals(field.getSystem()) && Objects.equals(field.getProjectId(), sourceProjectId)) {
-                        // 处理项目层自定义字段
-                        final Long newFieldOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceOptionId);
-                        if(newFieldOptionId == null) {
-                            continue;
-                        }
-                        newOptionId = newFieldOptionId;
-                    }
-                    // 不满足以上条件的, 暂时不需要处理
+                    newOptionId = this.mapSourceOptionIdToNewOptionId(sourceProjectId, field, sourceOptionId, context);
                 }
                 sourceStatusFieldValueSetting.setOptionId(newOptionId);
             }
@@ -1887,6 +1854,55 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             context.put(TABLE_FD_STATUS_FIELD_VALUE_SETTING, sourceStatusFieldValueSettingId, sourceStatusFieldValueSetting.getId());
         }
         this.logger.debug("fd_status_field_value_setting 复制完成");
+    }
+
+    /**
+     * optionId通用映射逻辑
+     * @param sourceProjectId   源项目ID
+     * @param field             字段信息
+     * @param sourceOptionId    源optionId
+     * @param context           上下文
+     * @return                  映射后的值, 如果无法映射则返回sourceOptionId
+     */
+    private Long mapSourceOptionIdToNewOptionId(Long sourceProjectId,
+                                                ObjectSchemeFieldDTO field,
+                                                Long sourceOptionId,
+                                                ProjectCloneContext context) {
+        if(sourceOptionId == null || BaseConstants.DEFAULT_TENANT_ID.equals(sourceOptionId)) {
+            return sourceOptionId;
+        }
+        Long newOptionId = sourceOptionId;
+        if(Boolean.TRUE.equals(field.getSystem()) && FIELD_CODE_COMPONENT.equals(field.getCode())) {
+            // 特殊处理模块
+            final Long newComponentId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_COMPONENT, sourceOptionId);
+            if(newComponentId == null) {
+                return sourceOptionId;
+            }
+            newOptionId = newComponentId;
+        } else if(Boolean.TRUE.equals(field.getSystem()) && FIELD_CODE_LABEL.equals(field.getCode())) {
+            // 特殊处理标签
+            final Long newLabelId = context.getByTableAndSourceId(TABLE_AGILE_ISSUE_LABEL, sourceOptionId);
+            if(newLabelId == null) {
+                return sourceOptionId;
+            }
+            newOptionId = newLabelId;
+        } else if(Boolean.TRUE.equals(field.getSystem()) && (FIELD_CODE_INFLUENCE_VERSION.equals(field.getCode()) || FIELD_CODE_FIX_VERSION.equals(field.getCode()))) {
+            // 特殊处理影响/修复的版本
+            final Long newProductVersionId = context.getByTableAndSourceId(TABLE_AGILE_PRODUCT_VERSION, sourceOptionId);
+            if(newProductVersionId == null) {
+                return sourceOptionId;
+            }
+            newOptionId = newProductVersionId;
+        } else if(!Boolean.TRUE.equals(field.getSystem()) && Objects.equals(field.getProjectId(), sourceProjectId)) {
+            // 处理项目层自定义字段
+            final Long newFieldOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceOptionId);
+            if(newFieldOptionId == null) {
+                return sourceOptionId;
+            }
+            newOptionId = newFieldOptionId;
+        }
+        // 不满足以上条件的, 暂时不需要处理
+        return newOptionId;
     }
 
 
