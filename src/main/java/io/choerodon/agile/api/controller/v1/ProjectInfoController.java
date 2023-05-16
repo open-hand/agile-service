@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import org.hzero.core.util.Results;
+
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/6/15
@@ -46,9 +48,7 @@ public class ProjectInfoController {
     @GetMapping
     public ResponseEntity<ProjectInfoVO> queryProjectInfoByProjectId(@ApiParam(value = "项目id", required = true)
                                                                       @PathVariable(name = "project_id") Long projectId) {
-        return Optional.ofNullable(projectInfoService.queryProjectInfoByProjectId(projectId))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.projectInfo.queryProjectInfoByProjectId"));
+        return Results.success(projectInfoService.queryProjectInfoByProjectId(projectId));
     }
 
 }
