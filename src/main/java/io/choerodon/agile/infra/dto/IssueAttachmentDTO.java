@@ -1,16 +1,17 @@
 package io.choerodon.agile.infra.dto;
 
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -56,7 +57,7 @@ public class IssueAttachmentDTO extends AuditDomain {
     private String fileType;
     @ApiModelProperty("onlyOffice用来标识文件的唯一性")
     @Transient
-    private String key;
+    private String fileId;
 
     @Transient
     @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
@@ -150,12 +151,12 @@ public class IssueAttachmentDTO extends AuditDomain {
         this.fileType = fileType;
     }
 
-    public String getKey() {
-        return key;
+    public String getFileId() {
+        return fileId;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 
     public Boolean getSupportWps() {
