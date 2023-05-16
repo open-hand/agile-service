@@ -59,6 +59,10 @@ public class IssueAttachmentVO {
 
     @ApiModelProperty("文件的大小")
     private Long size;
+    @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
+    private Boolean supportWps;
+
+
 
     public Long getAttachmentId() {
         return attachmentId;
@@ -167,5 +171,13 @@ public class IssueAttachmentVO {
 
     public void setSize(Long size) {
         this.size = size;
+    }
+
+    public Boolean getSupportWps() {
+        return supportWps;
+    }
+
+    public void setSupportWps(Boolean supportWps) {
+        this.supportWps = supportWps;
     }
 }

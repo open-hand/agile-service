@@ -60,6 +60,9 @@ public class IssueAttachmentDTO extends AuditDomain {
     @ApiModelProperty("文件名")
     @Transient
     private String title;
+    @Transient
+    @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
+    private Boolean supportWps;
 
 
     public Long getAttachmentId() {
@@ -163,5 +166,13 @@ public class IssueAttachmentDTO extends AuditDomain {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Boolean getSupportWps() {
+        return supportWps;
+    }
+
+    public void setSupportWps(Boolean supportWps) {
+        this.supportWps = supportWps;
     }
 }
