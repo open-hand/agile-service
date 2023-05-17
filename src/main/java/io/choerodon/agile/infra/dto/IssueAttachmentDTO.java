@@ -1,14 +1,17 @@
 package io.choerodon.agile.infra.dto;
 
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-import io.choerodon.agile.infra.utils.StringUtil;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import io.swagger.annotations.ApiModelProperty;
+
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -34,6 +37,32 @@ public class IssueAttachmentDTO extends AuditDomain {
     private Long projectId;
 
     private Long createdBy;
+
+    @ApiModelProperty("fileKey")
+    @Transient
+    private String fileKey;
+    @ApiModelProperty("文件的大小")
+    @Transient
+    private Long size;
+
+    // 前端onlyoffice展示时需要用到的字段
+    /**
+     * “fileType”：“docx”，
+     * “key”：“Khirz6zTPdfd7”，
+     * title”：“示例文档 Title.docx”，
+     * “url”：“https://example.com/url -to-example-document.docx"
+     */
+    @ApiModelProperty("文件的类型（根据后缀来判断）")
+    @Transient
+    private String fileType;
+    @ApiModelProperty("onlyOffice用来标识文件的唯一性")
+    @Transient
+    private String fileId;
+
+    @Transient
+    @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
+    private Boolean supportWps;
+
 
     public Long getAttachmentId() {
         return attachmentId;
@@ -98,4 +127,43 @@ public class IssueAttachmentDTO extends AuditDomain {
         return StringUtil.getToString(this);
     }
 
+    public String getFileKey() {
+        return fileKey;
+    }
+
+    public void setFileKey(String fileKey) {
+        this.fileKey = fileKey;
+    }
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public Boolean getSupportWps() {
+        return supportWps;
+    }
+
+    public void setSupportWps(Boolean supportWps) {
+        this.supportWps = supportWps;
+    }
 }
