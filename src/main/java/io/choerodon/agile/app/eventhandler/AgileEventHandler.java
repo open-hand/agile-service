@@ -194,6 +194,7 @@ public class AgileEventHandler {
         List<String> postAction = projectEvent.getPostAction();
         if (Boolean.TRUE.equals(templateFlag)
                 && categoryCodes.contains(ProjectCategory.MODULE_WATERFALL)
+                && postAction != null
                 && postAction.contains(AGILE_INIT_WATERFALL_DATA)) {
             LOGGER.info("初始化模板项目数据{}, code: {}", projectEvent.getProjectId(), projectEvent.getProjectCode());
             // 如果是瀑布模板项目，且需要初始化瀑布数据，则执行后置操作
