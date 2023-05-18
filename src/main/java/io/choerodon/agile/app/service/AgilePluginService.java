@@ -14,7 +14,6 @@ import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.*;
 import io.choerodon.agile.infra.enums.FieldSql;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -577,16 +576,6 @@ public interface AgilePluginService {
     void setExportIssueBusinessArgs(ExportIssuesVO exportIssuesVO, Map<String, Object> issueValueMap, IssueDTO issueDTO);
 
     void handlerProgramValueWhenTransferSubTask(IssueConvertDTO issueConvertDTO, Long projectId, List<String> fieldList);
-
-    /**
-     * 同步工作项到第三方
-     *
-     * @param tenantId      组织id
-     * @param issueId       问题id
-     * @param openAppType   第三方类型 ding_talk 等
-     * @param operationType 操作类型 create等
-     */
-    void issueSyncByIssueId(Long tenantId, Long issueId, String openAppType, OpenAppIssueSyncConstant.OperationType operationType);
 
     Long initRiskStateMachine(Long organizationId, ProjectEvent projectEvent);
 

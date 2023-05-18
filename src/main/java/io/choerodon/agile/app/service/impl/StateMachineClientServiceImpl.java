@@ -48,7 +48,6 @@ import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineConfigDTO;
 import io.choerodon.agile.infra.statemachineclient.dto.StateMachineTransformDTO;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -236,8 +235,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueService.afterCreateIssue(issueId, issueConvertDTO, issueCreateVO, projectInfo);
         if (agilePluginService != null) {
             agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO, projectId, issueId, issueCreateVO);
-            // 同步工作项到第三方
-            agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
             // 第三方实例关联:yqcloud等
             Optional.ofNullable(issueCreateVO.getInstanceOpenRelVO()).ifPresent(instanceOpenRelVO -> {
                 instanceOpenRelVO.setProjectId(projectId);
@@ -343,9 +340,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueService.afterCreateSubIssue(issueId, subIssueConvertDTO, issueSubCreateVO, projectInfo);
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerAfterCreateSubIssue(projectId, issueId, issueSubCreateVO);
-        }
-        if (agilePluginService != null) {
-            agilePluginService.issueSyncByIssueId(organizationId, issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.CREATE);
         }
         return issueId;
     }

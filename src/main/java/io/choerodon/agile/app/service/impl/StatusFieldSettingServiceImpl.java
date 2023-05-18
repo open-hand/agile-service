@@ -30,7 +30,6 @@ import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -453,7 +452,6 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         triggerCarrierVO.setFieldList(new ArrayList<>(fieldList));
         if (agilePluginService != null) {
             agilePluginService.handlerSpecifyProgramField(issueDTO, specifyMap, doRuleNotice, triggerCarrierVO);
-            agilePluginService.issueSyncByIssueId(organizationId, issueDTO.getIssueId(), OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.UPDATE);
         }
     }
 
