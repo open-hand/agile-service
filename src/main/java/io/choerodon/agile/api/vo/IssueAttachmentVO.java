@@ -1,9 +1,10 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -39,6 +40,27 @@ public class IssueAttachmentVO {
     @ApiModelProperty(value = "创建人")
     @Encrypt
     private Long createdBy;
+
+    @ApiModelProperty("fileKey")
+    private String fileKey;
+
+    // 前端onlyoffice展示时需要用到的字段
+    /**
+     * “fileType”：“docx”，
+     * “key”：“Khirz6zTPdfd7”，
+     * title”：“示例文档 Title.docx”，
+     * “url”：“https://example.com/url -to-example-document.docx"
+     */
+    @ApiModelProperty("文件的类型（根据后缀来判断）")
+    private String fileType;
+    @ApiModelProperty("onlyOffice用来标识文件的唯一性")
+    private String fileId;
+    @ApiModelProperty("文件的大小")
+    private Long size;
+    @ApiModelProperty("该附件是否支持wps预览（部分旧数据不支持）")
+    private Boolean supportWps;
+
+
 
     public Long getAttachmentId() {
         return attachmentId;
@@ -109,4 +131,44 @@ public class IssueAttachmentVO {
         return StringUtil.getToString(this);
     }
 
+    public String getFileKey() {
+        return fileKey;
+    }
+
+    public void setFileKey(String fileKey) {
+        this.fileKey = fileKey;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public Boolean getSupportWps() {
+        return supportWps;
+    }
+
+    public void setSupportWps(Boolean supportWps) {
+        this.supportWps = supportWps;
+    }
 }
