@@ -29,6 +29,7 @@ import io.choerodon.agile.infra.enums.ProjectCategory;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
+import io.choerodon.asgard.saga.SagaDefinition;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 
 import org.hzero.starter.keyencrypt.core.EncryptContext;
@@ -117,11 +118,15 @@ public class AgileEventHandler {
     /**
      * 创建项目事件
      *
+     * 设置根据ref_type限制并发，并发量为100
+     *
      * @param message message
      */
     @SagaTask(code = TASK_PROJECT_CREATE,
             description = "agile消费创建项目事件初始化项目数据",
             sagaCode = PROJECT_CREATE,
+            concurrentLimitPolicy = SagaDefinition.ConcurrentLimitPolicy.TYPE,
+            concurrentLimitNum = 100,
             seq = 2)
     public String handleProjectInitByConsumeSagaTask(String message) {
         ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);

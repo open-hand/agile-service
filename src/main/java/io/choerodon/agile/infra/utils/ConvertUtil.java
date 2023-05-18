@@ -125,7 +125,7 @@ public class ConvertUtil {
         }
         // 缓存取不到从CBASE取
         if (projectVO == null) {
-            projectVO = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class).queryProject(projectId);
+            projectVO = SpringBeanUtil.getBeansOfSuper(RemoteIamOperator.class).queryProject(projectId, false);
             if (projectVO == null) {
                 throw new CommonException("error.queryProject.notFound");
             }
