@@ -3,7 +3,11 @@ package io.choerodon.agile.app.service.impl;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import io.choerodon.agile.api.vo.FileVO;
 import io.choerodon.agile.api.vo.IssueAttachmentCombineVO;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.FilePathService;
@@ -17,10 +21,13 @@ import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.agile.infra.utils.FileCommonUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.file.dto.FileDTO;
 import org.hzero.core.base.BaseConstants;
@@ -138,9 +145,53 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
                 issueAttachmentCombineVO.getFileName(), relativePath);
         IssueAttachmentVO issueAttachmentVO = new IssueAttachmentVO();
         BeanUtils.copyProperties(result, issueAttachmentVO);
+
+        // 填充wps onlyOffice预览所需要的信息
+        String fileKey = getFileKey(issueAttachmentVO);
+        List<FileVO> fileVOS = ResponseUtils.getResponse(customFileFeignClient.queryFileDTOByIds(organizationId, Arrays.asList(fileKey)), new TypeReference<List<FileVO>>() {
+        });
+        fillAttachmentFileAttribute(issueAttachmentVO, fileVOS);
         String fullPath = filePathService.generateFullPath(result.getUrl());
         issueAttachmentVO.setUrl(fullPath);
         return issueAttachmentVO;
+    }
+
+    private void fillAttachmentFileAttribute(IssueAttachmentVO issueAttachmentVO, List<FileVO> fileVOS) {
+        if (CollectionUtils.isEmpty(fileVOS)) {
+            String fileKey = issueAttachmentVO.getUrl().startsWith("/") ? issueAttachmentVO.getUrl().substring(1) : issueAttachmentVO.getUrl();
+            fillDefaultValue(issueAttachmentVO, fileKey);
+            return;
+        }
+        Map<String, FileVO> stringFileVOMap = fileVOS.stream().collect(Collectors.toMap(FileVO::getFileKey, Function.identity()));
+        if (MapUtils.isNotEmpty(stringFileVOMap)) {
+            String fileKey = issueAttachmentVO.getUrl().startsWith("/") ? issueAttachmentVO.getUrl().substring(1) : issueAttachmentVO.getUrl();
+            FileVO fileVO = stringFileVOMap.get(fileKey);
+            if (fileVO != null) {
+                issueAttachmentVO.setFileName(fileVO.getFileName());
+                issueAttachmentVO.setFileType(FileCommonUtil.getFileType(fileKey));
+                issueAttachmentVO.setFileKey(fileVO.getFileKey());
+                issueAttachmentVO.setSize(fileVO.getFileSize());
+                issueAttachmentVO.setFileId(String.valueOf(fileVO.getFileId()));
+                issueAttachmentVO.setSupportWps(true);
+            } else {
+                fillDefaultValue(issueAttachmentVO, fileKey);
+            }
+        }
+    }
+
+    private void fillDefaultValue(IssueAttachmentVO issueAttachmentVO, String fileKey) {
+        issueAttachmentVO.setFileType(FileCommonUtil.getFileType(fileKey));
+        issueAttachmentVO.setFileId(UUID.randomUUID().toString());
+        issueAttachmentVO.setFileName(issueAttachmentVO.getFileName());
+        issueAttachmentVO.setSupportWps(false);
+    }
+
+    private String getFileKey(IssueAttachmentVO issueAttachmentVO) {
+        if (StringUtils.isNotEmpty(issueAttachmentVO.getUrl()) && issueAttachmentVO.getUrl().startsWith("/")) {
+            return issueAttachmentVO.getUrl().substring(1);
+        } else {
+            return issueAttachmentVO.getUrl();
+        }
     }
 
     @Override
