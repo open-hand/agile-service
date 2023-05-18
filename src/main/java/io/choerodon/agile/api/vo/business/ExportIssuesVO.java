@@ -48,6 +48,8 @@ public class ExportIssuesVO {
     public static final String PROGRESS = "progress";
     public static final String SEQUENCE = "sequence";
     public static final String PARENT = "parent";
+    public static final String SOURCE_BACKLOG = "sourceBacklog";
+    public static final String RELATE_BACKLOG = "relateBacklog";
 
 
 
@@ -195,7 +197,29 @@ public class ExportIssuesVO {
     @ApiModelProperty(value = "父级工作项")
     private String parent;
 
+    @ApiModelProperty(value = "来源需求")
+    private String sourceBacklog;
+    @ApiModelProperty(value = "关联需求")
+    private String relateBacklog;
+
+
     public ExportIssuesVO() {
+    }
+
+    public String getSourceBacklog() {
+        return sourceBacklog;
+    }
+
+    public void setSourceBacklog(String sourceBacklog) {
+        this.sourceBacklog = sourceBacklog;
+    }
+
+    public String getRelateBacklog() {
+        return relateBacklog;
+    }
+
+    public void setRelateBacklog(String relateBacklog) {
+        this.relateBacklog = relateBacklog;
     }
 
     public String getType() {

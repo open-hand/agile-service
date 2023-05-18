@@ -120,6 +120,8 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String RELATED_ISSUE_MAP = "relatedIssueMap";
     protected static final String PRODUCT_MAP = "productMap";
     protected static final String ISSUEDTO_MAP = "issueDTOMap";
+    protected static final String RELATE_BACKLOG_MAP = "relateBacklogMap";
+    protected static final String SOURCE_BACKLOG_MAP = "sourceBacklogMap";
 
     private static final String SUB_BUG_CN = "子缺陷";
 
@@ -202,6 +204,8 @@ public class ExcelServiceImpl implements ExcelService {
     protected PageFieldService pageFieldService;
     @Autowired(required = false)
     protected AgilePluginService agilePluginService;
+    @Autowired(required = false)
+    protected BacklogExpandService backlogExpandService;
     @Autowired
     private IssueLinkService issueLinkService;
     @Autowired
@@ -277,6 +281,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put(ExportIssuesVO.PARTICIPANT, "参与人");
         FIELD_MAP.put(ExportIssuesVO.PRODUCT, "产品");
         FIELD_MAP.put(ExportIssuesVO.PARENT, "父级故事/任务/缺陷");
+        FIELD_MAP.put(ExportIssuesVO.RELATE_BACKLOG, "关联需求");
+        FIELD_MAP.put(ExportIssuesVO.SOURCE_BACKLOG, "来源需求");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
@@ -1727,6 +1733,9 @@ public class ExcelServiceImpl implements ExcelService {
         if (agilePluginService != null) {
             predefinedFieldMap.putAll(agilePluginService.queryAdvanceParamFieldTableMap());
         }
+        if (backlogExpandService != null) {
+            predefinedFieldMap.putAll(backlogExpandService.queryAdvanceParamFieldTableMap());
+        }
         Set<Long> projectIds = SetUtils.unmodifiableSet(projectId);
         String advancedSql = advancedParamParserService.parse(InstanceType.ISSUE, searchParamVO, projectIds, predefinedFieldMap);
         double lastProcess = 0D;
@@ -1815,10 +1824,13 @@ public class ExcelServiceImpl implements ExcelService {
                 Map<String, String> envMap = lookupValueService.queryMapByTypeCode(FieldCode.ENVIRONMENT);
                 Map<Long, Set<TagVO>> tagMap = new HashMap<>();
                 Map<Long, List<ProductVO>> productMap = new HashMap<>();
+                Map<Long, List<BacklogInfoVO>> sourceBacklogMap = new HashMap<>();
+                Map<Long, List<BacklogInfoVO>> relateBacklogMap = new HashMap<>();
                 if (agilePluginService != null) {
                     tagMap.putAll(agilePluginService.listTagMap(ConvertUtil.getOrganizationId(projectId), new HashSet<>(Collections.singletonList(projectId)), issueIds));
                     productMap.putAll(agilePluginService.listProductMap(ConvertUtil.getOrganizationId(projectId), Collections.singletonList(projectId), issueIds));
                 }
+                processBacklogInfo(projectId, organizationId, issueIds, sourceBacklogMap, relateBacklogMap);
                 Map<Long, List<IssueLinkDTO>> relatedIssueMap =
                         issueLinkMapper.queryIssueLinkByIssueId(new HashSet<>(issueIds), new HashSet<>(Collections.singletonList(projectId)), false)
                                 .stream()
@@ -1841,6 +1853,8 @@ public class ExcelServiceImpl implements ExcelService {
                 issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
                 issueValueMap.put(PRODUCT_MAP, productMap);
                 issueValueMap.put(ISSUEDTO_MAP, issueDTOMap);
+                issueValueMap.put(SOURCE_BACKLOG_MAP, sourceBacklogMap);
+                issueValueMap.put(RELATE_BACKLOG_MAP, relateBacklogMap);
                 issueValueMap.forEach((k, v) -> cursor.addCollections(v));
                 issues.forEach(issue ->
                         buildExcelIssueFromIssue(
@@ -1872,6 +1886,29 @@ public class ExcelServiceImpl implements ExcelService {
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
     }
 
+    protected void processBacklogInfo(Long projectId, Long organizationId, List<Long> issueIds, Map<Long, List<BacklogInfoVO>> sourceBacklogMap, Map<Long, List<BacklogInfoVO>> relateBacklogMap) {
+        if (backlogExpandService != null) {
+            List<BaseIssueVO> baseIssues = new ArrayList<>();
+            for (Long issueId : issueIds) {
+                BaseIssueVO baseIssueVO = new BaseIssueVO();
+                baseIssueVO.setIssueId(issueId);
+                baseIssues.add(baseIssueVO);
+            }
+            backlogExpandService.addIssueBacklogInfo(organizationId, projectId, baseIssues);
+            for (BaseIssueVO baseIssueVO : baseIssues) {
+                Long issueId = baseIssueVO.getIssueId();
+                List<BacklogInfoVO> sourceBacklogs = baseIssueVO.getSourceBacklogs();
+                List<BacklogInfoVO> relateBacklogs = baseIssueVO.getRelateBacklogs();
+                if (CollectionUtils.isNotEmpty(sourceBacklogs)) {
+                    sourceBacklogMap.put(issueId, sourceBacklogs);
+                }
+                if (CollectionUtils.isNotEmpty(relateBacklogs)) {
+                    relateBacklogMap.put(issueId, relateBacklogs);
+                }
+            }
+        }
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public ExportIssuesVO buildExcelIssueFromIssue(String projectName,
@@ -1895,6 +1932,8 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Long, List<IssueLinkDTO>> relatedIssueMap = (Map<Long, List<IssueLinkDTO>>) issueValueMap.get(RELATED_ISSUE_MAP);
         Map<Long, List<ProductVO>> productMap = (Map<Long, List<ProductVO>>) issueValueMap.get(PRODUCT_MAP);
         Map<Long, IssueDTO> issueDTOMap = (Map<Long, IssueDTO>) issueValueMap.get(ISSUEDTO_MAP);
+        Map<Long, List<BacklogInfoVO>> relateBacklogMap = (Map<Long, List<BacklogInfoVO>>) issueValueMap.get(RELATE_BACKLOG_MAP);
+        Map<Long, List<BacklogInfoVO>> sourceBacklogMap = (Map<Long, List<BacklogInfoVO>>) issueValueMap.get(SOURCE_BACKLOG_MAP);
         Long issueId = issue.getIssueId();
         ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
         BeanUtils.copyProperties(issue, exportIssuesVO);
@@ -1931,7 +1970,39 @@ public class ExcelServiceImpl implements ExcelService {
         setProduct(exportIssuesVO, issue, productMap);
         // 设置父级工作项
         setParent(exportIssuesVO, issue, issueDTOMap);
+        setRelateBacklog(relateBacklogMap, issueId, exportIssuesVO);
+        setSourceBacklog(sourceBacklogMap, issueId, exportIssuesVO);
         return exportIssuesVO;
+    }
+
+    private void setRelateBacklog(Map<Long, List<BacklogInfoVO>> relateBacklogMap,
+                                  Long issueId,
+                                  ExportIssuesVO exportIssuesVO) {
+        String relateBacklog = "";
+        List<BacklogInfoVO> backlogInfos = relateBacklogMap.get(issueId);
+        if (!ObjectUtils.isEmpty(backlogInfos)) {
+            relateBacklog =
+                    backlogInfos
+                            .stream()
+                            .map(BacklogInfoVO::getSummary)
+                            .collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setRelateBacklog(relateBacklog);
+    }
+
+    private void setSourceBacklog(Map<Long, List<BacklogInfoVO>> sourceBacklogMap,
+                                  Long issueId,
+                                  ExportIssuesVO exportIssuesVO) {
+        String sourceBacklog = "";
+        List<BacklogInfoVO> backlogInfos = sourceBacklogMap.get(issueId);
+        if (!ObjectUtils.isEmpty(backlogInfos)) {
+            sourceBacklog =
+                    backlogInfos
+                            .stream()
+                            .map(BacklogInfoVO::getSummary)
+                            .collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setSourceBacklog(sourceBacklog);
     }
 
     private void setParent(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, IssueDTO> issueDTOMap) {
