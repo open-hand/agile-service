@@ -13,7 +13,6 @@ import io.choerodon.agile.api.vo.business.SystemFieldOverrideConfigVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.api.vo.waterfall.PredecessorIssueStatusLinkageVO;
-import io.choerodon.agile.api.vo.waterfall.WfDeliverableVO;
 import io.choerodon.agile.domain.context.ProjectCloneContext;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusFieldValueSettingDTO;
@@ -58,14 +57,6 @@ public interface AgileWaterfallService {
     List<String> queryFieldOrderByIssueType(String issueType);
 
     Map<String, PageConfigFieldEditedVO> fieldEdited(String issueType);
-
-    /**
-     * 创建交付物
-     *
-     * @param issueId          issueId
-     * @param wfDeliverableVOS wfDeliverableVOS
-     */
-    void createDeliverableService(Long issueId, List<WfDeliverableVO> wfDeliverableVOS);
 
     void handlerTransferSubTask(IssueConvertDTO issueConvertDTO, Long projectId, List<String> fieldList);
 
