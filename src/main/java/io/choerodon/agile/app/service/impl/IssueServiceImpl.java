@@ -56,7 +56,6 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import io.choerodon.agile.infra.enums.search.SearchConstant;
 import io.choerodon.agile.infra.feign.operator.DevopsClientOperator;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
