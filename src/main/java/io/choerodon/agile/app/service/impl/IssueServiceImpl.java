@@ -61,7 +61,6 @@ import io.choerodon.agile.infra.feign.operator.TestServiceClientOperator;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
-import io.choerodon.agile.infra.support.OpenAppIssueSyncConstant;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
@@ -1916,7 +1915,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (agilePluginService != null) {
             agilePluginService.handlerBusinessUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
-            agilePluginService.issueSyncByIssueId(ConvertUtil.getOrganizationId(projectId), issueConvertDTO.getIssueId(), OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.UPDATE);
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallUpdateIssue(issueType, fieldList, projectId, issueUpdateVO, originIssue);
@@ -2024,7 +2022,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (agilePluginService != null) {
             agilePluginService.deleteIssueForBusiness(issueConvertDTO);
-            agilePluginService.issueSyncByIssueId(ConvertUtil.getOrganizationId(projectId), issueId, OpenAppIssueSyncConstant.AppType.DIND.getValue(), OpenAppIssueSyncConstant.OperationType.DELETE);
         }
         if (backlogExpandService != null) {
             backlogExpandService.deleteIssueBacklogRel(issueId, null);

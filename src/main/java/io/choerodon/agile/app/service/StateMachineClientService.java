@@ -37,4 +37,14 @@ public interface StateMachineClientService {
     IssueVO createIssueWithoutRuleNotice(IssueCreateVO issueCreateVO, String applyType);
 
     IssueSubVO createSubIssueWithoutRuleNotice(IssueSubCreateVO issueSubCreateVO);
+
+    /**
+     * 项目模板简单创建issue，不走状态联动和触发器，消息通知等逻辑
+     * 用于应对修数据时高并发创建项目的场景
+     *
+     * @param issueCreateVO
+     * @param applyType
+     * @return
+     */
+    IssueVO projectTemplateCreateIssue(IssueCreateVO issueCreateVO, String applyType);
 }
