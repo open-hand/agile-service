@@ -181,6 +181,73 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         return this.issueService.queryIssue(projectId, issueId, ConvertUtil.getOrganizationId(projectId));
     }
 
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public IssueVO projectTemplateCreateIssue(IssueCreateVO issueCreateVO, String applyType) {
+        Long projectId = issueCreateVO.getProjectId();
+        issueValidator.checkIssueCreate(issueCreateVO, applyType);
+        if (agilePluginService != null) {
+            agilePluginService.checkBeforeCreateIssue(issueCreateVO, applyType);
+        }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.checkBeforeCreateIssue(issueCreateVO, applyType);
+        }
+        IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueCreateVO, IssueConvertDTO.class);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        //获取状态机id
+        Long stateMachineId = statusMachineSchemeConfigMapper.selectStatusMachineIdByIssueTypeId(organizationId, projectId, applyType, issueConvertDTO.getIssueTypeId());
+        if (stateMachineId == null) {
+            throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
+        }
+        Long initStatusId = issueCreateVO.getStatusId();
+        if (ObjectUtils.isEmpty(initStatusId)) {
+            //获取初始状态
+            initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
+            if (initStatusId == null) {
+                throw new CommonException(ERROR_ISSUE_STATUS_NOT_FOUND);
+            }
+        }
+        //获取项目信息
+        ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
+        projectInfoDTO.setProjectId(projectId);
+        ProjectInfoDTO projectInfo = projectInfoMapper.selectOne(projectInfoDTO);
+        if (projectInfo == null) {
+            throw new CommonException(ERROR_PROJECT_INFO_NOT_FOUND);
+        }
+        //创建issue
+        issueConvertDTO.setApplyType(applyType);
+        issueService.handleInitIssue(issueConvertDTO, initStatusId, projectInfo);
+        Long issueId = issueAccessDataService.create(issueConvertDTO).getIssueId();
+//        BaseFieldUtil.updateIssueLastUpdateInfo(issueConvertDTO.getRelateIssueId(), issueConvertDTO.getProjectId());
+        // 创建史诗，初始化排序
+        if ("issue_epic".equals(issueCreateVO.getTypeCode())) {
+            initRank(issueCreateVO, issueId, "epic");
+        }
+        CreateIssuePayload createIssuePayload = new CreateIssuePayload(issueCreateVO, issueConvertDTO, projectInfo);
+        InputDTO inputDTO = new InputDTO(issueId, JSON.toJSONString(createIssuePayload));
+        //通过状态机客户端创建实例, 反射验证/条件/后置动作
+        StateMachineTransformDTO initTransform = modelMapper.map(instanceService.queryInitTransform(organizationId, stateMachineId), StateMachineTransformDTO.class);
+        stateMachineClient.createInstance(initTransform, inputDTO);
+        issueService.afterCreateIssue(issueId, issueConvertDTO, issueCreateVO, projectInfo);
+        if (agilePluginService != null) {
+            agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO, projectId, issueId, issueCreateVO);
+        }
+        if (agileWaterfallService != null) {
+            agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId, issueId, issueCreateVO);
+        }
+        // 创建交付物
+        if (agileWaterfallService != null
+                && issueCreateVO.getTypeCode().equals(IssueTypeCode.MILESTONE.value())
+                && !ObjectUtils.isEmpty(issueCreateVO.getWaterfallIssueVO())
+                && !CollectionUtils.isEmpty(issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS())) {
+            agileWaterfallService.createDeliverableService(issueId, issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS());
+        }
+        //根据前端生成的附件链接，保存issue和附件的关联关系
+        createIssueAttachmentRel(projectId, issueId, issueCreateVO.getAttachments());
+        return modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueVO.class);
+    }
+
     /**
      * 创建issue 或者更新 issue
      * @param issueCreateVO
