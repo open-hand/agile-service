@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.feign;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +31,13 @@ public interface CustomFileFeignClient {
     ResponseEntity<String> fragmentCombineBlock(@PathVariable Long organizationId, @RequestParam String guid, @RequestParam String fileName, @RequestBody(required = false) Map<String, String> args);
 
     /**
-     * 根据文件的fileKeys集合 查询文件数据
-     *
-     * @param organizationId
-     * @param fileKeys
+     * 根据文件的keys集合 查询文件数据
+     * @param organizationId organizationId
+     * @param fileKeys fileKeys
      * @return List&lt;FileVO&gt;
      */
-    @PostMapping({"/choerodon/v1/{organization_id}/file/list"})
+    @ApiOperation(value = "根据文件的keys集合 查询文件数据")
+    @PostMapping("/choerodon/v1/{organization_id}/file/list")
     ResponseEntity<String> queryFileByFileKeys(@PathVariable("organization_id") Long organizationId,
                                                @RequestBody List<String> fileKeys);
 }

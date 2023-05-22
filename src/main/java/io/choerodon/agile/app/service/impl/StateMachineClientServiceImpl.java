@@ -233,13 +233,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId, issueId, issueCreateVO);
         }
-        // 创建交付物
-        if (agileWaterfallService != null
-                && issueCreateVO.getTypeCode().equals(IssueTypeCode.MILESTONE.value())
-                && !ObjectUtils.isEmpty(issueCreateVO.getWaterfallIssueVO())
-                && !CollectionUtils.isEmpty(issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS())) {
-            agileWaterfallService.createDeliverableService(issueId, issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS());
-        }
         //根据前端生成的附件链接，保存issue和附件的关联关系
         createIssueAttachmentRel(projectId, issueId, issueCreateVO.getAttachments());
         return modelMapper.map(issueMapper.selectByPrimaryKey(issueId), IssueVO.class);
