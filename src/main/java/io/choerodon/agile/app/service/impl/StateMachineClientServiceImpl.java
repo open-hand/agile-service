@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +31,6 @@ import io.choerodon.agile.infra.dto.RankDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.InstanceType;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
@@ -302,23 +299,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueService.afterCreateIssue(issueId, issueConvertDTO, issueCreateVO, projectInfo);
         if (agilePluginService != null) {
             agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO, projectId, issueId, issueCreateVO);
-            // 第三方实例关联:yqcloud等
-            Optional.ofNullable(issueCreateVO.getInstanceOpenRelVO()).ifPresent(instanceOpenRelVO -> {
-                instanceOpenRelVO.setProjectId(projectId);
-                instanceOpenRelVO.setInstanceId(issueId);
-                instanceOpenRelVO.setInstanceType(InstanceType.ISSUE.value());
-                agilePluginService.createInstanceOpenRel(organizationId, Lists.newArrayList(instanceOpenRelVO));
-            });
         }
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerWaterfallAfterCreateIssue(projectId, issueId, issueCreateVO);
-        }
-        // 创建交付物
-        if (agileWaterfallService != null
-                && issueCreateVO.getTypeCode().equals(IssueTypeCode.MILESTONE.value())
-                && !ObjectUtils.isEmpty(issueCreateVO.getWaterfallIssueVO())
-                && !CollectionUtils.isEmpty(issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS())) {
-            agileWaterfallService.createDeliverableService(issueId, issueCreateVO.getWaterfallIssueVO().getWfDeliverableVOS());
         }
         //根据前端生成的附件链接，保存issue和附件的关联关系
         createIssueAttachmentRel(projectId, issueId, issueCreateVO.getAttachments());
