@@ -102,8 +102,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private StatusTransferSettingService statusTransferSettingService;
-    @Autowired
     private InstanceCache instanceCache;
     @Autowired
     private StatusNoticeSettingService statusNoticeSettingService;
