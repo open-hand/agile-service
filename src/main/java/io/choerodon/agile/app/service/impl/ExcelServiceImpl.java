@@ -1978,31 +1978,35 @@ public class ExcelServiceImpl implements ExcelService {
     private void setRelateBacklog(Map<Long, List<BacklogInfoVO>> relateBacklogMap,
                                   Long issueId,
                                   ExportIssuesVO exportIssuesVO) {
-        String relateBacklog = "";
+        StringBuilder builder = new StringBuilder();
         List<BacklogInfoVO> backlogInfos = relateBacklogMap.get(issueId);
         if (!ObjectUtils.isEmpty(backlogInfos)) {
-            relateBacklog =
-                    backlogInfos
-                            .stream()
-                            .map(BacklogInfoVO::getSummary)
-                            .collect(Collectors.joining(","));
+            Iterator<BacklogInfoVO> iterator = backlogInfos.iterator();
+            while (iterator.hasNext()) {
+                BacklogInfoVO backlogInfoVO = iterator.next();
+                String summary = backlogInfoVO.getSummary();
+                String backlogNum = backlogInfoVO.getBacklogNum();
+                builder.append(backlogNum).append(COLON_CN).append(summary).append("\n");
+            }
         }
-        exportIssuesVO.setRelateBacklog(relateBacklog);
+        exportIssuesVO.setRelateBacklog(builder.toString());
     }
 
     private void setSourceBacklog(Map<Long, List<BacklogInfoVO>> sourceBacklogMap,
                                   Long issueId,
                                   ExportIssuesVO exportIssuesVO) {
-        String sourceBacklog = "";
+        StringBuilder builder = new StringBuilder();
         List<BacklogInfoVO> backlogInfos = sourceBacklogMap.get(issueId);
         if (!ObjectUtils.isEmpty(backlogInfos)) {
-            sourceBacklog =
-                    backlogInfos
-                            .stream()
-                            .map(BacklogInfoVO::getSummary)
-                            .collect(Collectors.joining(","));
+            Iterator<BacklogInfoVO> iterator = backlogInfos.iterator();
+            while (iterator.hasNext()) {
+                BacklogInfoVO backlogInfoVO = iterator.next();
+                String summary = backlogInfoVO.getSummary();
+                String backlogNum = backlogInfoVO.getBacklogNum();
+                builder.append(backlogNum).append(COLON_CN).append(summary).append("\n");
+            }
         }
-        exportIssuesVO.setSourceBacklog(sourceBacklog);
+        exportIssuesVO.setSourceBacklog(builder.toString());
     }
 
     private void setParent(ExportIssuesVO exportIssuesVO, IssueDTO issue, Map<Long, IssueDTO> issueDTOMap) {
