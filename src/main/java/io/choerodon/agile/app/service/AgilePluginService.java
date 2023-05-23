@@ -163,7 +163,7 @@ public interface AgilePluginService {
     void checkBeforeCreateIssue(IssueCreateVO issueCreateVO, String applyType);
 
     /**
-     * 创建issue后对商业版特有属性进行单独赋值
+     * 创建issue后对商业版hook
      *
      * @param issueConvertDTO issueConvertDTO
      * @param projectId projectId
@@ -171,6 +171,15 @@ public interface AgilePluginService {
      * @param issueCreateVO issueCreateVO
      */
     void handlerBusinessAfterCreateIssue(IssueConvertDTO issueConvertDTO, Long projectId, Long issueId, IssueCreateVO issueCreateVO);
+
+    /**
+     * 需求/issue创建后三方数据处理hook
+     * @param organizationId        组织ID
+     * @param projectId             项目ID
+     * @param instanceId            需求/issueID
+     * @param instanceOpenRelList   三方数据关联关系
+     */
+    void handelInstanceOpenRelAfterInstanceCreate(Long organizationId, Long projectId, Long instanceId, List<InstanceOpenRelVO> instanceOpenRelList);
 
     /**
      * 批量修改之前处理项目群的字段
