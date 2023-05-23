@@ -1986,7 +1986,10 @@ public class ExcelServiceImpl implements ExcelService {
                 BacklogInfoVO backlogInfoVO = iterator.next();
                 String summary = backlogInfoVO.getSummary();
                 String backlogNum = backlogInfoVO.getBacklogNum();
-                builder.append(backlogNum).append(COLON_CN).append(summary).append("\n");
+                builder.append(backlogNum).append(COLON_CN).append(summary);
+                if (iterator.hasNext()) {
+                    builder.append("\n");
+                }
             }
         }
         exportIssuesVO.setRelateBacklog(builder.toString());
@@ -2003,7 +2006,10 @@ public class ExcelServiceImpl implements ExcelService {
                 BacklogInfoVO backlogInfoVO = iterator.next();
                 String summary = backlogInfoVO.getSummary();
                 String backlogNum = backlogInfoVO.getBacklogNum();
-                builder.append(backlogNum).append(COLON_CN).append(summary).append("\n");
+                builder.append(backlogNum).append(COLON_CN).append(summary);
+                if (iterator.hasNext()) {
+                    builder.append("\n");
+                }
             }
         }
         exportIssuesVO.setSourceBacklog(builder.toString());
