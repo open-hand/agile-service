@@ -512,7 +512,7 @@ public interface IssueService {
     IssueVO updateIssueStatusWithoutRuleNotice(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
                                                String applyType, IssueDTO triggerIssue, boolean autoTranferFlag);
 
-    IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId);
+    IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId, boolean sendMsg);
 
     IssueSubVO queryIssueSubByCreateWithoutRuleNotice(Long projectId, Long issueId);
 

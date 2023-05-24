@@ -529,11 +529,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, instanceId = "issueId", allFieldCheck = true)
     public IssueVO queryIssueCreate(Long projectId, Long issueId) {
-        return queryIssueCreateWithoutRuleNotice(projectId, issueId);
+        return queryIssueCreateWithoutRuleNotice(projectId, issueId, true);
     }
 
     @Override
-    public IssueVO queryIssueCreateWithoutRuleNotice(Long projectId, Long issueId) {
+    public IssueVO queryIssueCreateWithoutRuleNotice(Long projectId,
+                                                     Long issueId,
+                                                     boolean sendMsg) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         final List<IssueAttachmentDTO> issueAttachmentDTOList = issue.getIssueAttachmentDTOList();
         if (CollectionUtils.isNotEmpty(issueAttachmentDTOList)) {
@@ -545,7 +547,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
-        sendMsgUtil.sendMsgByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
+        if (sendMsg) {
+            sendMsgUtil.sendMsgByIssueCreate(projectId, result, DetailsHelper.getUserDetails().getUserId());
+        }
         setCompletedAndActualCompletedDate(result);
         return result;
     }
@@ -3687,7 +3691,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agileWaterfallService != null) {
             agileWaterfallService.handlerSubIssueUpdateParent(projectId, issueId, parentIssueId);
         }
-        return queryIssueCreateWithoutRuleNotice(projectId, issueId);
+        return queryIssueCreateWithoutRuleNotice(projectId, issueId, false);
     }
 
     private void updateSubTaskSprint(Long projectId, IssueUpdateParentIdVO issueUpdateParentIdVO) {
