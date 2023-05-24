@@ -164,7 +164,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         Long projectId = issueCreateVO.getProjectId();
         //处理issue的属性数据，将issue插入或者更新数据库
         Long issueId = handlerIssue(issueCreateVO, applyType);
-        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId);
+        IssueVO result = issueService.queryIssueCreateWithoutRuleNotice(issueCreateVO.getProjectId(), issueId, true);
         //创建问题执行工作流自定义流转
         Set<Long> influenceIssueIds = new HashSet<>();
         IssueVO execResult = issueService.doStateMachineCustomFlow(projectId, issueId, applyType, influenceIssueIds, new TriggerCarrierVO());
