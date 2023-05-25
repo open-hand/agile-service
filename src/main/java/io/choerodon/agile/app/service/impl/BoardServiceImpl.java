@@ -855,6 +855,9 @@ public class BoardServiceImpl implements BoardService {
             case SchemeApplyType.WATERFALL:
                 type = "waterfall";
                 break;
+            case SchemeApplyType.RISK:
+                type = "risk";
+                break;
             default:
                 break;
         }
