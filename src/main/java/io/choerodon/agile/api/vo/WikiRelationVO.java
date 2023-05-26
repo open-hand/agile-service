@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import javax.validation.constraints.NotEmpty;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -22,12 +24,23 @@ public class WikiRelationVO {
     private String wikiName;
     @ApiModelProperty(value = "wiki url")
     private String wikiUrl;
+    @ApiModelProperty(value = "该篇知识来自燕千云还是猪齿鱼系统（choerodon,zknow）")
+    @NotEmpty(message = "{agile.source.type.cannot.be.null}")
+    private String sourceType;
 
     @Encrypt
     @ApiModelProperty(value = "空间id")
     private Long spaceId;
     @ApiModelProperty(value = "工作空间")
     private WorkSpaceVO workSpaceVO;
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
 
     public Long getId() {
         return id;
