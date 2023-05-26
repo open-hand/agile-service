@@ -1978,6 +1978,9 @@ public class ExcelServiceImpl implements ExcelService {
     private void setRelateBacklog(Map<Long, List<BacklogInfoVO>> relateBacklogMap,
                                   Long issueId,
                                   ExportIssuesVO exportIssuesVO) {
+        if (MapUtils.isEmpty(relateBacklogMap)) {
+            return;
+        }
         StringBuilder builder = new StringBuilder();
         List<BacklogInfoVO> backlogInfos = relateBacklogMap.get(issueId);
         if (!ObjectUtils.isEmpty(backlogInfos)) {
@@ -1986,7 +1989,10 @@ public class ExcelServiceImpl implements ExcelService {
                 BacklogInfoVO backlogInfoVO = iterator.next();
                 String summary = backlogInfoVO.getSummary();
                 String backlogNum = backlogInfoVO.getBacklogNum();
-                builder.append(backlogNum).append(COLON_CN).append(summary).append("\n");
+                builder.append(backlogNum).append(COLON_CN).append(summary);
+                if (iterator.hasNext()) {
+                    builder.append("\n");
+                }
             }
         }
         exportIssuesVO.setRelateBacklog(builder.toString());
@@ -1995,6 +2001,9 @@ public class ExcelServiceImpl implements ExcelService {
     private void setSourceBacklog(Map<Long, List<BacklogInfoVO>> sourceBacklogMap,
                                   Long issueId,
                                   ExportIssuesVO exportIssuesVO) {
+        if (MapUtils.isEmpty(sourceBacklogMap)) {
+            return;
+        }
         StringBuilder builder = new StringBuilder();
         List<BacklogInfoVO> backlogInfos = sourceBacklogMap.get(issueId);
         if (!ObjectUtils.isEmpty(backlogInfos)) {
@@ -2003,7 +2012,10 @@ public class ExcelServiceImpl implements ExcelService {
                 BacklogInfoVO backlogInfoVO = iterator.next();
                 String summary = backlogInfoVO.getSummary();
                 String backlogNum = backlogInfoVO.getBacklogNum();
-                builder.append(backlogNum).append(COLON_CN).append(summary).append("\n");
+                builder.append(backlogNum).append(COLON_CN).append(summary);
+                if (iterator.hasNext()) {
+                    builder.append("\n");
+                }
             }
         }
         exportIssuesVO.setSourceBacklog(builder.toString());

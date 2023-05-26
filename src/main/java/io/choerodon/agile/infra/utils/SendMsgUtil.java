@@ -498,7 +498,7 @@ public class SendMsgUtil {
                 if (!(object.get(INSERT) instanceof JSONObject)) {
                     result.append(object.getString(INSERT));
                 } else if (!(((JSONObject) object.get(INSERT)).get(IMAGE) instanceof JSONObject)) {
-                    result.append("<img style=\"width: auto; height: auto;\" src=\"").append(((JSONObject) object.get(INSERT)).getString(IMAGE)).append("\"></img>");
+                    result.append("<img style=\"width: auto;height: auto;max-width: 650px;\" src=\"").append(((JSONObject) object.get(INSERT)).getString(IMAGE)).append("\"></img>");
                 }
             }
         } catch (Exception e) {
@@ -517,7 +517,7 @@ public class SendMsgUtil {
         String tagName = element.tag().getName();
         if (IMG.equals(tagName)) {
             element.removeAttr("style");
-            element.attr("style", "width: auto; height: auto; text-align:center;");
+            element.attr("style", "width: auto; height: auto; max-width: 650px; text-align:center;");
         }
         if (element.childrenSize() > 0) {
             element.children().forEach(SendMsgUtil::setImgSize);

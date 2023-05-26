@@ -1,8 +1,8 @@
 package io.choerodon.agile.api.vo;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.List;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author superlee
@@ -13,6 +13,8 @@ public class ProjectSearchVO {
     private List<Long> categoryIds;
     @ApiModelProperty(value = "是否启用")
     private Boolean enable;
+    @ApiModelProperty(value = "是否为模板")
+    private Boolean templateFlag;
     @ApiModelProperty(value = "类别编码")
     private List<String> categoryCodes;
 
@@ -32,6 +34,18 @@ public class ProjectSearchVO {
         this.enable = enable;
     }
 
+    /**
+     * @return 是否为模板
+     */
+    public Boolean getTemplateFlag() {
+        return templateFlag;
+    }
+
+    public ProjectSearchVO setTemplateFlag(Boolean templateFlag) {
+        this.templateFlag = templateFlag;
+        return this;
+    }
+
     public List<String> getCategoryCodes() {
         return categoryCodes;
     }
@@ -39,4 +53,5 @@ public class ProjectSearchVO {
     public void setCategoryCodes(List<String> categoryCodes) {
         this.categoryCodes = categoryCodes;
     }
+
 }

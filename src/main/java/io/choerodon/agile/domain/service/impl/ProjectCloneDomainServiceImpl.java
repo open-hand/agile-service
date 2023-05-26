@@ -1552,11 +1552,11 @@ public class ProjectCloneDomainServiceImpl implements ProjectCloneDomainService 
             Long sourceOptionId = fieldValue.getOptionId();
             if (sourceOptionId != null) {
                 if (FieldType.MEMBER.equals(fieldType) || FieldType.MULTI_MEMBER.equals(fieldType)) {
-                    Long currentUserId = DetailsHelper.getUserDetails().getUserId();
-                    if (!Objects.equals(sourceOptionId, currentUserId)) {
-                        //不是操作人，跳过
-                        continue;
-                    }
+//                    Long currentUserId = DetailsHelper.getUserDetails().getUserId();
+//                    if (!Objects.equals(sourceOptionId, currentUserId)) {
+//                        //不是操作人，跳过
+//                        continue;
+//                    }
                 } else {
                     Long targetOptionId = context.getByTableAndSourceId(TABLE_FD_FIELD_OPTION, sourceOptionId);
                     if (targetOptionId == null) {
