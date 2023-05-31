@@ -69,6 +69,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         if (wikiRelationDTOList != null && !wikiRelationDTOList.isEmpty()) {
             for (WikiRelationDTO wikiRelationDTO : wikiRelationDTOList) {
                 if (!checkRepeat(wikiRelationDTO)) {
+                    wikiRelationDTO.setSourceType(wikiRelationDTO.getSourceType() == null ? ZKnowDetailsHelper.VALUE_CHOERODON : wikiRelationDTO.getSourceType());
                     iWikiRelationService.createBase(wikiRelationDTO);
                     BaseFieldUtil.updateIssueLastUpdateInfo(wikiRelationDTO.getIssueId(), wikiRelationDTO.getProjectId());
                 }
