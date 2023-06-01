@@ -6,11 +6,11 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.ibatis.annotations.Param;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hzero.core.util.Pair;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.backlog.BacklogCommentVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
 import io.choerodon.agile.api.vo.business.BacklogIssueRelVO;
 import io.choerodon.agile.api.vo.business.ConfigurationRuleFieldVO;
@@ -289,4 +289,32 @@ public interface BacklogExpandService {
      * @param issues
      */
     void addIssueBacklogInfo(Long organizationId, Long projectId, List<? extends BaseIssueVO> issues);
+
+    /**
+     * 创建需求评论
+     *
+     * @param projectId
+     * @param backlogId
+     * @param commentText
+     * @return
+     */
+    BacklogCommentVO createComment(Long projectId, Long backlogId, String commentText);
+
+    /**
+     * 更新需求评论
+     *
+     * @param projectId
+     * @param commentId
+     * @param objectVersionNumber
+     * @param commentText
+     */
+    void updateComment(Long projectId, Long commentId, Long objectVersionNumber, String commentText);
+
+    /**
+     * 根据需求评论id集合查询
+     *
+     * @param commentIds
+     * @return
+     */
+    List<BacklogCommentVO> listCommentByIds(Set<Long> commentIds);
 }
