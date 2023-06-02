@@ -623,7 +623,7 @@ public interface AgilePluginService {
 
     List<IssueProductRelVO> queryIssueProductRel(List<Long> issueIds);
 
-    void deleteInstanceOpenRel(Long organizationId, Long instanceId, String instanceType);
+    void deleteInstanceOpenRel(Long organizationId, Long instanceId, String instanceType, boolean noticeYqCloud);
 
     List<InstanceOpenRelVO> queryInstanceOpenRel(Long projectId, Long instanceId, String instanceType, String source);
 
