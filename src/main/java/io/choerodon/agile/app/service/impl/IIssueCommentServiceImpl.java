@@ -1,10 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IIssueCommentService;
 import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
+import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
     private IssueCommentMapper issueCommentMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     @DataLog(type = "createComment")
@@ -47,6 +52,7 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
     @Override
     @DataLog(type = "deleteComment")
     public int deleteBase(IssueCommentDTO issueCommentDTO) {
+        Long commentId = issueCommentDTO.getCommentId();
         int isDelete = issueCommentMapper.delete(issueCommentDTO);
         if (isDelete != 1) {
             throw new CommonException(DELETE_ERROR);
@@ -63,6 +69,10 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
             firstReply.setReplyToUserId(0L);
             issueCommentMapper.updateByPrimaryKeySelective(firstReply);
             issueCommentMapper.updateChildNewParent(issueCommentDTO.getProjectId(), issueCommentDTO.getCommentId(), firstReply.getCommentId());
+        }
+        if (agilePluginService != null) {
+            Long projectId = issueCommentDTO.getProjectId();
+            agilePluginService.deleteInstanceOpenRel(ConvertUtil.getOrganizationId(projectId), commentId, InstanceType.ISSUE_COMMENT.value(), false);
         }
         BaseFieldUtil.updateIssueLastUpdateInfo(issueCommentDTO.getIssueId(), issueCommentDTO.getProjectId());
         return isDelete;
