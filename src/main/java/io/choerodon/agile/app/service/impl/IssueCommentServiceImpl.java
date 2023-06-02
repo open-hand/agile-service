@@ -21,6 +21,7 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.PageUtil;
@@ -251,7 +252,7 @@ public class IssueCommentServiceImpl implements IssueCommentService {
             }
         });
         if (agilePluginService != null) {
-            agilePluginService.addCommentYqInfo(projectId, result);
+            agilePluginService.addCommentYqInfo(projectId, result, InstanceType.ISSUE);
         }
         return result;
     }
