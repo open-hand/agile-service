@@ -5,6 +5,8 @@ import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import io.choerodon.agile.api.vo.business.InstanceOpenRelVO;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -55,6 +57,16 @@ public class BacklogCommentVO {
     private Integer replySize;
     @ApiModelProperty("评论下的回复")
     private List<BacklogCommentReplyVO> backlogCommentReplyList;
+    @ApiModelProperty(value = "第三方关联关系")
+    private InstanceOpenRelVO instanceOpenRelVO;
+
+    public InstanceOpenRelVO getInstanceOpenRelVO() {
+        return instanceOpenRelVO;
+    }
+
+    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
+        this.instanceOpenRelVO = instanceOpenRelVO;
+    }
 
     public Long getId() {
         return id;

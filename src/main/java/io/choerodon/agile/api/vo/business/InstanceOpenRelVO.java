@@ -45,6 +45,29 @@ public class InstanceOpenRelVO {
     @ApiModelProperty(value = "第三方属性, 暂时直接使用obj，为后续拓展准备")
     private Object thirdPartyProperties;
 
+    @Encrypt
+    @ApiModelProperty(value = "第三方实例id")
+    private Long parentOpenInstanceId;
+
+    @ApiModelProperty(value = "第三方实例编号")
+    private String parentOpenInstanceNum;
+
+    public Long getParentOpenInstanceId() {
+        return parentOpenInstanceId;
+    }
+
+    public void setParentOpenInstanceId(Long parentOpenInstanceId) {
+        this.parentOpenInstanceId = parentOpenInstanceId;
+    }
+
+    public String getParentOpenInstanceNum() {
+        return parentOpenInstanceNum;
+    }
+
+    public void setParentOpenInstanceNum(String parentOpenInstanceNum) {
+        this.parentOpenInstanceNum = parentOpenInstanceNum;
+    }
+
     public Long getInstanceId() {
         return instanceId;
     }
