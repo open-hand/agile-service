@@ -698,4 +698,12 @@ public interface AgilePluginService {
      * @return                  查询结果
      */
     Set<Long> listPublishedFeatureIds(Long projectId, Long organizationId);
+
+    /**
+     * 评论添加燕千云信息
+     *
+     * @param projectId
+     * @param result
+     */
+    void addCommentYqInfo(Long projectId, Page result);
 }

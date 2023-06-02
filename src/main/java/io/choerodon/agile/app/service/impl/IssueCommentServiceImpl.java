@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.IssueCommentAssembler;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.IIssueCommentService;
 import io.choerodon.agile.app.service.IssueCommentService;
 import io.choerodon.agile.app.service.UserService;
@@ -58,6 +59,8 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     private ModelMapper modelMapper;
     @Autowired
     private SendMsgUtil sendMsgUtil;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public IssueCommentVO createIssueComment(Long projectId, IssueCommentCreateVO issueCommentCreateVO) {
@@ -247,7 +250,9 @@ public class IssueCommentServiceImpl implements IssueCommentService {
                 });
             }
         });
-
+        if (agilePluginService != null) {
+            agilePluginService.addCommentYqInfo(projectId, result);
+        }
         return result;
     }
 

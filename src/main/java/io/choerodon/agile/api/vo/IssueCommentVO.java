@@ -1,8 +1,8 @@
 package io.choerodon.agile.api.vo;
 
-
-
+import io.choerodon.agile.api.vo.business.InstanceOpenRelVO;
 import io.choerodon.agile.infra.utils.StringUtil;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -81,6 +81,16 @@ public class IssueCommentVO {
 
     @ApiModelProperty(value = "回复列表")
     private List<IssueCommentReplyVO> issueCommentReplyList;
+    @ApiModelProperty(value = "第三方关联关系")
+    private InstanceOpenRelVO instanceOpenRelVO;
+
+    public InstanceOpenRelVO getInstanceOpenRelVO() {
+        return instanceOpenRelVO;
+    }
+
+    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
+        this.instanceOpenRelVO = instanceOpenRelVO;
+    }
 
     public Long getCommentId() {
         return commentId;
