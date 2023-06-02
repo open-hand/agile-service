@@ -708,4 +708,13 @@ public interface AgilePluginService {
      * @param instanceType issue/backlog
      */
     void addCommentYqInfo(Long projectId, Page page, InstanceType instanceType);
+
+    /**
+     * 插入日志和第三方实例的关联关系
+     *
+     * @param logId
+     * @param businessType
+     * @param projectId
+     */
+    void insertDataLogOpenInstanceRel(Long logId, String businessType, Long projectId);
 }

@@ -1,8 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.AgileTriggerService;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
+import io.choerodon.agile.infra.enums.DataLogType;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
 import io.choerodon.agile.api.vo.FieldDataLogVO;
@@ -38,6 +40,8 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
     private ModelMapper modelMapper;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public FieldDataLogDTO baseCreate(FieldDataLogDTO create) {
@@ -56,6 +60,9 @@ public class FieldDataLogServiceImpl implements FieldDataLogService {
         FieldDataLogDTO result = baseCreate(dataLog);
         if (agileTriggerService != null) {
             agileTriggerService.insertTriggerLog(result.getId(), result.getFieldId(), projectId, CUSTOM_FIELD);
+        }
+        if (agilePluginService != null) {
+            agilePluginService.insertDataLogOpenInstanceRel(result.getId(), DataLogType.CUSTOM_FIELD.value(), projectId);
         }
         return modelMapper.map(result, FieldDataLogVO.class);
     }

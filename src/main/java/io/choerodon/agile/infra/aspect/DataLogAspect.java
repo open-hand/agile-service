@@ -27,6 +27,7 @@ import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.DataLogType;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.mapper.*;
@@ -212,6 +213,8 @@ public class DataLogAspect {
     private WorkCalendarSubscribeService workCalendarSubscribeService;
     @Autowired(required = false)
     private AgileWaterfallService agileWaterfallService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -1832,6 +1835,9 @@ public class DataLogAspect {
         DataLogDTO result = dataLogService.create(dataLogDTO);
         if (agileTriggerService != null) {
             agileTriggerService.insertTriggerLog(result.getLogId(), issueId, projectId, ISSUE);
+        }
+        if (agilePluginService != null) {
+            agilePluginService.insertDataLogOpenInstanceRel(result.getLogId(), DataLogType.ISSUE.value(), projectId);
         }
         return result;
     }
