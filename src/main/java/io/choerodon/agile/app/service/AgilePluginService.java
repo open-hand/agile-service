@@ -14,6 +14,7 @@ import io.choerodon.agile.api.vo.search.Condition;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.*;
 import io.choerodon.agile.infra.enums.FieldSql;
+import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -703,7 +704,8 @@ public interface AgilePluginService {
      * 评论添加燕千云信息
      *
      * @param projectId
-     * @param result
+     * @param page
+     * @param instanceType issue/backlog
      */
-    void addCommentYqInfo(Long projectId, Page result);
+    void addCommentYqInfo(Long projectId, Page page, InstanceType instanceType);
 }
