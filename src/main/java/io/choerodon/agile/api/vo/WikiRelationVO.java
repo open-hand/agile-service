@@ -33,6 +33,8 @@ public class WikiRelationVO {
     private Long spaceId;
     @ApiModelProperty(value = "工作空间")
     private WorkSpaceVO workSpaceVO;
+    @ApiModelProperty(value = "燕千云知识Id")
+    private Long knowledgeElementId;
 
     public String getSourceType() {
         return sourceType;
@@ -96,5 +98,13 @@ public class WikiRelationVO {
 
     public WorkSpaceVO getWorkSpaceVO() {
         return workSpaceVO;
+    }
+
+    public Long getKnowledgeElementId() {
+        return knowledgeElementId;
+    }
+
+    public void setKnowledgeElementId(Long knowledgeElementId) {
+        this.knowledgeElementId = knowledgeElementId;
     }
 }
