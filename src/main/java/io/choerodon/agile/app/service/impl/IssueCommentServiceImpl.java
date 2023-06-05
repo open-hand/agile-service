@@ -1,12 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -24,6 +24,7 @@ import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.enums.InstanceType;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.domain.Page;
@@ -147,7 +148,15 @@ public class IssueCommentServiceImpl implements IssueCommentService {
     public int deleteByIssueId(Long issueId) {
         IssueCommentDTO issueCommentDTO = new IssueCommentDTO();
         issueCommentDTO.setIssueId(issueId);
-        return issueCommentMapper.delete(issueCommentDTO);
+        List<IssueCommentDTO> comments = issueCommentMapper.select(issueCommentDTO);
+        int num = issueCommentMapper.delete(issueCommentDTO);
+        if (CollectionUtils.isNotEmpty(comments) && agilePluginService != null) {
+            //删除评论与第三方工单关联
+            for (IssueCommentDTO comment: comments) {
+                agilePluginService.deleteInstanceOpenRel(ConvertUtil.getOrganizationId(comment.getProjectId()), comment.getCommentId(), InstanceType.ISSUE_COMMENT.value(), false);
+            }
+        }
+        return num;
     }
 
     @Override

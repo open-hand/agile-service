@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -17,12 +19,14 @@ import io.choerodon.agile.api.vo.DataLogFixVO;
 import io.choerodon.agile.api.vo.FieldDataLogVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.api.vo.business.DataLogVO;
+import io.choerodon.agile.api.vo.business.InstanceOpenRelVO;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.DataLogType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.DataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
@@ -56,6 +60,8 @@ public class DataLogServiceImpl implements DataLogService {
     private AgileTriggerService agileTriggerService;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
     private static final String ISSUE = "issue";
     private static final String CUSTOM_FIELD = "custom_field";
 
@@ -73,18 +79,14 @@ public class DataLogServiceImpl implements DataLogService {
     public List<DataLogVO> listByIssueId(Long projectId, Long issueId) {
         List<DataLogVO> dataLogVOS = modelMapper.map(dataLogMapper.selectByIssueId(projectId, issueId), new TypeToken<List<DataLogVO>>() {
         }.getType());
-        Map<Long, RuleLogRelVO> ruleLogRelMap = new HashMap<>();
-        if (agileTriggerService != null) {
-            RuleLogRelVO ruleLogRelVO = new RuleLogRelVO();
-            ruleLogRelVO.setProjectId(projectId);
-            ruleLogRelVO.setInstanceId(issueId);
-            ruleLogRelVO.setBusinessType(ISSUE);
-            List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelList(ruleLogRelVO);
-            ruleLogRelMap = ruleLogRelList.stream().collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
-        }
-        appendSummary(dataLogVOS);
+        Map<Long, RuleLogRelVO> ruleLogRelMap = queryRuleLogRelMap(projectId, issueId);
+        Set<Long> logIds = dataLogVOS.stream().map(DataLogVO::getLogId).collect(Collectors.toSet());
+        Map<Long, InstanceOpenRelVO> issueLogOpenRelMap = queryDataLogOpenRelMap(projectId, logIds, DataLogType.ISSUE.value());
+        appendSummary(dataLogVOS, ruleLogRelMap, issueLogOpenRelMap);
         List<FieldDataLogVO> fieldDataLogVOS = fieldDataLogService.queryByInstanceId(projectId, issueId, ObjectSchemeCode.AGILE_ISSUE);
         Map<Long, RuleLogRelVO> customFieldRuleLogMap = queryCustomFieldRuleLogMap(fieldDataLogVOS, projectId);
+        Set<Long> customFieldLogIds = fieldDataLogVOS.stream().map(FieldDataLogVO::getId).collect(Collectors.toSet());
+        Map<Long, InstanceOpenRelVO> customFieldLogOpenRelMap = queryDataLogOpenRelMap(projectId, customFieldLogIds, DataLogType.CUSTOM_FIELD.value());
         for (FieldDataLogVO fieldDataLogVO : fieldDataLogVOS) {
             Long logId = fieldDataLogVO.getId();
             DataLogVO dataLogVO = modelMapper.map(fieldDataLogVO, DataLogVO.class);
@@ -96,9 +98,35 @@ public class DataLogServiceImpl implements DataLogService {
             if (!ObjectUtils.isEmpty(ruleLogRel)) {
                 dataLogVO.setRuleName(ruleLogRel.getRuleName());
             }
+            InstanceOpenRelVO instanceOpenRelVO = customFieldLogOpenRelMap.get(logId);
+            if (instanceOpenRelVO != null) {
+                dataLogVO.setInstanceOpenRelVO(instanceOpenRelVO);
+            }
         }
-        fillUserAndStatus(projectId, dataLogVOS, ruleLogRelMap);
+        fillUserAndStatus(projectId, dataLogVOS);
         return dataLogVOS.stream().sorted(Comparator.comparing(DataLogVO::getCreationDate).reversed()).collect(Collectors.toList());
+    }
+
+    private Map<Long, InstanceOpenRelVO> queryDataLogOpenRelMap(Long projectId,
+                                                                Set<Long> logIds,
+                                                                String businessType) {
+        if (CollectionUtils.isEmpty(logIds) || agilePluginService == null) {
+            return MapUtils.EMPTY_MAP;
+        }
+        return agilePluginService.listDataLogOpenInstanceRel(logIds, businessType, projectId).stream().collect(Collectors.toMap(InstanceOpenRelVO::getInstanceId, Function.identity()));
+    }
+
+    private Map<Long, RuleLogRelVO> queryRuleLogRelMap(Long projectId, Long issueId) {
+        Map<Long, RuleLogRelVO> ruleLogRelMap = new HashMap<>();
+        if (agileTriggerService != null) {
+            RuleLogRelVO ruleLogRelVO = new RuleLogRelVO();
+            ruleLogRelVO.setProjectId(projectId);
+            ruleLogRelVO.setInstanceId(issueId);
+            ruleLogRelVO.setBusinessType(ISSUE);
+            List<RuleLogRelVO> ruleLogRelList = agileTriggerService.queryRuleLogRelList(ruleLogRelVO);
+            ruleLogRelMap = ruleLogRelList.stream().collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
+        }
+        return ruleLogRelMap;
     }
 
     private Map<Long, RuleLogRelVO> queryCustomFieldRuleLogMap(List<FieldDataLogVO> fieldDataLogs,
@@ -116,21 +144,31 @@ public class DataLogServiceImpl implements DataLogService {
                 .collect(Collectors.toMap(RuleLogRelVO::getLogId, Function.identity()));
     }
 
-    private void appendSummary(List<DataLogVO> dataLogs) {
+    private void appendSummary(List<DataLogVO> dataLogs,
+                               Map<Long, RuleLogRelVO> ruleLogRelMap,
+                               Map<Long, InstanceOpenRelVO> issueLogOpenRelMap) {
         List<String> specialFields = Arrays.asList("Feature Link", "Epic Link", "Epic Child", "Feature Child");
         Set<Long> issueIds = new HashSet<>();
         List<DataLogVO> dataLogList = new ArrayList<>();
-        dataLogs.forEach(x -> {
-            if (specialFields.contains(x.getField())) {
-                dataLogList.add(x);
-                String oldValue = x.getOldValue();
-                String newValue = x.getNewValue();
+        dataLogs.forEach(dataLog -> {
+            if (specialFields.contains(dataLog.getField())) {
+                dataLogList.add(dataLog);
+                String oldValue = dataLog.getOldValue();
+                String newValue = dataLog.getNewValue();
                 if (oldValue != null) {
                     issueIds.add(Long.valueOf(oldValue));
                 }
                 if (newValue != null) {
                     issueIds.add(Long.valueOf(newValue));
                 }
+            }
+            Long logId = dataLog.getLogId();
+            if (ruleLogRelMap.get(logId) != null) {
+                dataLog.setRuleName(ruleLogRelMap.get(dataLog).getRuleName());
+            }
+            InstanceOpenRelVO instanceOpenRelVO = issueLogOpenRelMap.get(logId);
+            if (instanceOpenRelVO != null) {
+                dataLog.setInstanceOpenRelVO(instanceOpenRelVO);
             }
         });
         Map<Long, String> summaryMap = new HashMap<>();
@@ -165,13 +203,12 @@ public class DataLogServiceImpl implements DataLogService {
     }
 
     /**
-     * 填充用户信息
+     * 填充用户信息、状态信息、触发器日志信息、第三方应用触发操作信息等
      *
      * @param projectId projectId
      * @param dataLogVOS dataLogVOS
      */
-    private void fillUserAndStatus(Long projectId, List<DataLogVO> dataLogVOS,
-                                   Map<Long, RuleLogRelVO> ruleLogRelMap) {
+    private void fillUserAndStatus(Long projectId, List<DataLogVO> dataLogVOS) {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         List<Long> createByIds = dataLogVOS.stream().filter(dataLogDTO -> dataLogDTO.getCreatedBy() != null && !Objects.equals(dataLogDTO.getCreatedBy(), 0L)).map(DataLogVO::getCreatedBy).distinct().collect(Collectors.toList());
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(createByIds, true);
@@ -183,10 +220,6 @@ public class DataLogServiceImpl implements DataLogService {
                 dto.setRealName(userMessageDTO.getRealName());
                 dto.setImageUrl(userMessageDTO.getImageUrl());
                 dto.setEmail(userMessageDTO.getEmail());
-            }
-           
-            if (ruleLogRelMap.get(dto.getLogId()) != null) {
-                dto.setRuleName(ruleLogRelMap.get(dto.getLogId()).getRuleName());
             }
             if ("status".equals(dto.getField())) {
                 StatusVO statusMapVO = statusMapDTOMap.get(Long.parseLong(dto.getNewValue()));
@@ -207,8 +240,10 @@ public class DataLogServiceImpl implements DataLogService {
     }
 
     @Override
-    public void delete(DataLogDTO dataLogDTO) {
+    public Set<Long> delete(DataLogDTO dataLogDTO) {
+        Set<Long> logIds = dataLogMapper.select(dataLogDTO).stream().map(DataLogDTO::getLogId).collect(Collectors.toSet());
         dataLogMapper.delete(dataLogDTO);
+        return logIds;
     }
 
     @Override

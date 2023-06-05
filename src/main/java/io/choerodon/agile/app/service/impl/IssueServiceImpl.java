@@ -2023,7 +2023,11 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         DataLogDTO dataLogDTO = new DataLogDTO();
         dataLogDTO.setProjectId(projectId);
         dataLogDTO.setIssueId(issueId);
-        dataLogService.delete(dataLogDTO);
+        Set<Long> logIds = dataLogService.delete(dataLogDTO);
+        //删除日志和open instance的关联关系
+        if (CollectionUtils.isNotEmpty(logIds) && agilePluginService != null) {
+            agilePluginService.deleteDataLogOpenInstanceRel(logIds, DataLogType.ISSUE.value(), projectId);
+        }
     }
 
 
