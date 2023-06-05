@@ -107,9 +107,10 @@ public class DataLogServiceImpl implements DataLogService {
         return dataLogVOS.stream().sorted(Comparator.comparing(DataLogVO::getCreationDate).reversed()).collect(Collectors.toList());
     }
 
-    private Map<Long, InstanceOpenRelVO> queryDataLogOpenRelMap(Long projectId,
-                                                                Set<Long> logIds,
-                                                                String businessType) {
+    @Override
+    public Map<Long, InstanceOpenRelVO> queryDataLogOpenRelMap(Long projectId,
+                                                               Set<Long> logIds,
+                                                               String businessType) {
         if (CollectionUtils.isEmpty(logIds) || agilePluginService == null) {
             return MapUtils.EMPTY_MAP;
         }

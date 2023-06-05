@@ -14,11 +14,14 @@ import io.choerodon.agile.api.vo.DataLogQueryVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.AllDataLogVO;
+import io.choerodon.agile.api.vo.business.InstanceOpenRelVO;
 import io.choerodon.agile.api.vo.business.RuleLogRelVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
+import io.choerodon.agile.infra.enums.DataLogType;
+import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.mapper.DataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -56,6 +59,10 @@ public class DynamicServiceImpl implements DynamicService {
     private BacklogExpandService backlogExpandService;
     @Autowired(required = false)
     private AgileTriggerService agileTriggerService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+    @Autowired
+    private DataLogService dataLogService;
 
     @Override
     public Page<AllDataLogVO> listLatestOperationInfoByProjectId(Long projectId, DataLogQueryVO dataLogQueryVO, PageRequest pageRequest) {
@@ -91,6 +98,8 @@ public class DynamicServiceImpl implements DynamicService {
                 pageRequest
         );
         setLogRuleInfo(projectId, result, ruleLogRelMap);
+        //设置日志和第三方关联的信息
+        setOpenInstanceLogInfo(result, projectId);
         setDataLogIssueInfo(result, projectId);
         if (containBacklog) {
             backlogExpandService.setDataLogBacklogInfo(result);
@@ -98,6 +107,46 @@ public class DynamicServiceImpl implements DynamicService {
         setDataLogUserAndProjectInfo(result, projectId, ruleLogRelMap);
         appendSummary(result);
         return result;
+    }
+
+    private void setOpenInstanceLogInfo(Page<AllDataLogVO> result, Long projectId) {
+        List<AllDataLogVO> dataLogs = result.getContent();
+        if (agilePluginService == null || CollectionUtils.isEmpty(dataLogs)) {
+            return;
+        }
+        List<AllDataLogVO> issueDateLogs = new ArrayList<>();
+        List<AllDataLogVO> backlogDateLogs = new ArrayList<>();
+        List<AllDataLogVO> customFieldDateLogs = new ArrayList<>();
+        for (AllDataLogVO allDataLogVO : dataLogs) {
+            boolean isCustomFieldDateLog = Boolean.TRUE.equals(allDataLogVO.getIsCusLog());
+            if (!isCustomFieldDateLog) {
+                String logType = allDataLogVO.getLogType();
+                if (ObjectSchemeCode.AGILE_ISSUE.equals(logType)) {
+                    issueDateLogs.add(allDataLogVO);
+                } else if (ObjectSchemeCode.BACKLOG.equals(logType)) {
+                    backlogDateLogs.add(allDataLogVO);
+                }
+            } else {
+                customFieldDateLogs.add(allDataLogVO);
+            }
+        }
+        addOpenInstanceLogInfo(issueDateLogs, DataLogType.ISSUE.value(), projectId);
+        addOpenInstanceLogInfo(customFieldDateLogs, DataLogType.CUSTOM_FIELD.value(), projectId);
+        addOpenInstanceLogInfo(backlogDateLogs, DataLogType.BACKLOG.value(), projectId);
+    }
+
+    private void addOpenInstanceLogInfo(List<AllDataLogVO> dateLogs,
+                                        String businessType,
+                                        Long projectId) {
+        if (CollectionUtils.isEmpty(dateLogs)) {
+            return;
+        }
+        Set<Long> logIds = dateLogs.stream().map(AllDataLogVO::getLogId).collect(Collectors.toSet());
+        Map<Long, InstanceOpenRelVO>  instanceOpenRelMap= dataLogService.queryDataLogOpenRelMap(projectId, logIds, businessType);
+        for (AllDataLogVO allDataLogVO : dateLogs) {
+            Long logId = allDataLogVO.getLogId();
+            allDataLogVO.setInstanceOpenRelVO(instanceOpenRelMap.get(logId));
+        }
     }
 
     private void setLogRuleInfo(Long projectId, Page<AllDataLogVO> result, Map<String, RuleLogRelVO> ruleLogRelMap) {
