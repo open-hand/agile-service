@@ -21,7 +21,7 @@ public interface DataLogService {
 
     DataLogDTO create(DataLogDTO dataLogDTO);
 
-    void delete(DataLogDTO dataLogDTO);
+    Set<Long> delete(DataLogDTO dataLogDTO);
 
     /**
      * 根据id批量删除错误数据

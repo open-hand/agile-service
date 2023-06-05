@@ -717,4 +717,22 @@ public interface AgilePluginService {
      * @param projectId
      */
     void insertDataLogOpenInstanceRel(Long logId, String businessType, Long projectId);
+
+    /**
+     * 删除日志和第三方实例的关联关系
+     * @param logIds
+     * @param businessType
+     * @param projectId
+     */
+    void deleteDataLogOpenInstanceRel(Set<Long> logIds, String businessType, Long projectId);
+
+    /**
+     * 查询日志和第三方实例的关联关系
+     *
+     * @param logIds
+     * @param businessType
+     * @param projectId
+     * @return
+     */
+    List<InstanceOpenRelVO> listDataLogOpenInstanceRel(Set<Long> logIds, String businessType, Long projectId);
 }
