@@ -29,6 +29,7 @@ public class WikiRelationDTO extends AuditDomain {
     private String wikiName;
     private String sourceType;
     private Long spaceId;
+    private Long knowledgeElementId;
 
     public String getSourceType() {
         return sourceType;
@@ -76,5 +77,13 @@ public class WikiRelationDTO extends AuditDomain {
 
     public Long getSpaceId() {
         return spaceId;
+    }
+
+    public Long getKnowledgeElementId() {
+        return knowledgeElementId;
+    }
+
+    public void setKnowledgeElementId(Long knowledgeElementId) {
+        this.knowledgeElementId = knowledgeElementId;
     }
 }
