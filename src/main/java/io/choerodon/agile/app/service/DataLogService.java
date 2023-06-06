@@ -3,10 +3,12 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.DataLogCreateVO;
 import io.choerodon.agile.api.vo.DataLogFixVO;
 import io.choerodon.agile.api.vo.business.DataLogVO;
+import io.choerodon.agile.api.vo.business.InstanceOpenRelVO;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,5 +40,16 @@ public interface DataLogService {
     void batchUpdateErrorDataLog(Set<DataLogStatusChangeDTO> dataLogStatusChangeDTOS);
 
     List<DataLogFixVO> queryListByProjectId(Long projectId);
+
+    /**
+     * 根据businessType和logIds查询日志与第三方实例的关联关系
+     * @param projectId
+     * @param logIds
+     * @param businessType
+     * @return
+     */
+    Map<Long, InstanceOpenRelVO> queryDataLogOpenRelMap(Long projectId,
+                                                        Set<Long> logIds,
+                                                        String businessType);
 
 }

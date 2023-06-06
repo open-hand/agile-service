@@ -58,6 +58,16 @@ public class AllDataLogVO {
     private StatusVO statusVO;
     @ApiModelProperty(value = "规则名称")
     private String ruleName;
+    @ApiModelProperty(value = "第三方实例关联关系")
+    private InstanceOpenRelVO instanceOpenRelVO;
+
+    public InstanceOpenRelVO getInstanceOpenRelVO() {
+        return instanceOpenRelVO;
+    }
+
+    public void setInstanceOpenRelVO(InstanceOpenRelVO instanceOpenRelVO) {
+        this.instanceOpenRelVO = instanceOpenRelVO;
+    }
 
     public Boolean getCusLog() {
         return isCusLog;

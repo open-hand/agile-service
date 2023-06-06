@@ -107,9 +107,10 @@ public class DataLogServiceImpl implements DataLogService {
         return dataLogVOS.stream().sorted(Comparator.comparing(DataLogVO::getCreationDate).reversed()).collect(Collectors.toList());
     }
 
-    private Map<Long, InstanceOpenRelVO> queryDataLogOpenRelMap(Long projectId,
-                                                                Set<Long> logIds,
-                                                                String businessType) {
+    @Override
+    public Map<Long, InstanceOpenRelVO> queryDataLogOpenRelMap(Long projectId,
+                                                               Set<Long> logIds,
+                                                               String businessType) {
         if (CollectionUtils.isEmpty(logIds) || agilePluginService == null) {
             return MapUtils.EMPTY_MAP;
         }
@@ -164,7 +165,7 @@ public class DataLogServiceImpl implements DataLogService {
             }
             Long logId = dataLog.getLogId();
             if (ruleLogRelMap.get(logId) != null) {
-                dataLog.setRuleName(ruleLogRelMap.get(dataLog).getRuleName());
+                dataLog.setRuleName(ruleLogRelMap.get(logId).getRuleName());
             }
             InstanceOpenRelVO instanceOpenRelVO = issueLogOpenRelMap.get(logId);
             if (instanceOpenRelVO != null) {
