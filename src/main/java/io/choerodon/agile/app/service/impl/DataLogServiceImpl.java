@@ -165,7 +165,7 @@ public class DataLogServiceImpl implements DataLogService {
             }
             Long logId = dataLog.getLogId();
             if (ruleLogRelMap.get(logId) != null) {
-                dataLog.setRuleName(ruleLogRelMap.get(dataLog).getRuleName());
+                dataLog.setRuleName(ruleLogRelMap.get(logId).getRuleName());
             }
             InstanceOpenRelVO instanceOpenRelVO = issueLogOpenRelMap.get(logId);
             if (instanceOpenRelVO != null) {
