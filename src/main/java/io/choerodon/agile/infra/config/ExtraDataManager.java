@@ -16,7 +16,7 @@ import io.choerodon.swagger.swagger.extra.ExtraData;
 @ChoerodonExtraData
 public class ExtraDataManager implements io.choerodon.swagger.swagger.extra.ExtraDataManager {
 
-    @Value("${hzero.service.agile.code:agile}")
+    @Value("${choerodon.service.agile.code:agile}")
     private String routeName;
 
     @Value(ChoerodonService.AgileService.NAME)
