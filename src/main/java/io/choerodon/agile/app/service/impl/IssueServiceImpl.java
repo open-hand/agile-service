@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +48,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -212,6 +212,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
+    @Autowired
     private LinkIssueStatusLinkageService linkIssueStatusLinkageService;
     @Autowired
     private StatusLinkageExecutionLogService statusLinkageExecutionLogService;
@@ -298,9 +300,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String ORDER_STR = "orderStr";
     private static final String WEBSOCKET_COPY_ISSUE_CODE = "agile-clone-issue";
 
-//    @Value("${services.attachment.url}")
-//    private String attachmentUrl;
-
     private SagaClient sagaClient;
 
     @Autowired
@@ -353,8 +352,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
-    @Value("${services.chain.max-depth:20}")
-    private int triggerMaxDepth;
     @Autowired
     private IssueParticipantRelService issueParticipantRelService;
     @Autowired
@@ -1882,7 +1879,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         List<IssueLinkChangeVO> linkChangeVOS = issueLinkChangeGroupByStatus.get(statusId);
         if (CollectionUtils.isNotEmpty(linkChangeVOS)) {
             List<InfluenceIssueVO> influenceIssueVOS = new ArrayList<>();
-            Integer level = influenceIssueVO.getLevel() + 1;
+            int level = influenceIssueVO.getLevel() + 1;
             for (IssueLinkChangeVO linkChangeVO : linkChangeVOS) {
                 // 当前是联动触发，并且配置的是联动时不触发状态变更就停止
                 if (Boolean.TRUE.equals(linkTriggered) && Boolean.FALSE.equals(linkChangeVO.getTriggered()) ) {
@@ -1892,7 +1889,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 InfluenceIssueVO influenceIssue = new InfluenceIssueVO();
                 influenceIssue.setIssueId(linkChangeVO.getLinkedIssueId());
                 influenceIssue.setStatusId(linkChangeVO.getLinkIssueStatusId());
-                influenceIssue.setMaxDepth(level > triggerMaxDepth);
+                influenceIssue.setMaxDepth(level > configurationProperties.getChain().getMaxDepth());
                 influenceIssue.setLoop(false);
                 influenceIssue.setLevel(level);
                 influenceIssue.setLinkageSettingId(linkChangeVO.getLinkSettingId());

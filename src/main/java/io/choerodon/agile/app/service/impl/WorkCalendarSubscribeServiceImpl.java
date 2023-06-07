@@ -1,47 +1,50 @@
  package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.WorkItemSearchVO;
-import io.choerodon.agile.api.vo.WorkItemVO;
-import io.choerodon.agile.app.service.FilePathService;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.FileUploadBucket;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.IssueParticipantRelMapper;
-import io.choerodon.agile.infra.utils.ICal4jUtil;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.app.service.WorkCalendarSubscribeService;
-import io.choerodon.agile.infra.dto.WorkCalendarSubscribeDTO;
-import io.choerodon.agile.infra.mapper.WorkCalendarSubscribeMapper;
-import io.choerodon.agile.infra.utils.MultipartICalendar;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.component.VAlarm;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.*;
-import org.apache.commons.compress.utils.IOUtils;
-import org.hzero.boot.file.FileClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.MultipartFile;
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.util.*;
+ import java.util.concurrent.TimeUnit;
+ import javax.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+ import net.fortuna.ical4j.model.Date;
+ import net.fortuna.ical4j.model.DateTime;
+ import net.fortuna.ical4j.model.Dur;
+ import net.fortuna.ical4j.model.component.VAlarm;
+ import net.fortuna.ical4j.model.component.VEvent;
+ import net.fortuna.ical4j.model.property.*;
+ import org.apache.commons.compress.utils.IOUtils;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.http.CacheControl;
+ import org.springframework.http.MediaType;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ import org.springframework.util.CollectionUtils;
+ import org.springframework.web.multipart.MultipartFile;
+
+ import io.choerodon.agile.api.vo.ProjectVO;
+ import io.choerodon.agile.api.vo.WorkItemSearchVO;
+ import io.choerodon.agile.api.vo.WorkItemVO;
+ import io.choerodon.agile.app.service.FilePathService;
+ import io.choerodon.agile.app.service.IssueService;
+ import io.choerodon.agile.app.service.WorkCalendarSubscribeService;
+ import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
+ import io.choerodon.agile.infra.dto.WorkCalendarSubscribeDTO;
+ import io.choerodon.agile.infra.dto.business.IssueDTO;
+ import io.choerodon.agile.infra.enums.FileUploadBucket;
+ import io.choerodon.agile.infra.mapper.IssueMapper;
+ import io.choerodon.agile.infra.mapper.IssueParticipantRelMapper;
+ import io.choerodon.agile.infra.mapper.WorkCalendarSubscribeMapper;
+ import io.choerodon.agile.infra.utils.ConvertUtil;
+ import io.choerodon.agile.infra.utils.ICal4jUtil;
+ import io.choerodon.agile.infra.utils.MultipartICalendar;
+ import io.choerodon.core.domain.Page;
+ import io.choerodon.core.exception.CommonException;
+ import io.choerodon.core.oauth.DetailsHelper;
+ import io.choerodon.mybatis.pagehelper.PageHelper;
+ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+ import org.hzero.boot.file.FileClient;
 
 /**
  * @author huaxin.deng@hand-china.com 2021-10-11 14:35:33
@@ -66,26 +69,22 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
 
     @Autowired
     private WorkCalendarSubscribeMapper workCalendarSubscribeMapper;
-
     @Autowired
     private IssueMapper issueMapper;
-
     @Autowired
     private IssueParticipantRelMapper issueParticipantRelMapper;
-
     @Autowired
     private IssueService issueService;
-
     @Autowired
     private FileClient fileClient;
-
-    @Value("${services.domain.url}")
-    private String domainUrl;
     @Autowired
     private FilePathService filePathService;
 
-//    @Value("${services.attachment.url}")
-//    private String attachmentUrl;
+    private final String domainUrl;
+
+    public WorkCalendarSubscribeServiceImpl(AgileServiceConfigurationProperties configurationProperties) {
+        this.domainUrl = configurationProperties.getDomain().getUrl();
+    }
 
     @Override
     public String subscribe(Long organizationId) {

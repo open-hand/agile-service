@@ -1,13 +1,21 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.app.service.FilePathService;
-import io.choerodon.agile.infra.enums.FileUploadBucket;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.compress.utils.IOUtils;
-import org.hzero.boot.file.FileClient;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,32 +27,22 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import io.choerodon.agile.api.vo.StaticFileHeaderVO;
 import io.choerodon.agile.api.vo.StaticFileRelatedVO;
+import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.StaticFileCompressService;
 import io.choerodon.agile.app.service.StaticFileDealService;
 import io.choerodon.agile.app.service.StaticFileService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.FileUploadBucket;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+
+import org.hzero.boot.file.FileClient;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -73,8 +71,6 @@ public class StaticFileServiceImpl implements StaticFileService {
     private static final String MALFORMED_EXCEPTION_CODE = "error.malformed.url";
     private static final String RELATED_EXCEPTION_CODE = "error.file.issue.related.exist";
 
-//    @Value("${services.attachment.url}")
-//    private String attachmentUrl;
     @Autowired
     private StaticFileDealService staticFileDealService;
     @Autowired

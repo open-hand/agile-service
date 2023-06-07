@@ -145,7 +145,8 @@ mybatis:
 
 services:
   attachment:
-    url: ${SERVICES_ATTACHMENT_URL:http://minio.example.choerodon.io/agile-service}
+#    bucket-name: ${SERVICES_ATTACHMENT_BUCKET_NAME:private}
+    url: ${SERVICES_ATTACHMENT_URL:http://minio.example.choerodon.io/${services.attachment.bucket-name}}
   domain:
     url: ${SERVICES_DOMAIN_URL:example.com}
   chain:

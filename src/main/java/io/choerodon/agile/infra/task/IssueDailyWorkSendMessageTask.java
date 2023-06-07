@@ -14,7 +14,6 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -22,6 +21,7 @@ import org.springframework.util.ObjectUtils;
 import io.choerodon.agile.api.vo.IssueDailyWorkVO;
 import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.app.service.DelayTaskService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
 import io.choerodon.agile.infra.feign.vo.OrganizationInfoVO;
@@ -145,8 +145,11 @@ public class IssueDailyWorkSendMessageTask {
     @Autowired
     private IssueMapper issueMapper;
 
-    @Value("${services.domain.url}")
-    private String domainUrl;
+    private final String domainUrl;
+
+    public IssueDailyWorkSendMessageTask(AgileServiceConfigurationProperties configurationProperties) {
+        this.domainUrl = configurationProperties.getDomain().getUrl();
+    }
 
     @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
             maxRetryCount = 3,
