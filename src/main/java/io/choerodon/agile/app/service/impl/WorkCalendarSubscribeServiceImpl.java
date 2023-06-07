@@ -31,7 +31,6 @@
  import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
  import io.choerodon.agile.infra.dto.WorkCalendarSubscribeDTO;
  import io.choerodon.agile.infra.dto.business.IssueDTO;
- import io.choerodon.agile.infra.enums.FileUploadBucket;
  import io.choerodon.agile.infra.mapper.IssueMapper;
  import io.choerodon.agile.infra.mapper.IssueParticipantRelMapper;
  import io.choerodon.agile.infra.mapper.WorkCalendarSubscribeMapper;
@@ -78,6 +77,8 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
     @Autowired
     private FileClient fileClient;
     @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
+    @Autowired
     private FilePathService filePathService;
 
     private final String domainUrl;
@@ -108,7 +109,13 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
         MultipartFile multipartFile = createMultipartICalendar(organizationId, userId);
         try {
             // 文件上传到minio
-            url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, ORIGINAL_FILE_NAME, multipartFile);
+            url = fileClient.uploadFile(
+                    organizationId,
+                    configurationProperties.getAttachment().getBucketName(),
+                    configurationProperties.getAttachment().getDirectory(),
+                    ORIGINAL_FILE_NAME,
+                    multipartFile
+            );
         } catch (Exception e) {
             throw new CommonException("error.generateCalendarFile.uploadFile");
         }
@@ -304,7 +311,13 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
         if (Boolean.TRUE.equals(dto.getChanged())) {
             MultipartFile multipartFile = createMultipartICalendar(organizationId, dto.getUserId());
             try {
-                fileClient.updateFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), realUrl, null, multipartFile);
+                fileClient.updateFile(
+                        organizationId,
+                        configurationProperties.getAttachment().getBucketName(),
+                        realUrl,
+                        null,
+                        multipartFile
+                );
             } catch (Exception e) {
                 throw new CommonException("error.generateCalendarFile.updateFile");
             }
@@ -335,7 +348,7 @@ public class WorkCalendarSubscribeServiceImpl implements WorkCalendarSubscribeSe
 
     private byte[] getFileByteArray(Long organizationId, String url){
         InputStream inputStream =
-                fileClient.downloadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), url);
+                fileClient.downloadFile(organizationId, configurationProperties.getAttachment().getBucketName(), url);
         try {
             return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {

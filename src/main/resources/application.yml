@@ -141,11 +141,12 @@ mybatis:
     mapUnderscoreToCamelCase: true
     key-generator: snowflake
     snowflake:
-      meta-provider-redis-db: ${SPRING_REDIS_DATABASE:1}
+      meta-provider-redis-db: ${SPRING_REDIS_DATABASE:12}
 
 services:
   attachment:
-#    bucket-name: ${SERVICES_ATTACHMENT_BUCKET_NAME:private}
+    bucket-name: ${SERVICES_ATTACHMENT_BUCKET_NAME:private}
+    directory: ${SERVICES_ATTACHMENT_DIRECTORY:agile-service}
     url: ${SERVICES_ATTACHMENT_URL:http://minio.example.choerodon.io/${services.attachment.bucket-name}}
   domain:
     url: ${SERVICES_DOMAIN_URL:example.com}

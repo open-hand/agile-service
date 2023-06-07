@@ -33,9 +33,9 @@ import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.StaticFileCompressService;
 import io.choerodon.agile.app.service.StaticFileDealService;
 import io.choerodon.agile.app.service.StaticFileService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.FileUploadBucket;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
@@ -90,6 +90,8 @@ public class StaticFileServiceImpl implements StaticFileService {
     @Autowired
     private FileClient fileClient;
     @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
+    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private FilePathService filePathService;
@@ -105,7 +107,13 @@ public class StaticFileServiceImpl implements StaticFileService {
         if (!CollectionUtils.isEmpty(files)) {
             staticFileCompressService.validFileType(files);
             for (MultipartFile multipartFile : files) {
-                String headerUrl = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, multipartFile.getOriginalFilename(), multipartFile);
+                String headerUrl = fileClient.uploadFile(
+                        organizationId,
+                        configurationProperties.getAttachment().getBucketName(),
+                        configurationProperties.getAttachment().getDirectory(),
+                        multipartFile.getOriginalFilename(),
+                        multipartFile
+                );
                 String relativePath = filePathService.generateRelativePath(headerUrl);
                 StaticFileHeaderDTO staticFileHeader = createStaticFileHeader(projectId, organizationId, issueId, relativePath, multipartFile.getOriginalFilename());
                 issueMapper.updateIssueLastUpdateInfo(issueId, projectId, DetailsHelper.getUserDetails().getUserId());
@@ -392,23 +400,8 @@ public class StaticFileServiceImpl implements StaticFileService {
 
     private byte[] getFileByteArray(StaticFileLineDTO file) throws IOException {
         InputStream inputStream =
-                fileClient.downloadFile(file.getOrganizationId(), FileUploadBucket.AGILE_BUCKET.bucket(), filePathService.generateFullPath(file.getUrl()));
+                fileClient.downloadFile(file.getOrganizationId(), configurationProperties.getAttachment().getBucketName(), filePathService.generateFullPath(file.getUrl()));
         return IOUtils.toByteArray(inputStream);
     }
-
-//    private String getRealUrl(String url) {
-//        return attachmentUrl + "/" + FileUploadBucket.AGILE_BUCKET.bucket() + "/" + url;
-//    }
-
-//    private String dealUrl(String url) {
-//        String dealUrl;
-//        try {
-//            URL netUrl = new URL(url);
-//            dealUrl = netUrl.getFile().substring(FileUploadBucket.AGILE_BUCKET.bucket().length() + 2);
-//        } catch (MalformedURLException e) {
-//            throw new CommonException(MALFORMED_EXCEPTION_CODE, e);
-//        }
-//        return dealUrl;
-//    }
 
 }

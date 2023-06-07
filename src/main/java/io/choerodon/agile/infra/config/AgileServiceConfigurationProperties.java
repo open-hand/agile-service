@@ -17,16 +17,25 @@ public class AgileServiceConfigurationProperties {
     private Chain chain = new Chain();
 
     public static class Attachment {
-//        private String bucketName = StringUtils.EMPTY;
-        private String url = StringUtils.EMPTY;
+        private String bucketName = "private";
+        private String directory = "agile-service";
+        private String url = "http://minio.example.choerodon.io/private";
 
-//        public String getBucketName() {
-//            return bucketName;
-//        }
-//
-//        public void setBucketName(String bucketName) {
-//            this.bucketName = bucketName;
-//        }
+        public String getBucketName() {
+            return bucketName;
+        }
+
+        public void setBucketName(String bucketName) {
+            this.bucketName = bucketName;
+        }
+
+        public String getDirectory() {
+            return directory;
+        }
+
+        public void setDirectory(String directory) {
+            this.directory = directory;
+        }
 
         public String getUrl() {
             return url;

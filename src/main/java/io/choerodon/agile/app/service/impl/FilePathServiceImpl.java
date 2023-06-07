@@ -9,6 +9,8 @@ import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.utils.AssertUtilsForCommonException;
 import io.choerodon.core.exception.CommonException;
 
+import org.hzero.core.base.BaseConstants;
+
 /**
  * @author superlee
  * @since 2022-03-15
@@ -20,7 +22,7 @@ public class FilePathServiceImpl implements FilePathService {
     @Autowired
     private AgileServiceConfigurationProperties configurationProperties;
 
-    private static final String DIVIDING_LINE = "/";
+    private static final String DIVIDING_LINE = BaseConstants.Symbol.SLASH;
 
     @Override
     public String generateRelativePath(String fullPath) {
