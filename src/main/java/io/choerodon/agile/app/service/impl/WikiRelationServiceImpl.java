@@ -58,6 +58,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         wikiRelation.setIssueId(wikiRelationDTO.getIssueId());
         wikiRelation.setSpaceId(wikiRelationDTO.getSpaceId());
         wikiRelation.setSourceType(wikiRelationDTO.getSourceType());
+        wikiRelation.setKnowledgeElementId(wikiRelationDTO.getKnowledgeElementId());
         WikiRelationDTO res = wikiRelationMapper.selectOne(wikiRelation);
         return res != null;
     }
