@@ -13,7 +13,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -25,6 +24,7 @@ import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
@@ -89,8 +89,12 @@ public class SendMsgUtil {
     private ModelMapper modelMapper;
     @Autowired
     private StarBeaconMapper starBeaconMapper;
-    @Value("${services.domain.url}")
-    private String domainUrl;
+
+    private final String domainUrl;
+
+    public SendMsgUtil(AgileServiceConfigurationProperties configurationProperties) {
+        this.domainUrl = configurationProperties.getDomain().getUrl();
+    }
 
     private String convertProjectName(ProjectVO projectVO) {
         String projectName = projectVO.getName();

@@ -37,18 +37,21 @@ import org.springframework.web.multipart.MultipartFile;
 import io.choerodon.agile.api.vo.StaticFileOperationHistorySocketVO;
 import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.StaticFileCompressService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.StaticFileCompressDTO;
 import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.agile.infra.dto.StaticFileLineDTO;
 import io.choerodon.agile.infra.dto.StaticFileOperationHistoryDTO;
-import io.choerodon.agile.infra.enums.FileUploadBucket;
-import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.mapper.StaticFileHeaderMapper;
+import io.choerodon.agile.infra.mapper.StaticFileLineMapper;
+import io.choerodon.agile.infra.mapper.StaticFileOperationHistoryMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.helper.snowflake.SnowflakeHelper;
 
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.file.dto.FileDTO;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.websocket.helper.SocketSendHelper;
 
 /**
@@ -72,14 +75,13 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     private static final String FAILED = "failed";
     private static final String SUCCESS = "success";
 
-    private static final String PATH_SPLIT = "/";
+    private static final String PATH_SPLIT = BaseConstants.Symbol.SLASH;
 
     private static final String IO_EXCEPTION_CODE = "error.uncompressed.io";
     private static final String INDEX_NULL_EXCEPTION_CODE = "error.staticFile.index.null";
     private static final String INDEX_EMPTY_EXCEPTION_CODE = "error.staticFile.index.empty";
     private static final String COMPRESSED_TYPE_EXCEPTION_CODE = "error.compressed.type.not.support";
     private static final String RAR4_EXCEPTION_CODE = "error.compressed.rar4";
-    private static final String MALFORMED_EXCEPTION_CODE = "error.malformed.url";
     private static final String STATIC_FILE_WEBSOCKET_KEY = "agile-static-file";
 
     @Autowired
@@ -87,11 +89,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     @Autowired
     private StaticFileLineMapper staticFileLineMapper;
     @Autowired
-    private StaticFileIssueRelMapper staticFileIssueRelMapper;
-    @Autowired
     private StaticFileOperationHistoryMapper staticFileOperationHistoryMapper;
-    @Autowired
-    private IssueMapper issueMapper;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -100,6 +98,8 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
     private SocketSendHelper socketSendHelper;
     @Autowired
     private FileClient fileClient;
+    @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
     @Autowired
     @Lazy
     private SnowflakeHelper snowflakeHelper;
@@ -221,7 +221,13 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                         //跳过冗余文件和空文件
                         continue;
                     }
-                    String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, getEntryFileName(fileHeader.getFileName()), bytes);
+                    String url = fileClient.uploadFile(
+                            organizationId,
+                            configurationProperties.getAttachment().getBucketName(),
+                            configurationProperties.getAttachment().getDirectory(),
+                            getEntryFileName(fileHeader.getFileName()),
+                            bytes
+                    );
                     urls.add(url);
                     String relativePath = filePathService.generateRelativePath(url);
                     StaticFileLineDTO staticFileLine = new StaticFileLineDTO(
@@ -238,7 +244,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
             throw new CommonException(RAR4_EXCEPTION_CODE);
         }
         //获取上传的文件信息
-        List<FileDTO> files = fileClient.getFiles(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), urls);
+        List<FileDTO> files = fileClient.getFiles(organizationId, configurationProperties.getAttachment().getBucketName(), urls);
         Map<String, FileDTO> fileMap = files.stream().collect(Collectors.toMap(file -> filePathService.generateRelativePath(file.getFileUrl()), file -> file));
         lineList.forEach(line -> {
             //设置行的文件类型及其记录其他信息
@@ -289,7 +295,13 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                         continue;
                     }
                     //文件上传
-                    String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, getEntryFileName(entry.getName()), bytes);
+                    String url = fileClient.uploadFile(
+                            organizationId,
+                            configurationProperties.getAttachment().getBucketName(),
+                            configurationProperties.getAttachment().getDirectory(),
+                            getEntryFileName(entry.getName()),
+                            bytes
+                    );
                     urls.add(url);
                     String relativePath = filePathService.generateRelativePath(url);
                     StaticFileLineDTO staticFileLine = new StaticFileLineDTO(
@@ -303,7 +315,7 @@ public class StaticFileCompressServiceImpl implements StaticFileCompressService 
                 process = updateProcess(staticFileCompressHistoryList, staticFileCompress.getStaticFileCompressHistory(), size, (size - availableSize), process, staticFileCompress.getIssueId());
             }
             //获取上传的文件信息
-            List<FileDTO> files = fileClient.getFiles(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), urls);
+            List<FileDTO> files = fileClient.getFiles(organizationId, configurationProperties.getAttachment().getBucketName(), urls);
             Map<String, FileDTO> fileMap = files.stream().collect(Collectors.toMap(file -> filePathService.generateRelativePath(file.getFileUrl()), file -> file));
             lineList.forEach(line -> {
                 //设置行的文件类型及其记录其他信息

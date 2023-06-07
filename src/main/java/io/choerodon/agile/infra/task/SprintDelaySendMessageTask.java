@@ -14,7 +14,6 @@ import com.yqcloud.core.oauth.ZKnowDetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -22,6 +21,7 @@ import io.choerodon.agile.api.vo.ProjectMessageVO;
 import io.choerodon.agile.api.vo.ProjectWithUserVO;
 import io.choerodon.agile.api.vo.SprintDelayCarrierVO;
 import io.choerodon.agile.app.service.DelayTaskService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.operator.RemoteIamOperator;
@@ -61,8 +61,11 @@ public class SprintDelaySendMessageTask {
     @Autowired
     private DelayTaskService delayTaskService;
 
-    @Value("${services.domain.url}")
-    private String domainUrl;
+    private final String domainUrl;
+
+    public SprintDelaySendMessageTask(AgileServiceConfigurationProperties configurationProperties) {
+        this.domainUrl = configurationProperties.getDomain().getUrl();
+    }
 
     @JobTask(productSource = ZKnowDetailsHelper.VALUE_CHOERODON,
             maxRetryCount = 3,

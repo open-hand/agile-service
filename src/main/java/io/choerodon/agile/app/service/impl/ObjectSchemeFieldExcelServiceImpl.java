@@ -1,37 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
-import io.choerodon.agile.api.vo.UserVO;
-import io.choerodon.agile.app.service.FieldOptionService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldExcelService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
-import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.agile.infra.enums.CustomFieldExcelHeader;
-import io.choerodon.agile.infra.enums.FieldType;
-import io.choerodon.agile.infra.enums.FieldTypeCnName;
-import io.choerodon.agile.infra.enums.FileUploadBucket;
-import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
-import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
-import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
-import io.choerodon.agile.infra.utils.CatalogExcelUtil;
-import io.choerodon.agile.infra.utils.ExcelUtil;
-import io.choerodon.agile.infra.utils.MultipartExcelUtil;
-import io.choerodon.core.exception.CommonException;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hzero.boot.file.FileClient;
-import org.hzero.core.base.BaseConstants;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -41,6 +9,40 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import io.choerodon.agile.api.vo.FieldOptionUpdateVO;
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
+import io.choerodon.agile.api.vo.UserVO;
+import io.choerodon.agile.app.service.FieldOptionService;
+import io.choerodon.agile.app.service.ObjectSchemeFieldExcelService;
+import io.choerodon.agile.app.service.ObjectSchemeFieldService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
+import io.choerodon.agile.infra.dto.FileOperationHistoryDTO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.enums.CustomFieldExcelHeader;
+import io.choerodon.agile.infra.enums.FieldType;
+import io.choerodon.agile.infra.enums.FieldTypeCnName;
+import io.choerodon.agile.infra.mapper.FileOperationHistoryMapper;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
+import io.choerodon.agile.infra.utils.CatalogExcelUtil;
+import io.choerodon.agile.infra.utils.ExcelUtil;
+import io.choerodon.agile.infra.utils.MultipartExcelUtil;
+import io.choerodon.core.exception.CommonException;
+
+import org.hzero.boot.file.FileClient;
+import org.hzero.core.base.BaseConstants;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -95,6 +97,8 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
     @Autowired
     private FileClient fileClient;
     @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
+    @Autowired
     private ModelMapper modelMapper;
 
     @Override
@@ -118,7 +122,13 @@ public class ObjectSchemeFieldExcelServiceImpl implements ObjectSchemeFieldExcel
             });
         }
         MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, workbook);
-        String errorWorkBookUrl = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, FILE_NAME, multipartFile);
+        String errorWorkBookUrl = fileClient.uploadFile(
+                organizationId,
+                configurationProperties.getAttachment().getBucketName(),
+                configurationProperties.getAttachment().getDirectory(),
+                FILE_NAME,
+                multipartFile
+        );
         history.setFileUrl(errorWorkBookUrl);
     }
 

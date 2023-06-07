@@ -17,7 +17,6 @@ import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -25,6 +24,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.DelayTaskService;
 import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.StatusService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
@@ -147,8 +147,11 @@ public class IssueDelaySendMessageTask {
     @Autowired
     private FieldValueMapper fieldValueMapper;
 
-    @Value("${services.domain.url}")
-    private String domainUrl;
+    private final String domainUrl;
+
+    public IssueDelaySendMessageTask(AgileServiceConfigurationProperties configurationProperties) {
+        this.domainUrl = configurationProperties.getDomain().getUrl();
+    }
 
     @JobTask(
             productSource = ZKnowDetailsHelper.VALUE_CHOERODON,

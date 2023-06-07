@@ -1,17 +1,16 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.infra.enums.FileUploadBucket;
-import org.hzero.boot.file.FileClient;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-
 import io.choerodon.agile.app.service.StaticFileDealService;
 import io.choerodon.agile.infra.annotation.DataLog;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.StaticFileHeaderDTO;
 import io.choerodon.agile.infra.dto.StaticFileIssueRelDTO;
 import io.choerodon.agile.infra.dto.StaticFileLineDTO;
@@ -21,6 +20,8 @@ import io.choerodon.agile.infra.mapper.StaticFileIssueRelMapper;
 import io.choerodon.agile.infra.mapper.StaticFileLineMapper;
 import io.choerodon.agile.infra.mapper.StaticFileOperationHistoryMapper;
 import io.choerodon.core.exception.CommonException;
+
+import org.hzero.boot.file.FileClient;
 
 /**
  * @author chihao.ran@hand-china.com
@@ -45,6 +46,8 @@ public class StaticFileDealServiceImpl implements StaticFileDealService {
     private StaticFileOperationHistoryMapper staticFileOperationHistoryMapper;
     @Autowired
     private FileClient fileClient;
+    @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
 
     @Override
     @DataLog(type = "createStaticFile")
@@ -109,7 +112,7 @@ public class StaticFileDealServiceImpl implements StaticFileDealService {
                 lastIndex = size * (i + 1);
             }
             if (!fileUrls.subList(size * i, lastIndex).isEmpty()) {
-                fileClient.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), fileUrls.subList(size * i, lastIndex));
+                fileClient.deleteFileByUrl(organizationId, configurationProperties.getAttachment().getBucketName(), fileUrls.subList(size * i, lastIndex));
             }
         }
     }

@@ -47,6 +47,7 @@ import io.choerodon.agile.api.vo.search.SearchParamVO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.app.service.v2.AdvancedParamParserService;
 import io.choerodon.agile.domain.entity.ExcelSheetData;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
@@ -91,8 +92,8 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String FIELD_CODES = "fieldCodes";
     private static final String FIELD_NAMES = "fieldNames";
     private static final String WEBSOCKET_EXPORT_CODE = "agile-export-issue";
-    private static final String EXCELCONTENTTYPE = "application/vnd.ms-excel";
-    private static final String FILESUFFIX = ".xlsx";
+    protected static final String EXCEL_CONTENT_TYPE = "application/vnd.ms-excel";
+    protected static final String FILE_SUFFIX = ".xlsx";
     protected static final String DOWNLOAD_FILE = "download_file";
     protected static final String DOWNLOAD_FILE_PUBLISH_VERSION = "download_file_publish_version";
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.issue.close.workbook";
@@ -119,14 +120,12 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String TAG_MAP = "tagMap";
     protected static final String RELATED_ISSUE_MAP = "relatedIssueMap";
     protected static final String PRODUCT_MAP = "productMap";
-    protected static final String ISSUEDTO_MAP = "issueDTOMap";
+    protected static final String ISSUE_DTO_MAP = "issueDTOMap";
     protected static final String RELATE_BACKLOG_MAP = "relateBacklogMap";
     protected static final String SOURCE_BACKLOG_MAP = "sourceBacklogMap";
 
     private static final String SUB_BUG_CN = "子缺陷";
-
     protected static final String COLON_CN = "：";
-
     private static final int PREDEFINED_VALUE_START_ROW = 1;
     private static final int PREDEFINED_VALUE_END_ROW = 500;
     private static final String INSERT = "insert";
@@ -156,42 +155,32 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Autowired
     protected StateMachineClientService stateMachineClientService;
-
     @Autowired
     private SocketSendHelper socketSendHelper;
-
     @Autowired
     private FileOperationHistoryMapper fileOperationHistoryMapper;
-
     @Autowired
     protected ProductVersionMapper productVersionMapper;
-
     @Autowired
     protected IssueService issueService;
-
     @Autowired
     private IssueMapper issueMapper;
-
     @Autowired
     protected IssueComponentMapper issueComponentMapper;
-
     @Autowired
     protected SprintMapper sprintMapper;
     @Autowired
     private ProjectConfigService projectConfigService;
-
     @Autowired
     protected RemoteIamOperator remoteIamOperator;
-
     @Autowired
     private FileClient fileClient;
-
+    @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     protected ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
@@ -1660,7 +1649,7 @@ public class ExcelServiceImpl implements ExcelService {
                     issueValueMap.put(TAG_MAP, tagMap);
                     issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
                     issueValueMap.put(PRODUCT_MAP, productMap);
-                    issueValueMap.put(ISSUEDTO_MAP, issueDTOMap);
+                    issueValueMap.put(ISSUE_DTO_MAP, issueDTOMap);
                     issueValueMap.forEach((k, v) -> cursor.addCollections(v));
                     issues.forEach(issue ->
                             buildExcelIssueFromIssue(
@@ -1688,7 +1677,7 @@ public class ExcelServiceImpl implements ExcelService {
                 cursor.increasePage();
             }
         }
-        String fileName = project.getName() + FILESUFFIX;
+        String fileName = project.getName() + FILE_SUFFIX;
         //把workbook上传到对象存储服务中
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
     }
@@ -1852,7 +1841,7 @@ public class ExcelServiceImpl implements ExcelService {
                 issueValueMap.put(TAG_MAP, tagMap);
                 issueValueMap.put(RELATED_ISSUE_MAP, relatedIssueMap);
                 issueValueMap.put(PRODUCT_MAP, productMap);
-                issueValueMap.put(ISSUEDTO_MAP, issueDTOMap);
+                issueValueMap.put(ISSUE_DTO_MAP, issueDTOMap);
                 issueValueMap.put(SOURCE_BACKLOG_MAP, sourceBacklogMap);
                 issueValueMap.put(RELATE_BACKLOG_MAP, relateBacklogMap);
                 issueValueMap.forEach((k, v) -> cursor.addCollections(v));
@@ -1881,7 +1870,7 @@ public class ExcelServiceImpl implements ExcelService {
             //查询后页数增1
             cursor.increasePage();
         }
-        String fileName = project.getName() + FILESUFFIX;
+        String fileName = project.getName() + FILE_SUFFIX;
         //把workbook上传到对象存储服务中
         downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
     }
@@ -1931,7 +1920,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<Long, Set<TagVO>> tagMap = (Map<Long, Set<TagVO>>) issueValueMap.get(TAG_MAP);
         Map<Long, List<IssueLinkDTO>> relatedIssueMap = (Map<Long, List<IssueLinkDTO>>) issueValueMap.get(RELATED_ISSUE_MAP);
         Map<Long, List<ProductVO>> productMap = (Map<Long, List<ProductVO>>) issueValueMap.get(PRODUCT_MAP);
-        Map<Long, IssueDTO> issueDTOMap = (Map<Long, IssueDTO>) issueValueMap.get(ISSUEDTO_MAP);
+        Map<Long, IssueDTO> issueDTOMap = (Map<Long, IssueDTO>) issueValueMap.get(ISSUE_DTO_MAP);
         Map<Long, List<BacklogInfoVO>> relateBacklogMap = (Map<Long, List<BacklogInfoVO>>) issueValueMap.get(RELATE_BACKLOG_MAP);
         Map<Long, List<BacklogInfoVO>> sourceBacklogMap = (Map<Long, List<BacklogInfoVO>>) issueValueMap.get(SOURCE_BACKLOG_MAP);
         Long issueId = issue.getIssueId();
@@ -2181,10 +2170,16 @@ public class ExcelServiceImpl implements ExcelService {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
             byte[] content = os.toByteArray();
-            MultipartFile file = new MultipartExcel("file", fileName, EXCELCONTENTTYPE, content);
+            MultipartFile file = new MultipartExcel("file", fileName, EXCEL_CONTENT_TYPE, content);
 
             //返回上载结果
-            String path = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, file);
+            String path = fileClient.uploadFile(
+                    organizationId,
+                    configurationProperties.getAttachment().getBucketName(),
+                    configurationProperties.getAttachment().getDirectory(),
+                    fileName,
+                    file
+            );
             fileOperationHistoryDTO.setStatus(SUCCESS);
             fileOperationHistoryDTO.setFileUrl(path);
         } catch (Exception e) {

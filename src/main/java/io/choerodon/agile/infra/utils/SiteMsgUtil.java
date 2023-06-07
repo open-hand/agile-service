@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -17,6 +16,7 @@ import io.choerodon.agile.api.vo.IssueCommentVO;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
@@ -61,10 +61,14 @@ public class SiteMsgUtil {
     private UserService userService;
     @Autowired
     private MessageClient messageClient;
-    @Value("${services.domain.url}")
-    private String domainUrl;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+
+    private final String domainUrl;
+
+    public SiteMsgUtil(AgileServiceConfigurationProperties configurationProperties) {
+        this.domainUrl = configurationProperties.getDomain().getUrl();
+    }
 
     public void issueCreate(List<Long> userIds,
                             String userName,

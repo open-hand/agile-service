@@ -36,6 +36,7 @@ import io.choerodon.agile.api.vo.business.ProductVO;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.domain.entity.ExcelSheetData;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
@@ -127,6 +128,8 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private SendMsgUtil sendMsgUtil;
     @Autowired
     private FileClient fileClient;
+    @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
     @Autowired
     private LookupValueService lookupValueService;
     @Autowired
@@ -1155,7 +1158,13 @@ public class ExcelCommonServiceImpl implements ExcelCommonService {
     private String uploadErrorExcel(Workbook workbook, Long organizationId) {
         // 上传错误的excel
         MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, workbook);
-        return fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, FILE_NAME, multipartFile);
+        return fileClient.uploadFile(
+                organizationId,
+                configurationProperties.getAttachment().getBucketName(),
+                configurationProperties.getAttachment().getDirectory(),
+                FILE_NAME,
+                multipartFile
+        );
     }
 
     @Override

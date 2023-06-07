@@ -27,10 +27,10 @@ import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.FilePathService;
 import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.app.service.IssueAttachmentService;
+import io.choerodon.agile.infra.config.AgileServiceConfigurationProperties;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.FileUploadBucket;
 import io.choerodon.agile.infra.feign.CustomFileFeignClient;
 import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -62,13 +62,12 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     private IssueMapper issueMapper;
     @Autowired
     private IIssueAttachmentService iIssueAttachmentService;
-
     @Autowired
     private FileClient fileClient;
-
+    @Autowired
+    private AgileServiceConfigurationProperties configurationProperties;
     @Autowired
     private CustomFileFeignClient customFileFeignClient;
-
     @Autowired
     private ProjectUtil projectUtil;
     @Autowired
@@ -121,8 +120,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     @Override
     public IssueAttachmentVO attachmentCombineUpload(Long projectId, IssueAttachmentCombineVO issueAttachmentCombineVO) {
         Long organizationId = projectUtil.getOrganizationId(projectId);
-        Map<String, String> args = new HashMap<>(1);
-        args.put("bucketName", FileUploadBucket.AGILE_BUCKET.bucket());
+        Map<String, String> args = new HashMap<>(2);
+        args.put("bucketName", configurationProperties.getAttachment().getBucketName());
+        args.put("directory", configurationProperties.getAttachment().getDirectory());
         String url = ResponseUtils.getResponse(customFileFeignClient.fragmentCombineBlock(
                         organizationId,
                         issueAttachmentCombineVO.getGuid(),
@@ -137,9 +137,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         if (url == null) {
             throw new CommonException("error.attachment.combine.failed");
         }
-        final boolean isFileSizeOk = this.validateFileSize(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Collections.singleton(url), 30 * 1024 * 1024);
+        final boolean isFileSizeOk = this.validateFileSize(organizationId, configurationProperties.getAttachment().getBucketName(), Collections.singleton(url), 30 * 1024 * 1024);
         if (!isFileSizeOk) {
-            this.customFileFeignClient.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Collections.singletonList(url));
+            this.customFileFeignClient.deleteFileByUrl(organizationId, configurationProperties.getAttachment().getBucketName(), Collections.singletonList(url));
             throw new CommonException("error.attachment.size.max");
         }
         String relativePath = filePathService.generateRelativePath(url);
@@ -203,7 +203,13 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             for (MultipartFile multipartFile : files) {
                 String fileName = multipartFile.getOriginalFilename();
                 Long organizationId = projectUtil.getOrganizationId(projectId);
-                String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, multipartFile);
+                String url = fileClient.uploadFile(
+                        organizationId,
+                        configurationProperties.getAttachment().getBucketName(),
+                        configurationProperties.getAttachment().getDirectory(),
+                        fileName,
+                        multipartFile
+                );
                 String relativePath = filePathService.generateRelativePath(url);
                 dealIssue(projectId, issueId, fileName, relativePath);
             }
@@ -244,7 +250,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
             String fullPath = filePathService.generateFullPath(url);
             Long organizationId = projectUtil.getOrganizationId(projectId);
-            ResponseUtils.getResponse(customFileFeignClient.deleteFileByUrl(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), Arrays.asList(fullPath)), String.class);
+            ResponseUtils.getResponse(customFileFeignClient.deleteFileByUrl(organizationId, configurationProperties.getAttachment().getBucketName(), Collections.singletonList(fullPath)), String.class);
         } catch (Exception e) {
             LOGGER.error("error.attachment.delete", e);
         }
@@ -269,7 +275,13 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         for (MultipartFile multipartFile : files) {
             String fileName = multipartFile.getOriginalFilename();
             Long organizationId = projectUtil.getOrganizationId(projectId);
-            String url = fileClient.uploadFile(organizationId, FileUploadBucket.AGILE_BUCKET.bucket(), null, fileName, multipartFile);
+            String url = fileClient.uploadFile(
+                    organizationId,
+                    configurationProperties.getAttachment().getBucketName(),
+                    configurationProperties.getAttachment().getDirectory(),
+                    fileName,
+                    multipartFile
+            );
             String relativePath = filePathService.generateRelativePath(url);
             result.add(filePathService.generateFullPath(relativePath));
         }
